@@ -27,6 +27,7 @@ function buildRaceComposer(){
   return composer;
 }
 function renderRaceScene() {
+  const started=performance.now();
   if (!FALLBACK_GRAPHICS && !LOWFX && !MOBILEFX && THREE.EffectComposer && THREE.UnrealBloomPass && THREE.ShaderPass && !raceComposer) {
     try{raceComposer=buildRaceComposer();}catch(error){raceComposer=null;raceBloom=null;raceGrade=null;console.warn('Post-processing disabled:',error);}
   }
@@ -38,5 +39,6 @@ function renderRaceScene() {
     raceComposer.render();
   }
   else renderer.render(scene, camera);
+  renderer.info.render.workMs=performance.now()-started;
 }
 addEventListener('resize', () => {if(!raceComposer)return;raceComposer.setSize(innerWidth, innerHeight);if(raceBloom)raceBloom.resolution.set(innerWidth,innerHeight);});

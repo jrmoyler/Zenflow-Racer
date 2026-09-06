@@ -490,6 +490,7 @@ function reportFrameMetrics(now){
   out.frameMs=((now-frameReview.start)/frameReview.count).toFixed(1);
   out.raceState=game.state;out.raceSeconds=game.raceTime.toFixed(2);
   out.renderTriangles=String(renderer.info?.render?.triangles||0);
+  out.renderWorkMs=(renderer.info?.render?.workMs||0).toFixed(1);
   out.renderMode=FALLBACK_GRAPHICS?'Software 3D':'WebGL';
   frameReview.start=now;frameReview.count=0;
 }

@@ -9,64 +9,120 @@ class CanvasRaceRenderer {
   }
   setPixelRatio(r){this.ratio=Math.min(r,1);if(this.width)this.setSize(this.width,this.height);}
   setSize(w,h){this.width=w;this.height=h;this.domElement.width=Math.round(w*this.ratio);this.domElement.height=Math.round(h*this.ratio);this.domElement.style.width=w+'px';this.domElement.style.height=h+'px';}
-  // Vertex clustering gives CPU mode a bounded mesh workload while preserving each
-  // authored part, silhouette and transform. Cache only immutable BufferGeometry.
+  // Keep authored topology and split normals intact. No positional clustering:
+  // welding nearby surfaces corrupts fingers, rims and overlapping body panels.
   meshData(g){
-    const cached=this.geometryCache.get(g);if(cached)return cached;
-    const pos=g.attributes.position;if(!pos)return null;g.computeBoundingBox();g.computeBoundingSphere();
-    const extent=g.boundingBox.getSize(new THREE.Vector3()),cell=Math.min(Math.max(extent.x,extent.y,extent.z)/28,Math.min(...[extent.x,extent.y,extent.z].filter(v=>v>.001))/8);
-    const vertices=[],sourceIndices=[],remap=[],buckets=new Map();
-    for(let i=0;i<pos.count;i++){
-      const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i),key=cell>0?[Math.round(x/cell),Math.round(y/cell),Math.round(z/cell)].join(','):String(i);
-      let id=buckets.get(key);if(id===undefined){id=vertices.length;buckets.set(key,id);vertices.push(new THREE.Vector3(x,y,z));sourceIndices.push(i);}remap[i]=id;
+    let data=this.geometryCache.get(g);if(data)return data;
+    const p=g.attributes.position;if(!p)return null;
+    if(!g.attributes.normal)g.computeVertexNormals();
+    const n=g.attributes.normal,count=p.count,positions=new Float32Array(count*3),normals=new Float32Array(count*3);
+    for(let i=0;i<count;i++){positions.set([p.getX(i),p.getY(i),p.getZ(i)],i*3);normals.set([n.getX(i),n.getY(i),n.getZ(i)],i*3);}
+    const indices=g.index?Uint32Array.from(g.index.array):Uint32Array.from({length:count},(_,i)=>i);
+    const groups=g.groups.length?g.groups:[{start:0,count:indices.length,materialIndex:0}];
+    const color=g.attributes.color,colors=color?new Float32Array(count*3):null;
+    if(color)for(let i=0;i<count;i++)colors.set([color.getX(i),color.getY(i),color.getZ(i)],i*3);
+    data={positions,normals,indices,groups,colors,projected:new Float32Array(count*8+48)};
+    g.computeBoundingSphere();this.geometryCache.set(g,data);return data;
+  }
+  rasterTarget(width,height){
+    // Bound pixel work independently of display DPR and phone orientation.
+    const scale=Math.min(1,480/width,320/height),w=Math.max(1,Math.round(width*scale)),h=Math.max(1,Math.round(height*scale));
+    if(!this.target||this.target.w!==w||this.target.h!==h){
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d'),image=ctx.createImageData(w,h);
+      this.target={canvas,ctx,image,w,h,depth:new Float32Array(w*h)};
     }
-    const faces=[],seen=new Set(),idx=g.index,count=idx?idx.count:pos.count;
-    for(let i=0;i<count;i+=3){const a=remap[idx?idx.getX(i):i],b=remap[idx?idx.getX(i+1):i+1],c=remap[idx?idx.getX(i+2):i+2];if(a===b||b===c||c===a)continue;
-      const key=[a,b,c].sort((x,y)=>x-y).join(',');if(seen.has(key))continue;seen.add(key);
-      const group=g.groups.find(v=>i>=v.start&&i<v.start+v.count);faces.push([a,b,c,group?.materialIndex||0]);
-    }
-    const result={vertices,sourceIndices,faces};this.geometryCache.set(g,result);return result;
+    const t=this.target;t.image.data.fill(0);t.depth.fill(Infinity);return t;
   }
   drawScene(stage,cam,rect,clear=true){
-    const ctx=this.ctx,w=rect.width,h=rect.height,x=rect.x||0,y=rect.y||0;
+    const {min,max,ceil,floor,abs,hypot}=Math,isFiniteNumber=Number.isFinite;
+    const ctx=this.ctx,w=rect.width,h=rect.height,x=rect.x||0,y=rect.y||0;if(w<=0||h<=0)return;
     ctx.save();ctx.setTransform(this.ratio,0,0,this.ratio,0,0);ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
-    const map=typeof activeMap!=='undefined'?activeMap:{skyTop:0x798bad,skyHorizon:0xdceafa,fog:0xc6d8e6};
+    const map=typeof activeMap!=='undefined'?activeMap:{skyTop:0x798bad,skyHorizon:0xdceafa};
     if(clear){const gradient=ctx.createLinearGradient(0,y,0,y+h);gradient.addColorStop(0,'#'+new THREE.Color(map.skyTop).getHexString());gradient.addColorStop(1,'#'+new THREE.Color(map.skyHorizon).getHexString());ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h);}
+    const t=this.rasterTarget(w,h),rw=t.w,rh=t.h,pixels=t.image.data,depth=t.depth;
     stage.updateMatrixWorld(true);cam.updateMatrixWorld(true);cam.matrixWorldInverse.copy(cam.matrixWorld).invert();
     const vp=new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse),frustum=new THREE.Frustum().setFromProjectionMatrix(vp);
-    const triangles=[],eye=new THREE.Vector3().setFromMatrixPosition(cam.matrixWorld),light=new THREE.Vector3(-.4,.85,-.35).normalize(),normal=new THREE.Vector3(),edge=new THREE.Vector3(),worldMatrix=new THREE.Matrix4(),instance=new THREE.Matrix4(),sphere=new THREE.Sphere();
-    const candidates=[];stage.traverseVisible(o=>{if(!o.isMesh||!o.geometry?.attributes.position)return;if(o.material?.isShaderMaterial||o.material?.opacity<.025)return;
-      if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();sphere.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);
+    const eye=new THREE.Vector3().setFromMatrixPosition(cam.matrixWorld),light=new THREE.Vector3(-.4,.85,-.35).normalize(),world=new THREE.Matrix4(),mvp=new THREE.Matrix4(),instance=new THREE.Matrix4(),sphere=new THREE.Sphere(),normalMatrix=new THREE.Matrix3(),skinPoint=new THREE.Vector3();
+    const opaque=[],transparent=[];
+    stage.traverseVisible(o=>{
+      if(!o.isMesh||!o.geometry?.attributes.position||o.material?.isShaderMaterial)return;
+      if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();
+      sphere.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);
       if(!o.isInstancedMesh&&!frustum.intersectsSphere(sphere))return;
-      candidates.push({o,d:sphere.center.distanceTo(eye)-sphere.radius});});
-    candidates.sort((a,b)=>a.d-b.d);let processed=0;
-    for(const entry of candidates){const o=entry.o,data=this.meshData(o.geometry);if(!data)continue;
-      for(let n=0;n<(o.isInstancedMesh?o.count:1);n++){
-        if(o.isInstancedMesh){o.getMatrixAt(n,instance);worldMatrix.multiplyMatrices(o.matrixWorld,instance);}else worldMatrix.copy(o.matrixWorld);
-        sphere.copy(o.geometry.boundingSphere).applyMatrix4(worldMatrix);if(!frustum.intersectsSphere(sphere))continue;
-        const distance=Math.max(.01,sphere.center.distanceTo(eye));if(sphere.radius/distance*w<1.5)continue;
-        if(o.isSkinnedMesh)o.skeleton.update();
-        const world=data.vertices.map((v,i)=>{const p=v.clone();if(o.isSkinnedMesh)o.boneTransform(data.sourceIndices[i],p);return p.applyMatrix4(worldMatrix);}),screen=world.map(v=>v.clone().applyMatrix4(vp));
-        for(const f of data.faces){const a=screen[f[0]],b=screen[f[1]],c=screen[f[2]];
-          if(a.z < -1||b.z < -1||c.z < -1||a.z>1||b.z>1||c.z>1)continue;
-          const ax=x+(a.x+1)*w/2,ay=y+(1-a.y)*h/2,bx=x+(b.x+1)*w/2,by=y+(1-b.y)*h/2,cx=x+(c.x+1)*w/2,cy=y+(1-c.y)*h/2;
-          if(Math.abs((bx-ax)*(cy-ay)-(by-ay)*(cx-ax))<.3)continue;
-          if(Math.max(ax,bx,cx)<x||Math.min(ax,bx,cx)>x+w||Math.max(ay,by,cy)<y||Math.min(ay,by,cy)>y+h)continue;
-          const mat=Array.isArray(o.material)?o.material[f[3]]:o.material;if(!mat||mat.visible===false||mat.opacity<.025)continue;
-          normal.subVectors(world[f[1]],world[f[0]]).cross(edge.subVectors(world[f[2]],world[f[0]])).normalize();
-          const facing=normal.dot(edge.subVectors(eye,world[f[0]]));
-          if((mat.side===THREE.FrontSide&&facing<=0)||(mat.side===THREE.BackSide&&facing>=0))continue;
-          const shade=mat.isMeshBasicMaterial?1:.4+.6*Math.abs(normal.dot(light));const color=(mat.color||new THREE.Color(0xb4d1de)).clone().multiplyScalar(shade);
-          if(mat.emissive)color.add(mat.emissive.clone().multiplyScalar(Math.min(.45,mat.emissiveIntensity||0)));
-          if(stage.fog){const fog=1-Math.exp(-Math.pow(distance*(stage.fog.density||.0012),2));color.lerp(stage.fog.color,Math.min(.9,fog));}
-          triangles.push({p:[ax,ay,bx,by,cx,cy],depth:(a.z+b.z+c.z)/3,color:'#'+color.convertLinearToSRGB().getHexString(),alpha:mat.transparent?mat.opacity:1});
+      const entry={o,d:sphere.center.distanceToSquared(eye)};
+      (Array.isArray(o.material)?o.material.some(m=>m.transparent):o.material.transparent)?transparent.push(entry):opaque.push(entry);
+    });
+    opaque.sort((a,b)=>a.d-b.d);transparent.sort((a,b)=>b.d-a.d);
+    let triangles=0,vertices=0,draws=0;
+    const srgb=this.srgb||(this.srgb=Uint8Array.from({length:4097},(_,i)=>{const c=i/4096;return Math.round(255*(c<=.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-.055));}));
+    const convert=v=>srgb[v<=0?0:v>=1?4096:(v*4096)|0];
+    // Edge functions plus a per-pixel depth buffer correctly resolve intersecting
+    // geometry. Canvas receives one bitmap made from real scene triangles.
+    let projectedBuffer,winding=1;
+    const raster=(a,b,c,mat,color,emission,fog)=>{
+      const ax=(projectedBuffer[a+0]/projectedBuffer[a+3]+1)*rw*.5,ay=(1-projectedBuffer[a+1]/projectedBuffer[a+3])*rh*.5,az=projectedBuffer[a+2]/projectedBuffer[a+3];
+      const bx=(projectedBuffer[b+0]/projectedBuffer[b+3]+1)*rw*.5,by=(1-projectedBuffer[b+1]/projectedBuffer[b+3])*rh*.5,bz=projectedBuffer[b+2]/projectedBuffer[b+3];
+      const cx=(projectedBuffer[c+0]/projectedBuffer[c+3]+1)*rw*.5,cy=(1-projectedBuffer[c+1]/projectedBuffer[c+3])*rh*.5,cz=projectedBuffer[c+2]/projectedBuffer[c+3];
+      const area=(bx-ax)*(cy-ay)-(by-ay)*(cx-ax);
+      if(!isFiniteNumber(area)||abs(area)<.025)return;
+      if((mat.side===THREE.FrontSide&&area*winding>=0)||(mat.side===THREE.BackSide&&area*winding<=0))return;
+      const minX=max(0,ceil(min(ax,bx,cx)-.5)),maxX=min(rw-1,floor(max(ax,bx,cx)-.5));
+      const minY=max(0,ceil(min(ay,by,cy)-.5)),maxY=min(rh-1,floor(max(ay,by,cy)-.5));
+      if(minX>maxX||minY>maxY)return;
+      const inv=1/area,dx0=(by-cy)*inv,dy0=(cx-bx)*inv,dx1=(cy-ay)*inv,dy1=(ax-cx)*inv;
+      let row0=((bx-minX-.5)*(cy-minY-.5)-(by-minY-.5)*(cx-minX-.5))*inv;
+      let row1=((cx-minX-.5)*(ay-minY-.5)-(cy-minY-.5)*(ax-minX-.5))*inv;
+      const alpha=mat.transparent?mat.opacity:1,basic=mat.isMeshBasicMaterial;
+      triangles++;
+      for(let py=minY;py<=maxY;py++,row0+=dy0,row1+=dy1){let u=row0,v=row1,offset=py*rw+minX;
+        for(let px=minX;px<=maxX;px++,offset++,u+=dx0,v+=dx1){const q=1-u-v;if(u<-.00001||v<-.00001||q<-.00001)continue;
+          const z=u*az+v*bz+q*cz;if(z < -1||z>1||z>=depth[offset])continue;
+          const shade=basic?1:u*projectedBuffer[a+4]+v*projectedBuffer[b+4]+q*projectedBuffer[c+4],f=offset*4;
+          const red=convert((color.r*shade*(u*projectedBuffer[a+5]+v*projectedBuffer[b+5]+q*projectedBuffer[c+5])+emission.r)*(1-fog.amount)+fog.r),green=convert((color.g*shade*(u*projectedBuffer[a+6]+v*projectedBuffer[b+6]+q*projectedBuffer[c+6])+emission.g)*(1-fog.amount)+fog.g),blue=convert((color.b*shade*(u*projectedBuffer[a+7]+v*projectedBuffer[b+7]+q*projectedBuffer[c+7])+emission.b)*(1-fog.amount)+fog.b);
+          if(alpha>=.999){pixels[f]=red;pixels[f+1]=green;pixels[f+2]=blue;pixels[f+3]=255;}
+          else{const old=pixels[f+3]/255,combined=alpha+old*(1-alpha),mix=old*(1-alpha);pixels[f]=(red*alpha+pixels[f]*mix)/combined;pixels[f+1]=(green*alpha+pixels[f+1]*mix)/combined;pixels[f+2]=(blue*alpha+pixels[f+2]*mix)/combined;pixels[f+3]=combined*255;}
+          if(mat.depthWrite!==false)depth[offset]=z;
         }
-        processed+=data.faces.length;if(processed>180000)break;
       }
-      if(processed>180000)break;
+    };
+    for(const {o} of opaque.concat(transparent)){
+      const data=this.meshData(o.geometry);if(!data)continue;
+      if(o.isSkinnedMesh)o.skeleton.update();
+      for(let n=0;n<(o.isInstancedMesh?o.count:1);n++){
+        if(o.isInstancedMesh){o.getMatrixAt(n,instance);world.multiplyMatrices(o.matrixWorld,instance);}else world.copy(o.matrixWorld);
+        sphere.copy(o.geometry.boundingSphere).applyMatrix4(world);if(!frustum.intersectsSphere(sphere))continue;
+        const distance=max(.01,sphere.center.distanceTo(eye));if(sphere.radius/distance*rw<.75)continue;
+        mvp.multiplyMatrices(vp,world);normalMatrix.getNormalMatrix(world);winding=world.determinant()<0?-1:1;
+        const e=mvp.elements,ne=normalMatrix.elements,p=data.positions,norm=data.normals,projected=data.projected;
+        projectedBuffer=projected;
+        for(let i=0,j=0;i<p.length;i+=3,j+=8){let vx=p[i],vy=p[i+1],vz=p[i+2];if(o.isSkinnedMesh){skinPoint.set(vx,vy,vz);o.boneTransform(i/3,skinPoint);vx=skinPoint.x;vy=skinPoint.y;vz=skinPoint.z;}
+          projected[j]=e[0]*vx+e[4]*vy+e[8]*vz+e[12];projected[j+1]=e[1]*vx+e[5]*vy+e[9]*vz+e[13];projected[j+2]=e[2]*vx+e[6]*vy+e[10]*vz+e[14];projected[j+3]=e[3]*vx+e[7]*vy+e[11]*vz+e[15];
+          const nx=ne[0]*norm[i]+ne[3]*norm[i+1]+ne[6]*norm[i+2],ny=ne[1]*norm[i]+ne[4]*norm[i+1]+ne[7]*norm[i+2],nz=ne[2]*norm[i]+ne[5]*norm[i+1]+ne[8]*norm[i+2];
+          projected[j+4]=.38+.62*max(0,(nx*light.x+ny*light.y+nz*light.z)/(hypot(nx,ny,nz)||1));
+        }
+        vertices+=p.length/3;draws++;
+        const fogAmount=stage.fog?min(.9,stage.fog.isFog?max(0,(distance-stage.fog.near)/(stage.fog.far-stage.fog.near)):1-Math.exp(-Math.pow(distance*stage.fog.density,2))):0;
+        const fog={amount:fogAmount,r:(stage.fog?.color.r||0)*fogAmount,g:(stage.fog?.color.g||0)*fogAmount,b:(stage.fog?.color.b||0)*fogAmount};
+        const idx=data.indices;
+        for(const group of data.groups){const mat=Array.isArray(o.material)?o.material[group.materialIndex]:o.material;if(!mat||mat.visible===false||mat.opacity<.025||mat.isShaderMaterial)continue;
+          const color=mat.color||{r:.5,g:.7,b:.8},intensity=min(.6,mat.emissiveIntensity||0),emission={r:(mat.emissive?.r||0)*intensity,g:(mat.emissive?.g||0)*intensity,b:(mat.emissive?.b||0)*intensity};
+          const colors=data.colors;
+          for(let j=0;j<p.length/3;j++){projected[j*8+5]=mat.vertexColors&&colors?colors[j*3]:1;projected[j*8+6]=mat.vertexColors&&colors?colors[j*3+1]:1;projected[j*8+7]=mat.vertexColors&&colors?colors[j*3+2]:1;}
+          for(let i=group.start,end=min(idx.length,group.start+group.count);i<end;i+=3){const a=idx[i]*8,b=idx[i+1]*8,c=idx[i+2]*8,aw=projected[a+3],bw=projected[b+3],cw=projected[c+3];
+            if((projected[a]<-aw&&projected[b]<-bw&&projected[c]<-cw)||(projected[a]>aw&&projected[b]>bw&&projected[c]>cw)||(projected[a+1]<-aw&&projected[b+1]<-bw&&projected[c+1]<-cw)||(projected[a+1]>aw&&projected[b+1]>bw&&projected[c+1]>cw)||(projected[a+2]>aw&&projected[b+2]>bw&&projected[c+2]>cw))continue;
+            if(projected[a+2]>=-aw&&projected[b+2]>=-bw&&projected[c+2]>=-cw)raster(a,b,c,mat,color,emission,fog);
+            else{ // Clip against the near plane rather than dropping road triangles.
+              const polygon=[],input=[a,b,c];let next=p.length/3*8;
+              for(let k=0;k<3;k++){const from=input[k],to=input[(k+1)%3],d0=projected[from+2]+projected[from+3],d1=projected[to+2]+projected[to+3];if(d0>=0)polygon.push(from);if((d0>=0)!==(d1>=0)){const f=d0/(d0-d1);for(let j=0;j<8;j++)projected[next+j]=projected[from+j]+(projected[to+j]-projected[from+j])*f;polygon.push(next);next+=8;}}
+              for(let k=1;k<polygon.length-1;k++)raster(polygon[0],polygon[k],polygon[k+1],mat,color,emission,fog);
+            }
+          }
+        }
+      }
     }
-    triangles.sort((a,b)=>b.depth-a.depth);for(const t of triangles){ctx.globalAlpha=t.alpha;ctx.fillStyle=t.color;ctx.beginPath();ctx.moveTo(t.p[0],t.p[1]);ctx.lineTo(t.p[2],t.p[3]);ctx.lineTo(t.p[4],t.p[5]);ctx.closePath();ctx.fill();}
-    ctx.restore();this.info.render.calls=triangles.length;this.info.render.triangles=triangles.length;
+    t.ctx.putImageData(t.image,0,0);ctx.imageSmoothingEnabled=true;ctx.globalAlpha=1;ctx.drawImage(t.canvas,x,y,w,h);ctx.restore();
+    this.info.render.calls=draws;this.info.render.triangles=triangles;this.info.render.vertices=vertices;this.info.render.rasterPixels=rw*rh;
   }
   render(stage,cam){if(stage&&cam)this.drawScene(stage,cam,{x:0,y:0,width:this.width,height:this.height});}
   makePreview(division){const stage=new THREE.Scene(),kart=buildKart(division);stage.add(kart);const cam=new THREE.PerspectiveCamera(32,1,.1,40);cam.position.set(5,3.7,-7);cam.lookAt(0,1,0);return {stage,kart,cam};}

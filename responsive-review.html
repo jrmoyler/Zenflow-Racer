@@ -10,5 +10,5 @@
 <script>
 const frame=document.querySelector('iframe'),metrics=document.getElementById('metrics');
 document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;}));
-setInterval(()=>{const d=frame.contentDocument?.documentElement.dataset;if(!d?.frameMs)return;metrics.textContent=d.renderMode+' · '+d.frameMs+' ms/frame · '+(1000/Number(d.frameMs)).toFixed(1)+' fps · '+d.raceState+' · race '+d.raceSeconds+' s · '+d.renderTriangles+' triangles';},1000);
+setInterval(()=>{const d=frame.contentDocument?.documentElement.dataset;if(!d?.frameMs)return;metrics.textContent=d.renderMode+' · '+d.frameMs+' ms/frame · '+(1000/Number(d.frameMs)).toFixed(1)+' fps · render '+d.renderWorkMs+' ms · '+d.raceState+' · race '+d.raceSeconds+' s · '+d.renderTriangles+' triangles';},1000);
 </script></html>
