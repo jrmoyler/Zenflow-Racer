@@ -170,6 +170,29 @@ test('Touch drift holds charge a rocket start during the final countdown',()=>{
  racer();run("r.isPlayer=true;game.touch=true;game.state='countdown';game.countdown=.5;input.drift=true;for(let i=0;i<61;i++)simStep(1/120)");assert.equal(run('game.state'),'race');assert.ok(run('r.boost')>.8);run('game.touch=false;resetInput()');
 });
 require('./effects-regression.cjs')({test,assert});
+test('Disabling touch mode releases simultaneous steering, drift, item and power',()=>{
+ racer();run('resetInput();game.touch=true');
+ const ev=pointerId=>({pointerId,clientX:120,preventDefault:noop});
+ element('tSteer').events.pointerdown(ev(1));element('tD').events.pointerdown(ev(2));element('tI').events.pointerdown(ev(3));element('tP').events.pointerdown(ev(4));
+ assert.equal(run('input.drift&&input.item&&input.special&&touchSteer>0'),true);
+ element('touchmode').checked=false;element('touchmode').events.change();
+ assert.equal(run('input.drift||input.item||input.special||input.itemEdge||input.specialEdge'),false);assert.equal(run('touchSteer'),0);assert.equal(run('activeTouchPointers.size'),0);
+});
+test('Resize releases the old steering coordinate and held actions',()=>{
+ racer();run('resetInput()');const ev=pointerId=>({pointerId,clientX:120,preventDefault:noop});
+ element('tSteer').events.pointerdown(ev(1));element('tD').events.pointerdown(ev(2));
+ context.camera.updateProjectionMatrix=noop;context.renderer.setSize=noop;listeners.resize();
+ assert.equal(run('touchSteer'),0);assert.equal(run('input.drift'),false);assert.equal(run('steerPointer'),null);
+});
+test('Resume requests audio recovery in the button gesture',()=>{
+ racer();let resumed=0;const old=context.audioInit;context.audioInit=()=>resumed++;
+ run('pause();resume()');assert.equal(resumed,1);context.audioInit=old;
+});
+test('Backgrounding immediately mutes audio before hidden frames stop',()=>{
+ racer();let updated=0;const old=context.audioUpdate;context.audioUpdate=()=>updated++;
+ context.document.hidden=true;listeners.visibilitychange();assert.equal(updated,1);assert.equal(run('game.state'),'paused');
+ context.document.hidden=false;context.audioUpdate=old;
+});
 require('./kart-materials-regression.cjs')({test,assert});
 require('./racefx-regression.cjs')({test,assert});
 require('./kart-clips-regression.cjs')({test,assert});

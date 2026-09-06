@@ -46,6 +46,7 @@ class Racer{
 function disposeProjectile(mesh){scene.remove(mesh);if(mesh.userData?.projectileDisposed)return;if(mesh.userData)mesh.userData.projectileDisposed=true;const geometries=new Set(),materials=new Set();mesh.traverse?.(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}
 function clearProjectiles(){mines.forEach(m=>disposeProjectile(m.mesh));missiles.forEach(m=>disposeProjectile(m.mesh));mines=[];missiles=[];}
 function spawnRace(playerDiv){
+  const sceneBuildStarted=performance.now();
   disposePreview();if(typeof clearAbilities==='function')clearAbilities();
   game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];[sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx].forEach(pool=>pool.clear?.());clearProjectiles();if(typeof raceFX!=='undefined'&&!(typeof FALLBACK_GRAPHICS!=='undefined'&&FALLBACK_GRAPHICS))raceFX.init();
   if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;
@@ -59,6 +60,7 @@ function spawnRace(playerDiv){
   for(let i=0;i<12;i++){if(i===playerGrid){game.player=new Racer(playerDiv,true,i);game.racers.push(game.player);}else{game.racers.push(new Racer(order[k++],false,i));}}
   resetInput();lastItemKey=null;simStep.lastN=null;acc=0;
   game.raceTime=0;game.countdown=3.6;game.state='countdown';game.finishTimer=0;game.trauma=0;
+  if(typeof raceTelemetry!=='undefined')raceTelemetry.start({map:chosenMapId,division:playerDiv.id,racers:game.racers.length,laps:game.laps,sceneBuildMs:performance.now()-sceneBuildStarted});
   camState.init=false;updateRanks(true);hud.item.querySelector('.ic').innerHTML='';hud.item.querySelector('.lbl').textContent='NO ITEM';setToast('');updateHUD.lastRank=0;
   showTouch();
 }
@@ -435,6 +437,7 @@ function updateHUD(dt){
 
 // ---------- Race flow ----------
 function onPlayerFinish(){
+  if(typeof raceTelemetry!=='undefined')raceTelemetry.finish(game.player.finishTime);
   updateRanks(true);const p=game.player,key=raceRecordKey(p.div.id,game.diff);const old=saved[key];
   game.newBest=!Number.isFinite(old)||p.finishTime<old;game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
   if(game.newBest){saved[key]=p.finishTime;persist();}
@@ -498,6 +501,7 @@ function frame(now){
   requestAnimationFrame(frame);
   if(document.hidden){last=now;return;}
   reportFrameMetrics(now);
+  if(typeof raceTelemetry!=='undefined')raceTelemetry.frame(now,game.state,game.raceTime);
   if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
   const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
@@ -561,8 +565,8 @@ addEventListener('keydown',e=>{if(typingTarget(e))return;const k=KEYS[e.code];if
   else if(e.code==='KeyR'){if(restartRace()&&e.preventDefault)e.preventDefault();}
   else if(e.code==='KeyM'){if(['race','countdown','finish','paused','results'].includes(game.state)){toggleMute();if(e.preventDefault)e.preventDefault();}}});
 addEventListener('keyup',e=>{if(typingTarget(e))return;if(KEYS[e.code]){heldKeys.delete(e.code);syncInput();}});
-addEventListener('blur',()=>{resetInput();pause();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){resetInput();pause();}});
+addEventListener('blur',()=>{resetInput();pause();if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt('blur');});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){resetInput();pause();audioUpdate(0,game.player);}if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt(document.hidden?'hidden':'visible');});
 function pollGamepad(){const pad=navigator.getGamepads?.()[0];if(!pad){padHeld.clear();padSteer=0;padPause=false;syncInput();return;}
   const down=i=>!!pad.buttons[i]?.pressed;padSteer=Math.abs(pad.axes[0]||0)>.16?pad.axes[0]:0;
   padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4)||down(5))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
@@ -593,14 +597,14 @@ function showTouch(){touchEl.classList.toggle?.('analog',game.analogSteering);if
 function hideTouch(){touchEl.classList.remove('on');if(document.documentElement&&document.documentElement.dataset)delete document.documentElement.dataset.touch;}
 // UI buttons
 const touchModeToggle=document.getElementById('touchmode');
-if(touchModeToggle){touchModeToggle.checked=game.touch;touchModeToggle.addEventListener('change',()=>{game.touch=touchModeToggle.checked;saved.touchMode=game.touch;persist();if(['race','countdown'].includes(game.state)){if(game.touch)showTouch();else hideTouch();}});}
+if(touchModeToggle){touchModeToggle.checked=game.touch;touchModeToggle.addEventListener('change',()=>{resetInput();game.touch=touchModeToggle.checked;saved.touchMode=game.touch;persist();if(['race','countdown'].includes(game.state)){if(game.touch)showTouch();else hideTouch();}});}
 const autoThrottleToggle=document.getElementById('autothrottle');
 if(autoThrottleToggle){autoThrottleToggle.checked=game.autoThrottle;autoThrottleToggle.addEventListener('change',()=>{game.autoThrottle=autoThrottleToggle.checked;saved.autoThrottle=game.autoThrottle;persist();});}
 const fullscreenButton=document.getElementById('fullscreen');
 if(fullscreenButton){fullscreenButton.hidden=!document.documentElement?.requestFullscreen;fullscreenButton.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{setToast('FULLSCREEN UNAVAILABLE');}};document.addEventListener('fullscreenchange',()=>{fullscreenButton.textContent=document.fullscreenElement?'EXIT FULLSCREEN':'FULLSCREEN';});}
 function updateBestTime(){const el=document.getElementById('besttime');if(el&&selected)el.textContent=Number.isFinite(saved[raceRecordKey(selected.id,game.diff)])?'BEST '+fmtTime(saved[raceRecordKey(selected.id,game.diff)]):'SET YOUR FIRST RECORD';}
 function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';staticFrameDirty=true;resetInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
-function resume(){if(game.state!=='paused')return;game.state=game.prevState;document.getElementById('pause').classList.add('hidden');last=performance.now();acc=0;showTouch();}
+function resume(){if(game.state!=='paused')return;audioInit();game.state=game.prevState;document.getElementById('pause').classList.add('hidden');last=performance.now();acc=0;if(typeof resetRenderBudget==='function')resetRenderBudget();if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt('resume');showTouch();}
 document.getElementById('pausebtn').onclick=()=>{if(game.state==='paused')resume();else pause();};
 document.getElementById('resume').onclick=resume;
 document.getElementById('mutebtn').onclick=toggleMute;
@@ -610,7 +614,7 @@ document.getElementById('quit').onclick=()=>{document.getElementById('pause').cl
 document.getElementById('again').onclick=()=>{document.getElementById('results').classList.add('hidden');openRoster();};
 document.getElementById('rematch').onclick=()=>{document.getElementById('results').classList.add('hidden');audioInit();startRace();};
 document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));b.classList.add('on');game.diff=+b.dataset.d;SFX.ui();updateBestTime();});
-addEventListener('resize',()=>{staticFrameDirty=true;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+addEventListener('resize',()=>{resetInput();staticFrameDirty=true;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof raceTelemetry!=='undefined')raceTelemetry.event('resize',{width:innerWidth,height:innerHeight});});
 
 // ---------- Roster screen ----------
 let selected=null;
@@ -633,6 +637,7 @@ async function boot(){
   buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
+  if(typeof raceTelemetry!=='undefined')raceTelemetry.ready();
   requestAnimationFrame(frame);
  }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}
 }

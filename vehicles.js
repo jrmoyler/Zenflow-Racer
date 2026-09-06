@@ -441,7 +441,7 @@ function buildParticles(){sparksBlue=new ParticlePool(600,0x66aaff,1.1);sparksOr
 const AUDIO={ctx:null,on:true,master:null,voices:0,failed:false};
 function audioInit(){
   if(AUDIO.failed)return;
-  if(AUDIO.ctx){if(AUDIO.ctx.state==='suspended')AUDIO.ctx.resume().catch(()=>{});return;}
+  if(AUDIO.ctx){if(['suspended','interrupted'].includes(AUDIO.ctx.state))AUDIO.ctx.resume().catch(()=>{});return;}
   const AudioCtor=window.AudioContext||window.webkitAudioContext;if(!AudioCtor){AUDIO.failed=true;return;}
   let C;
   try{

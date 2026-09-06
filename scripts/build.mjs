@@ -1,17 +1,24 @@
 import { cp, mkdir, readdir, rm, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 const root=process.cwd(), out=path.join(root,'dist');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 // Only ship runtime assets. New documentation, exports and local files stay private.
-const runtime=['responsive-review.html','index.html','core.js','surface-detail.js','kart-materials.js','kart-clips.js','racefx.js','fallback-renderer.js','maps.js','world.js','vehicles.js',
+const runtime=['responsive-review.html','race-telemetry.js','index.html','core.js','surface-detail.js','kart-materials.js','kart-clips.js','racefx.js','fallback-renderer.js','maps.js','world.js','vehicles.js',
  'kart-assets.js','item-art.js','item-models.js','effects.js','abilities.js','postfx.js','game.js','title-attract.js','menu.js','pwa.js','polish.css','reference-polish.css',
  'manifest.webmanifest','vendor','icons','assets'];
 for(const file of runtime){
  await mkdir(path.dirname(path.join(out,file)),{recursive:true});
  await cp(path.join(root,file),path.join(out,file),{recursive:true,filter:source=>!source.split(path.sep).includes('art')});
 }
+// Bind exported diagnostic reports to the code that was actually deployed.
+let release=process.env.VERCEL_GIT_COMMIT_SHA;
+if(!release){try{release=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();}catch{release='development';}}
+if(!/^[a-f0-9]{40}$/.test(release))release='development';
+const html=await readFile(path.join(out,'index.html'),'utf8');
+await writeFile(path.join(out,'index.html'),html.replace('</head>',`<meta name="zenflow-release" content="${release}">\n</head>`));
 // Version every application byte so an installed game updates as a coherent release.
 const assets=[];
 async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true})){const f=path.join(dir,e.name);if(e.isDirectory())await walk(f);else if(e.name!=='sw.js')assets.push(path.relative(out,f).split(path.sep).join('/'));}}
