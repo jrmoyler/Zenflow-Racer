@@ -479,13 +479,30 @@ function stepPositionToasts(p,dt){
 
 // ---------- Main loop ----------
 let last=performance.now(),acc=0;const STEP=1/120;
+let lastFrameState=null,staticFrameDirty=true;
+const frameReview={start:0,count:0};
+function reportFrameMetrics(now){
+  if(typeof location==='undefined'||!/[?&]review=1(?:&|$)/.test(location.search))return;
+  if(!frameReview.start){frameReview.start=now;return;}
+  frameReview.count++;
+  if(now-frameReview.start<1000)return;
+  const out=document.documentElement.dataset;
+  out.frameMs=((now-frameReview.start)/frameReview.count).toFixed(1);
+  out.raceState=game.state;out.raceSeconds=game.raceTime.toFixed(2);
+  out.renderTriangles=String(renderer.info?.render?.triangles||0);
+  out.renderMode=FALLBACK_GRAPHICS?'Software 3D':'WebGL';
+  frameReview.start=now;frameReview.count=0;
+}
 function frame(now){
   requestAnimationFrame(frame);
+  if(document.hidden){last=now;return;}
+  reportFrameMetrics(now);
+  if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
   const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
   if(typeof tickTitleAttract==='function'&&tickTitleAttract(dt)){renderRaceScene();return;}
   if(game.state==='paused')pollGamepad();
-  if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster')(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
+  if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster'&&staticFrameDirty){(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));staticFrameDirty=false;}if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
   if(typeof updateMapScenery==='function')updateMapScenery(dt);
   pollGamepad();game.time+=dt;acc+=dt;let steps=0;
   while(acc>=STEP&&steps<12&&['countdown','race','finish'].includes(game.state)){simStep(STEP);acc-=STEP;steps++;}
@@ -581,7 +598,7 @@ if(autoThrottleToggle){autoThrottleToggle.checked=game.autoThrottle;autoThrottle
 const fullscreenButton=document.getElementById('fullscreen');
 if(fullscreenButton){fullscreenButton.hidden=!document.documentElement?.requestFullscreen;fullscreenButton.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{setToast('FULLSCREEN UNAVAILABLE');}};document.addEventListener('fullscreenchange',()=>{fullscreenButton.textContent=document.fullscreenElement?'EXIT FULLSCREEN':'FULLSCREEN';});}
 function updateBestTime(){const el=document.getElementById('besttime');if(el&&selected)el.textContent=Number.isFinite(saved[raceRecordKey(selected.id,game.diff)])?'BEST '+fmtTime(saved[raceRecordKey(selected.id,game.diff)]):'SET YOUR FIRST RECORD';}
-function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';resetInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
+function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';staticFrameDirty=true;resetInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
 function resume(){if(game.state!=='paused')return;game.state=game.prevState;document.getElementById('pause').classList.add('hidden');last=performance.now();acc=0;showTouch();}
 document.getElementById('pausebtn').onclick=()=>{if(game.state==='paused')resume();else pause();};
 document.getElementById('resume').onclick=resume;
@@ -592,7 +609,7 @@ document.getElementById('quit').onclick=()=>{document.getElementById('pause').cl
 document.getElementById('again').onclick=()=>{document.getElementById('results').classList.add('hidden');openRoster();};
 document.getElementById('rematch').onclick=()=>{document.getElementById('results').classList.add('hidden');audioInit();startRace();};
 document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));b.classList.add('on');game.diff=+b.dataset.d;SFX.ui();updateBestTime();});
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+addEventListener('resize',()=>{staticFrameDirty=true;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
 // ---------- Roster screen ----------
 let selected=null;
