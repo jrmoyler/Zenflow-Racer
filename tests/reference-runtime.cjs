@@ -18,7 +18,7 @@ for(const mobile of [false,true]){
  const scene=new THREE.Scene();scene.fog=new THREE.Fog(0xffffff,180,780);
  const c={THREE,console,document:{createElement:canvas},FALLBACK_GRAPHICS:true,MOBILEFX:mobile,LOWFX:false,TEX:{finish:new THREE.Texture()},zenWorldTime:{value:0},scene,sun:new THREE.DirectionalLight(),hemi:new THREE.HemisphereLight()};
  vm.createContext(c);const run=code=>vm.runInContext(code,c);
- run(core.slice(0,core.indexOf('function hexToRgb')));run(read('surface-detail.js'));run(read('maps.js'));run(worldSource.slice(worldSource.indexOf('const CTRL=')));
+ run(core.slice(0,core.indexOf('function hexToRgb')));run(read('surface-detail.js'));run(read('maps.js'));run(worldSource.slice(worldSource.indexOf('const CTRL=')));run(read('immersion.js'));
  const counts={},signatures=new Set();let priorSceneCount;
  for(const id of ['cherry','stormforge','canopy','cherry']){
   let geometryDisposals=0,materialDisposals=0,textureDisposals=0,ownedGeos=new Set(),ownedMats=new Set(),ownedTextures=new Set();
@@ -75,6 +75,6 @@ const index=fs.readFileSync(path.join(base,'index.html'),'utf8');
 const resources=[...index.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]).filter(x=>!/^https?:|^#|^data:/.test(x));
 for(const resource of resources)assert.ok(fs.statSync(path.join(base,resource.split('?')[0])).size>0,'nonempty UI resource '+resource);
 const scripts=[...index.matchAll(/<script\b[^>]*src="([^"]+)"/g)].map(m=>m[1]);
-for(const [a,b] of [['maps.js','world.js'],['core.js','kart-materials.js'],['kart-materials.js','vehicles.js'],['world.js','vehicles.js'],['vehicles.js','item-art.js'],['item-art.js','game.js']])assert.ok(scripts.includes(a)&&scripts.includes(b)&&scripts.indexOf(a)<scripts.indexOf(b),'runtime dependency '+a+' before '+b);
+for(const [a,b] of [['maps.js','world.js'],['world.js','immersion.js'],['immersion.js','vehicles.js'],['core.js','kart-materials.js'],['kart-materials.js','vehicles.js'],['world.js','vehicles.js'],['vehicles.js','item-art.js'],['item-art.js','game.js']])assert.ok(scripts.includes(a)&&scripts.includes(b)&&scripts.indexOf(a)<scripts.indexOf(b),'runtime dependency '+a+' before '+b);
 const css=fs.readFileSync(path.join(base,'polish.css'),'utf8');for(const match of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g)){if(!/^(?:data:|https?:)/.test(match[1]))assert.ok(fs.statSync(path.join(base,match[1])).size>0,'CSS artwork '+match[1]);}
 console.log('PASS UI resource resolution and runtime script order');
