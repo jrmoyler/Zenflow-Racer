@@ -61,112 +61,24 @@ function kmNormalFromHeight(hc,strength){
 
 // ---------- Division livery (colour / roughness / height modes share one layout) ----------
 function kmLivery(div,mode,S){
-  const cv=kmCanvas(S,S);if(!cv)return null;const {g}=cv,W=S,H=S,color=mode==='color',rough=mode==='rough';
-  const acc=div.acc,acc2=div.acc2,id=div.id;
-  const idx=(typeof ROSTER!=='undefined'&&ROSTER.findIndex?ROSTER.findIndex(d=>d.id===id):-1),order=idx>=0?idx:KART_ORDER.indexOf(id);
-  const number=String((order>=0?order:0)+1).padStart(2,'0');
-  // Mode palettes: colour is the livery; rough stores roughness in grey (G channel); height stores relief.
-  const P=color?{base:kmMix('#F1F5F9',acc2,id==='aether'?.3:.1),acc,acc2,dark:'#1B2230',under:'rgba(38,44,54,.85)',seam:'rgba(18,26,40,.42)',rivet:'rgba(24,32,46,.6)',rivetHi:'rgba(255,255,255,.7)',badge:id==='vector'?acc2:'#F8FAFC',ring:'rgba(20,28,40,.5)',text:id==='vector'?acc:'#111827'}
-    :rough?{base:'#333333',acc:'#4f4f4f',acc2:'#4b4b4b',dark:'#5c5c5c',under:'#8c8c8c',seam:'#7a7a7a',rivet:'#6c6c6c',rivetHi:'#6c6c6c',badge:'#585858',ring:'#707070',text:'#606060'}
-    :{base:'#808080',acc:'#878787',acc2:'#878787',dark:'#858585',under:'#7c7c7c',seam:'#3c3c3c',rivet:'#b0b0b0',rivetHi:'#b0b0b0',badge:'#8a8a8a',ring:'#5a5a5a',text:'#8e8e8e'};
-  const X=u=>u*W,Y=v=>(1-v)*H;
-  const rectUV=(u0,v0,u1,v1,fill)=>{const a=Math.min(u0,u1),b=Math.max(u0,u1);g.fillStyle=fill;g.fillRect(X(a),Y(v1),X(b)-X(a),Y(v0)-Y(v1));};
-  const polyUV=(pts,fill,stroke,lw)=>{g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.closePath();if(fill){g.fillStyle=fill;g.fill();}if(stroke){g.strokeStyle=stroke;g.lineWidth=lw||2;g.stroke();}};
-  const lineUV=(pts,stroke,lw)=>{g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.strokeStyle=stroke;g.lineWidth=lw;g.stroke();};
-  const dot=(u,v,r,fill)=>{g.fillStyle=fill;g.beginPath();g.arc(X(u),Y(v),r,0,Math.PI*2);g.fill();};
-  const wrap=fn=>{for(const dx of [-2,-1,0,1]){g.save();g.translate(dx*W,0);fn();g.restore();}};
-  const mirror=fn=>{fn(u=>u);fn(u=>1-u);};
-  g.lineCap='round';g.lineJoin='round';
-  g.fillStyle=P.base;g.fillRect(0,0,W,H);
-  if(color)kmFleck(g,W,H,.09);else if(rough)kmFleck(g,W,H,.14);
-  // ---- Authored stripe language per division ----
-  wrap(()=>{switch(id){
-    case 'zenflow':{ // cyan lattice over pearl, pale rear wedge
-      rectUV(-.035,0,.035,1,P.acc);
-      mirror(m=>{polyUV([[m(.05),.78],[m(.45),.7],[m(.45),1],[m(.05),1]],color?kmAlpha(acc2,.7):P.acc2);
-        g.lineWidth=Math.max(1.2,S/220);g.strokeStyle=color?kmAlpha(acc,.42):P.acc;
-        for(let k=-4;k<12;k++){const v=k*.085;lineUV([[m(.07),v],[m(.43),v+.36]],g.strokeStyle,g.lineWidth);lineUV([[m(.43),v],[m(.07),v+.36]],g.strokeStyle,g.lineWidth);}
-        for(let k=0;k<11;k++)for(let j=0;j<3;j++)dot(m(.11+j*.14),.08+k*.085,S*.006,color?acc2:P.acc2);});
-      break;}
-    case 'collective':{ // bronze tourer pinstripes on emerald
-      rectUV(-.07,0,.07,1,P.acc);rectUV(-.082,0,-.07,1,P.acc2);rectUV(.07,0,.082,1,P.acc2);
-      rectUV(.36,0,.64,1,color?kmMix(acc,'#000000',.25):P.acc);
-      mirror(m=>{rectUV(m(.19),0,m(.197),1,P.acc2);rectUV(m(.31),0,m(.317),1,P.acc2);polyUV([[m(.1),0],[m(.4),0],[m(.4),.13],[m(.1),.07]],P.acc2);});
-      break;}
-    case 'hybrid':{ // sky-blue / orange split with a pearl spine
-      rectUV(.07,0,.44,1,P.acc2);rectUV(.56,0,.93,1,P.acc);
-      rectUV(.44,0,.56,1,P.dark);
-      mirror(m=>{rectUV(m(.055),0,m(.07),1,color?'#0B1120':P.dark);polyUV([[m(.07),.6],[m(.44),.52],[m(.44),.56],[m(.07),.65]],color?'#F8FAFC':P.base);});
-      break;}
-    case 'nexus':{ // amber turbine hazard bands front and rear
-      rectUV(-.05,0,.05,1,P.acc);
-      for(const [v0,v1] of [[.06,.2],[.72,.86]])for(let k=0;k<10;k++){const u=k*.1;polyUV([[u,v0],[u+.05,v0],[u+.11,v1],[u+.06,v1]],k%2?P.dark:P.acc);}
-      mirror(m=>{rectUV(m(.3),0,m(.36),1,color?kmAlpha(acc2,.8):P.acc2);});
-      break;}
-    case 'kinetic':{ // twin green racing stripes, dark sills, forward swoosh
-      rectUV(-.075,0,-.02,1,P.acc);rectUV(.02,0,.075,1,P.acc);
-      rectUV(.33,0,.67,1,P.dark);
-      mirror(m=>{rectUV(m(.325),0,m(.335),1,color?acc2:P.acc2);polyUV([[m(.1),.55],[m(.42),.3],[m(.42),.42],[m(.1),.68]],P.acc);});
-      break;}
-    case 'juris':{ // gold armour bands with riveted steel edges
-      if(color){g.fillStyle=kmAlpha(acc,.08);g.fillRect(0,0,W,H);}
-      rectUV(.34,0,.66,1,P.acc2);rectUV(-.03,0,.03,1,P.acc);
-      for(const v0 of [.14,.46,.78]){rectUV(0,v0,1,v0+.09,P.acc);rectUV(0,v0-.009,1,v0,color?'#5C4A1E':P.dark);rectUV(0,v0+.09,1,v0+.099,color?'#5C4A1E':P.dark);
-        for(let k=0;k<20;k++){dot(k*.05+.025,v0+.02,S*.006,color?'#6B5525':P.rivet);dot(k*.05+.025,v0+.07,S*.006,color?'#6B5525':P.rivet);}}
-      break;}
-    case 'signal':{ // red speed chevrons pointing forward, red nose ring
-      rectUV(0,0,1,.1,P.acc);polyUV([[-.06,1],[.06,1],[.015,.1],[-.015,.1]],P.acc);rectUV(.38,0,.62,1,P.dark);
-      mirror(m=>{for(let k=0;k<5;k++){const v=.2+k*.12;polyUV([[m(.08),v+.06],[m(.25),v],[m(.42),v+.06],[m(.42),v+.1],[m(.25),v+.04],[m(.08),v+.1]],k%2?P.acc:P.dark);}});
-      break;}
-    case 'loom':{ // woven purple lattice on the flanks, pale spine
-      rectUV(-.05,0,.05,1,P.acc2);rectUV(-.058,0,-.05,1,P.acc);rectUV(.05,0,.058,1,P.acc);rectUV(.4,0,.6,1,P.dark);
-      mirror(m=>{for(let i=0;i<6;i++)for(let j=0;j<14;j++){const u0=.1+i*.05,v0=.15+j*.05,warp=(i+j)%2;rectUV(m(u0)+(m(1)-m(0))*.002,v0+.002,m(u0+.05)-(m(1)-m(0))*.002,v0+.048,warp?P.acc:P.acc2);
-        if(color){g.strokeStyle=warp?kmAlpha(acc2,.5):kmAlpha(acc,.5);g.lineWidth=1;for(let k=1;k<4;k++){const t=k/4;g.beginPath();if(warp){g.moveTo(X(m(u0)),Y(v0+t*.05));g.lineTo(X(m(u0+.05)),Y(v0+t*.05));}else{g.moveTo(X(m(u0+t*.05)),Y(v0));g.lineTo(X(m(u0+t*.05)),Y(v0+.05));}g.stroke();}}}});
-      break;}
-    case 'vector':{ // navy aircraft belly, steel top, cheat line and stencil ticks
-      rectUV(.28,0,.72,1,P.acc2);rectUV(-.12,0,.12,1,P.acc);
-      mirror(m=>{rectUV(m(.272),0,m(.283),1,color?'#309DFF':P.acc);for(let k=0;k<12;k++)rectUV(m(.13),.06+k*.08,m(.15),.068+k*.08,P.acc2);});
-      break;}
-    case 'aether':{ // copper orbit rings on cream, copper spine
-      rectUV(-.04,0,.04,1,P.acc);rectUV(.4,0,.6,1,color?kmMix(acc,'#000000',.3):P.acc);
-      mirror(m=>{const cx=X(m(.25)),cy=Y(.5),R=S*.21;[-.55,.25,1.05].forEach((a,k)=>{g.save();g.translate(cx,cy);g.rotate(a);g.scale(1,.36);g.beginPath();g.arc(0,0,R,0,Math.PI*2);g.restore();g.strokeStyle=P.acc;g.lineWidth=Math.max(2,S/130);g.stroke();
-          const th=.9+k*2.1,lx=Math.cos(th)*R,ly=Math.sin(th)*R*.36; // satellite node sitting on its ring
-          g.fillStyle=color?acc2:P.acc2;g.beginPath();g.arc(cx+lx*Math.cos(a)-ly*Math.sin(a),cy+lx*Math.sin(a)+ly*Math.cos(a),S*.011,0,Math.PI*2);g.fill();});});
-      break;}
-    case 'animus':{ // robotic panel lines with cyan light seams
-      rectUV(-.012,0,.012,1,P.acc);
-      mirror(m=>{rectUV(m(.21),0,m(.216),1,P.acc);const panels=[[.04,.05,.2,.35],[.04,.4,.2,.7],[.04,.75,.2,.95],[.23,.05,.44,.3],[.23,.35,.44,.62],[.23,.66,.44,.95]];
-        panels.forEach(([u0,v0,u1,v1],k)=>{rectUV(m(u0),v0,m(u1),v1,color?(k%2?'#DDE4EC':'#EDF1F5'):P.acc2);polyUV([[m(u0),v0],[m(u1),v0],[m(u1),v1],[m(u0),v1]],null,color?'#3A4250':P.seam,Math.max(1,S/256));
-          polyUV([[m(u0)+.006*(m(1)-m(0)),v0+.006],[m(u1)-.006*(m(1)-m(0)),v0+.006],[m(u1)-.006*(m(1)-m(0)),v1-.006],[m(u0)+.006*(m(1)-m(0)),v1-.006]],null,color?kmAlpha(acc,.75):P.acc,Math.max(1,S/300));});});
-      break;}
-    case 'helix':{ // teal/orange helix ribbons winding around the body
-      rectUV(.4,0,.6,1,color?kmMix(acc,'#000000',.35):P.dark);
-      [[P.acc,0],[P.acc2,.5]].forEach(([col,ph])=>{const pts=[];for(let t=0;t<=1.0001;t+=.02)pts.push([t*2+ph,t]);lineUV(pts,col,S*.05);if(color){const pts2=[];for(let t=0;t<=1.0001;t+=.02)pts2.push([t*2+ph,t]);lineUV(pts2,'rgba(255,255,255,.35)',S*.008);}});
-      break;}
-  }});
-  // ---- Shared coachwork detail: underbody, seams, rivets ----
-  rectUV(.455,0,.545,1,P.under);
-  g.lineWidth=Math.max(1,S/300);
-  for(const v of [.1,.42,.58,.9])lineUV([[0,v],[1,v]],P.seam,g.lineWidth);
-  wrap(()=>mirror(m=>{lineUV([[m(.11),0],[m(.11),1]],P.seam,g.lineWidth);lineUV([[m(.39),0],[m(.39),1]],P.seam,g.lineWidth);lineUV([[m(.05),.19],[m(.45),.22]],P.seam,g.lineWidth);lineUV([[m(.05),.81],[m(.45),.78]],P.seam,g.lineWidth);
-    for(let k=0;k<20;k++){const v=.025+k*.05;for(const u of [.115,.385]){dot(m(u),v,S*.0055,P.rivet);if(color)dot(m(u)-(m(1)-m(0))*.0018,v+.0018,S*.002,P.rivetHi);}}}));
-  // ---- Division mark, racing number, code and sponsor text on both flanks ----
-  let mark=null;if(color&&typeof texMark==='function'){try{mark=texMark(div.mark,acc,acc2,Math.min(256,S/2));}catch(e){mark=null;}}
-  const ms=S*.15,font=(w,px,mono)=>`${w} ${px}px ${mono?'"JetBrains Mono",monospace':'"Space Grotesk",system-ui,sans-serif'}`;
-  g.textAlign='center';g.textBaseline='middle';
-  for(const side of [1,-1]){ // right flank reads forward; left flank is the mirror of that frame
-    const cx=X(side>0?.25:.75),cy=Y(.5);g.save();g.setTransform(0,side,side,0,cx,cy);
-    g.fillStyle=P.badge;g.beginPath();g.arc(0,0,ms*.6,0,Math.PI*2);g.fill();g.strokeStyle=P.ring;g.lineWidth=Math.max(1,S/200);g.stroke();
-    if(mark)g.drawImage(mark,-ms/2,-ms/2,ms,ms);else if(color){g.fillStyle=acc;g.beginPath();g.arc(0,0,ms*.3,0,Math.PI*2);g.fill();}
-    g.fillStyle=color?acc:P.text;g.font=font(800,S*.11);g.fillText(number,S*.19,0);
-    if(color){g.strokeStyle=P.text;g.lineWidth=Math.max(1,S/400);g.strokeText?g.strokeText(number,S*.19,0):0;}
-    g.fillStyle=P.text;g.font=font(700,S*.03,true);g.fillText(div.code,-S*.17,-S*.02);
-    g.font=font(600,S*.019);g.fillText('COLLECTIVE AI',-S*.17,S*.02);g.fillText('COLLECTIVE AI',S*.19,S*.07);
-    g.restore();
-  }
-  // Nose top: number and code read correctly from the chase camera (upside-down in canvas space).
-  for(const dx of [0,W]){g.save();g.setTransform(1,0,0,-1,dx,Y(.58));g.fillStyle=P.text;g.font=font(800,S*.085);g.fillText(number,0,0);g.font=font(700,S*.026,true);g.fillText(div.code,0,-S*.075);g.restore();}
-  if(color)kmFleck(g,W,H,.04);
+  const cv=kmCanvas(S,S);if(!cv)return null;const {g}=cv;
+  const color=mode==='color',rough=mode==='rough',id=div.id;
+  g.fillStyle=color?'#F1F5FA':rough?'#484848':'#808080';g.fillRect(0,0,S,S);
+  if(color)kmFleck(g,S,S,.025);
+  // The approved skins show pearl shells and continuous colored inlays, not an
+  // all-over sponsor wrap. These UV panels stay subordinate to sculpted coachwork.
+  const accent=color?div.acc:rough?'#505050':'#848484';
+  const trim=color?(['collective','juris','aether','hybrid','helix'].includes(id)?div.acc2:'#DCEBF6'):rough?'#454545':'#838383';
+  const widths={zenflow:.055,collective:.10,hybrid:.035,nexus:.04,kinetic:.045,juris:.065,signal:.07,loom:.028,vector:.08,aether:.04,animus:.022,helix:.026};
+  const width=widths[id]||.04;
+  g.fillStyle=accent;g.fillRect(0,0,S*width,S);g.fillRect(S*(1-width),0,S*width,S);
+  for(const x of[.17,.83]){g.strokeStyle=trim;g.lineWidth=S*.012;g.beginPath();g.moveTo(S*x,0);g.lineTo(S*(x+.035),S*.35);g.lineTo(S*x,S);g.stroke();}
+  // Subtle panel seams give a physical scale cue without striping every fender.
+  g.strokeStyle=color?'rgba(35,55,75,.18)':rough?'#656565':'#686868';g.lineWidth=Math.max(1,S/512);
+  for(const y of[.12,.88]){g.beginPath();g.moveTo(S*.1,S*y);g.lineTo(S*.4,S*y);g.moveTo(S*.6,S*y);g.lineTo(S*.9,S*y);g.stroke();}
+  g.fillStyle=color?'#52657B':rough?'#777777':'#808080';g.textAlign='center';g.font=`600 ${S*.022}px sans-serif`;
+  g.fillText(String(KART_ORDER.indexOf(id)+1).padStart(2,'0'),S*.25,S*.74);g.fillText(div.code,S*.75,S*.74);
+  g.font=`500 ${S*.012}px sans-serif`;g.fillText('COLLECTIVE AI',S*.75,S*.77);
   return cv;
 }
 
@@ -213,7 +125,7 @@ function kmPanel(mode,S){
   const cv=kmCanvas(S,S);if(!cv)return null;const {g}=cv,em=mode==='emissive',r=S/14;
   g.fillStyle=em?'#000000':'#F4F4F4';g.fillRect(0,0,S,S);
   if(em){const gr=g.createRadialGradient(S/2,S/2,0,S/2,S/2,S*.5);gr.addColorStop(0,'rgba(255,255,255,.35)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,S,S);}
-  g.strokeStyle=em?'rgba(255,255,255,.55)':'#B9B9B9';g.lineWidth=Math.max(1,S/170);
+  g.strokeStyle=em?'rgba(255,255,255,.15)':'#E5E5E5';g.lineWidth=Math.max(1,S/170);
   for(let y=0;y<S+r;y+=r*1.5)for(let x=0;x<S+r;x+=r*1.732){const ox=(Math.round(y/(r*1.5))%2)*r*.866;g.beginPath();for(let i=0;i<6;i++){const a=i/6*Math.PI*2+Math.PI/6;const px=x+ox+Math.cos(a)*r*.9,py=y+Math.sin(a)*r*.9;i?g.lineTo(px,py):g.moveTo(px,py);}g.closePath();g.stroke();
     g.fillStyle=em?'rgba(255,255,255,.9)':'#D0D0D0';g.beginPath();g.arc(x+ox,y,Math.max(1,S/120),0,Math.PI*2);g.fill();}
   return cv;
@@ -257,11 +169,11 @@ function kartMaterials(div){
   const color=new THREE.Color(div.id==='vector'?'#309DFF':div.acc),light=color.clone().lerp(new THREE.Color(0xc8ffff),.38);
   const T=kartTextures(div),side=THREE.DoubleSide,v2=(x)=>new THREE.Vector2(x,x);
   const metalTint=['collective','juris','aether','helix','hybrid'].includes(div.id)?(div.id==='juris'?'#C9A84C':div.id==='collective'?'#BE813B':'#EE8B36'):'#708CA3';
-  const white=new THREE.MeshPhysicalMaterial({color:T.livery?0xffffff:0xeaf5ff,map:T.livery,roughnessMap:T.liveryRough,roughness:T.liveryRough?1:.2,normalMap:T.liveryNormal,normalScale:v2(.55),metalness:.08,clearcoat:1,clearcoatRoughness:.12,side});
+  const white=new THREE.MeshPhysicalMaterial({color:T.livery?0xffffff:0xeaf5ff,map:T.livery,roughnessMap:T.liveryRough,roughness:T.liveryRough?1:.2,normalMap:T.liveryNormal,normalScale:v2(.18),metalness:.22,envMapIntensity:1.1,clearcoat:1,clearcoatRoughness:.12,side});
   const dark=new THREE.MeshStandardMaterial({color:T.carbon?0xffffff:0x142943,map:T.carbon,normalMap:T.carbonNormal,normalScale:v2(.5),metalness:.15,roughness:.35,side});
-  const panel=new THREE.MeshPhysicalMaterial({color:color.clone(),map:T.panel,emissive:color,emissiveMap:T.panelEm,emissiveIntensity:T.panelEm?.5:.15,roughness:.2,metalness:.25,clearcoat:1,side});
+  const panel=new THREE.MeshPhysicalMaterial({color:color.clone(),map:T.panel,emissive:color,emissiveMap:T.panelEm,emissiveIntensity:.08,roughness:.19,metalness:.38,envMapIntensity:1.2,clearcoat:1,side});
   const glow=new THREE.MeshStandardMaterial({color:light,emissive:light,emissiveMap:T.glowEm,emissiveIntensity:1.7,roughness:.2,side});
-  const skin=new THREE.MeshPhysicalMaterial({color,emissive:color,emissiveMap:T.skinEm,emissiveIntensity:T.skinEm?.5:.18,roughness:.18,metalness:.3,clearcoat:1,transparent:true,opacity:.91,depthWrite:true,side});
+  const skin=new THREE.MeshPhysicalMaterial({color,emissive:color,emissiveMap:T.skinEm,emissiveIntensity:.055,roughness:.12,metalness:.42,envMapIntensity:1.35,clearcoat:1,clearcoatRoughness:.08,transparent:false,opacity:1,side});
   const metal=new THREE.MeshPhysicalMaterial({color:metalTint,map:T.metal,roughnessMap:T.metalRough,metalness:.85,roughness:T.metalRough?1:.22,clearcoat:1});
   const tyre=new THREE.MeshStandardMaterial({color:T.tyre?0xffffff:0x1c1d20,map:T.tyre,normalMap:T.tyreNormal,normalScale:v2(.8),roughness:.85,metalness:0});
   return {white,dark,panel,glow,skin,metal,tyre,color,light};

@@ -9,7 +9,7 @@ const coreSource=readFileSync(path.join(__dirname,'../core.js'),'utf8');
 const roster=vm.runInNewContext(coreSource.match(/const ROSTER = (\[[\s\S]*?\n\]);/)[1]);
 class Vec {constructor(x=0,y=0,z=0){Object.assign(this,{x,y,z});} set(x,y,z){Object.assign(this,{x,y,z});return this;} copy(){return this;} clone(){return new Vec();} add(){return this;} addScaledVector(){return this;} multiplyScalar(){return this;} normalize(){return this;} lerp(){return this;} applyAxisAngle(){return this;}}
 const elements=new Map(),listeners={};
-function element(id){if(!elements.has(id)){const classes=new Set();elements.set(id,{id,textContent:'',innerHTML:'',className:'',style:{setProperty(k,v){this[k]=v;}},dataset:{},classList:{add:(...x)=>x.forEach(v=>classes.add(v)),remove:(...x)=>x.forEach(v=>classes.delete(v)),contains:x=>classes.has(x),toggle:noop},querySelector:x=>element(id+x),querySelectorAll:()=>[],getContext:()=>new Proxy({},{get:(t,k)=>k in t?t[k]:noop,set:(t,k,v)=>{t[k]=v;return true;}}),addEventListener:noop,setAttribute:noop,focus:noop,setPointerCapture:noop});}return elements.get(id);}
+function element(id){if(!elements.has(id)){const classes=new Set();elements.set(id,{id,textContent:'',innerHTML:'',className:'',style:{setProperty(k,v){this[k]=v;}},dataset:{},classList:{add:(...x)=>x.forEach(v=>classes.add(v)),remove:(...x)=>x.forEach(v=>classes.delete(v)),contains:x=>classes.has(x),toggle:noop},querySelector:x=>element(id+x),querySelectorAll:()=>[],getContext:()=>new Proxy({},{get:(t,k)=>k in t?t[k]:noop,set:(t,k,v)=>{t[k]=v;return true;}}),events:{},addEventListener(n,fn){this.events[n]=fn;},setAttribute:noop,focus:noop,setPointerCapture:noop,getBoundingClientRect:()=>({left:0,width:150})});}return elements.get(id);}
 const context={console,Math,Set,Map,THREE:{Vector3:Vec},window:{},document:{getElementById:element,querySelectorAll:()=>[],addEventListener:(n,fn)=>{listeners[n]=fn;},hidden:false},navigator:{getGamepads:()=>[]},localStorage:{getItem:()=>null,setItem:noop},performance:{now:()=>100},matchMedia:()=>({matches:false,addEventListener:noop}),addEventListener:(n,fn)=>{listeners[n]=fn;},requestAnimationFrame:noop,setTimeout:()=>1,clearTimeout:noop,innerWidth:1400,innerHeight:900,devicePixelRatio:1,scene:{add:noop,remove:noop},rng:()=>.99,lerp:(a,b,t)=>a+(b-a)*t,clamp:(v,a,b)=>Math.max(a,Math.min(b,v)),wrap01:v=>((v%1)+1)%1,track:{len:1000},TRACK_W:16,trackAG:()=>0,trackCurv:()=>0,orientOnTrack:noop,trackPoint:noop,trackTan:noop,trackUp:noop,trackRight:noop,_p:new Vec(),_v1:new Vec(),_v2:new Vec(),_v3:new Vec(),noiseHit:noop,SFX:new Proxy({},{get:()=>noop}),AUDIO:{on:false},audioInit:noop,audioUpdate:noop,ROSTER:roster,STAT_NAMES:[],itemBoxes:[],tokens:[],mines:[],missiles:[],sparksBlue:{emit:noop},sparksOrange:{emit:noop},sparksPink:{emit:noop},boostFx:{emit:noop},smokeFx:{emit:noop},goldFx:{emit:noop},hitFx:{emit:noop},ordinal:n=>n===1?'st':n===2?'nd':n===3?'rd':'th',renderer:{render:noop},camera:{},world:{traverse:noop},ITEMS:{burst:{name:'SIGNAL BURST'},shield:{name:'AEGIS SHIELD'},mine:{name:'LOOM MINE'},missile:{name:'VECTOR MISSILE'},pulse:{name:'OVERSEER PULSE'},triple:{name:'NODE CLUSTER'}},itemIconSVG:()=>''};
 // Minimal kart rig matching the vehicles.js contract (named nodes with {x,y,z} transforms) so stepRacer -> animateKart runs headless.
 const node=(name,x=0,y=0,z=0)=>({name,position:new Vec(x,y,z),rotation:new Vec(),scale:new Vec(1,1,1),material:{},visible:true,children:[],parent:null,getWorldPosition:v=>v,traverse(fn){fn(this);this.children.forEach(c=>c.traverse(fn));},add(...list){list.forEach(o=>{this.children.push(o);o.parent=this;});return this;}});
@@ -148,6 +148,25 @@ test('HUD update runs headless with the new elements: gap readout, speed bar, wr
  racer();opponent('zenflow',.01);run('r.isPlayer=true;r.speed=30;o.progress=r.progress+.01;game.rankTick=0;updateRanks(true);updateHUD(.05)');assert.match(element('ranks').innerHTML,/class="gap">▲ \+\d+\.\ds/);assert.equal(element('speedbar').className,'');assert.equal(element('tP').textContent,'POWER');
  run('r.speed=-5;r.wrongT=.5;updateHUD(.05)');assert.equal(element('wrong').style.display,'none','no warning inside the first second');run('r.wrongT=1.2;updateHUD(.05)');assert.equal(element('wrong').style.display,'block');
  run('r.specialCooldown=5;r.boost=1;r.roulette=.7;updateHUD(.05)');assert.equal(element('tP').textContent,'5s');assert.equal(element('speedbar').className,'boost');assert.equal(element('item').style['--spin'],'0.500');run('r.roulette=0;r.boost=0;updateHUD(.05)');assert.equal(element('item').style['--spin'],'0');});
+test('Analog steering clamps travel, ignores other fingers and releases on cancellation',()=>{
+ racer();run('r.isPlayer=true;resetInput()');const el=element('tSteer'),ev=(pointerId,clientX)=>({pointerId,clientX,preventDefault:noop});
+ el.events.pointerdown(ev(1,120));assert.ok(run('touchSteer')>.8);el.events.pointermove(ev(2,0));assert.ok(run('touchSteer')>.8);
+ el.events.pointermove(ev(1,-100));assert.equal(run('touchSteer'),-1);el.events.pointercancel(ev(1,0));assert.equal(run('touchSteer'),0);
+ el.events.pointerdown(ev(3,76));assert.equal(run('touchSteer'),0,'center dead zone');run('pause()');assert.equal(run('touchSteer'),0);assert.equal(run('steerPointer'),null);
+});
+test('Two fingers on the same action do not release one another',()=>{
+ racer();run('resetInput()');const el=element('tD'),ev=pointerId=>({pointerId,preventDefault:noop});
+ el.events.pointerdown(ev(1));el.events.pointerdown(ev(2));el.events.pointerup(ev(1));assert.equal(run('input.drift'),true);
+ el.events.lostpointercapture(ev(2));assert.equal(run('input.drift'),false);assert.equal(run('activeTouchPointers.size'),0);
+});
+test('Touch steering assist is optional and does not override deliberate steering',()=>{
+ racer();run('resetInput();r.isPlayer=true;game.touch=true;game.steeringAssist=true;r.lat=6.5;r.speed=20;stepRacer(r,1/120)');assert.ok(run('r.steer')<0);
+ run('game.steeringAssist=false;r.steer=0;stepRacer(r,1/120)');assert.equal(run('r.steer'),0);
+ run('game.steeringAssist=true;touchSteer=1;stepRacer(r,1/120)');assert.ok(run('r.steer')>0);run('game.touch=false;resetInput()');
+});
+test('Touch drift holds charge a rocket start during the final countdown',()=>{
+ racer();run("r.isPlayer=true;game.touch=true;game.state='countdown';game.countdown=.5;input.drift=true;for(let i=0;i<61;i++)simStep(1/120)");assert.equal(run('game.state'),'race');assert.ok(run('r.boost')>.8);run('game.touch=false;resetInput()');
+});
 require('./effects-regression.cjs')({test,assert});
 require('./kart-materials-regression.cjs')({test,assert});
 require('./racefx-regression.cjs')({test,assert});

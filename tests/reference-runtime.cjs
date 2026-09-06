@@ -18,7 +18,7 @@ for(const mobile of [false,true]){
  const scene=new THREE.Scene();scene.fog=new THREE.Fog(0xffffff,180,780);
  const c={THREE,console,document:{createElement:canvas},FALLBACK_GRAPHICS:true,MOBILEFX:mobile,LOWFX:false,TEX:{finish:new THREE.Texture()},zenWorldTime:{value:0},scene,sun:new THREE.DirectionalLight(),hemi:new THREE.HemisphereLight()};
  vm.createContext(c);const run=code=>vm.runInContext(code,c);
- run(core.slice(0,core.indexOf('function hexToRgb')));run(read('maps.js'));run(worldSource.slice(worldSource.indexOf('const CTRL=')));
+ run(core.slice(0,core.indexOf('function hexToRgb')));run(read('surface-detail.js'));run(read('maps.js'));run(worldSource.slice(worldSource.indexOf('const CTRL=')));
  const counts={},signatures=new Set();let priorSceneCount;
  for(const id of ['cherry','stormforge','canopy','cherry']){
   let geometryDisposals=0,materialDisposals=0,textureDisposals=0,ownedGeos=new Set(),ownedMats=new Set(),ownedTextures=new Set();
@@ -53,7 +53,7 @@ for(const mobile of [false,true]){
    assert.equal(ud.steeringWheel.parent,ud.body);assert.ok(Math.abs(ud.steeringWheel.rotation.x+.7)<1e-6);assert.ok(ud.steeringWheel.children.some(m=>m.isMesh&&m.name==='steering-wheel-rim'));
    assert.equal(ud.exhaust.length,2);assert.ok(ud.exhaust.every((e,i)=>e.isMesh&&e.parent===ud.body&&e.name===(i?'exhaust-r':'exhaust-l')));assert.equal(ud.under.parent,kart);assert.equal(ud.shield.parent,kart);assert.equal(ud.halo.parent,ud.pilot);
    assert.equal(ud.clipNodes.head,ud.head);assert.equal(ud.clipNodes['wheel-fl'],ud.wheels[0].pivot);assert.equal(ud.clipNodes.body,ud.body);assert.equal(Object.keys(ud.clipState.weights).length,8);
-   if(div.id==='kinetic'||div.id==='loom')assert.equal(kart.getObjectByName('hair').parent,ud.head,'hair rides on the head pivot');else assert.equal(names.get('hair'),undefined);
+   assert.equal(names.get('hair'),undefined,'approved driver skins have smooth featureless heads');
    const corners=new Set();for(const w of kart.userData.wheels){assert.equal(w.pivot.parent,kart);assert.equal(w.spin.parent,w.pivot);assert.equal(w.spin.name,'spin');assert.ok(w.spin.children.length>=2);assert.ok(w.glow.isMesh&&w.glow.parent===w.pivot);assert.ok(w.rest.equals(w.pivot.position),'wheel rest position stored');corners.add(`${Math.sign(w.pivot.position.x)},${Math.sign(w.pivot.position.z)}`);}assert.equal(corners.size,4,'one wheel per corner');
    // Showroom animation plus a synthetic additive clip must keep the rig finite, and reset once the clip is gone.
    c.kart=kart;run("globalThis.authoredIdle=KART_CLIPS.clips.idle;KART_CLIPS.clips.idle={duration:1,loop:true,tracks:{torso:{rotation:[[0,0,.5,0],[1,0,.5,0]]},'wheel-rr':{position:[[0,0,.05,0],[1,0,.05,0]]},ghost:{scale:[[0,1,1,1]]}}};resolveKartRig(kart);for(let i=0;i<90;i++)animateShowroomKart(kart,1.2+i/60,1/60)");

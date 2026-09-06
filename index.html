@@ -143,6 +143,7 @@ html[data-touch="on"] #tS{display:none}
 @media (max-height:520px){#pos .n{font-size:56px}#mini{width:110px;height:110px}#item{width:66px;height:66px}#item .ic{width:44px;height:44px}}
 </style>
 <link rel="stylesheet" href="polish.css">
+<link rel="stylesheet" href="reference-polish.css">
 </head>
 <body>
 <canvas id="gl" aria-label="ZenFlow racing circuit"></canvas>
@@ -178,7 +179,7 @@ html[data-touch="on"] #tS{display:none}
   <div class="selector-heading"><span>CHOOSE YOUR DIRECTOR</span><span>← → ARROWS OR SWIPE TO EXPLORE</span></div>
   <div id="grid" aria-label="Select a racing director"></div>
   <div class="menu-tools"><button id="title-return" type="button">← Title</button><button id="open-art" type="button">Division collection ↗</button></div>
-  <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>
+  <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>
   <div id="footer">
     <div id="pick">Choose a director to join the grid</div>
     <div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div>
@@ -205,7 +206,7 @@ html[data-touch="on"] #tS{display:none}
   <div id="count"></div><div id="countmap" class="mono" aria-hidden="true"></div>
   <div id="wrong">WRONG WAY</div>
 </div>
-<div id="touch"><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate director power">POWER</button></div>
+<div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate director power">POWER</button></div>
 
 <div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">SYNERGY GRAND PRIX</div><h2>Race paused.</h2><p>Take a breath. Your race is right where you left it.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
 
@@ -224,10 +225,12 @@ html[data-touch="on"] #tS{display:none}
 <script src="kart-materials.js"></script>
 <script src="kart-clips.js"></script>
 <script src="fallback-renderer.js"></script>
+<script src="surface-detail.js"></script>
 <script src="maps.js"></script>
 <script src="world.js"></script>
 <script src="postfx.js"></script>
 <script src="vehicles.js"></script>
+<script src="item-models.js"></script>
 <script src="item-art.js"></script>
 <script src="racefx.js"></script>
 <script src="effects.js"></script>
