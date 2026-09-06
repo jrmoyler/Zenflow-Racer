@@ -51,7 +51,7 @@ function spawnRace(playerDiv){
   for(let i=0;i<12;i++){if(i===playerGrid){game.player=new Racer(playerDiv,true,i);game.racers.push(game.player);}else{game.racers.push(new Racer(order[k++],false,i));}}
   resetInput();lastItemKey=null;simStep.lastN=null;acc=0;
   game.raceTime=0;game.countdown=3.6;game.state='countdown';game.finishTimer=0;game.trauma=0;
-  camState.init=false;updateRanks(true);hud.item.querySelector('.ic').innerHTML='';hud.item.querySelector('.lbl').textContent='';setToast('');
+  camState.init=false;updateRanks(true);hud.item.querySelector('.ic').innerHTML='';hud.item.querySelector('.lbl').textContent='NO ITEM';setToast('');updateHUD.lastRank=0;
   showTouch();
 }
 
@@ -222,7 +222,6 @@ function stepAI(r,dt){
   // rubber band relative to player
   const p=game.player;const diff=p.progress-r.progress;
   const band=[.55,.85,.7][game.diff],base=[.88,.965,1.04][game.diff];
-  r.boostMult=Math.max(r.boostMult, r.boost>0?r.boostMult:1)* (r.boost>0?1:1);
   r.rubber=clamp(base+diff*band,.84,1.16);
 }
 
@@ -278,7 +277,7 @@ let lastItemKey=null;
 function updateHUD(dt){
   const p=game.player;if(!p)return;
   game.rankTick-=dt;updateRanks(false);if(game.rankTick<=0)game.rankTick=.3;
-  hud.pos.querySelector('.n').textContent=p.rank;hud.pos.querySelector('.o').textContent=ordinal(p.rank);hud.pos.className=p.rank===1?'p1':p.rank>=9?'pl':'';
+  hud.pos.querySelector('.n').textContent=p.rank;hud.pos.querySelector('.o').textContent=ordinal(p.rank);if(p.rank!==updateHUD.lastRank){updateHUD.lastRank=p.rank;updateHUD.bump=.35;}updateHUD.bump=Math.max(0,(updateHUD.bump||0)-dt);hud.pos.className=(p.rank===1?'p1':p.rank>=9?'pl':'')+(updateHUD.bump>0?' bump':'');
   hud.lap.textContent=p.finished?'FINISH':`LAP ${Math.min(p.lap,game.laps)}/${game.laps}`;hud.tok.textContent=p.tokens;
   hud.speedo.querySelector('b').textContent=Math.round(Math.max(0,p.speed)*3.1);
   hud.timer.textContent=fmtTime(p.finished?p.finishTime:game.raceTime);hud.wrong.style.display=p.wrongWay?'block':'none';
@@ -286,7 +285,7 @@ function updateHUD(dt){
   const ic=hud.item.querySelector('.ic'),lbl=hud.item.querySelector('.lbl');
   if(p.roulette>0){p.rouletteTick-=dt;if(p.rouletteTick<=0){p.rouletteTick=.07+ (1.4-p.roulette)*.08;const keys=Object.keys(ITEMS);const k=keys[Math.floor(rng()*keys.length)];ic.innerHTML=itemIconSVG(k);lbl.textContent='';SFX.ui();}}
   else if(p.item){const key=p.item+(p.tripleLeft||'');if(key!==lastItemKey){ic.innerHTML=itemIconSVG(p.item);lbl.textContent=ITEMS[p.item].name+(p.tripleLeft?` ×${p.tripleLeft}`:'');lastItemKey=key;}}
-  else if(lastItemKey!==null){ic.innerHTML='';lbl.textContent='';lastItemKey=null;}
+  else if(lastItemKey!==null){ic.innerHTML='';lbl.textContent='NO ITEM';lastItemKey=null;}
   const drift=document.getElementById('driftmeter');if(drift){drift.hidden=!p.drifting;drift.style.setProperty('--charge',Math.min(100,p.driftTime/3*100)+'%');drift.dataset.tier=p.driftTier;drift.textContent=p.driftTier?['','BLUE BOOST','GOLD BOOST','ULTRA BOOST'][p.driftTier]+' · RELEASE': 'DRIFT · HOLD TO CHARGE';}
   const special=document.getElementById('specialHUD');if(special&&typeof ABILITIES!=='undefined'){const ability=ABILITIES[p.div.id];const specialLabel=document.getElementById('specialLabel');if(specialLabel)specialLabel.textContent=ability.name+' · '+(p.specialCooldown>0?Math.ceil(p.specialCooldown)+'s':'Q / Y · READY');special.dataset.ready=p.specialCooldown>0?'false':'true';special.style.setProperty('--ready',Math.max(0,1-p.specialCooldown/ability.cooldown));}
   drawMini();
@@ -414,22 +413,59 @@ function boot(){
 }
 if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('800 20px "Space Grotesk"'),document.fonts.load('400 12px "JetBrains Mono"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
 
-// Isolated selection showroom: the same kart geometry used in the race.
-let previewScene=null,previewCamera=null,previewKart=null,previewAngle=-.55;
+// Isolated selection showroom: the same kart geometry used in the race, presented
+// on a holographic turntable that completes full 360° turns and can be spun by hand.
+let previewScene=null,previewCamera=null,previewKart=null,previewStage=null,previewAngle=-.55;
+const previewSpin={velocity:0,dragging:false,lastX:0,pointer:null};
 function disposePreview(){if(previewKart){previewScene.remove(previewKart);if(typeof disposeKart==='function')disposeKart(previewKart);previewKart=null;}}
+function buildPreviewStage(){
+ previewScene=new THREE.Scene();previewCamera=new THREE.PerspectiveCamera(30,1,.1,80);
+ previewScene.add(new THREE.HemisphereLight(0xdff6ff,0x55688c,.72));
+ const key=new THREE.DirectionalLight(0xfff3ea,1.05);key.position.set(-4,7,-6);previewScene.add(key);
+ const fill=new THREE.DirectionalLight(0xbfe9ff,.35);fill.position.set(6,3,4);previewScene.add(fill);
+ const rim=new THREE.DirectionalLight(0x9effff,.9);rim.position.set(2,4,8);previewScene.add(rim);
+ previewStage=new THREE.Group();previewScene.add(previewStage);
+ // Soft contact shadow keeps the chassis grounded on the pedestal.
+ const c=mkCanvas(128,128),g=c.getContext('2d'),gr=g.createRadialGradient(64,64,4,64,64,64);gr.addColorStop(0,'rgba(8,18,40,.6)');gr.addColorStop(.55,'rgba(8,18,40,.2)');gr.addColorStop(1,'rgba(8,18,40,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+ const shadow=new THREE.Mesh(new THREE.PlaneGeometry(6.6,6.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.004;previewStage.add(shadow);
+ const flat=(geometry,color,opacity,y)=>{const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;mesh.position.y=y;previewStage.add(mesh);return mesh;};
+ const disc=flat(new THREE.CircleGeometry(2.6,64),0x7fe9ff,.14,.002);
+ const ring=flat(new THREE.RingGeometry(2.55,2.72,96),0xa9ffff,.7,.01);
+ const halo=flat(new THREE.RingGeometry(3.05,3.09,96),0xa9ffff,.28,.01);
+ const ticks=new THREE.Group();ticks.rotation.x=-Math.PI/2;ticks.position.y=.012;previewStage.add(ticks);
+ for(let i=0;i<24;i++){const tick=new THREE.Mesh(new THREE.PlaneGeometry(i%6?.05:.1,i%6?.14:.26),ring.material);const a=i/24*Math.PI*2;tick.position.set(Math.cos(a)*2.88,Math.sin(a)*2.88,0);tick.rotation.z=a+Math.PI/2;ticks.add(tick);}
+ previewStage.userData={ring,halo,disc,ticks,rim};
+}
 function updateSelectedPreview(d){
  const power=typeof ABILITIES!=='undefined'?ABILITIES[d.id]:null;
  for(const [id,value] of Object.entries({'selected-power':power?.name||'','selected-description':power?.description||''})){const el=document.getElementById(id);if(el)el.textContent=value;}
 
  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('racerselect',{detail:{division:d,ability:power}}));
  if(typeof THREE.Scene!=='function'||renderer.renderRosterPreview)return;
- disposePreview();if(!previewScene){previewScene=new THREE.Scene();previewCamera=new THREE.PerspectiveCamera(35,1,.1,80);previewScene.add(new THREE.HemisphereLight(0xffffff,0x8595ad,1.8));const key=new THREE.DirectionalLight(0xffffff,2.4);key.position.set(-3,7,-5);previewScene.add(key);}
+ disposePreview();if(!previewScene)buildPreviewStage();
  previewKart=buildKart(d);previewScene.add(previewKart);
+ const accent=new THREE.Color(d.id==='vector'?'#309DFF':d.acc);
+ previewStage.userData.rim.color.copy(accent).lerp(new THREE.Color(0xffffff),.35);
+ previewStage.userData.disc.material.color.copy(accent).lerp(new THREE.Color(0x7fe9ff),.5);
+ previewSpin.velocity=0;
 }
-function renderSelectedPreview(dt){const el=document.getElementById('kart-preview');if(!el||!selected)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
- if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect);return;}
+function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previewSpin.velocity+delta*6,-9,9);}
+(()=>{const el=document.getElementById('kart-preview');if(!el||!el.addEventListener)return;
+ el.addEventListener('pointerdown',e=>{if((e.button!==0&&e.pointerType==='mouse')||e.target?.closest?.('button'))return;previewSpin.dragging=true;previewSpin.pointer=e.pointerId;previewSpin.lastX=e.clientX;previewSpin.velocity=0;el.setPointerCapture?.(e.pointerId);el.classList.add('dragging');});
+ el.addEventListener('pointermove',e=>{if(!previewSpin.dragging||e.pointerId!==previewSpin.pointer)return;const dx=e.clientX-previewSpin.lastX;previewSpin.lastX=e.clientX;spinPreview(dx*.011);});
+ const release=e=>{if(e.pointerId!==previewSpin.pointer)return;previewSpin.dragging=false;previewSpin.pointer=null;el.classList.remove('dragging');};
+ el.addEventListener('pointerup',release);el.addEventListener('pointercancel',release);el.addEventListener('lostpointercapture',release);
+})();
+function renderSelectedPreview(dt){const el=document.getElementById('kart-preview');if(!el||!selected||!el.getBoundingClientRect)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
+ // Full turntable rotation (about eleven seconds per 360°), plus hand-spun momentum.
+ if(!previewSpin.dragging){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
+ if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
  if(!previewKart||!renderer.setScissor)return;
- previewAngle+=dt*.13;previewKart.rotation.y=previewAngle;previewCamera.aspect=rect.width/rect.height;previewCamera.position.set(6,3.1,-8);previewCamera.lookAt(0,.8,0);previewCamera.updateProjectionMatrix();
+ previewKart.rotation.y=previewAngle;previewKart.position.y=.05+Math.sin(game.time*1.5)*.045;
+ const stage=previewStage.userData;stage.ticks.rotation.z=-previewAngle;stage.ring.material.opacity=.58+Math.sin(game.time*2.2)*.14;stage.halo.rotation.z=game.time*.15;
+ const ud=previewKart.userData;ud.wheels.forEach(w=>{w.glow.material.emissiveIntensity=1.2+Math.sin(game.time*3)*.4;});ud.exhaust.forEach(e=>e.material.emissiveIntensity=1.6);ud.under.material.emissiveIntensity=.9;
+ previewCamera.aspect=rect.width/rect.height;const narrow=rect.width<rect.height*1.15;
+ previewCamera.position.set(5.5,2.9,-7.3).multiplyScalar(narrow?1.45:1.08);previewCamera.lookAt(0,.55,0);previewCamera.updateProjectionMatrix();
  const y=innerHeight-rect.bottom;renderer.setViewport(rect.left,y,rect.width,rect.height);renderer.setScissor(rect.left,y,rect.width,rect.height);renderer.setScissorTest(true);const oldAuto=renderer.autoClear;renderer.autoClear=false;renderer.clearDepth();renderer.render(previewScene,previewCamera);renderer.autoClear=oldAuto;renderer.setScissorTest(false);renderer.setViewport(0,0,innerWidth,innerHeight);
 }
 // Render authentic selection portraits once, reusing one small GPU context.

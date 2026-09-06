@@ -3,7 +3,7 @@
 Reference-driven floating-island arcade racer with three selectable circuits, twelve distinct division chassis, twelve powers, and six illustrated items. See [abilities](docs/abilities.md), [verification](docs/upgrade-verification.md) and the original visual references in references/.
 
 ## Play
-Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. Twelve directors compete across three complete laps. Drift to charge boosts; collect tokens and items.
+Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. The character select shows the selected director's actual race chassis on a 360° holographic turntable: it turns continuously, can be dragged to spin, and the arrow buttons or keyboard arrows step through the roster. Twelve directors compete across three complete laps. Drift to charge boosts; collect tokens and items.
 
 - Keyboard: W/Up accelerate, S/Down brake/reverse, A/D or arrows steer, Shift/Space drift, E/Ctrl use item, Q director power, Escape pause.
 - Touch: automatic acceleration; steering, brake, drift and item buttons. Touch controls can also be enabled manually.

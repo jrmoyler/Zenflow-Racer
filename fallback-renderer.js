@@ -133,16 +133,24 @@ class CanvasRaceRenderer {
     if(typeof ABILITIES==='undefined'||!r.div)return;const ability=ABILITIES[r.div.id];if(!ability)return;
     if(r.specialActive>0||r.phase>0||r.ram>0||r.reflect>0||r.regen>0||r.specialCooldown>ability.cooldown-1.2)this.powerMotif(r.div.id,x,y,size,r.div.acc);
   }
-  renderRosterPreview(division,rect){
+  renderRosterPreview(division,rect,angle=0){
+    // Compatibility turntable: the chassis art pivots through a full 360° on a holographic pedestal.
     if(!division||!rect)return;const c=this.ctx;c.save();c.setTransform(this.ratio,0,0,this.ratio,0,0);
+    const cx=rect.x+rect.width*.5,cy=rect.y+rect.height*.5,turn=Math.cos(angle),facing=Math.max(.06,Math.abs(turn)),mirror=turn<0?-1:1;
+    const px=Math.min(rect.width*.42,rect.height*.5),py=px*.28,baseY=rect.y+rect.height*.82;
+    c.fillStyle='rgba(127,233,255,.16)';c.beginPath();c.ellipse(cx,baseY,px,py,0,0,Math.PI*2);c.fill();
+    c.strokeStyle='rgba(169,255,255,.7)';c.lineWidth=2;c.beginPath();c.ellipse(cx,baseY,px,py,0,0,Math.PI*2);c.stroke();
+    c.strokeStyle='rgba(169,255,255,.3)';c.lineWidth=1;c.beginPath();c.ellipse(cx,baseY,px*1.15,py*1.15,0,0,Math.PI*2);c.stroke();
+    for(let i=0;i<24;i++){const a=i/24*Math.PI*2-angle;c.fillStyle=i%6?'rgba(169,255,255,.5)':'rgba(169,255,255,.9)';c.beginPath();c.arc(cx+Math.cos(a)*px*1.08,baseY+Math.sin(a)*py*1.08,i%6?1.2:2.2,0,Math.PI*2);c.fill();}
     const art=this.referenceKart(division);
+    c.save();c.translate(cx,cy);c.scale(facing*mirror,1);c.translate(-cx,-cy);
     if(art){
-      const scale=Math.min(rect.width*.94/art.w,rect.height*.86/art.h),w=art.w*scale,h=art.h*scale;
-      const x=rect.x+(rect.width-w)/2,y=rect.y+(rect.height-h)/2-8;
+      const scale=Math.min(rect.width*.9/art.w,rect.height*.8/art.h),w=art.w*scale,h=art.h*scale;
+      const x=cx-w/2,y=cy-h/2-6;
       c.save();c.beginPath();c.roundRect(x,y,w,h,16);c.clip();
       c.drawImage(art.image,art.x,art.y,art.w,art.h,x,y,w,h);c.restore();
-    }else this.kart(rect.x+rect.width*.5,rect.y+rect.height*.76,Math.min(rect.width*.53,rect.height*.64),division.acc,0);
-    c.restore();
+    }else this.kart(cx,baseY-py*.4,Math.min(rect.width*.53,rect.height*.64),division.acc,0);
+    c.restore();c.restore();
   }
   render(){
     if(typeof track==='undefined'||!track.len)return;

@@ -5,7 +5,7 @@ function renderRaceScene() {
     raceComposer = new THREE.EffectComposer(renderer);
     raceComposer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
     raceComposer.addPass(new THREE.RenderPass(scene, camera));
-    raceComposer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.48, 0.45, 0.88));
+    raceComposer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.26, 0.4, 0.93));
     raceComposer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
   }
   if (raceComposer) raceComposer.render();
