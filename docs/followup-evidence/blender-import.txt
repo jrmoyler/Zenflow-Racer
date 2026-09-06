@@ -1,0 +1,30 @@
+07:45:41 | INFO: Data are loaded, start creating Blender stuff
+07:45:41 | INFO: Blender create Mesh node zenflow:aegis-shield.001
+07:45:41 | INFO: Blender create Mesh node bonnet-enamel-inlay.008
+07:45:41 | INFO: Blender create Mesh node zenflow:coachwork-batch.003
+07:45:42 | INFO: Blender create Mesh node zenflow:coachwork-batch.004
+07:45:42 | INFO: Blender create Mesh node zenflow:coachwork-batch.005
+07:45:42 | INFO: Blender create Mesh node zenflow:exhaust-l.001
+07:45:42 | INFO: Blender create Mesh node front-undertray-diffuser.001
+07:45:42 | INFO: Blender create Mesh node zenflow:headlight-signature.002
+07:45:42 | INFO: Blender create Mesh node zenflow:headlight-signature.003
+07:45:42 | INFO: Blender create Mesh node zenflow:arm-l-mesh.001
+07:45:42 | INFO: Blender create Mesh node zenflow:shoulder-seam.002
+07:45:42 | INFO: Blender create Mesh node zenflow:arm-r-mesh.001
+07:45:42 | INFO: Blender create Mesh node zenflow:head-mesh.001
+07:45:42 | INFO: Blender create Mesh node zenflow:torso-continuous-anatomy
+07:45:42 | INFO: Blender create Mesh node sculpted-front-fairing--1.003
+07:45:42 | INFO: Blender create Mesh node sculpted-front-fairing-1.003
+07:45:42 | INFO: Blender create Mesh node zenflow:steering-wheel-rim.001
+07:45:42 | INFO: Blender create Mesh node zenflow:underbody-flow-ring.001
+07:45:42 | INFO: Blender create Mesh node zenflow:machined-wheel-spokes.004
+07:45:42 | INFO: Blender create Mesh node zenflow:recessed-colored-hub-concave-dish.001
+07:45:42 | INFO: Blender create Mesh node zenflow:rounded-wheel-shell.001
+07:45:42 | INFO: Blender create Mesh node zenflow:translucent-tire-band.001
+07:45:42 | INFO: Blender create Mesh node zenflow:wheel-light-ring.001
+07:45:42 | INFO: Blender create Mesh node zenflow:machined-wheel-spokes.005
+07:45:42 | INFO: glTF import finished in 0.08s
+VERIFIED_CURRENT_GLB 40
+Blender 4.5.0 (hash 8cb6b388974a built 2025-07-15 01:36:28)
+
+Blender quit

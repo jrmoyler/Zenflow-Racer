@@ -19,7 +19,13 @@ try{
 catch(error){const replacement=canvas.cloneNode(false);canvas.replaceWith(replacement);canvas=replacement;FALLBACK_GRAPHICS=true;renderer=new CanvasRaceRenderer({canvas});document.documentElement.dataset.renderer='canvas';}
 renderer.setPixelRatio(LOWFX?0.7:Math.min(devicePixelRatio,MOBILEFX?1.15:1.6));
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();if(typeof game!=='undefined'&&['race','countdown'].includes(game.state)&&typeof pause==='function')pause();graphicsNotice('The graphics connection was interrupted. Restoring the circuit…',true);});
-canvas.addEventListener('webglcontextrestored',()=>{document.getElementById('graphics-notice')?.remove();});
+canvas.addEventListener('webglcontextrestored',()=>{
+  // Render-target contents do not survive context loss. Re-bake the environment;
+  // retaining its old Texture object would leave metallic drivers black.
+  if(typeof refreshMapEnvironment==='function')refreshMapEnvironment();
+  if(typeof staticFrameDirty!=='undefined')staticFrameDirty=true;
+  document.getElementById('graphics-notice')?.remove();
+});
 renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.82;
 renderer.shadowMap.enabled=!LOWFX&&!MOBILEFX;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();

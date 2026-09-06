@@ -72,9 +72,10 @@ function foliageGeometry(seed,tint){
 
 // Frame-cost adaptation only changes resolution; input / physics stay at 120 Hz.
 const renderBudget={mean:16.7,samples:0,cooldown:240,ratio:0};
+function resetRenderBudget(){renderBudget.mean=16.7;renderBudget.cooldown=240;}
 function updateRenderBudget(milliseconds){
   if(typeof FALLBACK_GRAPHICS==='undefined'||FALLBACK_GRAPHICS||LOWFX||!MOBILEFX||!renderer.setPixelRatio)return;
-  if(milliseconds<4||milliseconds>150)return;
+  if(!Number.isFinite(milliseconds)||milliseconds<4||milliseconds>150)return;
   renderBudget.mean+=(milliseconds-renderBudget.mean)*.035;
   if(--renderBudget.cooldown>0)return;
   const current=renderBudget.ratio||Math.min(devicePixelRatio,1.15);

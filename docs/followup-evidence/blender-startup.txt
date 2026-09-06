@@ -1,0 +1,7 @@
+Blender download: tools/setup-blender.sh downloaded Blender 4.5.0 Linux x64 (358 MiB).
+Startup: blender --version terminated with segmentation fault (exit 139).
+Retry: blender -b --threads 1 --factory-startup --version terminated with exit 139.
+No Blender scene was authored, rendered or exported in this environment.
+Recovery: found complete retained ZenFlow Blender 4.5.0 executable (163508312 bytes versus fresh 88227840).
+Retained executable --version succeeded, build 8cb6b388974a. Blender access is recovered.
+Use ZENFLOW_BLENDER with a verified executable; no reconstruction-gate override was attempted.
