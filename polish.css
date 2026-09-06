@@ -76,6 +76,18 @@ button{touch-action:manipulation}button:focus-visible,.card:focus-visible{outlin
 /* Race feedback: the position counter pulses whenever the player gains or loses a place. */
 #pos.bump .n{animation:posbump .35s ease-out}@keyframes posbump{0%{transform:scale(1.18)}100%{transform:scale(1)}}#pos .n{display:inline-block;transform-origin:left bottom}
 #item .lbl:empty{display:none}
+/* ---------- Gameplay polish: touch POWER, lap splits, speed bar, gap readout, results board ---------- */
+#tP{background:#3151779c;border-color:#b2faff9e;color:#e1ffff}#tP.ready{color:#a9fff9;border-color:#a9fff9;box-shadow:0 0 16px #a9fff98c}#tP.act{background:#80e6e4c7;color:#194f70}
+#driftmeter:before{content:'';position:absolute;bottom:5px;left:5px;right:5px;height:4px;pointer-events:none;z-index:1;background:linear-gradient(90deg,transparent calc(30% - 1px),#eaffffc0 calc(30% - 1px),#eaffffc0 calc(30% + 1px),transparent calc(30% + 1px),transparent calc(63.3% - 1px),#eaffffc0 calc(63.3% - 1px),#eaffffc0 calc(63.3% + 1px),transparent calc(63.3% + 1px))}
+#driftmeter[data-tier='3']{color:#ffb3ea}#driftmeter[data-tier='3']:after{background:#ffb3ea}
+#toastsub{color:#e9ffff;text-shadow:0 2px 4px #12314f}#countmap{background:#203652a1;border-color:#c1f3ff80;color:#e9ffff;backdrop-filter:blur(5px)}
+#speedbar{background:#ffffff26}#speedbar::after{background:linear-gradient(90deg,#8fd6ff,#eaffff)}#speedbar.boost::after{background:#91fafa;box-shadow:0 0 8px #91fafa}
+#ranks div.gap{display:flex!important;background:#1a304ea8;border-left-color:#a3ffff;color:#c7ffff}
+#board div.hd{color:#bfe6f3;border-bottom:1px solid #ffffff14;background:transparent}#board div i.fastest{color:#ffe6a3;text-shadow:0 0 8px #ffd77a80}
+.row{flex-wrap:wrap}.row .btn{flex:1 1 auto;white-space:nowrap}#pause p.keys{color:#c6dcec;margin-top:8px}#pause p.keys kbd{background:#25476ba1;border-color:#a7e8ff60;color:#dfffff}
+@media(max-width:540px){#board div{grid-template-columns:22px 1fr auto auto;gap:6px;font-size:11px;padding:7px 6px}#board div i.bl{display:none}#board div i.gp{min-width:54px;font-size:10px}#speedbar{width:64px;margin-top:4px}#toastsub{font-size:9px;transform:translate(-50%,calc(-50% + 26px))}#countmap{font-size:8px;padding:4px 8px;letter-spacing:.12em;top:calc(96px + var(--sa-t))}#tP{bottom:calc(315px + var(--sa-b));right:20px;width:60px;height:60px;font-size:9px}.row .btn{flex:1 1 45%}#pause p.keys{display:none}}
+@media(max-height:560px) and (orientation:landscape){#board{max-height:34vh}#board div{padding:5px 8px;font-size:11px}#speedbar{width:64px;margin-top:3px}#toastsub{font-size:9px}#countmap{font-size:8px;top:calc(86px + var(--sa-t))}#tP{bottom:calc(178px + var(--sa-b));right:21px;width:56px;height:56px;font-size:8px}.row{margin-top:10px}.row .btn{padding:8px 12px;min-height:34px;font-size:9px}#pause p.keys{display:none}#results .sub{font-size:9px}}
+@media(prefers-reduced-motion:reduce){#tP.ready{animation:none}#wrong{animation:none}}
 /* ---------- Race FX ---------- */
 /* HUD-side race presentation: raceFX toggles these classes on #hud (fx-boost is held while boosting; the rest are timed pulses). All are pointer-transparent overlays on pseudo-elements so existing HUD children are untouched. */
 #hud::before,#hud::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0}

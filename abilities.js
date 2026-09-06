@@ -47,12 +47,13 @@ function useSpecial(r){
 function stepAbilities(dt){
  for(const r of game.racers){
   for(const key of ['specialCooldown','phase','slow','ram','reflect','regen'])r[key]=Math.max(0,(r[key]||0)-dt);
-  if(!r.isPlayer&&!r.finished){r.specialAI-=dt;if(r.specialAI<=0){useSpecial(r);r.specialAI=1.2+rng()*2.8;}}
+  // AI decision timer; game.js supplies aiWantsSpecial (defensive powers when threatened, offensive when a rival is in range).
+  if(!r.isPlayer&&!r.finished){r.specialAI-=dt;if(r.specialAI<=0){if(typeof aiWantsSpecial!=='function'||aiWantsSpecial(r))useSpecial(r);r.specialAI=1.2+rng()*2.8;}}
   if(r.finished||!(r.specialActive>0))continue;
   r.specialActive=Math.max(0,r.specialActive-dt);
   if(r.div.id==='zenflow')for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<18&&!o.regen&&!o.phase&&!o.reflect&&!o.shield)o.slow=Math.max(o.slow||0,.18);}
   if(r.div.id==='aether')for(const t of tokens){if(t.t<=0&&r.tokens<10&&Math.abs(du_dist(r.u,t.u))<24){t.t=9;t.mesh.visible=false;r.tokens++;if(r.isPlayer)SFX.token(r.tokens);}}
-  if(r.div.id==='animus'){r.specialPulse-=dt;if(r.specialPulse<=0){r.specialPulse=1.5;let target=null,best=32;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best){target=o;best=d;}}if(target){if(powerSlow(target,1.1,r))target.speed*=.84;abilityFX(target,'animus');}}}
+  if(r.div.id==='animus'){r.specialPulse-=dt;if(r.specialPulse<=0){r.specialPulse=1.5;let target=null,best=32;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best){target=o;best=d;}}if(target){if(powerSlow(target,1.1,r))target.speed*=.84;abilityFX(target,'animus-pulse');}}}
  }
  for(let i=abilityZones.length-1;i>=0;i--){const z=abilityZones[i];z.life-=dt;if(z.life<=0){abilityZones.splice(i,1);continue;}
   if(z.kind==='snare'){for(const r of game.racers)if(r!==z.owner&&Math.abs(du_dist(z.u,r.u))<7&&Math.abs(z.lat-r.lat)<2.4)powerSlow(r,.7,z.owner);}

@@ -3,11 +3,11 @@
 Reference-driven floating-island arcade racer with three selectable circuits, twelve distinct division chassis, twelve powers, and six illustrated items. See [abilities](docs/abilities.md), [verification](docs/upgrade-verification.md) and the original visual references in references/.
 
 ## Play
-Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. The character select shows the selected director's actual race chassis on a 360° holographic turntable: it turns continuously, can be dragged to spin, and the arrow buttons or keyboard arrows step through the roster. Twelve directors compete across three complete laps. Drift to charge boosts; collect tokens and items.
+Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. The character select shows the selected director's actual race chassis on a 360° holographic turntable: it turns continuously, can be dragged to spin, and the arrow buttons or keyboard arrows step through the roster. Twelve directors compete across three complete laps. Hop then hold to drift and release for a surge boost; tuck in behind rivals for a slipstream; collect tokens and items. Results list best lap and gap to the leader; Next Circuit cycles the three maps.
 
-- Keyboard: W/Up accelerate, S/Down brake/reverse, A/D or arrows steer, Shift/Space drift, E/Ctrl use item, Q director power, Escape pause.
-- Touch: automatic acceleration; steering, brake, drift and item buttons. Touch controls can also be enabled manually.
-- Gamepad: triggers accelerate/brake, left stick steer, shoulder buttons drift, X use item, Y director power, Start pause. Requires a standard-mapped controller/browser.
+- Keyboard: W/Up accelerate, S/Down brake/reverse, A/D or arrows steer, Shift/Space drift, E/Ctrl use item, Q director power, Escape pause, R restart (pause/results), M sound.
+- Touch: automatic acceleration; steering, brake, drift, item and POWER buttons; vibration on hits where supported. Touch controls can also be enabled manually.
+- Gamepad: triggers accelerate/brake, left stick steer, shoulder buttons drift, X use item, Y director power, Start pause. Requires a standard-mapped controller/browser. Rumble on hits and boosts where the browser exposes vibrationActuator.
 - Auto throttle is optional on desktop. Fullscreen appears in supported browsers.
 - Best times are stored on this device per circuit, director, and difficulty. Original records migrate to Cherry Blossom Skyway.
 
@@ -32,7 +32,7 @@ Signed race-distance tracking prevents reverse lap shortcuts. Correct finish ord
 A Canvas compatibility renderer automatically activates if WebGL is unavailable, using the same physics/AI/items and stabilized road visuals. Normal capable devices use the Three.js 3D circuit.
 
 ## Verification and limits
-34 Node/Three regression cases pass: full forward laps, reverse exploit prevention, braking, pause/countdown, frozen simulation, blur release, finish ranking and result labels. Rendering is stubbed in those tests.
+70 Node/Three regression cases pass: full forward laps, reverse exploit prevention, braking, pause/countdown, frozen simulation, blur release, finish ranking and result labels, plus boost surge, hop-to-drift, slipstream, angle-based wall scrub, lap splits and best lap, AI power and item rules, rubber-band caps, mine cap, results board, Next Circuit, text-field-safe key handling, kart materials, rig animation, Blender clips and race FX pools. Rendering is stubbed in those tests.
 Browser checked: director selection, desktop layout, 390×844 portrait and 844×390 landscape layouts, countdown, acceleration/rank updates, pause/resume, touch button events and mute. This cloud browser has no WebGL, so visual checks exercised Canvas compatibility mode. WebGL track frame math and vehicle construction passed numerical/runtime checks; GPU performance, real-device multi-touch, physical gamepads, PWA install/offline lifecycle and full GPU visual appearance still need hardware verification. Awards, zero bugs and universal device performance are not claimed.
 
 ## Art tools
