@@ -68,7 +68,7 @@ void main(){vec2 q=gl_PointCoord-.5;float d=length(q);float a=smoothstep(.5,.18,
   const SPEED_FRAG=glsl(`uniform float time,intensity,flash,aspect;uniform vec3 tint,flashColor;varying vec2 vUv;
 void main(){vec2 p=(vUv-.5)*vec2(aspect,1.);float r=length(p);float a=atan(p.y,p.x);float bins=72.;float fb=a/6.2831853*bins;float bin=floor(fb+.5);float rnd=fract(sin(bin*12.9898)*43758.5453);float rnd2=fract(sin(bin*78.233)*12345.678);
 float line=pow(max(0.,sin(fract(fb+.5)*3.14159)),16.);float start=.22+rnd*.38;float len=fract(r*2.4-time*(7.+rnd2*5.)+rnd);float seg=smoothstep(0.,.3,len)*smoothstep(.95,.55,len);
-float s=line*seg*smoothstep(start,start+.32,r)*intensity*(.35+.65*rnd2);vec3 c=tint*s+flashColor*flash*(.35+.65*smoothstep(.1,.85,r));gl_FragColor=vec4(c,1.);}`);
+float s=line*seg*smoothstep(start,start+.32,r)*intensity*.38*(.35+.65*rnd2);vec3 c=tint*s+flashColor*flash*.5*(.35+.65*smoothstep(.1,.85,r));gl_FragColor=vec4(c,1.);}`);
 
   // ---- helpers ----------------------------------------------------------------------------
   function shader(vert,frag,uniforms,opts){
@@ -342,8 +342,8 @@ float s=line*seg*smoothstep(start,start+.32,r)*intensity*(.35+.65*rnd2);vec3 c=t
       let boostK=0,speedK=0,tier=0;
       if(player&&typeof player==='object'){const base=player.maxSpeedBase>0?player.maxSpeedBase:40;boostK=player.boost>0?clamp01(player.boost/1.2)*.7+.3:0;speedK=clamp01(((player.speed||0)/base-1)/.4);tier=player.drifting?(player.driftTier|0):0;}
       S.boostK=lerpN(S.boostK,boostK,1-Math.exp(-dt*6));S.speedI=lerpN(S.speedI,Math.max(boostK,speedK*.7),1-Math.exp(-dt*5));S.flash=Math.max(0,S.flash-dt*3.4);S.hit=Math.max(0,S.hit-dt*1.9);S.tier=lerpN(S.tier,tier,1-Math.exp(-dt*4));
-      const su=S.speed.material.uniforms;su.intensity.value=S.speedI;su.flash.value=S.flash*.55+S.hit*.15;su.flashColor.value.setHex(S.hit>S.flash?0xff5a3a:0xffffff);S.speed.visible=S.speedI>.01||S.flash>.01||S.hit>.01;
-      post.bloom=clamp01(S.boostK*.85+S.tier*.12+S.hit*.55+S.flash*.4);post.vignette=clamp01(S.speedI*.85+S.hit*.7);post.chroma=clamp01(S.boostK*.45+S.hit*.9+S.flash*.5);post.hit=clamp01(S.hit);post.flash=clamp01(S.flash);
+      const su=S.speed.material.uniforms;su.intensity.value=S.speedI;su.flash.value=S.flash*.3+S.hit*.1;su.flashColor.value.setHex(S.hit>S.flash?0xff5a3a:0xffffff);S.speed.visible=S.speedI>.01||S.flash>.01||S.hit>.01;
+      post.bloom=clamp01(S.boostK*.6+S.tier*.12+S.hit*.4+S.flash*.25);post.vignette=clamp01(S.speedI*.7+S.hit*.7);post.chroma=clamp01(S.boostK*.22+S.hit*.55+S.flash*.25);post.hit=clamp01(S.hit);post.flash=clamp01(S.flash);
       if(S.hud&&S.hud.classList){const boostOn=S.boostK>.2;if(boostOn!==S.hudOn['fx-boost']){S.hudOn['fx-boost']=boostOn;if(boostOn)S.hud.classList.add('fx-boost');else S.hud.classList.remove('fx-boost');}
         for(const c of HUD_CLASSES){if(c==='fx-boost')continue;if(S.hudTimers[c]>0){S.hudTimers[c]-=dt;if(S.hudTimers[c]<=0&&S.hudOn[c]){S.hud.classList.remove(c);S.hudOn[c]=false;}}}}
     },
