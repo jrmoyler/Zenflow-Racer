@@ -1,0 +1,15 @@
+{
+  "name": "zenflow-racer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenFlow Racer \u2014 browser and installable arcade racing",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node tests/game-regression.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

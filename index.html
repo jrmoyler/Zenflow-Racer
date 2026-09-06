@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>ZenFlow Racer — Synergy Circuit</title>
+<meta name="description" content="Twelve division directors. Three laps. One Synergy Circuit. Race the ZenFlow championship with drift boosts, tactical items and responsive touch controls.">
+<meta name="theme-color" content="#050A18">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#050A18; --navy2:#0A0F1E; --card:#0D1326; --card2:#111827;
+  --gold:#D4A843; --gold2:#C9963F; --teal:#00D9B5; --white:#F5F5F5; --silver:#8B9BAE; --border:#1A2540;
+  --sa-t:env(safe-area-inset-top,0px); --sa-b:env(safe-area-inset-bottom,0px);
+  --sa-l:env(safe-area-inset-left,0px); --sa-r:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+#gl{position:fixed;inset:0;display:block}
+.mono{font-family:'JetBrains Mono',monospace}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;padding:calc(16px + var(--sa-t)) calc(16px + var(--sa-r)) calc(16px + var(--sa-b)) calc(16px + var(--sa-l))}
+.hidden{display:none!important}
+
+/* ---------- Roster ---------- */
+#roster{background:linear-gradient(180deg,rgba(5,10,24,.92) 0%,rgba(5,10,24,.78) 40%,rgba(5,10,24,.9) 100%);overflow:hidden;justify-content:flex-start}
+#roster .head{width:100%;max-width:960px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:6px 4px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+#roster h1{font-weight:800;font-size:clamp(22px,4.6vw,38px);letter-spacing:-.02em;line-height:1}
+#roster h1 span{color:var(--gold)}
+#roster .head .sub{font-weight:300;font-style:italic;color:var(--silver);font-size:clamp(11px,1.8vw,14px);margin-top:6px}
+#roster .tag{text-align:right;color:var(--silver);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+#roster .tag b{display:block;color:var(--white);font-size:13px;letter-spacing:.06em;margin-top:2px}
+#grid{width:100%;max-width:960px;flex:1;align-content:start;grid-auto-rows:auto;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px 4px;-webkit-overflow-scrolling:touch}
+.card{position:relative;background:rgba(13,19,38,.85);border:1px solid var(--border);border-radius:6px;padding:10px 10px 8px;cursor:pointer;transition:transform .12s,border-color .12s,background .12s;min-height:158px;display:flex;flex-direction:column;overflow:hidden}
+.card:active{transform:scale(.97)}
+.card.sel{border-color:var(--acc);background:var(--card2);box-shadow:inset 0 0 0 1px var(--acc)}
+.card .bar{height:3px;width:42px;background:var(--acc);border-radius:2px;margin-bottom:8px}
+.card .mark{position:absolute;right:10px;top:8px;width:34px;height:34px}
+.card .nm{font-weight:700;font-size:14px;line-height:1.1;letter-spacing:-.01em;padding-right:34px}
+.card .rl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--silver);margin:3px 0 8px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .st{display:grid;grid-template-columns:auto 1fr;grid-template-rows:repeat(4,auto);gap:4px 8px;font-size:9px;color:var(--silver);letter-spacing:.1em;text-transform:uppercase;align-items:center;margin-top:auto}
+.card .st i{display:block;height:4px;background:#1c2742;border-radius:2px;overflow:hidden}
+.card .st i b{display:block;height:100%;background:var(--acc);width:var(--w)}
+.card .star{position:absolute;right:12px;bottom:10px;width:10px;height:10px;opacity:.55}
+#footer{width:100%;max-width:960px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px 0;border-top:1px solid var(--border);flex-shrink:0}
+#pick{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--silver)}
+#pick b{color:var(--gold);font-weight:700}
+.btn{font-family:'Space Grotesk';font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;padding:12px 22px;border-radius:4px;border:1px solid var(--gold);background:var(--gold);color:#120c02;cursor:pointer;transition:filter .12s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.35;filter:grayscale(1);cursor:default}
+.btn.ghost{background:transparent;color:var(--white);border-color:var(--border)}
+#ctrlhint{font-size:11px;color:var(--silver);margin-top:8px;text-align:center;line-height:1.5;max-width:960px;flex-shrink:0}
+#ctrlhint kbd{font-family:'JetBrains Mono';background:var(--card2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--white)}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+#pos{position:absolute;left:calc(16px + var(--sa-l));bottom:calc(20px + var(--sa-b));display:flex;align-items:flex-end;line-height:.85;text-shadow:0 3px 0 rgba(0,0,0,.55),0 0 24px rgba(0,0,0,.6)}
+#pos .n{font-weight:800;font-size:clamp(64px,13vw,120px);color:var(--gold);letter-spacing:-.05em}
+#pos .o{font-weight:800;font-size:clamp(18px,3.6vw,32px);color:var(--gold);margin-left:2px;margin-bottom:6px}
+#pos.p1 .n,#pos.p1 .o{color:#FFE28A}
+#pos.pl .n,#pos.pl .o{color:#c6cfe0}
+#lapwrap{position:absolute;left:calc(16px + var(--sa-l));bottom:calc(6px + var(--sa-b));font-family:'JetBrains Mono';font-size:12px;color:var(--white);letter-spacing:.08em;text-shadow:0 1px 0 #000}
+#lapwrap .tok{display:inline-flex;align-items:center;gap:5px;margin-left:12px}
+#lapwrap .tok em{display:inline-block;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff0b0,#d4a843 45%,#7d5a14);box-shadow:0 0 6px rgba(212,168,67,.6)}
+#item{position:absolute;right:calc(16px + var(--sa-r));top:calc(14px + var(--sa-t));width:84px;height:84px;border-radius:50%;border:3px solid rgba(255,255,255,.85);background:radial-gradient(circle,rgba(13,19,38,.9),rgba(5,10,24,.75));box-shadow:0 0 0 3px rgba(5,10,24,.7),0 6px 20px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform .15s}
+#item.pop{transform:scale(1.14)}
+#item .ic{width:56px;height:56px}
+#item .lbl{position:absolute;bottom:4px;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--silver);font-weight:700}
+#mini{position:absolute;right:calc(16px + var(--sa-r));bottom:calc(16px + var(--sa-b));width:150px;height:150px;opacity:.92;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
+#speedo{position:absolute;right:calc(20px + var(--sa-r));top:calc(112px + var(--sa-t));text-align:right;font-family:'JetBrains Mono';font-size:11px;color:var(--silver);letter-spacing:.1em;text-shadow:0 1px 0 #000}
+#speedo b{display:block;font-family:'Space Grotesk';font-weight:800;font-size:26px;color:var(--white);line-height:1;letter-spacing:-.03em}
+#timer{position:absolute;left:50%;top:calc(12px + var(--sa-t));transform:translateX(-50%);font-family:'JetBrains Mono';font-size:13px;color:var(--white);letter-spacing:.12em;text-shadow:0 1px 0 #000;background:rgba(5,10,24,.45);padding:4px 12px;border-radius:3px;border:1px solid rgba(26,37,64,.8)}
+#toast{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(28px,7vw,64px);letter-spacing:-.02em;color:var(--white);text-shadow:0 4px 0 rgba(0,0,0,.6),0 0 40px rgba(212,168,67,.4);opacity:0;transition:opacity .15s,transform .25s}
+#toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#toast.gold{color:var(--gold)}
+#toast.teal{color:var(--teal)}
+#count{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(90px,22vw,200px);color:var(--gold);letter-spacing:-.06em;text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(212,168,67,.35);opacity:0}
+#count.go{color:var(--teal);text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(0,217,181,.45)}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,217,181,.0) 100%);opacity:0;transition:opacity .2s}
+#vig.boost{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,217,181,.22) 100%)}
+#vig.hit{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.35) 100%)}
+#wrong{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:800;color:#EF4444;font-size:26px;letter-spacing:.1em;text-shadow:0 2px 0 #000;display:none}
+#ranks{position:absolute;left:calc(14px + var(--sa-l));top:calc(14px + var(--sa-t));display:flex;flex-direction:column;gap:2px;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em}
+#ranks div{display:flex;align-items:center;gap:6px;color:var(--silver);text-shadow:0 1px 0 #000;background:rgba(5,10,24,.35);padding:1px 6px 1px 3px;border-radius:2px;width:max-content}
+#ranks div i{width:8px;height:8px;border-radius:2px;background:var(--c);transform:rotate(45deg);flex-shrink:0}
+#ranks div.me{color:var(--white);font-weight:700;background:rgba(212,168,67,.18)}
+#pausebtn{position:absolute;left:50%;top:calc(40px + var(--sa-t));transform:translateX(-50%);pointer-events:auto;background:transparent;border:0;color:var(--silver);font-family:'JetBrains Mono';font-size:10px;letter-spacing:.14em;cursor:pointer;padding:6px 10px}
+#mutebtn{position:absolute;right:calc(112px + var(--sa-r));top:calc(20px + var(--sa-t));pointer-events:auto;background:rgba(5,10,24,.5);border:1px solid var(--border);color:var(--silver);font-family:'JetBrains Mono';font-size:10px;letter-spacing:.14em;cursor:pointer;padding:6px 8px;border-radius:3px}
+
+/* touch controls */
+#touch{position:fixed;inset:0;z-index:12;pointer-events:none;display:none}
+#touch.on{display:block}
+.tz{position:absolute;pointer-events:auto;bottom:calc(120px + var(--sa-b));width:76px;height:76px;border-radius:50%;border:1px solid rgba(139,155,174,.45);background:rgba(13,19,38,.45);display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:800;font-size:12px;letter-spacing:.08em;backdrop-filter:blur(2px)}
+.tz.act{background:rgba(212,168,67,.35);border-color:var(--gold)}
+#tL{left:calc(18px + var(--sa-l))}
+#tR{left:calc(104px + var(--sa-l))}
+#tD{right:calc(18px + var(--sa-r));bottom:calc(200px + var(--sa-b))}
+#tI{right:calc(104px + var(--sa-r));bottom:calc(200px + var(--sa-b));width:64px;height:64px;font-size:10px}
+#tB{right:calc(18px + var(--sa-r));bottom:calc(290px + var(--sa-b));width:56px;height:56px;font-size:10px;opacity:.8}
+
+/* ---------- Results / pause ---------- */
+#results{background:rgba(5,10,24,.86);backdrop-filter:blur(6px)}
+#results .panel,#pause .panel{width:min(94vw,520px);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px 18px}
+#results h2{font-weight:800;font-size:28px;letter-spacing:-.02em}
+#results h2 span{color:var(--gold)}
+#results .sub{font-family:'JetBrains Mono';font-size:11px;color:var(--silver);margin:4px 0 14px;letter-spacing:.06em}
+#board{display:flex;flex-direction:column;gap:4px;max-height:44vh;overflow-y:auto;touch-action:pan-y}
+#board div{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:6px 8px;border-radius:3px;background:var(--card2);font-size:13px}
+#board div.me{outline:1px solid var(--gold);background:rgba(212,168,67,.12)}
+#board div b{font-family:'JetBrains Mono';color:var(--silver);font-size:12px}
+#board div em{font-style:normal;display:inline-block;width:10px;height:10px;transform:rotate(45deg);background:var(--c);margin-right:8px;vertical-align:middle;border-radius:1px}
+#board div i{font-family:'JetBrains Mono';font-style:normal;font-size:11px;color:var(--silver)}
+.row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+#pause{background:rgba(5,10,24,.7);backdrop-filter:blur(4px)}
+#pause h2{font-weight:800;font-size:24px;letter-spacing:-.02em;margin-bottom:6px}
+#pause p{color:var(--silver);font-size:12px;line-height:1.6}
+#diff{display:flex;gap:6px;margin-top:10px}
+#diff button{flex:1;font-family:'JetBrains Mono';font-size:11px;padding:8px 4px;background:var(--card2);border:1px solid var(--border);color:var(--silver);border-radius:3px;cursor:pointer;letter-spacing:.06em}
+#diff button.on{border-color:var(--gold);color:var(--gold)}
+#loading{background:var(--navy);z-index:30;font-family:'JetBrains Mono';font-size:12px;color:var(--silver);letter-spacing:.12em}
+#loading .d{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite;margin-bottom:14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (max-width:520px){#grid{grid-template-columns:repeat(2,1fr);gap:8px}#footer{flex-wrap:wrap;gap:8px}#pick{width:100%;font-size:11px}#diff{flex:1;margin-top:0}#diff button{padding:8px 2px;font-size:10px}#go{padding:10px 14px}#ctrlhint{display:none}#ranks{font-size:9px}#ranks div:nth-child(n+7){display:none}#mini{width:110px;height:110px}#speedo{top:calc(100px + var(--sa-t))}#item{width:70px;height:70px}#item .ic{width:46px;height:46px}#timer{font-size:11px}#mutebtn{right:calc(96px + var(--sa-r))}}
+@media (max-height:520px){#pos .n{font-size:56px}#mini{width:110px;height:110px}#item{width:66px;height:66px}#item .ic{width:44px;height:44px}}
+</style>
+<link rel="stylesheet" href="polish.css">
+</head>
+<body>
+<canvas id="gl" aria-label="ZenFlow racing circuit"></canvas>
+
+<div id="loading" class="screen"><div class="d"></div><div>ASSEMBLING CIRCUIT</div></div>
+
+<div id="roster" class="screen hidden">
+  <div class="head">
+    <div>
+      <div class="eyebrow">Collective AI presents · Racing division</div>
+      <h1>ZENFLOW <span>RACER</span></h1>
+      <div class="sub">Choose your director. Find your racing line. Own the circuit.</div>
+    </div>
+    <div class="tag">SYNERGY CIRCUIT<b>12 DIRECTORS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
+  </div>
+  <div class="session-line"><strong>01 / SELECT YOUR DIRECTOR</strong><span>SYNERGY GRAND PRIX</span></div>
+  <div id="grid" aria-label="Select a racing director"></div>
+  <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>
+  <div id="footer">
+    <div id="pick">Choose a director to join the grid</div>
+    <div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div>
+    <button id="go" class="btn" disabled>Enter Race</button>
+  </div>
+  <div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> use item · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause. Touch: auto throttle · Gamepad: triggers drive, shoulder drift, X item.</div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="ranks"></div>
+  <div id="timer" class="mono">00:00.00</div>
+  <button id="pausebtn">PAUSE</button>
+  <button id="mutebtn">SOUND ON</button>
+  <div id="item"><div class="ic"></div><div class="lbl"></div></div>
+  <div id="speedo">KM/H<b>0</b></div>
+  <canvas id="mini" width="300" height="300"></canvas>
+  <div id="pos"><div class="n">12</div><div class="o">th</div></div>
+  <div id="lapwrap"><span id="lap">LAP 1/3</span><span class="tok"><em></em><span id="tok">0</span></span></div>
+  <div id="driftmeter" hidden aria-live="off"></div>
+  <div id="vig"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="count"></div>
+  <div id="wrong">WRONG WAY</div>
+</div>
+<div id="touch"><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button></div>
+
+<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">SYNERGY GRAND PRIX</div><h2>Race paused.</h2><p>Take a breath. Your race is right where you left it.</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="resume" class="btn">Resume</button></div></div></div>
+
+<div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="rematch" class="btn">Rematch</button></div></div></div>
+
+<script src="vendor/three.min.js"></script>
+<script src="core.js"></script>
+<script src="fallback-renderer.js"></script>
+<script src="world.js"></script>
+<script src="vehicles.js"></script>
+<script src="game.js"></script>
+<script src="pwa.js" defer></script>
+</body>
+</html>
