@@ -1,0 +1,258 @@
+{
+ "blender": "4.5.0",
+ "engine": "CYCLES",
+ "samples": 40,
+ "format": "WEBP",
+ "source": "../.tools/zenflow-karts.blend",
+ "generated": "2026-09-06 16:57 UTC",
+ "files": {
+  "kart-zenflow.webp": {
+   "kind": "lineup",
+   "kart": "zenflow",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 19930,
+   "seconds": 38.1
+  },
+  "kart-collective.webp": {
+   "kind": "lineup",
+   "kart": "collective",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 23282,
+   "seconds": 33.1
+  },
+  "kart-hybrid.webp": {
+   "kind": "lineup",
+   "kart": "hybrid",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 20734,
+   "seconds": 34.5
+  },
+  "kart-nexus.webp": {
+   "kind": "lineup",
+   "kart": "nexus",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 23356,
+   "seconds": 34.3
+  },
+  "kart-kinetic.webp": {
+   "kind": "lineup",
+   "kart": "kinetic",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 23582,
+   "seconds": 33.4
+  },
+  "kart-juris.webp": {
+   "kind": "lineup",
+   "kart": "juris",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 19304,
+   "seconds": 23.2
+  },
+  "kart-signal.webp": {
+   "kind": "lineup",
+   "kart": "signal",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 21138,
+   "seconds": 14.8
+  },
+  "kart-loom.webp": {
+   "kind": "lineup",
+   "kart": "loom",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 19812,
+   "seconds": 15.2
+  },
+  "kart-vector.webp": {
+   "kind": "lineup",
+   "kart": "vector",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 20584,
+   "seconds": 14.8
+  },
+  "kart-aether.webp": {
+   "kind": "lineup",
+   "kart": "aether",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 23472,
+   "seconds": 18.8
+  },
+  "kart-animus.webp": {
+   "kind": "lineup",
+   "kart": "animus",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 21458,
+   "seconds": 26.6
+  },
+  "kart-helix.webp": {
+   "kind": "lineup",
+   "kart": "helix",
+   "clip": "idle",
+   "frame": 20,
+   "bytes": 22702,
+   "seconds": 33.7
+  },
+  "clip-idle.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "idle",
+   "frames": [
+    0,
+    8,
+    15,
+    22,
+    30,
+    38,
+    45,
+    52
+   ],
+   "duration": 2.0,
+   "loop": true,
+   "bytes": 69652,
+   "seconds": 67.7
+  },
+  "clip-drive.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "drive",
+   "frames": [
+    0,
+    4,
+    8,
+    11,
+    15,
+    19,
+    22,
+    26
+   ],
+   "duration": 1.0,
+   "loop": true,
+   "bytes": 69460,
+   "seconds": 66.9
+  },
+  "clip-drift.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "drift",
+   "frames": [
+    0,
+    4,
+    9,
+    14,
+    18,
+    22,
+    27,
+    32
+   ],
+   "duration": 1.2,
+   "loop": true,
+   "bytes": 71438,
+   "seconds": 71.5
+  },
+  "clip-boost.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "boost",
+   "frames": [
+    0,
+    3,
+    7,
+    10,
+    14,
+    17,
+    21,
+    24
+   ],
+   "duration": 0.8,
+   "loop": false,
+   "bytes": 70116,
+   "seconds": 57.2
+  },
+  "clip-spinout.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "spinout",
+   "frames": [
+    0,
+    5,
+    9,
+    14,
+    19,
+    24,
+    28,
+    33
+   ],
+   "duration": 1.1,
+   "loop": false,
+   "bytes": 70806,
+   "seconds": 31.5
+  },
+  "clip-hit.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "hit",
+   "frames": [
+    0,
+    3,
+    5,
+    8,
+    10,
+    13,
+    15,
+    18
+   ],
+   "duration": 0.6,
+   "loop": false,
+   "bytes": 66894,
+   "seconds": 47.8
+  },
+  "clip-victory.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "victory",
+   "frames": [
+    0,
+    9,
+    18,
+    27,
+    36,
+    45,
+    54,
+    63
+   ],
+   "duration": 2.4,
+   "loop": true,
+   "bytes": 72786,
+   "seconds": 68.7
+  },
+  "clip-defeat.webp": {
+   "kind": "contact-sheet",
+   "kart": "zenflow",
+   "clip": "defeat",
+   "frames": [
+    0,
+    9,
+    18,
+    27,
+    36,
+    45,
+    54,
+    63
+   ],
+   "duration": 2.4,
+   "loop": true,
+   "bytes": 69266,
+   "seconds": 68.5
+  }
+ }
+}
