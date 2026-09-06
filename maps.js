@@ -23,8 +23,17 @@ function selectMap(id){
   return true;
 }
 function applyMapAtmosphere(){
-  scene.fog.color.setHex(activeMap.fog);sun.color.setHex(activeMap.sun);hemi.color.setHex(activeMap.skyTop);hemi.groundColor.setHex(activeMap.id==='canopy'?0x537b60:0x8272a0);
+  scene.fog.color.setHex(activeMap.fog);
+  scene.fog.near=activeMap.id==='stormforge'?200:activeMap.id==='canopy'?300:260;
+  scene.fog.far=activeMap.id==='canopy'?1180:activeMap.id==='stormforge'?860:980;
+  sun.color.setHex(activeMap.sun);hemi.color.setHex(activeMap.skyTop);hemi.groundColor.setHex(activeMap.id==='canopy'?0x537b60:activeMap.id==='stormforge'?0x4a5368:0x8272a0);
+  hemi.intensity=activeMap.id==='stormforge'?0.32:0.4;
+  sun.intensity=activeMap.id==='canopy'?1.35:activeMap.id==='stormforge'?1.05:1.25;
   if(typeof game!=='undefined'&&game.skyMat?.uniforms.skyTop){game.skyMat.uniforms.skyTop.value.setHex(activeMap.skyTop);game.skyMat.uniforms.skyHorizon.value.setHex(activeMap.skyHorizon);}
   if(typeof refreshMapEnvironment==='function')refreshMapEnvironment();
 }
-function updateMapScenery(dt){for(const rotor of mapSceneryAnimations)rotor.rotation.z+=dt*.2;}
+function updateMapScenery(dt){
+  if(typeof zenWorldTime!=='undefined')zenWorldTime.value=(zenWorldTime.value||0)+dt;
+  for(const rotor of mapSceneryAnimations)rotor.rotation.z+=dt*(rotor.userData.spinRate||.2);
+  if(typeof updateImmersion==='function')updateImmersion(dt);
+}

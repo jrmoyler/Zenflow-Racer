@@ -44,7 +44,7 @@ let refreshMapEnvironment=null;
 function buildSky(){
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)}},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);vec3 sky=mix(skyHorizon,skyTop,smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
+    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);float h=smoothstep(-.12,.82,d.y);vec3 sky=mix(skyHorizon,skyTop,h);sky=mix(vec3(.55,.64,.8),sky,smoothstep(-.85,-.02,d.y));vec3 sunDir=normalize(vec3(-.35,.42,-.55));float disc=pow(max(0.,dot(d,sunDir)),86.);float glow=pow(max(0.,dot(d,sunDir)),7.);sky+=vec3(1.,.93,.78)*disc*1.45+vec3(1.,.68,.42)*glow*.38;float cloud=sin(d.x*14.+d.z*9.+time*.08)*.5+sin(d.x*31.-d.z*17.+time*.13)*.22;sky+=vec3(.13,.11,.12)*smoothstep(.28,.72,cloud)*exp(-pow((d.y-.18)*4.2,2.));float star=smoothstep(.996,1.,sin(d.x*220.)*sin(d.z*180.+d.y*40.));sky+=vec3(.9,.95,1.)*star*smoothstep(.2,.6,d.y)*.55;gl_FragColor=vec4(sky,1.);}`});
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
   if(!FALLBACK_GRAPHICS){refreshMapEnvironment=()=>{scene.environment=createSurfaceEnvironment(renderer,activeMap);};refreshMapEnvironment();}
   return mat;
@@ -138,7 +138,7 @@ const world=new THREE.Group();scene.add(world);
 function buildTrackMeshes(){
   const W=TRACK_W/2;
   // Lighting is balanced so the lavender road, grass and liveries keep their saturation after ACES.
-  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,map:TEX.roadDetail||null,roughnessMap:TEX.roadRoughness||null,bumpMap:TEX.roadDetail||null,bumpScale:.025,roughness:.65,metalness:.22,clearcoat:.8,clearcoatRoughness:.16,envMapIntensity:.65,side:THREE.DoubleSide});
+  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,map:TEX.roadDetail||null,roughnessMap:TEX.roadRoughness||null,bumpMap:TEX.roadDetail||null,bumpScale:.03,roughness:.58,metalness:.28,clearcoat:.92,clearcoatRoughness:.12,envMapIntensity:.85,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road,null,12));
   const under=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0xd3dfd9:0x697087,roughness:.34,metalness:.5,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W-.5,-.12],[-W-.3,-.85],[W+.3,-.85],[W+.5,-.12]],under));
@@ -250,7 +250,7 @@ function buildEnvironment(){
   }
   const trunk=mergeGeos(branchGeos);branchGeos.forEach(g=>g.dispose());
   const cherrySpots=[],bonsaiSpots=[];
-  const pondMat=new THREE.MeshPhysicalMaterial({color:0x83d6e5,roughness:.09,metalness:.5,clearcoat:1,transparent:true,opacity:.85,side:THREE.DoubleSide});
+  const pondMat=(typeof createImmersionWater==='function')?createImmersionWater(activeMap,'pond'):new THREE.MeshPhysicalMaterial({color:0x83d6e5,roughness:.09,metalness:.5,clearcoat:1,transparent:true,opacity:.85,side:THREE.DoubleSide});
   const waterfallMat=new THREE.ShaderMaterial({side:THREE.DoubleSide,transparent:true,depthWrite:false,uniforms:{time:zenWorldTime},vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vUv;uniform float time;void main(){float strand=pow(.5+.5*sin(vUv.x*79.+sin(vUv.y*14.+time*2.)*.3),7.);float rush=.5+.5*sin(vUv.y*100.+time*7.+vUv.x*13.);vec3 c=mix(vec3(.26,.61,.89),vec3(.84,.96,1.),strand*.8+rush*.16);float edge=smoothstep(0.,.08,vUv.x)*smoothstep(0.,.08,1.-vUv.x);float fade=smoothstep(0.,.15,vUv.y);gl_FragColor=vec4(c,edge*fade*.82);}`});
   function waterfall(island,width,angle){
     const length=island.depth+40,seg=20,p=[],uv=[],idx=[];for(let j=0;j<=seg;j++){const t=j/seg;for(let k=0;k<=8;k++){const q=k/8,x=(q-.5)*width,z=island.r*.8+Math.sin(Math.min(t*5,Math.PI/2))*2.5;const ca=Math.cos(angle),sa=Math.sin(angle);p.push(island.x+x*ca-z*sa,island.y+.08-t*length,island.z+x*sa+z*ca);uv.push(q,1-t);if(j<seg&&k<8){const a=j*9+k;idx.push(a,a+9,a+1,a+1,a+9,a+10);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();world.add(new THREE.Mesh(g,waterfallMat));
@@ -283,6 +283,7 @@ function buildEnvironment(){
   world.updateMatrixWorld(true);const batches=new Map();
   world.traverse(mesh=>{if(!mesh.isMesh||mesh.userData.dynamic||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});
   for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);const originals=new Set(meshes.map(mesh=>mesh.geometry));meshes.forEach(mesh=>mesh.parent.remove(mesh));originals.forEach(g=>g.dispose());geometries.forEach(g=>g.dispose());world.add(merged);}
+  if(typeof buildImmersion==='function')buildImmersion();
 
 }
 

@@ -193,6 +193,13 @@ test('Backgrounding immediately mutes audio before hidden frames stop',()=>{
  context.document.hidden=true;listeners.visibilitychange();assert.equal(updated,1);assert.equal(run('game.state'),'paused');
  context.document.hidden=false;context.audioUpdate=old;
 });
+test('Controls probe: A yaws left (player-visible) while moving forward; D yaws right',()=>{
+ racer();run("r.isPlayer=true;r.speed=32;r.throttle=true;__controlsTest.setKeys(['KeyW']);yawBefore=__controlsTest.getYaw();__controlsTest.setKeys(['KeyW','KeyA']);for(let i=0;i<48;i++)stepRacer(r,1/120);aTurn=__controlsTest.getYaw()-yawBefore");
+ const a=run('aTurn');assert.ok(a>0.05,'A must increase yaw (left), got '+a);
+ racer();run("r.isPlayer=true;r.speed=32;r.throttle=true;__controlsTest.setKeys(['KeyW']);yawBefore=__controlsTest.getYaw();__controlsTest.setKeys(['KeyW','KeyD']);for(let i=0;i<48;i++)stepRacer(r,1/120);dTurn=__controlsTest.getYaw()-yawBefore");
+ const d=run('dTurn');assert.ok(d<-0.05,'D must decrease yaw (right), got '+d);
+ run("__controlsTest.setKeys([])");
+});
 require('./kart-materials-regression.cjs')({test,assert});
 require('./racefx-regression.cjs')({test,assert});
 require('./kart-clips-regression.cjs')({test,assert});

@@ -556,6 +556,17 @@ const heldKeys=new Set(),touchHeld=new Set(),padHeld=new Set();let padSteer=0,pa
 const activeTouchPointers=new Map();
 game.analogSteering=saved.analogSteering!==false;game.steeringAssist=saved.steeringAssist!==false;
 function syncInput(){for(const key of ['throttle','brake','left','right','drift','item','special']){const on=touchHeld.has(key)||padHeld.has(key)||[...heldKeys].some(code=>KEYS[code]===key);if(key==='item'&&on&&!input.item)input.itemEdge=true;if(key==='special'&&on&&!input.special)input.specialEdge=true;input[key]=on;}}
+function bindControlsProbe(){
+  const probe={
+    getYaw(){return game.player?-game.player.theta:0;},
+    getSpeed(){return game.player?game.player.speed:0;},
+    setKeys(codes){heldKeys.clear();for(const code of codes||[])heldKeys.add(code);syncInput();if(game.player&&game.player.isPlayer){game.player.throttle=!!input.throttle;game.player.brake=!!input.brake;}},
+    setSteer(v){touchSteer=clamp(-v,-1,1);syncInput();}
+  };
+  if(typeof window!=='undefined')window.__controlsTest=probe;
+  if(typeof globalThis!=='undefined')globalThis.__controlsTest=probe;
+}
+bindControlsProbe();
 function resetInput(){heldKeys.clear();touchHeld.clear();padHeld.clear();padSteer=0;touchSteer=0;steerPointer=null;activeTouchPointers.clear();const pad=document.getElementById('tSteer');if(pad){pad.style.setProperty('--steer','0px');pad.setAttribute?.('aria-valuenow','0');}for(const k of Object.keys(input))input[k]=false;document.querySelectorAll('#touch .act').forEach(el=>el.classList.remove('act'));}
 // Key events that originate inside a text field never drive the kart or the menus.
 function typingTarget(e){const t=e&&e.target;if(!t||!t.tagName)return false;const tag=String(t.tagName).toUpperCase();return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||t.isContentEditable===true;}

@@ -24,22 +24,31 @@ npm run build
 npm run test:release
 ```
 
-Vercel uses the checked-in vercel.json configuration. The build outputs dist/. Three r128 is vendored with its MIT license to preserve compatibility with the original renderer. Rendering modules are separated from game rules for ongoing work.
+Vercel uses the checked-in vercel.json configuration. The build outputs dist/. Three r128 is vendored with its MIT license to preserve compatibility with the original renderer, GLTFLoader, and EffectComposer. Do not bump the runtime Three version in a Vercel deploy — `outputEncoding` / example postprocessing paths are pinned. Anime.js 4.2.2 animates menus. Rendering modules are separated from game rules for ongoing work.
 
 ## Improvements
 Signed race-distance tracking prevents reverse lap shortcuts. Correct finish ordering, brake priority, source-aware input clearing, pause/visibility lifecycle, remembered settings, record persistence, responsive UI, drift feedback, audio limiting/cleanup, detailed correctly oriented karts, reduced draw calls, improved track geometry, mobile graphics settings, and WebGL recovery.
 
 A Canvas compatibility renderer automatically activates if WebGL is unavailable, using the same physics/AI/items and stabilized road visuals. Normal capable devices use the Three.js 3D circuit.
 
+## Immersive worlds
+Each circuit is a full 3D world you drive through, not a backdrop:
+
+- **Cherry Blossom Skyway** — pagodas, lantern avenues, a pale moon, falling petals, shader waterfalls and ponds.
+- **Nexus Stormforge** — ribbed forge portal, turbines, ember weather and lightning in the sky dome.
+- **Vital Canopy Run** — conservatories, the ancient tree, bioluminescent caps, circling fauna and a rolling sea.
+
+Weather, pulsing rails and mist are rebuilt with the map and disposed on switch. See [docs/3d-reconstruction/immersion-pass.md](docs/3d-reconstruction/immersion-pass.md).
+
 ## Verification and limits
-70 Node/Three regression cases pass: full forward laps, reverse exploit prevention, braking, pause/countdown, frozen simulation, blur release, finish ranking and result labels, plus boost surge, hop-to-drift, slipstream, angle-based wall scrub, lap splits and best lap, AI power and item rules, rubber-band caps, mine cap, results board, Next Circuit, text-field-safe key handling, kart materials, rig animation, Blender clips and race FX pools. Rendering is stubbed in those tests.
+Node/Three regression cases pass: full forward laps, reverse exploit prevention, braking, pause/countdown, frozen simulation, blur release, finish ranking and result labels, plus boost surge, hop-to-drift, slipstream, angle-based wall scrub, lap splits and best lap, AI power and item rules, rubber-band caps, mine cap, results board, Next Circuit, text-field-safe key handling, kart materials, rig animation, Blender clips, race FX pools, and the immersion layer. Rendering is stubbed in those tests.
 Browser checked: director selection, desktop layout, 390×844 portrait and 844×390 landscape layouts, countdown, acceleration/rank updates, pause/resume, touch button events and mute. This cloud browser has no WebGL, so visual checks exercised Canvas compatibility mode. WebGL track frame math and vehicle construction passed numerical/runtime checks; GPU performance, real-device multi-touch, physical gamepads, PWA install/offline lifecycle and full GPU visual appearance still need hardware verification. Awards, zero bugs and universal device performance are not claimed.
 
 ## Art tools
 
 Anime.js 4.2.2 animates the menus. Three.js r128 stays pinned to preserve original renderer compatibility; EffectComposer, UnrealBloomPass and final gamma conversion are vendored. Distinct power effects use pooled instancing and analytic shader motion informed by the Zukan Arena effect implementation.
 
-Blender 4.5.0 is an optional offline art/review tool; run `bash tools/setup-blender.sh` on Linux to install a portable copy. The img2threejs skill assessment and gated reconstruction evidence are retained in `.img2threejs/vehicle`. These tools are not included in the browser bundle.
+Blender 4.5.0 is an optional offline art/review tool; run `bash tools/setup-blender.sh` on Linux to install a portable copy. The img2threejs skill assessment and gated reconstruction evidence are retained in `.img2threejs/vehicle`. These tools are not included in the browser bundle and are not run on Vercel.
 
 ## Reference art edition
 
@@ -51,7 +60,7 @@ All nine approved source images are retained in `references/art/`; optimized run
 
 The actual race uses Three.js geometry with twelve distinct chassis. The images are visual targets; procedural scenery and shaders are not pixel-identical to the rendered concept art. Canvas compatibility mode is a simpler renderer for devices without WebGL.
 
-`npm run verify` includes gameplay/effect regression tests, build/offline checks, and real Three.js geometry/lifecycle checks across all maps and karts. See `docs/reference-review.md` for visual review and environment limitations.
+`npm run verify` includes gameplay/effect regression tests, build/offline checks, and real Three.js geometry/lifecycle checks across all maps and karts. See [docs/reference-review.md](docs/reference-review.md) for visual review and environment limitations.
 
 ## Blender chassis workflow
 

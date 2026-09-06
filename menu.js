@@ -49,7 +49,7 @@
  document.getElementById('title-select').onclick=()=>{dismiss();document.querySelector('#grid .sel')?.focus();};
  document.getElementById('title-settings').onclick=()=>{dismiss();document.getElementById('autothrottle').focus();document.querySelector('.race-options').scrollIntoView({block:'nearest'});};
  document.getElementById('title-return').onclick=()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();};
- const descriptions={cherry:'Floating gardens, cascading waterfalls, and sweeping sky bridges.',stormforge:'Race through colossal turbines and the amber-lit floating foundry.',canopy:'Climb the living canopy through glass gardens and tropical skyways.'};
+ const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: glass gardens, spore-light and a rolling turquoise sea.'};
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
    document.querySelectorAll('[data-map]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
