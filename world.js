@@ -40,8 +40,7 @@ function buildSky(){
     uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)}},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
     fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);vec3 sky=mix(skyHorizon,skyTop,smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
-  // Small cubemap supplies pastel specular reflections on the road and vehicles.
-  if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});target.texture.encoding=THREE.sRGBEncoding;const envCamera=new THREE.CubeCamera(.1,30,target);refreshMapEnvironment=()=>envCamera.update(renderer,envScene);refreshMapEnvironment();scene.environment=target.texture;}
+  if(!FALLBACK_GRAPHICS){refreshMapEnvironment=()=>{scene.environment=createSurfaceEnvironment(renderer,activeMap);};refreshMapEnvironment();}
   return mat;
 }
 
@@ -133,8 +132,8 @@ const world=new THREE.Group();scene.add(world);
 function buildTrackMeshes(){
   const W=TRACK_W/2;
   // Lighting is balanced so the lavender road, grass and liveries keep their saturation after ACES.
-  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,roughness:.34,metalness:.1,clearcoat:.5,clearcoatRoughness:.22,envMapIntensity:.4,side:THREE.DoubleSide});
-  world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road));
+  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,map:TEX.roadDetail||null,roughnessMap:TEX.roadRoughness||null,bumpMap:TEX.roadDetail||null,bumpScale:.025,roughness:.65,metalness:.22,clearcoat:.8,clearcoatRoughness:.16,envMapIntensity:.65,side:THREE.DoubleSide});
+  world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road,null,12));
   const under=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0xd3dfd9:0x697087,roughness:.34,metalness:.5,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W-.5,-.12],[-W-.3,-.85],[W+.3,-.85],[W+.5,-.12]],under));
   const cyan=new THREE.MeshBasicMaterial({color:activeMap.edge}),pink=new THREE.MeshBasicMaterial({color:activeMap.trim});
@@ -165,7 +164,8 @@ function mergeGeos(list){ // Typed-array assembly avoids argument limits on deta
 }
 function displace(geo,amp,freq,seed=0){const p=geo.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);const n=fbm(x*freq+seed,y*freq+z*freq*.7+seed,3)-0.5;const l=Math.hypot(x,y,z)||1;p.setXYZ(i,x+x/l*n*amp,y+y/l*n*amp,z+z/l*n*amp);}p.needsUpdate=true;geo.computeVertexNormals();return geo;}
 
-function treeCanopyGeo(seed,tint){ // organic lobed canopy: 8 merged lobes, noise-displaced, vertex-colour gradient (shade at the base, sunlit crown)
+function treeCanopyGeo(seed,tint){
+  if(typeof foliageGeometry==='function')return foliageGeometry(seed,tint); // organic lobed canopy: 8 merged lobes, noise-displaced, vertex-colour gradient (shade at the base, sunlit crown)
   const lobes=[];const r=mulberry(seed);
   for(let i=0;i<8;i++){const s=1.3+r()*1.5;const g=new THREE.IcosahedronGeometry(s,LOWFX?1:2);const a=r()*6.3,d=r()*1.9;g.translate(Math.cos(a)*d,r()*2.8+1.0+(i<2?1.2:0),Math.sin(a)*d);lobes.push(g);}
   const m=mergeGeos(lobes);lobes.forEach(g=>g.dispose());displace(m,.75,.9,seed*3.1);
@@ -190,10 +190,10 @@ function starGeo(size=1,depth=.25){ // Collective 4-point diamond star
   const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:true,bevelThickness:.05,bevelSize:.04,bevelSegments:2});g.center();return g;}
 
 function buildEnvironment(){
-  const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:.03,flatShading:true});
-  const grassMat=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0x4b8841:0x4f9a5e,roughness:.88});
-  const barkMat=new THREE.MeshStandardMaterial({color:0x4a354f,roughness:.86});
-  const pinkMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8});
+  const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.cliffColor||null,bumpMap:TEX.cliffHeight||null,bumpScale:.8,roughness:.93,metalness:.03,flatShading:false});
+  const grassMat=new THREE.MeshStandardMaterial({color:0xc8e2ac,map:TEX.mossColor||null,roughness:.88});
+  const barkMat=new THREE.MeshStandardMaterial({color:0xbba59b,map:TEX.barkColor||null,bumpMap:TEX.barkColor||null,bumpScale:.12,roughness:.86});
+  const pinkMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,side:THREE.DoubleSide});
   const stoneMat=new THREE.MeshStandardMaterial({color:0xbfc0d6,roughness:.78});
   const islands=[];
   function clearance(x,z){let d=Infinity;for(let i=0;i<N_SAMP;i+=3)d=Math.min(d,Math.hypot(x-track.pos[i].x,z-track.pos[i].z));return d;}
@@ -203,10 +203,17 @@ function buildEnvironment(){
   for(let k=0;k<10;k++){const a=k/10*Math.PI*2,r=22+random()*18,x=-20+Math.cos(a)*290,z=-120+Math.sin(a)*290;islands.push({x,y:20+random()*60,z,r,depth:40+random()*70,temple:k%3===0});}
   world.userData.islands=islands;
   function islandGeometry(r,depth,seed){
-    const rnd=mulberry(seed),segments=32,rings=[{y:0,s:1},{y:-depth*.035,s:.99},{y:-depth*.12,s:.84},{y:-depth*.15,s:.96},{y:-depth*.29,s:.7},{y:-depth*.33,s:.84},{y:-depth*.49,s:.53},{y:-depth*.54,s:.66},{y:-depth*.73,s:.31},{y:-depth*.78,s:.37},{y:-depth,s:.035}],p=[],colors=[],idx=[],angles=[];
-    for(let k=0;k<segments;k++)angles.push(.89+rnd()*.16);
-    rings.forEach((ring,j)=>{for(let k=0;k<segments;k++){const a=k/segments*Math.PI*2,rr=r*ring.s*angles[k]*(j>1?.92+rnd()*.17:1),shade=.72+rnd()*.35; p.push(Math.cos(a)*rr+(j>1?Math.sin(j*1.5)*r*.12:0),ring.y+(j>0?(rnd()-.5)*2:0),Math.sin(a)*rr*.83);const c=new THREE.Color(j===0?0x637c73:j===1?0x5b6470:j%2?0x66687e:0x3e425c).multiplyScalar(shade);colors.push(c.r,c.g,c.b);if(j<rings.length-1){const n=(k+1)%segments,a0=j*segments+k,b0=j*segments+n,c0=(j+1)*segments+k,d0=(j+1)*segments+n;idx.push(a0,b0,c0,b0,d0,c0);}}});
-    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(idx);g.computeVertexNormals();return g;
+    const segments=MOBILEFX?48:72,levels=24,p=[],colors=[],uv=[],idx=[],c=new THREE.Color();
+    for(let j=0;j<=levels;j++)for(let k=0;k<=segments;k++){
+      const t=j/levels,a=k/segments*Math.PI*2;
+      const rim=.95+.035*Math.sin(a*7+seed)+.025*Math.sin(a*13+seed);
+      const taper=Math.pow(1-t,.64),flute=Math.sin(a*19+Math.sin(t*8+seed))*.045;
+      const rr=r*(.025+taper*(rim+flute*Math.sin(t*Math.PI)));
+      p.push(Math.cos(a)*rr+Math.sin(t*4)*r*.08,-depth*t,Math.sin(a)*rr*.83);
+      c.setHex(j<2?0x728c67:activeMap.id==='canopy'?0xb5b6a1:0xabb0c3).multiplyScalar(.8+.2*(1-t));colors.push(c.r,c.g,c.b);uv.push(k/segments*4,t*3);
+      if(j<levels&&k<segments){const n=j*(segments+1)+k,m=n+segments+1;idx.push(n,n+1,m,n+1,m+1,m);}
+    }
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g;
   }
   // Each flower is five individually modeled, irregular petals. The sprays retain
   // open space between branch tips instead of obscuring the tree with solid crowns.
@@ -315,7 +322,7 @@ function buildMapLandmark(island,index){
       const a=j*Math.PI/6,points=[];for(let k=0;k<=18;k++){const t=k/18*Math.PI/2;points.push([Math.cos(a)*Math.cos(t)*radius,1.3+Math.sin(t)*radius,Math.sin(a)*Math.cos(t)*radius]);}mapTube(points,.17,ivory,g,18);
     }
     for(const t of[.25,.6,1]){const ring=mapMesh(new THREE.TorusGeometry(Math.cos(t)*radius,.14,6,48),ivory,g,0,1.3+Math.sin(t)*radius,0);ring.rotation.x=Math.PI/2;}
-    const leaf=new THREE.MeshStandardMaterial({color:0x519248,roughness:.85});
+    const leaf=new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.85,side:THREE.DoubleSide});
     for(let j=0;j<7;j++){const a=j*2.4,d=radius*.62*Math.sqrt(j/7);const plant=mapMesh(treeCanopyGeo(150+j,[0x244b31,0x6eac47]),leaf,g,Math.cos(a)*d,2,Math.sin(a)*d);plant.scale.setScalar(.65);}
   }
 }
@@ -373,7 +380,7 @@ function buildCircuitArchitecture(){
   }
   if(activeMap.id==='canopy'){
     // Glass garden tunnel with curved ribs, trailing vines and luminous blossoms.
-    const bark=new THREE.MeshStandardMaterial({color:0x685e3b,roughness:.96});
+    const bark=new THREE.MeshStandardMaterial({color:0xc3b494,map:TEX.barkColor||null,bumpMap:TEX.barkColor||null,bumpScale:.2,roughness:.96});
     const leaf=new THREE.MeshStandardMaterial({color:0x56983e,roughness:.83,side:THREE.DoubleSide});
     const glass=new THREE.MeshPhysicalMaterial({color:0xadddf2,transparent:true,opacity:.11,roughness:.08,side:THREE.DoubleSide,depthWrite:false});
     for(let k=0;k<12;k++){
@@ -389,11 +396,11 @@ function buildCircuitArchitecture(){
     for(let j=0;j<12;j++){
       const a=j*Math.PI/6;mapTube([[Math.cos(a)*19,-1,Math.sin(a)*19],[Math.cos(a)*9,5,Math.sin(a)*9],[Math.cos(a)*5,21,Math.sin(a)*5]],1.6,bark,tree,14);
       const y=40+j%4*7,points=[[0,y-10,0],[Math.cos(a)*11,y,Math.sin(a)*11],[Math.cos(a)*28,y+8,Math.sin(a)*28]];mapTube(points,1.4,bark,tree,18);
-      const crown=mapMesh(treeCanopyGeo(800+j,[0x25482b,0x82a84b]),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85}),tree,Math.cos(a)*23,y+7,Math.sin(a)*23);crown.scale.set(3.5,1.6,3.5);
+      const crown=mapMesh(treeCanopyGeo(800+j,[0x25482b,0x82a84b]),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,side:THREE.DoubleSide}),tree,Math.cos(a)*23,y+7,Math.sin(a)*23);crown.scale.set(3.5,1.6,3.5);
     }
     for(const y of[26,39,52]){mapMesh(new THREE.CylinderGeometry(11.5,7.5,2.2,40),metal,tree,0,y,0);const rail=mapMesh(new THREE.TorusGeometry(11.4,.15,6,48),cyan,tree,0,y+1.8,0);rail.rotation.x=Math.PI/2;}
     // Far below the circuit: a rippled turquoise sea instead of an empty void.
-    const sea=new THREE.MeshPhysicalMaterial({color:0x26b7c2,roughness:.2,metalness:.38,transparent:true,opacity:.9});
+    const sea=new THREE.MeshPhysicalMaterial({color:0x26b7c2,bumpMap:TEX.cliffHeight||null,bumpScale:.08,roughness:.2,metalness:.38,transparent:true,opacity:.9});
     const ocean=mapMesh(new THREE.CircleGeometry(850,64),sea,world,-20,-100,-120);ocean.rotation.x=-Math.PI/2;ocean.receiveShadow=false;
   }
   buildMapClouds();

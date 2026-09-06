@@ -97,7 +97,12 @@ function stepSlipstream(r,dt){
 function stepRacer(r,dt){
   const ag=trackAG(r.u);
   // --- controls -> targets
-  let steerIn=r.isPlayer&&!r.finished?clamp(((input.right?1:0)-(input.left?1:0))+padSteer,-1,1):r.ai.steer;
+  let steerIn=r.isPlayer&&!r.finished?clamp(((input.right?1:0)-(input.left?1:0))+padSteer+touchSteer,-1,1):r.ai.steer;
+  if(r.isPlayer&&game.touch&&game.steeringAssist&&!r.drifting&&r.spin<=0){
+    const margin=TRACK_W/2-1.35,edge=Math.max(0,(Math.abs(r.lat)-(margin-1.5))/1.5);
+    // Assist only counters passive centrifugal drift near an edge, never a deliberate steer.
+    if(Math.abs(steerIn)<.12)steerIn=clamp(trackCurv(r.u)*r.speed*.22-Math.sign(r.lat)*edge*.42,-.55,.55);
+  }
   if(r.spin>0){steerIn=0;r.throttle=false;}
   r.steer=lerp(r.steer,steerIn,1-Math.exp(-dt*(r.drifting?7:10)));
   // --- drift state machine: hop first, then commit to a direction inside the hop window
@@ -227,8 +232,8 @@ function pickItem(r){
   const table=[['burst',1.2+back*1.0],['shield',1.4-back*.5],['mine',1.3-back*.9],['missile',(.45+back*1.5)*(last?1.5:1)],['pulse',rank===1?0:back>.6?back*1.6:.05],['triple',back*1.5*(last?1.6:1)]];
   let sum=0;for(let i=0;i<table.length;i++)sum+=table[i][1];let x=rng()*sum;for(const [k,w] of table){if(w<=0)continue;x-=w;if(x<=0)return k;}return 'burst';
 }
-function buildMineMesh(){const g=new THREE.Group();const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,1),new THREE.MeshStandardMaterial({color:0x000,emissive:0xa3e635,emissiveIntensity:2}));g.add(core);const shell=new THREE.Mesh(starGeo(.9,.3),new THREE.MeshStandardMaterial({color:0x2a2f18,metalness:.7,roughness:.3}));shell.rotation.x=Math.PI/2;g.add(shell);g.userData.core=core;return g;}
-function buildMissileMesh(){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(0,-.9),new THREE.Vector2(.28,-.8),new THREE.Vector2(.3,.3),new THREE.Vector2(0,.95)],12),new THREE.MeshStandardMaterial({color:0xcbd5e1,metalness:.85,roughness:.3}));body.rotation.x=Math.PI/2;g.add(body);const fin=new THREE.Mesh(starGeo(.7,.08),new THREE.MeshStandardMaterial({color:0x0a1628,emissive:0xcbd5e1,emissiveIntensity:1}));fin.position.z=-.7;g.add(fin);return g;}
+function buildMineMesh(){if(typeof buildReferenceMine==='function')return buildReferenceMine();const g=new THREE.Group();const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,1),new THREE.MeshStandardMaterial({color:0x000,emissive:0xa3e635,emissiveIntensity:2}));g.add(core);const shell=new THREE.Mesh(starGeo(.9,.3),new THREE.MeshStandardMaterial({color:0x2a2f18,metalness:.7,roughness:.3}));shell.rotation.x=Math.PI/2;g.add(shell);g.userData.core=core;return g;}
+function buildMissileMesh(){if(typeof buildReferenceMissile==='function')return buildReferenceMissile();const g=new THREE.Group();const body=new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(0,-.9),new THREE.Vector2(.28,-.8),new THREE.Vector2(.3,.3),new THREE.Vector2(0,.95)],12),new THREE.MeshStandardMaterial({color:0xcbd5e1,metalness:.85,roughness:.3}));body.rotation.x=Math.PI/2;g.add(body);const fin=new THREE.Mesh(starGeo(.7,.08),new THREE.MeshStandardMaterial({color:0x0a1628,emissive:0xcbd5e1,emissiveIntensity:1}));fin.position.z=-.7;g.add(fin);return g;}
 function useItem(r){
   if(!r.item||r.spin>0||r.finished)return false;const k=r.item;
   if(k==='triple'){if(r.tripleCd>0)return false;if(!r.tripleLeft)r.tripleLeft=3;r.tripleLeft--;r.tripleCd=.28;applyBoost(r,1.0,1.34,.7);if(r.isPlayer)SFX.boost(2);if(r.tripleLeft>0)return true;}
@@ -423,7 +428,7 @@ function updateHUD(dt){
     if(p.item){const key=p.item+(p.tripleLeft||'');if(key!==lastItemKey){ic.innerHTML=itemIconSVG(p.item);lbl.textContent=ITEMS[p.item].name+(p.tripleLeft?` ×${p.tripleLeft}`:'');lastItemKey=key;}}
     else if(lastItemKey!==null){ic.innerHTML='';lbl.textContent='NO ITEM';lastItemKey=null;}}
   const drift=document.getElementById('driftmeter');if(drift){drift.hidden=!p.drifting;drift.style.setProperty('--charge',Math.min(100,p.driftTime/3*100)+'%');drift.dataset.tier=p.driftTier;drift.textContent=DRIFT_LABELS[p.driftTier];}
-  const special=document.getElementById('specialHUD');if(special&&typeof ABILITIES!=='undefined'){const ability=ABILITIES[p.div.id];const ready=!(p.specialCooldown>0);const specialLabel=document.getElementById('specialLabel');if(specialLabel)specialLabel.textContent=ability.name+' · '+(ready?'Q / Y · READY':Math.ceil(p.specialCooldown)+'s');special.dataset.ready=ready?'true':'false';special.style.setProperty('--ready',Math.max(0,1-p.specialCooldown/ability.cooldown));
+  const special=document.getElementById('specialHUD');if(special&&typeof ABILITIES!=='undefined'){const ability=ABILITIES[p.div.id];const ready=!(p.specialCooldown>0);const specialLabel=document.getElementById('specialLabel');if(specialLabel)specialLabel.textContent=ability.name+' · '+(ready?(game.touch?'READY':'Q / Y · READY'):Math.ceil(p.specialCooldown)+'s');special.dataset.ready=ready?'true':'false';special.style.setProperty('--ready',Math.max(0,1-p.specialCooldown/ability.cooldown));
     if(hud.tP){if(ready!==updateHUD.powerReady){updateHUD.powerReady=ready;if(ready)hud.tP.classList.add('ready');else hud.tP.classList.remove('ready');}hud.tP.textContent=ready?'POWER':Math.ceil(p.specialCooldown)+'s';}}
   drawMini();
 }
@@ -476,13 +481,14 @@ function stepPositionToasts(p,dt){
 let last=performance.now(),acc=0;const STEP=1/120;
 function frame(now){
   requestAnimationFrame(frame);
-  let dt=Math.min(.05,(now-last)/1000);last=now;
+  const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
+  if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
   if(game.state==='paused')pollGamepad();
   if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster')(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
   if(typeof updateMapScenery==='function')updateMapScenery(dt);
   pollGamepad();game.time+=dt;acc+=dt;let steps=0;
-  while(acc>=STEP&&steps<6&&['countdown','race','finish'].includes(game.state)){simStep(STEP);acc-=STEP;steps++;}
-  if(steps===6)acc=0;
+  while(acc>=STEP&&steps<12&&['countdown','race','finish'].includes(game.state)){simStep(STEP);acc-=STEP;steps++;}
+  if(steps===12)acc=0;
   [sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx].forEach(p=>p.update(dt));if(typeof raceFX!=='undefined')raceFX.update(dt,game.player);
   updateCamera(dt);updateHUD(dt);
   world.traverse(o=>{if(o.userData.spin)o.rotation.z+=o.userData.spin*dt*(o.geometry&&o.geometry.type==='TorusGeometry'?1:0),o.rotation.y+=o.userData.spin*dt;});
@@ -500,7 +506,7 @@ function simStep(dt){
         // start boost / wheelspin judgment
         if(p.startHold>0&&p.startHold<.9){applyBoost(p,1.0,1.3,.8);SFX.boost(2);setToast('ROCKET START','teal','',3);}else if(p.startHold>=1.6){p.wheelspin=.9;setToast('WHEELSPIN','','',3);haptic(30);}}}
     if(c<=0){game.state='race';game.racers.forEach(r=>{if(!r.isPlayer)r.ai.throttleHold=0;});}
-    else{if(input.throttle)p.startHold+=dt;else p.startHold=0;game.racers.forEach(r=>{if(!r.isPlayer)stepAI(r,dt);r.throttle=false;stepRacer(r,dt);});return;}
+    else{if(input.throttle||(game.touch&&input.drift))p.startHold+=dt;else p.startHold=0;game.racers.forEach(r=>{if(!r.isPlayer)stepAI(r,dt);r.throttle=false;stepRacer(r,dt);});return;}
   }
   game.raceTime+=dt;
   p.throttle=(input.throttle||game.touch||game.autoThrottle)&&!input.brake;p.brake=input.brake;
@@ -523,9 +529,11 @@ function rosterOrbit(dt){if(typeof updateMapScenery==='function')updateMapScener
 
 // ---------- Input ----------
 const KEYS={KeyW:'throttle',ArrowUp:'throttle',KeyS:'brake',ArrowDown:'brake',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',ShiftLeft:'drift',ShiftRight:'drift',Space:'drift',KeyE:'item',ControlLeft:'item',ControlRight:'item',KeyQ:'special'};
-const heldKeys=new Set(),touchHeld=new Set(),padHeld=new Set();let padSteer=0,padPause=false;
+const heldKeys=new Set(),touchHeld=new Set(),padHeld=new Set();let padSteer=0,padPause=false,touchSteer=0;
+const activeTouchPointers=new Map();
+game.analogSteering=saved.analogSteering!==false;game.steeringAssist=saved.steeringAssist!==false;
 function syncInput(){for(const key of ['throttle','brake','left','right','drift','item','special']){const on=touchHeld.has(key)||padHeld.has(key)||[...heldKeys].some(code=>KEYS[code]===key);if(key==='item'&&on&&!input.item)input.itemEdge=true;if(key==='special'&&on&&!input.special)input.specialEdge=true;input[key]=on;}}
-function resetInput(){heldKeys.clear();touchHeld.clear();padHeld.clear();padSteer=0;for(const k of Object.keys(input))input[k]=false;document.querySelectorAll('#touch .act').forEach(el=>el.classList.remove('act'));}
+function resetInput(){heldKeys.clear();touchHeld.clear();padHeld.clear();padSteer=0;touchSteer=0;steerPointer=null;activeTouchPointers.clear();const pad=document.getElementById('tSteer');if(pad){pad.style.setProperty('--steer','0px');pad.setAttribute?.('aria-valuenow','0');}for(const k of Object.keys(input))input[k]=false;document.querySelectorAll('#touch .act').forEach(el=>el.classList.remove('act'));}
 // Key events that originate inside a text field never drive the kart or the menus.
 function typingTarget(e){const t=e&&e.target;if(!t||!t.tagName)return false;const tag=String(t.tagName).toUpperCase();return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||t.isContentEditable===true;}
 addEventListener('keydown',e=>{if(typingTarget(e))return;const k=KEYS[e.code];if(k&&['race','countdown','finish'].includes(game.state)){heldKeys.add(e.code);syncInput();if(e.preventDefault)e.preventDefault();audioInit();}
@@ -541,13 +549,28 @@ function pollGamepad(){const pad=navigator.getGamepads?.()[0];if(!pad){padHeld.c
   padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4)||down(5))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
   if(down(9)&&!padPause){if(game.state==='paused')resume();else pause();}padPause=down(9);syncInput();}
 const touchEl=document.getElementById('touch');
-function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;const pointers=new Set();
-  el.addEventListener('pointerdown',e=>{e.preventDefault();audioInit();pointers.add(e.pointerId);el.setPointerCapture(e.pointerId);touchHeld.add(key);syncInput();el.classList.add('act');});
-  const off=e=>{pointers.delete(e.pointerId);if(!pointers.size){touchHeld.delete(key);syncInput();el.classList.remove('act');}};
-  el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',off);}
+function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
+  el.addEventListener('pointerdown',e=>{
+    if(!['race','countdown'].includes(game.state))return;e.preventDefault();audioInit();
+    activeTouchPointers.set(e.pointerId,{key,el});el.setPointerCapture?.(e.pointerId);touchHeld.add(key);syncInput();el.classList.add('act');
+  });
+  const off=e=>{activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
+  el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',off);
+}
+const steerPad=document.getElementById('tSteer');let steerPointer=null;
+if(steerPad){
+  const move=e=>{const b=steerPad.getBoundingClientRect();touchSteer=clamp((e.clientX-b.left-b.width/2)/(b.width*.36),-1,1);if(Math.abs(touchSteer)<.08)touchSteer=0;steerPad.style.setProperty('--steer',(touchSteer*b.width*.31)+'px');steerPad.setAttribute?.('aria-valuenow',String(Math.round(touchSteer*100)));};
+  steerPad.addEventListener('pointerdown',e=>{if(!['race','countdown'].includes(game.state)||steerPointer!==null)return;e.preventDefault();audioInit();steerPointer=e.pointerId;steerPad.setPointerCapture?.(e.pointerId);move(e);steerPad.classList.add('act');});
+  steerPad.addEventListener('pointermove',e=>{if(e.pointerId===steerPointer)move(e);});
+  const release=e=>{if(e.pointerId!==steerPointer)return;steerPointer=null;touchSteer=0;steerPad.style.setProperty('--steer','0px');steerPad.setAttribute?.('aria-valuenow','0');steerPad.classList.remove('act');};
+  for(const type of['pointerup','pointercancel','lostpointercapture'])steerPad.addEventListener(type,release);
+}
+for(const [id,key] of[['analogmode','analogSteering'],['steerassist','steeringAssist']]){
+  const toggle=document.getElementById(id);if(toggle){toggle.checked=game[key];toggle.addEventListener('change',()=>{game[key]=toggle.checked;saved[key]=game[key];persist();resetInput();if(['race','countdown'].includes(game.state))showTouch();});}
+}
 bindTouch('tL','left');bindTouch('tR','right');bindTouch('tD','drift');bindTouch('tI','item');bindTouch('tB','brake');bindTouch('tS','special');bindTouch('tP','special');
 game.touch=typeof saved.touchMode==='boolean'?saved.touchMode:matchMedia('(pointer:coarse)').matches;
-function showTouch(){if(game.touch){touchEl.classList.add('on');if(document.documentElement&&document.documentElement.dataset)document.documentElement.dataset.touch='on';}}
+function showTouch(){touchEl.classList.toggle?.('analog',game.analogSteering);if(game.touch){touchEl.classList.add('on');if(document.documentElement&&document.documentElement.dataset)document.documentElement.dataset.touch='on';}}
 function hideTouch(){touchEl.classList.remove('on');if(document.documentElement&&document.documentElement.dataset)delete document.documentElement.dataset.touch;}
 // UI buttons
 const touchModeToggle=document.getElementById('touchmode');
@@ -599,7 +622,7 @@ let previewScene=null,previewCamera=null,previewKart=null,previewStage=null,prev
 const previewSpin={velocity:0,dragging:false,lastX:0,pointer:null};
 function disposePreview(){if(previewKart){previewScene.remove(previewKart);if(typeof disposeKart==='function')disposeKart(previewKart);previewKart=null;}}
 function buildPreviewStage(){
- previewScene=new THREE.Scene();previewCamera=new THREE.PerspectiveCamera(30,1,.1,80);
+ previewScene=new THREE.Scene();previewScene.environment=scene.environment;previewCamera=new THREE.PerspectiveCamera(30,1,.1,80);
  previewScene.add(new THREE.HemisphereLight(0xdff6ff,0x55688c,.72));
  const key=new THREE.DirectionalLight(0xfff3ea,1.05);key.position.set(-4,7,-6);previewScene.add(key);
  const fill=new THREE.DirectionalLight(0xbfe9ff,.35);fill.position.set(6,3,4);previewScene.add(fill);
@@ -641,24 +664,30 @@ function renderSelectedPreview(dt){const el=document.getElementById('kart-previe
  if(!previewSpin.dragging){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
  if(!previewKart||!renderer.setScissor)return;
+ previewScene.environment=scene.environment;
  animateShowroomKart(previewKart,game.time,dt,previewAngle);
  const stage=previewStage.userData;stage.ticks.rotation.z=-previewAngle;stage.ring.material.opacity=.58+Math.sin(game.time*2.2)*.14;stage.halo.rotation.z=game.time*.15;
  previewCamera.aspect=rect.width/rect.height;const narrow=rect.width<rect.height*1.15;
  previewCamera.position.set(5.5,2.9,-7.3).multiplyScalar(narrow?1.45:1.08);previewCamera.lookAt(0,.55,0);previewCamera.updateProjectionMatrix();
  const y=innerHeight-rect.bottom;renderer.setViewport(rect.left,y,rect.width,rect.height);renderer.setScissor(rect.left,y,rect.width,rect.height);renderer.setScissorTest(true);const oldAuto=renderer.autoClear;renderer.autoClear=false;renderer.clearDepth();renderer.render(previewScene,previewCamera);renderer.autoClear=oldAuto;renderer.setScissorTest(false);renderer.setViewport(0,0,innerWidth,innerHeight);
 }
-// Render authentic selection portraits once, reusing one small GPU context.
-const directorPortraits=new Map();let portraitRenderer=null;
+// Portraits share the main renderer and its reflection environment: no extra GPU context.
+const directorPortraits=new Map();
 window.renderDirectorPortrait=function(d){
  if(directorPortraits.has(d.id))return directorPortraits.get(d.id);
  if(typeof renderer.renderDirectorPortrait==='function'){const out=renderer.renderDirectorPortrait(d);directorPortraits.set(d.id,out);return out;}
+ const target=new THREE.WebGLRenderTarget(160,180,{encoding:THREE.sRGBEncoding,depthBuffer:true});
+ const previous=renderer.getRenderTarget(),viewport=renderer.getViewport(new THREE.Vector4()),scissor=renderer.getScissor(new THREE.Vector4()),scissorTest=renderer.getScissorTest(),clear=renderer.getClearColor(new THREE.Color()),alpha=renderer.getClearAlpha(),auto=renderer.autoClear;
+ let kart;
  try{
-  if(!portraitRenderer){portraitRenderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});portraitRenderer.setSize(160,180);portraitRenderer.setClearColor(0xeff8fb,0);}
-  const stage=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,160/180,.1,30),kart=buildKart(d);
-  stage.add(kart);stage.add(new THREE.HemisphereLight(0xffffff,0x798cb0,1.8));const key=new THREE.DirectionalLight(0xffffff,2);key.position.set(-2,5,-4);stage.add(key);
-  cam.position.set(2.5,2.4,-5.5);cam.lookAt(0,1.15,0);portraitRenderer.render(stage,cam);
-  const out=document.createElement('canvas');out.width=160;out.height=180;out.getContext('2d').drawImage(portraitRenderer.domElement,0,0);directorPortraits.set(d.id,out);disposeKart(kart);
-  if(directorPortraits.size===ROSTER.length){portraitRenderer.dispose();portraitRenderer.forceContextLoss?.();portraitRenderer=null;}
-  return out;
- }catch{return null;}
+  const stage=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,160/180,.1,30);kart=buildKart(d);
+  stage.environment=scene.environment;stage.add(kart);stage.add(new THREE.HemisphereLight(0xffffff,0x798cb0,.6));const key=new THREE.DirectionalLight(0xffffff,1.2);key.position.set(-2,5,-4);stage.add(key);
+  cam.position.set(2.5,2.4,-5.5);cam.lookAt(0,1.15,0);
+  renderer.setRenderTarget(target);renderer.setViewport(0,0,160,180);renderer.setScissorTest(false);renderer.setClearColor(0xeff8fb,0);renderer.autoClear=true;renderer.render(stage,cam);
+  const pixels=new Uint8Array(160*180*4);renderer.readRenderTargetPixels(target,0,0,160,180,pixels);
+  const out=document.createElement('canvas');out.width=160;out.height=180;const ctx=out.getContext('2d'),image=ctx.createImageData(160,180);
+  for(let y=0;y<180;y++)image.data.set(pixels.subarray((179-y)*640,(180-y)*640),y*640);
+  ctx.putImageData(image,0,0);directorPortraits.set(d.id,out);return out;
+ }catch(error){console.warn('Director portrait unavailable',error);return null;}
+ finally{renderer.setRenderTarget(previous);renderer.setViewport(viewport);renderer.setScissor(scissor);renderer.setScissorTest(scissorTest);renderer.setClearColor(clear,alpha);renderer.autoClear=auto;target.dispose();if(kart)disposeKart(kart);}
 };

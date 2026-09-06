@@ -47,7 +47,18 @@ function sectionSurface(rows,segments=48){
   for(let j=0;j<rows.length-1;j++)for(let i=0;i<segments;i++){const a=j*(segments+1)+i,b=a+segments+1;indices.push(a,b,a+1,b,b+1,a+1);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();return g;
 }
+// Smooth authored sections without changing their endpoints or silhouette extents.
+function smoothKartSections(rows,steps=4){
+  const out=[];
+  for(let j=0;j<rows.length-1;j++)for(let k=0;k<steps;k++){
+    const t=k/steps,a=rows[Math.max(0,j-1)],b=rows[j],c=rows[j+1],d=rows[Math.min(rows.length-1,j+2)];
+    out.push(b.map((v,i)=>{if(i===0)return lerp(v,c[i],t);const v0=(c[i]-(a[i]||0))*.5,v1=((d[i]||0)-v)*.5;
+      const n=(2*t*t*t-3*t*t+1)*v+(t*t*t-2*t*t+t)*v0+(-2*t*t*t+3*t*t)*c[i]+(t*t*t-t*t)*v1;
+      return Math.max(Math.min(v,c[i]),Math.min(Math.max(v,c[i]),n));}));
+  }out.push(rows[rows.length-1]);return out;
+}
 function bodyLoft(rows,segments=32){
+  rows=smoothKartSections(rows,3);
   const p=[],uv=[],idx=[];rows.forEach((r,j)=>{for(let i=0;i<=segments;i++){const a=i/segments*Math.PI*2;p.push(Math.sin(a)*r[1],r[0],Math.cos(a)*r[2]+(r[3]||0));uv.push(i/segments,j/(rows.length-1));}});
   for(let j=0;j<rows.length-1;j++)for(let i=0;i<segments;i++){const a=j*(segments+1)+i,b=a+segments+1;idx.push(a,a+1,b,b,a+1,b+1);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g;
@@ -76,7 +87,12 @@ function kartGeos(){
     legs.push(limbSurface([[s*.19,.06,.01],[s*.22,-.05,-.2],[s*.27,-.10,-.43],[s*.28,-.12,-.57],[s*.27,-.35,-.75],[s*.24,-.53,-.91]],[.16,.17,.15,.14,.1,.075]));
     hands.push(limbSurface([[s*.28,.47,-.66],[s*.275,.49,-.71],[s*.255,.47,-.76]],[.065,.085,.035]));
   }
-  const torso=mergeKartGeometry([torsoLoft,...legs]);[torsoLoft,...legs].forEach(g=>g.dispose());
+  const chest=[];
+  for(const side of[-1,1]){
+    const pectoral=bodyLoft([[.55,.02,.01,0],[.61,.13,.055,0],[.75,.17,.09,0],[.88,.145,.06,0],[.94,.01,.01,0]],24);pectoral.translate(side*.16,0,-.15);chest.push(pectoral);
+    for(let j=0;j<3;j++){const abdominal=bodyLoft([[.15+j*.13,.01,.01,0],[.18+j*.13,.1,.045,0],[.25+j*.13,.09,.035,0],[.28+j*.13,.01,.01,0]],16);abdominal.translate(side*.105,0,-.17);chest.push(abdominal);}
+  }
+  const torso=mergeKartGeometry([torsoLoft,...legs,...chest]);[torsoLoft,...legs,...chest].forEach(g=>g.dispose());
   const head=mergeKartGeometry([headLoft]).translate(-PILOT_NECK[0],-PILOT_NECK[1],-PILOT_NECK[2]);headLoft.dispose();
   const armL=mergeKartGeometry([arms[0],hands[0]]).translate(PILOT_SHOULDER[0],-PILOT_SHOULDER[1],-PILOT_SHOULDER[2]);
   const armR=mergeKartGeometry([arms[1],hands[1]]).translate(-PILOT_SHOULDER[0],-PILOT_SHOULDER[1],-PILOT_SHOULDER[2]);[...arms,...hands].forEach(g=>g.dispose());
@@ -87,6 +103,7 @@ function kartGeos(){
 // Longitudinal coachwork: each station defines z, half-width, vertical center and depth.
 // Unlike primitive boxes, these smooth closed lofts have authored taper and camber.
 function coachwork(stations,facets=24){
+  stations=smoothKartSections(stations,4);
   const p=[],uv=[],idx=[];
   stations.forEach((r,j)=>{for(let i=0;i<=facets;i++){const a=i/facets*Math.PI*2;p.push(Math.sin(a)*r[1],r[2]+Math.cos(a)*r[3],r[0]);uv.push(i/facets,j/(stations.length-1));}});
   for(let j=0;j<stations.length-1;j++)for(let i=0;i<facets;i++){const a=j*(facets+1)+i,b=a+facets+1;idx.push(a,b,a+1,b,b+1,a+1);}
@@ -173,7 +190,7 @@ function buildKart(div){
   add(KART_GEO.torso,skin,pilot,'torso');
   const head=new THREE.Group();head.name='head';head.position.set(...PILOT_NECK);pilot.add(head);add(KART_GEO.head,skin,head,'head-mesh');
   const arms=[-1,1].map(s=>{const arm=new THREE.Group();arm.name=s<0?'arm-l':'arm-r';arm.position.set(s*PILOT_SHOULDER[0],PILOT_SHOULDER[1],PILOT_SHOULDER[2]);pilot.add(arm);add(s<0?KART_GEO.armL:KART_GEO.armR,skin,arm,arm.name+'-mesh');return arm;});
-  if(div.id==='kinetic'||div.id==='loom'){pilot.scale.set(.9,1,.94);add(KART_GEO.hair,skin,head,'hair');}
+  if(div.id==='kinetic'||div.id==='loom')pilot.scale.set(.9,1,.94);
   // Steering wheel is connected to the footwell, with hands meeting its upper grips; the group turns about its own tilted axis via rotation.z.
   const steeringWheel=new THREE.Group();steeringWheel.name='steering-wheel';steeringWheel.position.set(0,1.45,-.34);steeringWheel.rotation.x=-.7;body.add(steeringWheel);
   add(new THREE.TorusGeometry(.25,.035,10,32),dark,steeringWheel,'steering-wheel-rim');
@@ -181,7 +198,7 @@ function buildKart(div){
   const wheels=[];
   KART_WHEEL_REST.forEach((p,i)=>{
     const pivot=new THREE.Group(),spin=new THREE.Group();pivot.name=['wheel-fl','wheel-fr','wheel-rl','wheel-rr'][i];spin.name='spin';pivot.position.set(...p);root.add(pivot);pivot.add(spin);
-    add(KART_GEO.tyre,tyre,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
+    add(KART_GEO.tyre,div.id==='kinetic'||div.id==='animus'?tyre:white,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
     const luminous=glow.clone();const ring=add(KART_GEO.rim,luminous,pivot,'wheel-light-ring');ring.position.x=i%2?.255:-.255;
     wheels.push({pivot,spin,glow:ring,side:i%2?1:-1,rest:new THREE.Vector3(...p)});
   });
@@ -192,6 +209,16 @@ function buildKart(div){
   root.userData={wheels,body,pilot,head,arms,steeringWheel,exhaust,under,shield,halo,star,glow,chassis:div.id,clipState:null,clipNodes:null,anim:null};
   // Object3D.clone() JSON-copies userData; keep the rig references out of that copy (kartProjection ghosts only need the id).
   Object.defineProperty(root.userData,'toJSON',{value:()=>({chassis:div.id}),enumerable:false});
+  // A shared alpha footprint grounds karts even when phone shadow maps are off.
+  if(TEX.contactShadow){
+    if(!KART_GEO.contactFootprint)KART_GEO.contactFootprint=new THREE.PlaneGeometry(3.9,5.4);
+    const contact=add(KART_GEO.contactFootprint,new THREE.MeshBasicMaterial({map:TEX.contactShadow,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1}),root,'contact-shadow');contact.rotation.x=-Math.PI/2;contact.position.y=.035;contact.castShadow=contact.receiveShadow=false;
+  }
+  // Articulated shoulder caps, white/copper collar details and wheel spokes.
+  for(let i=0;i<2;i++){
+    const cap=add(new THREE.TorusGeometry(.132,.018,6,20),['hybrid','helix'].includes(div.id)?metal:panel,arms[i],'shoulder-seam');cap.rotation.y=Math.PI/2;cap.position.x=i===0?-.03:.03;
+  }
+  for(const w of wheels){const spokes=[];for(let j=0;j<5;j++){const a=j/5*Math.PI*2;const g=new THREE.BoxGeometry(.035,.055,.27);g.translate(0,0,.18);g.rotateX(a);g.translate(w.side*.249,0,0);spokes.push(g);}const g=mergeKartGeometry(spokes);spokes.forEach(p=>p.dispose());add(g,metal,w.spin,'machined-wheel-spokes');}
   batchKartBody(body);resolveKartRig(root);return root;
 }
 
@@ -304,11 +331,11 @@ function animateKart(r,dt,ag=0){
   for(let i=0;i<4;i++){const w=ud.wheels[i];if(!w)continue;
     w.spin.rotation.x=r.wheelRot+(i>=2?a.overspin:0);w.pivot.rotation.y=i<2?r.steer*.38:0;
     a.fold[i]=ease(a.fold[i],w.side*ag*Math.PI/2,dt,5);w.pivot.rotation.z=a.fold[i];
-    w.glow.material.emissiveIntensity=ag*2.6;w.glow.material.opacity=ag;}
+    w.glow.material.emissiveIntensity=.65+ag*1.0;w.glow.material.opacity=1;}
   ud.under.material.emissiveIntensity=ag*2.4;
   // --- exhausts, halo/star, shield
   const pulse=boosting?1+.12*Math.sin(a.t*38)+.08:1;
-  for(let i=0;i<ud.exhaust.length;i++){const e=ud.exhaust[i];e.material.emissiveIntensity=boosting?5:r.throttle?2.2:.6;e.scale.set(pulse,pulse,1);}
+  for(let i=0;i<ud.exhaust.length;i++){const e=ud.exhaust[i];e.material.emissiveIntensity=boosting?2.4:r.throttle?1.1:.4;e.scale.set(pulse,pulse,1);}
   ud.halo.rotation.y+=dt*2.5;ud.star.rotation.y+=dt*1.5;ud.shield.visible=r.shield>0;if(r.shield>0){const s=1+Math.sin(a.t*9)*.04;ud.shield.scale.set(s,s,s);ud.shield.rotation.y+=dt;}
   // --- steering wheel and arms
   a.wheel=ease(a.wheel,spinning?Math.sin(a.t*21)*.6:-r.steer*1.1,dt,12);
@@ -378,12 +405,12 @@ function itemIconSVG(key){
 let itemBoxes=[],tokens=[],mines=[],missiles=[];
 const pickupGroup=new THREE.Group();scene.add(pickupGroup);
 function buildPickups(){
-  const boxG=starGeo(1.1,.5);const boxMat=new THREE.MeshPhysicalMaterial({color:0xd4a843,metalness:.85,roughness:.18,emissive:0xd4a843,emissiveIntensity:.18,clearcoat:1});
-  const coreG=new THREE.IcosahedronGeometry(.42,1);const coreMat=new THREE.MeshStandardMaterial({color:0x000,emissive:0x00d9b5,emissiveIntensity:3});
+  const boxG=new THREE.BoxGeometry(1.45,1.45,.32);const boxMat=new THREE.MeshPhysicalMaterial({color:0x66e8ff,metalness:.25,roughness:.1,emissive:0x00bfff,emissiveIntensity:.25,transparent:true,opacity:.72,depthWrite:false,clearcoat:1});
+  const coreG=starGeo(.44,.38);const coreMat=new THREE.MeshStandardMaterial({color:0xc4ffff,emissive:0x39dcff,emissiveIntensity:1.1});
   const rows=[0.11,0.30,0.47,0.64,0.80,0.93];
   rows.forEach(u=>{[-5,-1.7,1.7,5].forEach(lat=>{const g=new THREE.Group();const m=new THREE.Mesh(boxG,boxMat);m.castShadow=true;g.add(m);const cc=new THREE.Mesh(coreG,coreMat);g.add(cc);pickupGroup.add(g);itemBoxes.push({u,lat,mesh:g,star:m,core:cc,t:0});});});
-  // tokens: gold hex coins in arcs
-  const tokG=new THREE.CylinderGeometry(.5,.5,.12,6);tokG.rotateX(Math.PI/2);const tokMat=new THREE.MeshPhysicalMaterial({color:0xd4a843,metalness:.9,roughness:.2,emissive:0xd4a843,emissiveIntensity:.35,clearcoat:.8});
+  // tokens: round gold coins in arcs
+  const tokG=new THREE.CylinderGeometry(.5,.5,.12,32);tokG.rotateX(Math.PI/2);const tokMat=new THREE.MeshPhysicalMaterial({color:0xd4a843,metalness:.9,roughness:.2,emissive:0xd4a843,emissiveIntensity:.35,clearcoat:.8});
   const embG=starGeo(.24,.06);const embMat=new THREE.MeshStandardMaterial({color:0x2a1a04,roughness:.5,metalness:.4});
   const arcs=[[0.06,-3,1],[0.2,3,-1],[0.38,-4,.5],[0.55,0,0],[0.72,4,-.5],[0.86,-2,1]];
   arcs.forEach(([u0,lat0,dir])=>{for(let k=0;k<6;k++){const u=u0+k*0.0045,lat=lat0+Math.sin(k*.9)*dir*2.2;const g=new THREE.Group();g.add(new THREE.Mesh(tokG,tokMat));const e=new THREE.Mesh(embG,embMat);e.position.z=.07;g.add(e);const e2=e.clone();e2.position.z=-.07;g.add(e2);pickupGroup.add(g);tokens.push({u,lat,mesh:g,t:0});}});
