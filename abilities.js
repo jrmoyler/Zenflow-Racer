@@ -16,13 +16,13 @@ const ABILITIES={
 const abilityZones=[];
 function initAbility(r){r.specialCooldown=0;r.specialActive=0;r.specialPulse=0;r.phase=0;r.slow=0;r.ram=0;r.reflect=0;r.regen=0;r.lastLostTokens=0;r.specialAI=1+rng()*4;}
 function clearAbilities(){abilityZones.length=0;if(typeof clearPowerEffects==='function')clearPowerEffects();}
-function abilityFX(r,kind=r.div.id){if(typeof spawnPowerEffect==='function')spawnPowerEffect(kind,r.u,r.lat,r.div.acc,r);}
+function abilityFX(r,kind=r.div.id){if(typeof spawnPowerEffect==='function')spawnPowerEffect(kind,r.u,r.lat,r.div.acc,r);if(typeof raceFX!=='undefined')raceFX.onSpecial(r,kind);}
 function powerProtected(r,attacker,reflectable=true){
  if(r.finished||r.phase>0)return true;
  if(r.reflect>0&&reflectable){r.reflect=0;abilityFX(r,'juris');if(attacker&&attacker!==r)hitRacer(attacker,'reflection',null);return true;}
  return false;
 }
-function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker))return false;if(r.shield>0){r.shield=0;return false;}r.slow=Math.max(r.slow||0,duration);return true;}
+function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker))return false;if(r.shield>0){r.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);return false;}r.slow=Math.max(r.slow||0,duration);return true;}
 function useSpecial(r){
  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.spin>0&&r.div.id!=='helix')return false;
  const power=ABILITIES[r.div.id];if(!power)return false;
@@ -30,7 +30,7 @@ function useSpecial(r){
  if(r.isPlayer){setToast(power.name,'teal');SFX.ui();}
  switch(r.div.id){
  case 'zenflow':r.specialActive=4;break;
- case 'collective':{let taken=0;for(const o of game.racers){if(o===r||!o.tokens||Math.abs(du_dist(r.u,o.u))>35||r.tokens>=10||taken>=3||powerProtected(o,r))continue;if(o.shield>0){o.shield=0;continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}break;}
+ case 'collective':{let taken=0;for(const o of game.racers){if(o===r||!o.tokens||Math.abs(du_dist(r.u,o.u))>35||r.tokens>=10||taken>=3||powerProtected(o,r))continue;if(o.shield>0){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}break;}
  case 'hybrid':r.phase=3.5;r.specialActive=3.5;break;
  case 'nexus':abilityZones.push({kind:'decoy',owner:r,u:r.u,lat:r.lat,life:8});r.specialActive=8;break;
  case 'kinetic':r.ram=4;r.specialActive=4;break;

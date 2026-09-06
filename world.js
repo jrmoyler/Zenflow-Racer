@@ -20,12 +20,12 @@ catch(error){const replacement=canvas.cloneNode(false);canvas.replaceWith(replac
 renderer.setPixelRatio(LOWFX?0.7:Math.min(devicePixelRatio,MOBILEFX?1.15:1.6));
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();if(typeof game!=='undefined'&&['race','countdown'].includes(game.state)&&typeof pause==='function')pause();graphicsNotice('The graphics connection was interrupted. Restoring the circuit…',true);});
 canvas.addEventListener('webglcontextrestored',()=>{document.getElementById('graphics-notice')?.remove();});
-renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.88;
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.82;
 renderer.shadowMap.enabled=!LOWFX&&!MOBILEFX;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0xc5c8ec,180,780);
+scene.fog=new THREE.Fog(0xc5c8ec,320,980);
 const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.3,1400);
-const hemi=new THREE.HemisphereLight(0xc7eaff,0x8272a0,.92);scene.add(hemi);
+const hemi=new THREE.HemisphereLight(0xc7eaff,0x8272a0,.38);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe5ef,1.25);sun.position.set(-180,220,-120);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.near=20;sun.shadow.camera.far=700;
 sun.shadow.camera.left=-120;sun.shadow.camera.right=120;sun.shadow.camera.top=120;sun.shadow.camera.bottom=-120;sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.03;
@@ -41,7 +41,7 @@ function buildSky(){
     fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);vec3 sky=mix(skyHorizon,skyTop,smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
   // Small cubemap supplies pastel specular reflections on the road and vehicles.
-  if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});const envCamera=new THREE.CubeCamera(.1,30,target);refreshMapEnvironment=()=>envCamera.update(renderer,envScene);refreshMapEnvironment();scene.environment=target.texture;}
+  if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});target.texture.encoding=THREE.sRGBEncoding;const envCamera=new THREE.CubeCamera(.1,30,target);refreshMapEnvironment=()=>envCamera.update(renderer,envScene);refreshMapEnvironment();scene.environment=target.texture;}
   return mat;
 }
 
@@ -132,7 +132,8 @@ function buildWall(lat,h0,h1,mat,pred,uvScale=8){
 const world=new THREE.Group();scene.add(world);
 function buildTrackMeshes(){
   const W=TRACK_W/2;
-  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,roughness:.21,metalness:.42,clearcoat:1,clearcoatRoughness:.12,envMapIntensity:1.1,side:THREE.DoubleSide});
+  // Lighting is balanced so the lavender road, grass and liveries keep their saturation after ACES.
+  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,roughness:.34,metalness:.1,clearcoat:.5,clearcoatRoughness:.22,envMapIntensity:.4,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road));
   const under=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0xd3dfd9:0x697087,roughness:.34,metalness:.5,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W-.5,-.12],[-W-.3,-.85],[W+.3,-.85],[W+.5,-.12]],under));
@@ -190,7 +191,7 @@ function starGeo(size=1,depth=.25){ // Collective 4-point diamond star
 
 function buildEnvironment(){
   const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:.03,flatShading:true});
-  const grassMat=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0x4b8841:0x527e67,roughness:.88});
+  const grassMat=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0x4b8841:0x4f9a5e,roughness:.88});
   const barkMat=new THREE.MeshStandardMaterial({color:0x4a354f,roughness:.86});
   const pinkMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8});
   const stoneMat=new THREE.MeshStandardMaterial({color:0xbfc0d6,roughness:.78});

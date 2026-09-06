@@ -76,3 +76,23 @@ button{touch-action:manipulation}button:focus-visible,.card:focus-visible{outlin
 /* Race feedback: the position counter pulses whenever the player gains or loses a place. */
 #pos.bump .n{animation:posbump .35s ease-out}@keyframes posbump{0%{transform:scale(1.18)}100%{transform:scale(1)}}#pos .n{display:inline-block;transform-origin:left bottom}
 #item .lbl:empty{display:none}
+/* ---------- Race FX ---------- */
+/* HUD-side race presentation: raceFX toggles these classes on #hud (fx-boost is held while boosting; the rest are timed pulses). All are pointer-transparent overlays on pseudo-elements so existing HUD children are untouched. */
+#hud::before,#hud::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0}
+#hud::before{background:repeating-conic-gradient(from 0deg at 50% 50%,#9ffff000 0deg,#9ffff000 4.6deg,#9ffff0 4.8deg,#9ffff000 5deg);-webkit-mask:radial-gradient(ellipse at center,transparent 38%,#000 72%);mask:radial-gradient(ellipse at center,transparent 38%,#000 72%);mix-blend-mode:screen;transition:opacity .25s ease-out}
+#hud.fx-boost::before{opacity:.28;animation:fxspeed .55s linear infinite}
+@keyframes fxspeed{0%{transform:scale(1) rotate(0deg)}100%{transform:scale(1.06) rotate(1.2deg)}}
+#hud::after{background:radial-gradient(ellipse at center,transparent 42%,var(--fx-flash,#9ffff0) 100%)}
+#hud.fx-tier1{--fx-flash:#66aaffcc}#hud.fx-tier2{--fx-flash:#ffa040cc}#hud.fx-tier3{--fx-flash:#ff5fd0d9}
+#hud.fx-tier1::after,#hud.fx-tier2::after,#hud.fx-tier3::after{animation:fxtier .45s ease-out}
+@keyframes fxtier{0%{opacity:.9}100%{opacity:0}}
+#hud.fx-hit{--fx-flash:#ff3b2fd9}#hud.fx-hit::after{animation:fxhit .4s ease-out}
+@keyframes fxhit{0%{opacity:1;transform:scale(1.04)}30%{opacity:.7}100%{opacity:0;transform:scale(1)}}
+#hud.fx-lap{--fx-flash:#ffd77ab3}#hud.fx-lap::after{animation:fxlap .6s ease-out}
+@keyframes fxlap{0%{opacity:0}25%{opacity:.85}100%{opacity:0}}
+#hud.fx-finish{--fx-flash:#fff5d0e6}#hud.fx-finish::after{animation:fxfinish 1.2s ease-out}
+@keyframes fxfinish{0%{opacity:1}100%{opacity:0}}
+#hud.fx-hit #pos,#hud.fx-hit #speedo{animation:fxshake .35s ease-out}
+@keyframes fxshake{0%,100%{transform:translate(0,0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,1px)}80%{transform:translate(2px,-1px)}}
+#hud.fx-boost #speedo{text-shadow:0 0 14px #00d9b5,0 0 26px #00d9b580;transition:text-shadow .2s}
+@media(prefers-reduced-motion:reduce){#hud.fx-boost::before{animation:none;opacity:.12}#hud.fx-hit #pos,#hud.fx-hit #speedo{animation:none}}
