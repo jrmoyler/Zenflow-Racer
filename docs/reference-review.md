@@ -59,3 +59,11 @@ Vercel automatically built the PR branch successfully. Browser inspection confir
 The browser explicitly reported `data-renderer="canvas"`; WebGL is unavailable in this cloud browser. These interactions verify the compatibility renderer and shared game simulation, **not** WebGL appearance or performance. Full race completion/rematch and physical mobile/gamepad checks remain unverified.
 
 The compatibility showroom/portraits now display approved kart artwork, and each circuit has its matching scenic matte behind the live projected road. The interactive WebGL path continues using actual chassis and environment geometry.
+
+### Captured browser evidence
+
+Captured from Vercel preview of runtime commit `c3c1a74`. Both screenshots are explicitly from the Canvas compatibility browser, at 1363×936; they do not prove WebGL visual parity.
+
+![Approved title artwork with functional controls](world-review/reference-title.jpg)
+
+![Compatibility selection with exact kart artwork](world-review/reference-selection.jpg)
