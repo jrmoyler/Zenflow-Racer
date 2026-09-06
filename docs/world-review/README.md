@@ -1,19 +1,24 @@
 # Offline world geometry review
 
-The images in this directory are CPU Cycles renders of **the actual `world.js` BufferGeometry and instance transforms**. They are geometry/composition evidence, not screenshots from the browser game. Materials and pastel lighting are approximated in Blender; browser reflection, animated waterfall shaders, gameplay effects, karts and UI are not represented.
+The existing `chase.png` and `overview.png` files are CPU Cycles renders of an earlier Cherry circuit. They are geometry/composition evidence, **not browser screenshots**, and do not show the new Stormforge or Canopy circuits. Materials and lighting are approximated in Blender; animated waterfall shaders, cloud sprites, browser reflections, gameplay effects, karts and UI are not represented.
 
-- `chase.png`: forward view along the real circuit at normalized distance 0.035.
-- `overview.png`: layout overview of the complete floating-island circuit.
+The exporter now supports all three current circuits and preserves BufferGeometry, vertex colors, normals, material parameters and every instanced transform. It validates that exported geometry and matrices contain only finite values. It also reports nearby nonadjacent centreline sections as a conservative road-clearance screening metric; this is not an exact collision calculation for banked ribbons.
 
-The review identified gaps between the moss caps and their cliff rims. The production world now generates both boundaries from the same seeded coordinates. Duplicate canopy vertices now share averaged normals to prevent accidental flat faceting.
-
-To reproduce from the repository root:
+To export each circuit from the repository root:
 
 ```sh
-node scripts/render-world-export.cjs
+node scripts/render-world-export.cjs cherry /tmp/zenflow-cherry.json
+node scripts/render-world-export.cjs stormforge /tmp/zenflow-stormforge.json
+node scripts/render-world-export.cjs canopy /tmp/zenflow-canopy.json
+```
+
+The map defaults to `cherry`. When no output path is supplied, the exporter writes `zenflow-MAP-geometry.json` to the operating system's temporary directory. Do not commit these large intermediate JSON files.
+
+The existing Blender review script reads one fixed input path. To render a selected circuit using that script:
+
+```sh
+node scripts/render-world-export.cjs canopy docs/world-review/world-geometry.json
 blender -b -t 6 --python scripts/render-world-blender.py
 ```
 
-The exporter generates `docs/world-review/world-geometry.json` as a temporary intermediate. It is intentionally not retained in the repository. Geometry, vertex colors, custom normals, material parameters and every instance transform are preserved by the exporter. Waterfalls use an approximate static blue material for this review.
-
-The final detail pass replaces the cherry trees' opaque lobe crowns with open, instanced sprays of individually modeled five-petal flowers, plus secondary branch twigs. Desktop uses 590 blossoms per tree; mobile uses 330. Basalt islands now have alternating broken ledge/stratum rings and irregular offset tapers. The latest renders include this pass.
+That operation replaces the existing `chase.png` and `overview.png` outputs; archive or rename those files if retaining multiple map reviews. The Blender material/light setup remains an approximation and does not automatically reproduce each map's browser atmosphere. The JSON includes map palette metadata for future renderer improvements.

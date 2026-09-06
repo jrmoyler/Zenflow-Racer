@@ -51,6 +51,13 @@ test('Race cleanup removes all lingering ability zones',()=>{racer('nexus');run(
 context.makeProjectileMesh=()=>{const Three=require('../vendor/three.min.js');const root=new Three.Group(),geometry=new Three.SphereGeometry(.5,8,6),material=new Three.MeshBasicMaterial();geometry.addEventListener('dispose',()=>context.disposalCounts.geometries++);material.addEventListener('dispose',()=>context.disposalCounts.materials++);root.add(new Three.Mesh(geometry,material),new Three.Mesh(geometry,material));return root;};
 test('Projectile expiry disposes GPU resources once, including shared child resources',()=>{racer();context.disposalCounts={geometries:0,materials:0};run('globalThis.expiring=makeProjectileMesh();mines.push({u:wrap01(r.u+.3),lat:0,mesh:expiring,core:expiring.children[0],owner:r,life:.001});stepWorld(.01);disposeProjectile(expiring)');assert.equal(run('mines.length'),0);assert.deepEqual(context.disposalCounts,{geometries:1,materials:1});});
 test('Race projectile cleanup releases mines and missiles',()=>{racer();context.disposalCounts={geometries:0,materials:0};run('mines.push({mesh:makeProjectileMesh()});missiles.push({mesh:makeProjectileMesh()});clearProjectiles();clearProjectiles()');assert.equal(run('mines.length+missiles.length'),0);assert.deepEqual(context.disposalCounts,{geometries:2,materials:2});});
+test('Records remain separate across circuits and selection rejects mid-race changes',()=>{
+ assert.notEqual(run("raceRecordKey('zenflow',1,'cherry')"),run("raceRecordKey('zenflow',1,'canopy')"));
+ context.MAPS=[{id:'cherry'},{id:'stormforge'},{id:'canopy'}];
+ run("game.state='roster';chooseMap('canopy')");assert.equal(run('chosenMapId'),'canopy');
+ run("game.state='race'");assert.equal(run("chooseMap('stormforge')"),false);assert.equal(run('chosenMapId'),'canopy');
+ run("game.state='roster'");assert.equal(run("chooseMap('missing')"),false);
+});
 require('./effects-regression.cjs')({test,assert});
 console.log(JSON.stringify({passed:cases.filter(t=>t.pass).length,total:cases.length,cases},null,2));
 process.exitCode=cases.every(t=>t.pass)?0:1;
