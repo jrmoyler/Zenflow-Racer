@@ -54,10 +54,12 @@ class CanvasRaceRenderer {
           if(Math.max(ax,bx,cx)<x||Math.min(ax,bx,cx)>x+w||Math.max(ay,by,cy)<y||Math.min(ay,by,cy)>y+h)continue;
           const mat=Array.isArray(o.material)?o.material[f[3]]:o.material;if(!mat||mat.visible===false||mat.opacity<.025)continue;
           normal.subVectors(world[f[1]],world[f[0]]).cross(edge.subVectors(world[f[2]],world[f[0]])).normalize();
+          const facing=normal.dot(edge.subVectors(eye,world[f[0]]));
+          if((mat.side===THREE.FrontSide&&facing<=0)||(mat.side===THREE.BackSide&&facing>=0))continue;
           const shade=mat.isMeshBasicMaterial?1:.4+.6*Math.abs(normal.dot(light));const color=(mat.color||new THREE.Color(0xb4d1de)).clone().multiplyScalar(shade);
           if(mat.emissive)color.add(mat.emissive.clone().multiplyScalar(Math.min(.45,mat.emissiveIntensity||0)));
           if(stage.fog){const fog=1-Math.exp(-Math.pow(distance*(stage.fog.density||.0012),2));color.lerp(stage.fog.color,Math.min(.9,fog));}
-          triangles.push({p:[ax,ay,bx,by,cx,cy],depth:(a.z+b.z+c.z)/3,color:'#'+color.getHexString(),alpha:mat.transparent?mat.opacity:1});
+          triangles.push({p:[ax,ay,bx,by,cx,cy],depth:(a.z+b.z+c.z)/3,color:'#'+color.convertLinearToSRGB().getHexString(),alpha:mat.transparent?mat.opacity:1});
         }
         processed+=data.faces.length;if(processed>180000)break;
       }

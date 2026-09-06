@@ -12,7 +12,8 @@ const kart=new THREE.Mesh(new THREE.BoxGeometry(1,1,3),new THREE.MeshStandardMat
 renderer.render(scene,camera);assert.ok(paths.length>0,'actual BufferGeometry triangles draw');assert.ok(paths.flat().every(Number.isFinite),'projection remains finite');const initial=JSON.stringify(paths);
 paths.length=0;kart.rotation.y=Math.PI/3;renderer.render(scene,camera);assert.notEqual(JSON.stringify(paths),initial,'kart rotation changes projected body silhouette');
 paths.length=0;kart.visible=false;renderer.render(scene,camera);assert.equal(paths.length,0,'hidden scene geometry is excluded');
-const instanced=new THREE.InstancedMesh(kart.geometry,kart.material,2);instanced.setMatrixAt(0,new THREE.Matrix4().makeTranslation(-1,0,0));instanced.setMatrixAt(1,new THREE.Matrix4().makeTranslation(1,0,0));scene.add(instanced);renderer.render(scene,camera);assert.ok(paths.length>12,'world instance matrices produce distinct triangles');
+const instanced=new THREE.InstancedMesh(kart.geometry,kart.material,2);instanced.setMatrixAt(0,new THREE.Matrix4().makeTranslation(-1,0,0));instanced.setMatrixAt(1,new THREE.Matrix4().makeTranslation(1,0,0));scene.add(instanced);renderer.render(scene,camera);const twoInstances=paths.length;paths.length=0;instanced.count=1;renderer.render(scene,camera);assert.ok(twoInstances>paths.length&&paths.length>0,'world instance matrices produce distinct visible faces');
+assert.ok(paths.length<12,'opaque boxes cull their hidden back faces');
 assert.equal(renderer.meshData(kart.geometry),renderer.meshData(kart.geometry),'immutable topology cache is reused');
 assert.ok(!/new Image|drawImage|assets\/art|referenceKart|paintReferencePortrait/.test(source),'software mode cannot substitute illustration sheets');
 console.log('PASS software 3D: real mesh projection, rotation, visibility, instances and shared topology cache.');
