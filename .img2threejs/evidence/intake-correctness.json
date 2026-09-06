@@ -1,0 +1,15 @@
+{
+  "action": "proceed",
+  "confirmed": false,
+  "assumptionsExposed": {
+    "primaryType": "articulated humanoid kart racer roster",
+    "primaryDomain": "hybrid",
+    "materialFamilies": [
+      "lacquered dielectric",
+      "tinted metal",
+      "rubber",
+      "carbon composite"
+    ]
+  },
+  "reason": "no objectness source available yet \u2014 confirmation DEFERRED to Phase 3 (OSIM). Proceeding on exposed assumptions; they remain falsifiable at Divine-Eye review."
+}

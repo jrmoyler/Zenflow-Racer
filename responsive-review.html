@@ -1,1 +1,14 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ZenFlow responsive review</title><style>body{margin:20px;background:#0c1728;color:#e8f8ff;font:15px system-ui}button{padding:12px;margin:0 8px 16px 0}iframe{display:block;border:1px solid #50dde0;background:#102339;max-width:100%}p{max-width:800px}</style><h1>Responsive playtest</h1><p>Real game in fixed CSS viewports. Enable Touch controls in Character Select. This checks responsive layout and pointer input, not physical-device performance.</p><button data-size="390,844">Phone portrait · 390 × 844</button><button data-size="844,390">Phone landscape · 844 × 390</button><button data-size="1024,768">Tablet · 1024 × 768</button><iframe title="Game viewport" src="index.html" width="390" height="844" allow="fullscreen; gamepad"></iframe><script>const frame=document.querySelector('iframe');document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;}));</script></html>
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZenFlow responsive review</title>
+<style>body{margin:20px;background:#0c1728;color:#e8f8ff;font:15px system-ui}button{padding:12px;margin:0 8px 16px 0}iframe{display:block;border:1px solid #50dde0;background:#102339;max-width:100%}p{max-width:800px}output{display:block;margin:0 0 16px;font:13px monospace;line-height:1.6}</style>
+<h1>Responsive playtest</h1>
+<p>Real game in fixed CSS viewports. Enable Touch controls in Character Select. Frame timings describe this browser, not a physical phone. Pause freezes the circuit; its idle frame rate does not measure rendering performance.</p>
+<button data-size="390,844">Phone portrait · 390 × 844</button><button data-size="844,390">Phone landscape · 844 × 390</button><button data-size="1024,768">Tablet · 1024 × 768</button>
+<output id="metrics" aria-label="Runtime performance">Waiting for the circuit…</output>
+<iframe title="Game viewport" src="index.html?review=1" width="390" height="844" allow="fullscreen; gamepad"></iframe>
+<script>
+const frame=document.querySelector('iframe'),metrics=document.getElementById('metrics');
+document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;}));
+setInterval(()=>{const d=frame.contentDocument?.documentElement.dataset;if(!d?.frameMs)return;metrics.textContent=d.renderMode+' · '+d.frameMs+' ms/frame · '+(1000/Number(d.frameMs)).toFixed(1)+' fps · render '+d.renderWorkMs+' ms · '+d.raceState+' · race '+d.raceSeconds+' s · '+d.renderTriangles+' triangles';},1000);
+</script></html>

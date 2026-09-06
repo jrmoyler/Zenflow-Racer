@@ -1,0 +1,122 @@
+[
+  {
+    "id": "aether",
+    "angle": "front",
+    "file": "aether-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/aether.glb",
+    "sourceSha256": "cd30e2d5b84ebb9cd5ed8c96cc32cb29d002033147d70cf3fbcdf7780d876eaa",
+    "seconds": 25.04,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "animus",
+    "angle": "front",
+    "file": "animus-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/animus.glb",
+    "sourceSha256": "bd30a8c7f797dd2906af624fcfc18974a00917d88b027afc197457d252c526c2",
+    "seconds": 14.29,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "collective",
+    "angle": "front",
+    "file": "collective-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/collective.glb",
+    "sourceSha256": "8f8c8549717d7d80af8c1efe62e402a4147d7350016cd5a40ce7288d929be363",
+    "seconds": 13.67,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "helix",
+    "angle": "front",
+    "file": "helix-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/helix.glb",
+    "sourceSha256": "7f21099f6760920dba94e17abd764210387fee599fb742ffcc780ebd5bda894d",
+    "seconds": 14.32,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "hybrid",
+    "angle": "front",
+    "file": "hybrid-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/hybrid.glb",
+    "sourceSha256": "241630c0c14207244ce0b81e1c3aa6f8dc4b6d3bd1e0d4573fcfb5b572394822",
+    "seconds": 13.78,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "juris",
+    "angle": "front",
+    "file": "juris-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/juris.glb",
+    "sourceSha256": "f624a53bb73fbf0f71075bf16812a91b095880737decca8225b727103a81becd",
+    "seconds": 13.43,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "kinetic",
+    "angle": "front",
+    "file": "kinetic-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/kinetic.glb",
+    "sourceSha256": "f2d7e668195b08e972f49d1e93a26b3db8f777585f4bae0bae535b819c28d9b9",
+    "seconds": 13.36,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "loom",
+    "angle": "front",
+    "file": "loom-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/loom.glb",
+    "sourceSha256": "7a3bf8a9623c209a37cf3f1342df5b7ec272fb37a4bc546d2fb2bb2afd1a4581",
+    "seconds": 14.75,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "nexus",
+    "angle": "front",
+    "file": "nexus-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/nexus.glb",
+    "sourceSha256": "cc6882199d9ece56e69a0ed9a43a1d302894b37454b77f6f35cac867dfb90be6",
+    "seconds": 13.81,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "signal",
+    "angle": "front",
+    "file": "signal-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/signal.glb",
+    "sourceSha256": "0cd3f0d626383e99dabab383cf6cc9810a33a09be1e630fd330ca99da580966a",
+    "seconds": 13.68,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "vector",
+    "angle": "front",
+    "file": "vector-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/vector.glb",
+    "sourceSha256": "875057cf91973c9ffd7aa960dbe58205ad86c2964de6a7a079d41f390fc2f011",
+    "seconds": 13.85,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/zenflow.glb",
+    "sourceSha256": "e685961626d986e56c51658cdc195f33f473d7a5a62af461cb1c8362fa66c562",
+    "seconds": 13.97,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  }
+]

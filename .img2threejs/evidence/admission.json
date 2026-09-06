@@ -1,0 +1,14 @@
+{
+  "admitted": true,
+  "reasons": [],
+  "provenance": {
+    "viewpoint": "reference",
+    "sourcePath": ".img2threejs/evidence/zenflow-front.png",
+    "width": 163,
+    "height": 400,
+    "foregroundCoverage": 0.4748,
+    "largestComponentFraction": 0.9996,
+    "pHash": 16771030693262068238,
+    "duplicateOfHash": null
+  }
+}

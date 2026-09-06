@@ -1,0 +1,32 @@
+[
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/zenflow.glb",
+    "sourceSha256": "e685961626d986e56c51658cdc195f33f473d7a5a62af461cb1c8362fa66c562",
+    "seconds": 22.83,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "zenflow",
+    "angle": "side",
+    "file": "zenflow-side.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/zenflow.glb",
+    "sourceSha256": "e685961626d986e56c51658cdc195f33f473d7a5a62af461cb1c8362fa66c562",
+    "seconds": 15.31,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "zenflow",
+    "angle": "rear",
+    "file": "zenflow-rear.png",
+    "source": "/workspace/scratch/c3d1231a0165/zenflow-reference/assets/models/zenflow.glb",
+    "sourceSha256": "e685961626d986e56c51658cdc195f33f473d7a5a62af461cb1c8362fa66c562",
+    "seconds": 14.38,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  }
+]

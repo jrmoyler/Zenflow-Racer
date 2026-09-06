@@ -479,12 +479,31 @@ function stepPositionToasts(p,dt){
 
 // ---------- Main loop ----------
 let last=performance.now(),acc=0;const STEP=1/120;
+let lastFrameState=null,staticFrameDirty=true;
+const frameReview={start:0,count:0};
+function reportFrameMetrics(now){
+  if(typeof location==='undefined'||!/[?&]review=1(?:&|$)/.test(location.search))return;
+  if(!frameReview.start){frameReview.start=now;return;}
+  frameReview.count++;
+  if(now-frameReview.start<1000)return;
+  const out=document.documentElement.dataset;
+  out.frameMs=((now-frameReview.start)/frameReview.count).toFixed(1);
+  out.raceState=game.state;out.raceSeconds=game.raceTime.toFixed(2);
+  out.renderTriangles=String(renderer.info?.render?.triangles||0);
+  out.renderWorkMs=(renderer.info?.render?.workMs||0).toFixed(1);
+  out.renderMode=FALLBACK_GRAPHICS?'Software 3D':'WebGL';
+  frameReview.start=now;frameReview.count=0;
+}
 function frame(now){
   requestAnimationFrame(frame);
+  if(document.hidden){last=now;return;}
+  reportFrameMetrics(now);
+  if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
   const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
+  if(typeof tickTitleAttract==='function'&&tickTitleAttract(dt)){renderRaceScene();return;}
   if(game.state==='paused')pollGamepad();
-  if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster')(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
+  if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster'&&staticFrameDirty){(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));staticFrameDirty=false;}if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
   if(typeof updateMapScenery==='function')updateMapScenery(dt);
   pollGamepad();game.time+=dt;acc+=dt;let steps=0;
   while(acc>=STEP&&steps<12&&['countdown','race','finish'].includes(game.state)){simStep(STEP);acc-=STEP;steps++;}
@@ -580,7 +599,7 @@ if(autoThrottleToggle){autoThrottleToggle.checked=game.autoThrottle;autoThrottle
 const fullscreenButton=document.getElementById('fullscreen');
 if(fullscreenButton){fullscreenButton.hidden=!document.documentElement?.requestFullscreen;fullscreenButton.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{setToast('FULLSCREEN UNAVAILABLE');}};document.addEventListener('fullscreenchange',()=>{fullscreenButton.textContent=document.fullscreenElement?'EXIT FULLSCREEN':'FULLSCREEN';});}
 function updateBestTime(){const el=document.getElementById('besttime');if(el&&selected)el.textContent=Number.isFinite(saved[raceRecordKey(selected.id,game.diff)])?'BEST '+fmtTime(saved[raceRecordKey(selected.id,game.diff)]):'SET YOUR FIRST RECORD';}
-function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';resetInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
+function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';staticFrameDirty=true;resetInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
 function resume(){if(game.state!=='paused')return;game.state=game.prevState;document.getElementById('pause').classList.add('hidden');last=performance.now();acc=0;showTouch();}
 document.getElementById('pausebtn').onclick=()=>{if(game.state==='paused')resume();else pause();};
 document.getElementById('resume').onclick=resume;
@@ -591,7 +610,7 @@ document.getElementById('quit').onclick=()=>{document.getElementById('pause').cl
 document.getElementById('again').onclick=()=>{document.getElementById('results').classList.add('hidden');openRoster();};
 document.getElementById('rematch').onclick=()=>{document.getElementById('results').classList.add('hidden');audioInit();startRace();};
 document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));b.classList.add('on');game.diff=+b.dataset.d;SFX.ui();updateBestTime();});
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+addEventListener('resize',()=>{staticFrameDirty=true;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
 // ---------- Roster screen ----------
 let selected=null;
@@ -608,11 +627,14 @@ function openRoster(){clearProjectiles();if(typeof raceFX!=='undefined')raceFX.r
 function startRace(){document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------
-function boot(){
+async function boot(){
+ try{
+  await loadKartAssets((done,total)=>{document.getElementById('loading').textContent='ASSEMBLING 3D RACERS · '+done+'/'+total;});
   buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
   requestAnimationFrame(frame);
+ }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}
 }
 if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('800 20px "Space Grotesk"'),document.fonts.load('400 12px "JetBrains Mono"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
 
@@ -659,7 +681,7 @@ function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previ
  const release=e=>{if(e.pointerId!==previewSpin.pointer)return;previewSpin.dragging=false;previewSpin.pointer=null;el.classList.remove('dragging');};
  el.addEventListener('pointerup',release);el.addEventListener('pointercancel',release);el.addEventListener('lostpointercapture',release);
 })();
-function renderSelectedPreview(dt){const el=document.getElementById('kart-preview');if(!el||!selected||!el.getBoundingClientRect)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
+function renderSelectedPreview(dt){if(document.body?.classList.contains('title-open'))return;const el=document.getElementById('kart-preview');if(!el||!selected||!el.getBoundingClientRect)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
  // Full turntable rotation (about eleven seconds per 360°), plus hand-spun momentum.
  if(!previewSpin.dragging){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
