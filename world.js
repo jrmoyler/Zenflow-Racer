@@ -36,8 +36,8 @@ const rim=new THREE.DirectionalLight(0x00d9b5,0.35);rim.position.set(160,80,200)
 const zenWorldTime={value:0};
 function buildSky(){
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
-    uniforms:{time:zenWorldTime},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec3 direction;uniform float time;void main(){vec3 d=normalize(direction);vec3 sky=mix(vec3(.98,.76,.84),vec3(.53,.65,.91),smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
+    uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)}},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);vec3 sky=mix(skyHorizon,skyTop,smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
   // Small cubemap supplies pastel specular reflections on the road and vehicles.
   if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});new THREE.CubeCamera(.1,30,target).update(renderer,envScene);scene.environment=target.texture;}
@@ -53,10 +53,12 @@ const CTRL=[
 ];
 const ROLL_KEYS  =[[0,0],[8,0],[9,35],[10,110],[11,200],[12,290],[13,340],[14,360],[19,360],[20,360]]; // [ctrl index, degrees]
 const AG_KEYS    =[[0,0],[7.6,0],[8.6,1],[13.6,1],[14.8,0],[20,0]];
+const CHERRY_CONTROL=CTRL.map(p=>p.slice()),CHERRY_ROLL=ROLL_KEYS.map(p=>p.slice()),CHERRY_AG=AG_KEYS.map(p=>p.slice());
 const TRACK_W=14, N_SAMP=1800;
 const track={pos:[],tan:[],up:[],right:[],curv:[],ag:[],roll:[],len:0,u:[]};
 
 function buildTrackFrames(){
+  for(const key of ['pos','tan','up','right','curv','ag','roll','u'])track[key].length=0;
   const pts=CTRL.map(p=>new THREE.Vector3(p[0],p[1],p[2]));
   const curve=new THREE.CatmullRomCurve3(pts,true,'centripetal',0.5);
   curve.arcLengthDivisions=4000;curve.updateArcLengths();
@@ -129,11 +131,11 @@ function buildWall(lat,h0,h1,mat,pred,uvScale=8){
 const world=new THREE.Group();scene.add(world);
 function buildTrackMeshes(){
   const W=TRACK_W/2;
-  const road=new THREE.MeshPhysicalMaterial({color:0x5b439c,roughness:.21,metalness:.42,clearcoat:1,clearcoatRoughness:.12,envMapIntensity:1.1,side:THREE.DoubleSide});
+  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,roughness:.21,metalness:.42,clearcoat:1,clearcoatRoughness:.12,envMapIntensity:1.1,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road));
-  const under=new THREE.MeshStandardMaterial({color:0x6b458e,roughness:.34,metalness:.5,side:THREE.DoubleSide});
+  const under=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0xd3dfd9:0x697087,roughness:.34,metalness:.5,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W-.5,-.12],[-W-.3,-.85],[W+.3,-.85],[W+.5,-.12]],under));
-  const cyan=new THREE.MeshBasicMaterial({color:0x72ffff}),pink=new THREE.MeshBasicMaterial({color:0xeab0ff});
+  const cyan=new THREE.MeshBasicMaterial({color:activeMap.edge}),pink=new THREE.MeshBasicMaterial({color:activeMap.trim});
   for(const side of[-1,1]){
     world.add(buildRibbon([[side*(W-.25),.035],[side*(W-.05),.035]].sort((a,b)=>a[0]-b[0]),cyan));
     world.add(buildRibbon([[side*(W+.02),-.08],[side*(W+.48),-.08]].sort((a,b)=>a[0]-b[0]),pink));
@@ -187,7 +189,7 @@ function starGeo(size=1,depth=.25){ // Collective 4-point diamond star
 
 function buildEnvironment(){
   const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:.03,flatShading:true});
-  const grassMat=new THREE.MeshStandardMaterial({color:0x527e67,roughness:.88});
+  const grassMat=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0x4b8841:0x527e67,roughness:.88});
   const barkMat=new THREE.MeshStandardMaterial({color:0x4a354f,roughness:.86});
   const pinkMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8});
   const stoneMat=new THREE.MeshStandardMaterial({color:0xbfc0d6,roughness:.78});
@@ -250,18 +252,156 @@ function buildEnvironment(){
     // A continuous stream bridges the pond to the visible waterfall lip.
     const stream=new THREE.Mesh(new THREE.PlaneGeometry(island.r*.29,island.r*.53),pondMat);stream.rotation.x=-Math.PI/2;stream.position.set(island.x,island.y+.1,island.z+island.r*.55);world.add(stream);
     waterfall(island,island.r*.29,0);if(n%3===0)waterfall(island,island.r*.18,-.9);
-    if(island.temple)temple(island);
-    const count=Math.floor(island.r/4);for(let j=0;j<count;j++){const a=j/count*Math.PI*2+random()*.2,d=island.r*(.56+random()*.2),spot={x:island.x+Math.cos(a)*d,y:island.y+.06,z:island.z+Math.sin(a)*d*.78,s:1+random()*.6,rot:random()*6.3};(j%3===0?bonsaiSpots:cherrySpots).push(spot);}
+    if(island.temple){if(activeMap.id==='cherry')temple(island);else if(!(activeMap.id==='canopy'&&n===0))buildMapLandmark(island,n);}
+    const count=Math.floor(island.r/4);for(let j=0;j<count;j++){const a=j/count*Math.PI*2+random()*.2,d=island.r*(.56+random()*.2),spot={x:island.x+Math.cos(a)*d,y:island.y+.06,z:island.z+Math.sin(a)*d*.78,s:1+random()*.6,rot:random()*6.3};(activeMap.id!=='cherry'||j%3===0?bonsaiSpots:cherrySpots).push(spot);}
     // Irregular pale stepping stones on the moss, grouped around the pond.
     const stones=[];for(let k=0;k<8;k++){const g=rockGeo(n*19+k);g.scale(.8,.18,.65);g.translate(island.x+Math.cos(k*.4)*island.r*.5,island.y+.15,island.z+Math.sin(k*.4)*island.r*.38);stones.push(g);}const stoneGeo=mergeGeos(stones);stones.forEach(g=>g.dispose());world.add(new THREE.Mesh(stoneGeo,stoneMat));
   });
   function instanceTrees(spots,isBonsai){if(!spots.length)return;const can=new THREE.InstancedMesh(isBonsai?greenGeo:pinkGeo,isBonsai?pinkMat:blossomMat,spots.length),tr=new THREE.InstancedMesh(trunk,barkMat,spots.length),matrix=new THREE.Matrix4(),q=new THREE.Quaternion(),axis=new THREE.Vector3(0,1,0);spots.forEach((s,i)=>{q.setFromAxisAngle(axis,s.rot);matrix.compose(new THREE.Vector3(s.x,s.y,s.z),q,new THREE.Vector3(s.s,s.s*(isBonsai?.72:1),s.s));tr.setMatrixAt(i,matrix);matrix.compose(new THREE.Vector3(s.x,s.y+s.s*(isBonsai?2.6:3.6),s.z),q,new THREE.Vector3(s.s*(isBonsai?1.25:1),s.s*(isBonsai?.38:1),s.s));can.setMatrixAt(i,matrix);});can.castShadow=true;tr.castShadow=true;world.add(can,tr);}
   instanceTrees(cherrySpots,false);instanceTrees(bonsaiSpots,true);
+  if(!cherrySpots.length){pinkGeo.dispose();blossomMat.dispose();}
+  if(!bonsaiSpots.length){greenGeo.dispose();pinkMat.dispose();}
   // Small uninhabited fragments hang beneath the large islands, never in driving space.
   for(let k=0;k<14;k++){const host=islands[k%islands.length],g=islandGeometry(3+random()*3,10+random()*9,k+600),m=new THREE.Mesh(g,cliffMat);m.position.set(host.x+host.r*1.4,host.y-35-random()*30,host.z+host.r);world.add(m);}
+  buildCircuitArchitecture();
   // Static architecture shares material batches; transparent water remains separate.
   world.updateMatrixWorld(true);const batches=new Map();
-  world.traverse(mesh=>{if(!mesh.isMesh||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});
-  for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);meshes.forEach(mesh=>mesh.parent.remove(mesh));geometries.forEach(g=>g.dispose());world.add(merged);}
+  world.traverse(mesh=>{if(!mesh.isMesh||mesh.userData.dynamic||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});
+  for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);const originals=new Set(meshes.map(mesh=>mesh.geometry));meshes.forEach(mesh=>mesh.parent.remove(mesh));originals.forEach(g=>g.dispose());geometries.forEach(g=>g.dispose());world.add(merged);}
 
+}
+
+// Authored landmark kit: modeled ribs, blades, roots and galleries remain world
+// geometry so the camera can race through and around the reference architecture.
+function mapMesh(geometry,material,parent,x=0,y=0,z=0){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+function mapTube(points,radius,material,parent,segments=28){return mapMesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),segments,radius,7,false),material,parent);}
+function buildMapLandmark(island,index){
+  const g=new THREE.Group();g.position.set(island.x,island.y,island.z);world.add(g);
+  const ivory=new THREE.MeshStandardMaterial({color:0xe7e7d7,roughness:.34,metalness:.38});
+  const dark=new THREE.MeshStandardMaterial({color:0x434e60,roughness:.42,metalness:.7});
+  const amber=new THREE.MeshBasicMaterial({color:0xffbd61});
+  if(activeMap.id==='stormforge'){
+    // Riveted foundry towers: stepped roof, inset louvres, light seams, service pipes.
+    const w=island.r*.43,h=20+(index%4)*8;
+    mapMesh(new THREE.CylinderGeometry(w,w+2,3,8),dark,g,0,1.5,0);
+    mapMesh(new THREE.CylinderGeometry(w*.86,w,h,8),dark,g,0,h/2+3,0);
+    mapMesh(new THREE.CylinderGeometry(w,w*.86,2,8),ivory,g,0,h+3,0);
+    for(let j=0;j<8;j++){
+      const a=j*Math.PI/4,x=Math.sin(a)*w*.96,z=Math.cos(a)*w*.96;
+      mapMesh(new THREE.CylinderGeometry(.19,.19,h*.8,6),amber,g,x,h*.53+2,z);
+      const vent=mapMesh(new THREE.BoxGeometry(2.8,3,.35),dark,g,x,h-1,z);vent.rotation.y=a;
+      for(let k=0;k<5;k++){const slat=mapMesh(new THREE.BoxGeometry(2.5,.12,.45),ivory,g,x,h-2+k*.45,z);slat.rotation.y=a;}
+      if(j%2===0){mapTube([[x*.8,2,z*.8],[x*1.25,2,z*1.25],[x*1.25,h*.65,z*1.25],[x,h*.7,z]],.35,ivory,g);}
+    }
+    if(index%2===0){
+      const housing=new THREE.Group();housing.position.set(0,14,-w-3);g.add(housing);buildTurbine(housing,13,dark,ivory,amber);
+    }else{
+      // Rotating-joint crane and lattice boom above the industrial garden.
+      mapMesh(new THREE.CylinderGeometry(.8,1,19,10),ivory,g,w*.8,12,0);
+      for(const y of[6,18])mapMesh(new THREE.CylinderGeometry(1.4,1.4,.8,12),dark,g,w*.8,y,0);
+      for(const z of[-.65,.65])mapTube([[w*.8,20,z],[w*.8+3,26,z],[w*.8+19,26,z]],.3,ivory,g);
+      for(let k=0;k<8;k++)mapTube([[w*.8+3+k*2,26,-.65],[w*.8+5+k*2,26,.65]],.1,amber,g,1);
+      mapMesh(new THREE.CylinderGeometry(.045,.045,12,5),dark,g,w*.8+18,20,0);
+      mapMesh(new THREE.BoxGeometry(3,3,3),dark,g,w*.8+18,12.5,0);
+    }
+  }else{
+    // Conservatory: actual hemisphere glass shell with meridian ribs and rings.
+    const radius=Math.min(island.r*.46,18),glass=new THREE.MeshPhysicalMaterial({color:0x9fe6df,roughness:.12,metalness:.14,transparent:true,opacity:.19,side:THREE.DoubleSide,depthWrite:false});
+    mapMesh(new THREE.CylinderGeometry(radius+1,radius+1.6,1.5,40),ivory,g,0,.6,0);
+    mapMesh(new THREE.SphereGeometry(radius,32,16,0,Math.PI*2,0,Math.PI/2),glass,g,0,1.3,0);
+    for(let j=0;j<12;j++){
+      const a=j*Math.PI/6,points=[];for(let k=0;k<=18;k++){const t=k/18*Math.PI/2;points.push([Math.cos(a)*Math.cos(t)*radius,1.3+Math.sin(t)*radius,Math.sin(a)*Math.cos(t)*radius]);}mapTube(points,.17,ivory,g,18);
+    }
+    for(const t of[.25,.6,1]){const ring=mapMesh(new THREE.TorusGeometry(Math.cos(t)*radius,.14,6,48),ivory,g,0,1.3+Math.sin(t)*radius,0);ring.rotation.x=Math.PI/2;}
+    const leaf=new THREE.MeshStandardMaterial({color:0x519248,roughness:.85});
+    for(let j=0;j<7;j++){const a=j*2.4,d=radius*.62*Math.sqrt(j/7);const plant=mapMesh(treeCanopyGeo(150+j,[0x244b31,0x6eac47]),leaf,g,Math.cos(a)*d,2,Math.sin(a)*d);plant.scale.setScalar(.65);}
+  }
+}
+function buildTurbine(parent,radius,dark,metal,light){
+  mapMesh(new THREE.TorusGeometry(radius,.95,10,52),dark,parent);
+  mapMesh(new THREE.TorusGeometry(radius*.88,.19,6,52),light,parent,0,0,.5);
+  const rotor=new THREE.Group();parent.add(rotor);mapSceneryAnimations.push(rotor);
+  const hub=mapMesh(new THREE.CylinderGeometry(radius*.17,radius*.24,3,16),metal,rotor);hub.rotation.x=Math.PI/2;
+  for(let j=0;j<10;j++){
+    const shape=new THREE.Shape();shape.moveTo(radius*.15,-.4);shape.bezierCurveTo(radius*.5,-radius*.22,radius*.85,-radius*.2,radius*.9,-radius*.04);shape.lineTo(radius*.85,radius*.1);shape.bezierCurveTo(radius*.6,0,radius*.4,radius*.1,radius*.15,.4);shape.closePath();
+    const blade=mapMesh(new THREE.ExtrudeGeometry(shape,{depth:.35,bevelEnabled:true,bevelThickness:.15,bevelSize:.13,bevelSegments:2,curveSegments:8}),metal,rotor);blade.rotation.z=j*Math.PI/5;
+  }
+  rotor.updateMatrixWorld(true);
+  const rotorParts=rotor.children.map(m=>m.geometry.clone().applyMatrix4(m.matrix));
+  const mergedRotor=mergeGeos(rotorParts);rotorParts.forEach(g=>g.dispose());
+  rotor.children.forEach(m=>m.geometry.dispose());rotor.clear();mapMesh(mergedRotor,metal,rotor);
+  rotor.traverse(o=>{o.userData.dynamic=true;});
+  for(let j=0;j<16;j++){const a=j*Math.PI/8;mapMesh(new THREE.SphereGeometry(.2,5,4),metal,parent,Math.cos(a)*radius,Math.sin(a)*radius,1);}
+}
+function buildCircuitArchitecture(){
+  const metal=new THREE.MeshStandardMaterial({color:activeMap.id==='stormforge'?0x8994a3:0xe7e5dd,roughness:.38,metalness:.45});
+  const dark=new THREE.MeshStandardMaterial({color:0x3e4859,roughness:.42,metalness:.62});
+  const glow=new THREE.MeshBasicMaterial({color:activeMap.trim});
+  const cyan=new THREE.MeshBasicMaterial({color:activeMap.edge});
+  const putAt=(u)=>{const g=new THREE.Group(),p=new THREE.Vector3(),t=new THREE.Vector3(),up=new THREE.Vector3(),r=new THREE.Vector3();trackPoint(u,0,0,p);trackTan(u,t);trackUp(u,up);trackRight(u,r);g.position.copy(p);g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(r,up,t.clone().negate()));world.add(g);return g;};
+  // Repeating structural piers follow the road vertically without entering lanes.
+  for(let k=0;k<28;k++){
+    const u=k/28;if(trackAG(u)>.2)continue;const g=putAt(u);
+    for(const side of[-1,1]){
+      mapTube([[side*6.8,-.7,0],[side*5,-2,0],[side*1.2,-8,0],[side*.8,-19,0]],.6,metal,g,12);
+      if(activeMap.id==='stormforge')mapTube([[side*6.5,-1,-3],[side*3,-6,0],[side*6.5,-1,3]],.22,dark,g,4);
+    }
+  }
+  // Start gate is a full-width traversable arch; the hanging banner clears racers.
+  const gate=putAt(.007);
+  if(activeMap.id==='cherry'){
+    const vermilion=new THREE.MeshStandardMaterial({color:0x8c3e50,roughness:.58});
+    for(const x of[-8.7,8.7]){mapMesh(new THREE.CylinderGeometry(.52,.68,11,12),vermilion,gate,x,5,0);mapMesh(new THREE.CylinderGeometry(.9,.9,1.1,12),dark,gate,x,.3,0);}
+    mapTube([[-10.8,12.4,0],[-8.8,11.5,0],[0,11,0],[8.8,11.5,0],[10.8,12.4,0]],.55,dark,gate);
+    mapMesh(new THREE.BoxGeometry(20,.6,.7),vermilion,gate,0,9.5,0);
+  }else{
+    for(const x of[-8.8,8.8]){mapMesh(new THREE.BoxGeometry(1.6,10,2),metal,gate,x,5,0);mapMesh(new THREE.BoxGeometry(.22,8,2.06),cyan,gate,x,5,0);}
+    mapMesh(new THREE.BoxGeometry(20,2,2.3),metal,gate,0,10,0);
+    mapMesh(new THREE.BoxGeometry(17,.16,2.36),glow,gate,0,10.5,0);
+  }
+  const flagMat=new THREE.MeshStandardMaterial({map:TEX.finish,emissive:0x7ca2cd,emissiveIntensity:.25,side:THREE.DoubleSide});
+  mapMesh(new THREE.PlaneGeometry(6,1.3),flagMat,gate,0,8.5,0);
+  if(activeMap.id==='stormforge'){
+    // Track passes through the illuminated ribbed hangar; all ribs clear its width.
+    for(let k=0;k<9;k++){
+      const g=putAt(.325+k*.008);const pts=[];for(let j=0;j<=24;j++){const a=j/24*Math.PI;pts.push([Math.cos(a)*10,Math.sin(a)*12,0]);}mapTube(pts,.65,metal,g,24);mapTube(pts,.13,glow,g,24).position.z=.7;
+      if(k%2===0)for(const x of[-10.5,10.5])mapMesh(new THREE.BoxGeometry(2.2,5,1.4),dark,g,x,2.5,0);
+    }
+    for(const u of[.13,.57,.78]){const g=putAt(u),housing=new THREE.Group();housing.position.set(26,10,-6);g.add(housing);buildTurbine(housing,16,dark,metal,glow);mapMesh(new THREE.BoxGeometry(12,3,12),metal,g,26,-5,-6);}
+  }
+  if(activeMap.id==='canopy'){
+    // Glass garden tunnel with curved ribs, trailing vines and luminous blossoms.
+    const bark=new THREE.MeshStandardMaterial({color:0x685e3b,roughness:.96});
+    const leaf=new THREE.MeshStandardMaterial({color:0x56983e,roughness:.83,side:THREE.DoubleSide});
+    const glass=new THREE.MeshPhysicalMaterial({color:0xadddf2,transparent:true,opacity:.11,roughness:.08,side:THREE.DoubleSide,depthWrite:false});
+    for(let k=0;k<12;k++){
+      const g=putAt(.67+k*.007);const pts=[];for(let j=0;j<=20;j++){const a=j/20*Math.PI;pts.push([Math.cos(a)*8.7,Math.sin(a)*8.7,0]);}mapTube(pts,.16,metal,g,20);
+      const shell=mapMesh(new THREE.CylinderGeometry(8.7,8.7,5.8,20,1,true,0,Math.PI),glass,g);shell.rotation.set(0,0,Math.PI/2);shell.rotation.y=Math.PI/2;
+      // Vines stay beyond the track boundary; leaves are merged by material below.
+      for(const side of[-1,1]){mapTube([[side*8.4,1,0],[side*8.1,3,.3],[side*6.8,5.2,0],[side*5.4,6.9,.2]],.075,bark,g,10);for(let j=0;j<9;j++){const l=mapMesh(new THREE.SphereGeometry(.4,5,4),leaf,g,side*(8.3-j*.33),1+j*.64,.18);l.scale.set(.5,1,.23);l.rotation.z=side*(.7+(j%2)*.7);}}
+    }
+    // Ancient central tree with buttress roots, winding branches, canopy terraces.
+    const tree=new THREE.Group();tree.position.set(-103,-5,-130);world.add(tree);
+    const trunkPoints=[];for(let j=0;j<=16;j++){const t=j/16;trunkPoints.push(new THREE.Vector2(9*(1-t*.69)+Math.sin(t*16)*.65,t*72));}
+    mapMesh(displace(new THREE.LatheGeometry(trunkPoints,24),1.3,.32,891),bark,tree);
+    for(let j=0;j<12;j++){
+      const a=j*Math.PI/6;mapTube([[Math.cos(a)*19,-1,Math.sin(a)*19],[Math.cos(a)*9,5,Math.sin(a)*9],[Math.cos(a)*5,21,Math.sin(a)*5]],1.6,bark,tree,14);
+      const y=40+j%4*7,points=[[0,y-10,0],[Math.cos(a)*11,y,Math.sin(a)*11],[Math.cos(a)*28,y+8,Math.sin(a)*28]];mapTube(points,1.4,bark,tree,18);
+      const crown=mapMesh(treeCanopyGeo(800+j,[0x25482b,0x82a84b]),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85}),tree,Math.cos(a)*23,y+7,Math.sin(a)*23);crown.scale.set(3.5,1.6,3.5);
+    }
+    for(const y of[26,39,52]){mapMesh(new THREE.CylinderGeometry(11.5,7.5,2.2,40),metal,tree,0,y,0);const rail=mapMesh(new THREE.TorusGeometry(11.4,.15,6,48),cyan,tree,0,y+1.8,0);rail.rotation.x=Math.PI/2;}
+    // Far below the circuit: a rippled turquoise sea instead of an empty void.
+    const sea=new THREE.MeshPhysicalMaterial({color:0x26b7c2,roughness:.2,metalness:.38,transparent:true,opacity:.9});
+    const ocean=mapMesh(new THREE.CircleGeometry(850,64),sea,world,-20,-100,-120);ocean.rotation.x=-Math.PI/2;ocean.receiveShadow=false;
+  }
+  buildMapClouds();
+}
+function buildMapClouds(){
+  // Soft alpha billboards below the road preserve clear racing sightlines.
+  const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d');if(!ctx)return;
+  const gradient=ctx.createRadialGradient(64,64,5,64,64,63);gradient.addColorStop(0,'rgba(255,255,255,.75)');gradient.addColorStop(.38,'rgba(255,255,255,.5)');gradient.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
+  const tex=new THREE.CanvasTexture(c),mat=new THREE.SpriteMaterial({map:tex,color:activeMap.id==='canopy'?0xe8f7fa:0xe9dcf3,transparent:true,opacity:.72,depthWrite:false,fog:true});
+  // Owned texture is explicitly released alongside map scenery on a map switch.
+  mat.userData.mapTexture=tex;
+  const rnd=mulberry(270);for(let k=0;k<(MOBILEFX?42:76);k++){const sprite=new THREE.Sprite(mat);sprite.position.set((rnd()-.5)*850,-36-rnd()*65,-120+(rnd()-.5)*850);const s=60+rnd()*100;sprite.scale.set(s,s*.5,1);world.add(sprite);}
 }

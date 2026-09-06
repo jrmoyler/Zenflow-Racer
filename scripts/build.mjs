@@ -5,9 +5,9 @@ const root=process.cwd(), out=path.join(root,'dist');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 // Only ship runtime assets. New documentation, exports and local files stay private.
-const runtime=['index.html','core.js','fallback-renderer.js','world.js','vehicles.js',
- 'effects.js','abilities.js','postfx.js','game.js','menu.js','pwa.js','polish.css',
- 'manifest.webmanifest','vendor','icons','references/race-reference.jpg'];
+const runtime=['index.html','core.js','fallback-renderer.js','maps.js','world.js','vehicles.js',
+ 'item-art.js','effects.js','abilities.js','postfx.js','game.js','menu.js','pwa.js','polish.css',
+ 'manifest.webmanifest','vendor','icons','assets','references/race-reference.jpg'];
 for(const file of runtime){
  await mkdir(path.dirname(path.join(out,file)),{recursive:true});
  await cp(path.join(root,file),path.join(out,file),{recursive:true});

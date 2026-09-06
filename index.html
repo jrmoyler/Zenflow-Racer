@@ -132,6 +132,11 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 
 <div id="loading" class="screen"><div class="d"></div><div>ASSEMBLING CIRCUIT</div></div>
 
+<section id="title-screen" aria-label="ZenFlow Racer main menu">
+  <div class="title-stage"><img src="assets/art/title-screen.webp" alt="ZenFlow Racer: luminous division racers above the cherry blossom islands" fetchpriority="high" width="1672" height="941">
+    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start race" disabled><span>Start Race</span></button><button id="title-select" aria-label="Select division" disabled><span>Select Division</span></button><button id="title-settings" aria-label="Settings" disabled><span>Settings</span></button></nav>
+  </div><p class="title-status" role="status">Preparing your racing division…</p>
+</section>
 <div id="roster" class="screen hidden">
   <div class="head">
     <div>
@@ -139,7 +144,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
       <h1>ZENFLOW <span>RACER</span></h1>
       <div class="sub">Find your flow. Race beyond the clouds.</div>
     </div>
-    <div class="tag">CHERRY BLOSSOM SKYWAY<b>12 DIRECTORS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
+    <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>12 DIRECTORS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
   </div>
   <div class="showroom">
     <section class="director-panel glass" aria-label="Selected director">
@@ -147,10 +152,15 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
       <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your director’s power</div>
     </section>
     <div id="kart-preview" aria-label="Selected director and kart preview"><div class="preview-caption"><span>MEET YOUR DIRECTOR</span><strong id="preview-name">ZENFLOW</strong></div></div>
-    <section class="track-panel glass" aria-label="Track preview"><div class="panel-kicker">TRACK PREVIEW</div><div class="track-thumbnail" role="img" aria-label="Cherry blossom floating islands circuit concept preview"><span>CIRCUIT CONCEPT</span></div><h2>Cherry Blossom <br>Skyway</h2><p>Find your flow above the clouds. Chase the perfect line through floating gardens and cascading waterfalls.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><button id="go" class="btn" disabled>Confirm &amp; <br>Start Race</button></section>
+    <section class="track-panel glass" aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
+      <button class="map-card selected" data-map="cherry" aria-pressed="true"><img src="assets/art/map-cherry.webp" alt="Cherry blossom islands with pagodas and waterfalls"><span>Cherry Blossom Skyway</span></button>
+      <button class="map-card" data-map="stormforge" aria-pressed="false"><img src="assets/art/map-stormforge.webp" alt="Industrial floating citadel with enormous turbines"><span>Nexus Stormforge</span></button>
+      <button class="map-card" data-map="canopy" aria-pressed="false"><img src="assets/art/map-canopy.webp" alt="Tropical islands with giant trees and glass garden tunnels"><span>Vital Canopy Run</span></button>
+    </div><p id="map-description">Floating gardens, cascading waterfalls, and sweeping sky bridges.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><button id="go" class="btn" disabled>Start Race</button></section>
   </div>
   <div class="selector-heading"><span>CHOOSE YOUR DIRECTOR</span><span>← SWIPE TO EXPLORE →</span></div>
   <div id="grid" aria-label="Select a racing director"></div>
+  <div class="menu-tools"><button id="title-return" type="button">← Title</button><button id="open-art" type="button">Division collection ↗</button></div>
   <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>
   <div id="footer">
     <div id="pick">Choose a director to join the grid</div>
@@ -161,7 +171,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 </div>
 
 <div id="hud" class="hidden">
-  <div class="race-brand">ZENFLOW<span>RACER</span></div>
+  <div class="race-brand">ZENFLOW<span>RACER</span><small id="race-map-name">Cherry Blossom Skyway</small></div>
   <div id="ranks"></div>
   <div id="timer" class="mono">00:00.00</div>
   <button id="pausebtn">PAUSE</button>
@@ -184,6 +194,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 
 <div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="rematch" class="btn">Rematch</button></div></div></div>
 
+<dialog id="art-gallery" aria-labelledby="art-title"><header><h2 id="art-title">Division collection</h2><button id="close-art" aria-label="Close division collection">Close ×</button></header><p>The original kart and power reference artwork.</p><div class="art-pages"><figure><img loading="lazy" src="assets/art/division-karts-01.webp" alt="First six distinct division kart designs"><figcaption>Division karts · 01–06</figcaption></figure><figure><img loading="lazy" src="assets/art/division-karts-02.webp" alt="Second six distinct division kart designs"><figcaption>Division karts · 07–12</figcaption></figure><figure><img loading="lazy" src="assets/art/division-effects-01.webp" alt="First six signature division power effects"><figcaption>Signature powers · 01–06</figcaption></figure><figure><img loading="lazy" src="assets/art/division-effects-02.webp" alt="Second six signature division power effects"><figcaption>Signature powers · 07–12</figcaption></figure><figure><img loading="lazy" src="assets/art/item-icons.webp" alt="Signal Burst, Aegis Shield, Loom Mine, Vector Missile, Overseer Pulse, Node Cluster"><figcaption>Race items</figcaption></figure></div></dialog>
 <script src="vendor/three.min.js"></script>
 <script src="vendor/postprocessing/CopyShader.js"></script>
 <script src="vendor/postprocessing/GammaCorrectionShader.js"></script>
@@ -194,9 +205,11 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 <script src="vendor/postprocessing/UnrealBloomPass.js"></script>
 <script src="core.js"></script>
 <script src="fallback-renderer.js"></script>
+<script src="maps.js"></script>
 <script src="world.js"></script>
 <script src="postfx.js"></script>
 <script src="vehicles.js"></script>
+<script src="item-art.js"></script>
 <script src="effects.js"></script>
 <script src="abilities.js"></script>
 <script src="game.js"></script>
