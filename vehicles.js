@@ -32,7 +32,7 @@ function disposeKart(root){
   const sharedGeometry=new Set(Object.values(KART_GEO));
   const sharedTextures=new Set(Object.values(TEX));
   const geometries=new Set(),materials=new Set(),textures=new Set();
-  root.traverse(obj=>{if(obj.geometry&&!sharedGeometry.has(obj.geometry))geometries.add(obj.geometry);
+  root.traverse(obj=>{if(obj.geometry&&!obj.geometry.userData?.blenderShared&&!sharedGeometry.has(obj.geometry))geometries.add(obj.geometry);
     if(obj.material)(Array.isArray(obj.material)?obj.material:[obj.material]).forEach(m=>materials.add(m));});
   materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture&&!sharedTextures.has(v))textures.add(v);});m.dispose();});
   geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());if(root.parent)root.parent.remove(root);
@@ -180,6 +180,7 @@ function buildDivisionCoachwork(div,root,add,m){
 //   root > underbody-flow-ring, aegis-shield.
 const KART_WHEEL_REST=[[-1.23,.6,-1.25],[1.23,.6,-1.25],[-1.23,.6,1.28],[1.23,.6,1.28]];
 function buildKart(div){
+  if(typeof createLoadedKart==='function'){const model=createLoadedKart(div);if(model)return model;}
   const root=new THREE.Group();root.name=div.name+' Reference Chassis';
   const {white,dark,panel,glow,skin,metal,tyre}=kartMaterials(div);
   const add=(g,m,parent=root,name='')=>{const o=new THREE.Mesh(g,m);o.name=name;o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};

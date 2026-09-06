@@ -483,6 +483,7 @@ function frame(now){
   requestAnimationFrame(frame);
   const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
+  if(typeof tickTitleAttract==='function'&&tickTitleAttract(dt)){renderRaceScene();return;}
   if(game.state==='paused')pollGamepad();
   if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster')(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
   if(typeof updateMapScenery==='function')updateMapScenery(dt);
@@ -608,11 +609,14 @@ function openRoster(){clearProjectiles();if(typeof raceFX!=='undefined')raceFX.r
 function startRace(){document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------
-function boot(){
+async function boot(){
+ try{
+  await loadKartAssets((done,total)=>{document.getElementById('loading').textContent='ASSEMBLING 3D RACERS · '+done+'/'+total;});
   buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
   requestAnimationFrame(frame);
+ }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}
 }
 if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('800 20px "Space Grotesk"'),document.fonts.load('400 12px "JetBrains Mono"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
 
@@ -659,7 +663,7 @@ function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previ
  const release=e=>{if(e.pointerId!==previewSpin.pointer)return;previewSpin.dragging=false;previewSpin.pointer=null;el.classList.remove('dragging');};
  el.addEventListener('pointerup',release);el.addEventListener('pointercancel',release);el.addEventListener('lostpointercapture',release);
 })();
-function renderSelectedPreview(dt){const el=document.getElementById('kart-preview');if(!el||!selected||!el.getBoundingClientRect)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
+function renderSelectedPreview(dt){if(document.body?.classList.contains('title-open'))return;const el=document.getElementById('kart-preview');if(!el||!selected||!el.getBoundingClientRect)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
  // Full turntable rotation (about eleven seconds per 360°), plus hand-spun momentum.
  if(!previewSpin.dragging){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}

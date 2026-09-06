@@ -9,9 +9,10 @@
     "build": "node scripts/build.mjs",
     "test": "node tests/game-regression.cjs",
     "test:release": "node tests/build-shell.cjs",
-    "verify": "npm test && npm run build && npm run test:release && npm run test:runtime",
+    "verify": "npm test && npm run build && npm run test:release && npm run test:runtime && npm run test:assets",
     "test:runtime": "node tests/reference-runtime.cjs",
-    "blender:karts": "node tools/export-kart-rig.cjs && bash tools/render-karts-blender.sh"
+    "blender:karts": "node tools/export-kart-rig.cjs && bash tools/render-karts-blender.sh",
+    "test:assets": "node tests/playable-assets.cjs"
   },
   "engines": {
     "node": "24.x"

@@ -6,11 +6,11 @@ await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 // Only ship runtime assets. New documentation, exports and local files stay private.
 const runtime=['responsive-review.html','index.html','core.js','surface-detail.js','kart-materials.js','kart-clips.js','racefx.js','fallback-renderer.js','maps.js','world.js','vehicles.js',
- 'item-art.js','item-models.js','effects.js','abilities.js','postfx.js','game.js','menu.js','pwa.js','polish.css','reference-polish.css',
- 'manifest.webmanifest','vendor','icons','assets','references/race-reference.jpg'];
+ 'kart-assets.js','item-art.js','item-models.js','effects.js','abilities.js','postfx.js','game.js','title-attract.js','menu.js','pwa.js','polish.css','reference-polish.css',
+ 'manifest.webmanifest','vendor','icons','assets'];
 for(const file of runtime){
  await mkdir(path.dirname(path.join(out,file)),{recursive:true});
- await cp(path.join(root,file),path.join(out,file),{recursive:true});
+ await cp(path.join(root,file),path.join(out,file),{recursive:true,filter:source=>!source.split(path.sep).includes('art')});
 }
 // Version every application byte so an installed game updates as a coherent release.
 const assets=[];
@@ -18,7 +18,7 @@ async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true}))
 await walk(out);assets.sort();
 const hash=createHash('sha256');for(const f of assets){hash.update(f);hash.update(await readFile(path.join(out,f)));}
 const cache='zenflow-racer-'+hash.digest('hex').slice(0,14);
-const shell=['./',...assets.filter(f=>/\.(js|css|html|webmanifest|png|jpg|jpeg|webp)$/.test(f)).map(f=>'./'+f)];
+const shell=['./',...assets.filter(f=>/\.(js|css|html|webmanifest|png|jpg|jpeg|webp|glb)$/.test(f)).map(f=>'./'+f)];
 await writeFile(path.join(out,'sw.js'),`const CACHE=${JSON.stringify(cache)};const SHELL=${JSON.stringify(shell)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('zenflow-racer-')&&k!==CACHE).map(k=>caches.delete(k))))));

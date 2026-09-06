@@ -37,18 +37,18 @@
   animate('#grid',{opacity:[0,1],translateY:[20,0],duration:800,ease:'outQuad'});
 })();
 
-// Main-menu artwork is kept intact, with real keyboard/touch buttons aligned
-// precisely to the labels in its fixed-aspect composition.
+// The main menu overlays the live scene; controls and title are selectable DOM text.
 (() => {
  const title=document.getElementById('title-screen'),roster=document.getElementById('roster');
  const ready=()=>{if(document.getElementById('go').disabled)return;title.querySelectorAll('button').forEach(b=>b.disabled=false);title.querySelector('.title-status').textContent='';};
  const observer=new MutationObserver(ready);observer.observe(document.getElementById('go'),{attributes:true,attributeFilter:['disabled']});ready();
- const dismiss=()=>{title.classList.add('hidden');roster.inert=false;};
+ const dismiss=()=>{title.classList.add('hidden');document.body.classList.remove('title-open');roster.inert=false;};
+ document.body.classList.add('title-open');
  roster.inert=true;
  document.getElementById('title-start').onclick=()=>{dismiss();document.getElementById('go').click();};
  document.getElementById('title-select').onclick=()=>{dismiss();document.querySelector('#grid .sel')?.focus();};
  document.getElementById('title-settings').onclick=()=>{dismiss();document.getElementById('autothrottle').focus();document.querySelector('.race-options').scrollIntoView({block:'nearest'});};
- document.getElementById('title-return').onclick=()=>{title.classList.remove('hidden');roster.inert=true;document.getElementById('title-start').focus();};
+ document.getElementById('title-return').onclick=()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();};
  const descriptions={cherry:'Floating gardens, cascading waterfalls, and sweeping sky bridges.',stormforge:'Race through colossal turbines and the amber-lit floating foundry.',canopy:'Climb the living canopy through glass gardens and tropical skyways.'};
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
@@ -63,8 +63,16 @@
  }));
  window.addEventListener('mapselect',event=>syncMap(event.detail.id));
  syncMap(typeof chosenMapId==='string'?chosenMapId:'cherry');
- const gallery=document.getElementById('art-gallery');
- document.getElementById('open-art').onclick=()=>gallery.showModal();
- document.getElementById('close-art').onclick=()=>gallery.close();
- gallery.addEventListener('click',e=>{if(e.target===gallery)gallery.close();});
+ // Circuit cards trace the actual racing spline, including the authored route.
+ document.querySelectorAll('[data-map]').forEach(button=>{
+   const map=MAPS.find(m=>m.id===button.dataset.map),canvas=button.querySelector('canvas');if(!map||!canvas)return;
+   const points=(map.control||CHERRY_CONTROL).map(p=>new THREE.Vector3(...p));
+   const curve=new THREE.CatmullRomCurve3(points,true,'catmullrom',.5),samples=curve.getPoints(180),ctx=canvas.getContext('2d');
+   const xs=samples.map(p=>p.x),zs=samples.map(p=>p.z),minX=Math.min(...xs),minZ=Math.min(...zs);
+   const scale=Math.min(156/(Math.max(...xs)-minX),76/(Math.max(...zs)-minZ));
+   const cx=(180-(Math.max(...xs)-minX)*scale)/2,cy=(100-(Math.max(...zs)-minZ)*scale)/2;
+   ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();samples.forEach((p,i)=>{const x=cx+(p.x-minX)*scale,y=cy+(p.z-minZ)*scale;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();
+   ctx.strokeStyle='#62788d';ctx.lineWidth=7;ctx.stroke();ctx.strokeStyle='#'+new THREE.Color(map.edge).getHexString();ctx.lineWidth=2;ctx.stroke();
+   ctx.fillStyle='#fff';ctx.fillRect(cx+(samples[0].x-minX)*scale-3,cy+(samples[0].z-minZ)*scale-3,6,6);
+ });
 })();
