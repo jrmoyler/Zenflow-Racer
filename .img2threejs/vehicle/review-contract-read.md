@@ -1,0 +1,1 @@
+Read gates_reference.md and self_correction.md completely. Tier1 failed; do not claim accepted visual fidelity or advance to structure/material. CPU captures show draft only.

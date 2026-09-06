@@ -1,0 +1,18 @@
+{
+  "status": "draft-implemented-fidelity-gate-unpassed",
+  "reason": "CPU mesh evidence captured. Strict spec validation and runtime checks pass. Deterministic silhouette/frame gate remains unpassed. No acceptance claimed.",
+  "implementation": "vehicles.js",
+  "renderEvidence": [
+    "front.png",
+    "rear.png",
+    "side.png",
+    "portrait.png"
+  ],
+  "tier1": "tier1.json",
+  "remaining": [
+    "precise sculpted hood/rear bumper contour",
+    "facial/hair polish",
+    "material translucency and reference lighting",
+    "strict fidelity and action-ready coverage gates"
+  ]
+}

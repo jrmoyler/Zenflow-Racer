@@ -1,0 +1,473 @@
+{
+  "targetName": "ZenFlow reference kart with seated humanoid",
+  "sourceImage": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/references/select-reference.jpg",
+  "preSpecAssessment": {
+    "objectClass": {
+      "primaryType": "open cockpit anti-gravity kart with seated translucent humanoid",
+      "primaryDomain": "hybrid",
+      "formLanguage": [
+        "organic",
+        "hard-surface",
+        "character-like"
+      ],
+      "structureKind": [
+        "layered shell",
+        "articulated assembly",
+        "repeated modules"
+      ],
+      "motionPotential": [
+        "whole-object transform",
+        "articulated",
+        "effect-emitter"
+      ],
+      "materialFamilies": [
+        "gloss dielectric",
+        "translucent emissive polymer",
+        "dark satin cockpit"
+      ],
+      "notes": "Direct observation from supplied selection front-three-quarter view and race rear-three-quarter view."
+    },
+    "complexity": {
+      "tier": "complex",
+      "scores": {
+        "silhouetteComplexity": 2,
+        "componentCount": 3,
+        "hierarchyDepth": 2,
+        "repetitionDensity": 1,
+        "materialLayerCount": 2,
+        "localDetailDensity": 2,
+        "occlusionRisk": 2,
+        "actionReadinessNeed": 3
+      },
+      "estimatedCounts": {
+        "macroComponents": 3,
+        "mesoComponents": 12,
+        "microFeatureGroups": 10,
+        "materialLayers": 4,
+        "repetitionSystems": 2
+      },
+      "reasoning": [
+        "Continuous molded shell encloses open cockpit with four thick rounded luminous wheels.",
+        "Humanoid seated anatomy and hand-to-wheel contact define reference identity."
+      ]
+    },
+    "specDepthDecision": {
+      "requiredDepth": "complex",
+      "minimumComponentLevels": [
+        "macro",
+        "meso",
+        "micro"
+      ],
+      "needsRepetitionSystems": true,
+      "needsMaterialLocalOverrides": true,
+      "needsMultipleReviewViews": true,
+      "needsActionReadyHierarchy": true,
+      "rationale": "Choose simple/moderate/complex/ultra-complex from observed structure, not from a hardcoded domain."
+    },
+    "unknownsToResolveBeforeImplementation": [
+      "Exact foot pose and pedal structure are occluded; must remain explicitly inferred.",
+      "Reference face is stylized/translucent and only tens of pixels wide: no facial identity guarantees.",
+      "GPU screenshot capture unavailable: no pass can be visually certified or advanced."
+    ],
+    "detailInventory": {
+      "scanMethod": "component-zones",
+      "targetMinDetails": 10,
+      "note": "Enumerate every identity-defining small detail before authoring the spec. Each detail must map to a component.localFeatures entry or material.localOverrides entry, never prose only. Use forge/stage1_intake/build_detail_inventory.py to scan zones.",
+      "details": [
+        {
+          "id": "detail-1",
+          "name": "white continuous cockpit rim",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "shell"
+        },
+        {
+          "id": "detail-2",
+          "name": "rounded sloping hood",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "shell"
+        },
+        {
+          "id": "detail-3",
+          "name": "inset colored hood panel",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "shell"
+        },
+        {
+          "id": "detail-4",
+          "name": "cyan upper flank light band",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "shell"
+        },
+        {
+          "id": "detail-5",
+          "name": "sculpted lower front fascia",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "shell"
+        },
+        {
+          "id": "detail-6",
+          "name": "four thick rounded tires",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "wheels"
+        },
+        {
+          "id": "detail-7",
+          "name": "luminous outer wheel rings",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "wheels"
+        },
+        {
+          "id": "detail-8",
+          "name": "dark recessed wheel hubs",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "wheels"
+        },
+        {
+          "id": "detail-9",
+          "name": "open black cockpit seat",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "pilot"
+        },
+        {
+          "id": "detail-10",
+          "name": "adult-proportioned exposed head and neck",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "pilot"
+        },
+        {
+          "id": "detail-11",
+          "name": "clavicle and shoulder transition",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "pilot"
+        },
+        {
+          "id": "detail-12",
+          "name": "elbows bent toward steering wheel",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.75,
+          "componentTarget": "pilot"
+        },
+        {
+          "id": "detail-13",
+          "name": "hands contacting steering grips",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.5,
+          "componentTarget": "pilot"
+        },
+        {
+          "id": "detail-14",
+          "name": "bent knees inside cockpit",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.5,
+          "componentTarget": "pilot"
+        },
+        {
+          "id": "detail-15",
+          "name": "rear sculpted bumper",
+          "evidenceRefs": [
+            "select-reference.jpg:vehicle-center",
+            "race-reference.jpg:player-rear"
+          ],
+          "confidence": 0.5,
+          "componentTarget": "shell"
+        }
+      ]
+    },
+    "anatomy": {
+      "applies": true,
+      "styleHeads": 7,
+      "proportions": {
+        "headUnit": 0.14,
+        "torso": 2.7,
+        "legs": 3.3,
+        "shoulderWidth": 1.8,
+        "hipWidth": 1.2
+      },
+      "pose": {
+        "type": "seated, shoulders level, hands forward on steering wheel",
+        "jointAngles": {
+          "elbowFlexion": 90,
+          "hipFlexion": 100,
+          "kneeFlexion": 100
+        }
+      },
+      "faceLandmarks": {
+        "eyeLine": 0.0,
+        "eyeSpacing": 0.0,
+        "noseBase": 0.0,
+        "mouthLine": 0.0,
+        "hairline": 0.0
+      },
+      "features": [],
+      "confidence": 0.55,
+      "note": "Head and shoulder ratio estimated from selection center figure; legs occluded and inferred, not landmark-certified."
+    },
+    "sourceImage": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/references/select-reference.jpg"
+  },
+  "qualityContract": {
+    "qualityBar": "complex",
+    "definitionOfDone": [
+      "Both three-quarter views show white continuous shell, four thick cyan wheels, colored recessed flanks, visible cockpit void, seated humanoid with exposed head, neck, anatomical torso and arms reaching wheel.",
+      "Block completion for visible sphere-stack anatomy, disconnected hands, Formula-style wings, helmet, halo, star ornament or incorrect race direction.",
+      "Three-angle GPU renders and reference comparison required before fidelity acceptance."
+    ],
+    "minimumSpecDepth": {
+      "macroComponents": 3,
+      "mesoComponents": 8,
+      "microFeatureGroups": 5,
+      "materialLayers": 3,
+      "repetitionSystems": 1,
+      "reviewViewpoints": 4
+    },
+    "featureGroups": [
+      {
+        "id": "overall-silhouette",
+        "name": "Overall silhouette and proportions",
+        "required": true,
+        "qualityCriteria": [
+          "Bounding shape, dominant curves, negative spaces, and scale relationships are explicitly described."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "model reads as a generic placeholder instead of the reference object",
+          "major proportions are guessed without evidence"
+        ]
+      },
+      {
+        "id": "primary-structure",
+        "name": "Primary structure and hierarchy",
+        "required": true,
+        "qualityCriteria": [
+          "Major parts, joints, seams, contact points, and parent-child relationships are named before code generation."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "large visible parts are merged into one mesh",
+          "component hierarchy is too shallow for the observed complexity"
+        ]
+      },
+      {
+        "id": "attachment-joint-correctness",
+        "name": "Attachment and joint correctness",
+        "required": true,
+        "qualityCriteria": [
+          "Every visible child appendage, branch, limb, handle, connector, tube, cable, horn, wing, leg, or hinged part has an attachment contract with parent socket, localStart/localEnd, contact type, embed/overlap, and gap tolerance."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "child part root floats away from the parent",
+          "branch/limb/tube is centered in space instead of pivoting from its root",
+          "parent-child transform mixes world and local coordinates"
+        ]
+      },
+      {
+        "id": "surface-material-response",
+        "name": "Surface material response",
+        "required": true,
+        "qualityCriteria": [
+          "Albedo zones, roughness, normal/bump/displacement intent, cavity dirt, edge wear, and local overrides are specified where visible.",
+          "Important materials define independent albedo, roughness, height/normal, and AO responses instead of reusing one texture for unrelated PBR channels.",
+          "Surface response is decomposed into macro, meso, and micro frequency bands with scale and amplitude tied to object scale."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "surface looks like flat plastic",
+          "local material variation is missing or not tied to image evidence"
+        ]
+      },
+      {
+        "id": "reference-lookdev",
+        "name": "Reference color, material, and lighting response",
+        "required": true,
+        "qualityCriteria": [
+          "Material-pass names the reference-derived albedo palette, roughness variation, tactile normal/bump/displacement response, and local masks.",
+          "When a source image is available, run reference PBR extraction and require confidence >= 0.7 before treating maps as implementation-ready.",
+          "Lighting-pass names key/fill/rim or environment light, exposure, tone mapping, background, and contact shadow behavior.",
+          "Neutral, grazing-angle, and reference-matched renders prove that surface relief survives relighting and is not painted into albedo."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "model has acceptable shape but reads as flat shaded or plastic",
+          "colors are a generic average instead of reference-observed local color zones",
+          "lighting is evenly ambient and cannot reproduce the source value range"
+        ]
+      }
+    ],
+    "visualDeltaChecks": [
+      "silhouette and negative-space delta",
+      "component hierarchy depth delta",
+      "repetition density and distribution delta",
+      "material albedo/roughness/normal response delta",
+      "local feature placement and scale delta"
+    ],
+    "antiShallowSpecRules": [
+      "Do not proceed to code if qualityContract.qualityBar is unassessed.",
+      "Do not proceed to code if the spec only contains a root component for a moderate or complex object.",
+      "Do not proceed to code if required featureGroups are not represented by componentTree, materials, or repetitionSystems.",
+      "Do not proceed to code if visible local features are described only in prose and not attached to components/materials/evidenceRefs.",
+      "Do not proceed past structural-pass if attached child parts lack attachment.parentSocket, localStart, localEnd, embedDepth/overlap, and gapTolerance.",
+      "Do not pass material look-dev when albedo is reused as roughness, height, normal, or AO.",
+      "Do not pass material look-dev without macro, meso, and micro surface frequency bands for close-up materials.",
+      "Do not pass reference-fidelity material look-dev from a source image without usable referencePbr maps or an explicit documented limitation.",
+      "Do not patch a spec with extracted PBR maps when extraction confidence is below the target threshold unless the user explicitly accepts lower fidelity.",
+      "Do not place adjacent separate-geometry parts below 0.02 world-unit seam overlap (source: grimoire/build/geometry_patterns.md).",
+      "Do not satisfy raised or recessed relief, fasteners, or grip structure with a map alone when the feature affects form; use geometry or displacement (source: grimoire/build/geometry_patterns.md)."
+    ]
+  },
+  "authoringInstruction": "Fill observed object class, complexity reasoning, featureGroups, visualDeltaChecks, and unknowns before generating or implementing ObjectSculptSpec.",
+  "localSpecSearch": {
+    "collection": "core_3d",
+    "query": "ZenFlow reference kart with seated humanoid",
+    "index": {
+      "status": "hit",
+      "reason": "current",
+      "fingerprint": "6857e5ab528b42ac12f4f411f862610a0bffce8e47aee3610a7603c318072fe8"
+    },
+    "matches": [
+      {
+        "record_id": "core.measurement-source-text",
+        "file_path": "grimoire/intake/image_analysis.md",
+        "heading": "Layer 2 \u2014 Overall form & silhouette",
+        "key_path": null,
+        "score": 4.991236358706,
+        "snippets": [
+          "Record proportions relative to a named reference dimension and keep observations separate from inference."
+        ],
+        "source_refs": [
+          {
+            "path": "grimoire/intake/image_analysis.md",
+            "heading": "Layer 2 \u2014 Overall form & silhouette",
+            "key_path": null
+          },
+          {
+            "path": "grimoire/intake/image_analysis.md",
+            "heading": "The Rule",
+            "key_path": null
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source",
+            "ref": "grimoire/intake/image_analysis.md"
+          },
+          {
+            "kind": "notebooklm-research",
+            "ref": "notebooklm:4b03c2f9-8393-411f-b5b4-039ab9532843",
+            "note": "Validated generic schema vocabulary; numeric claims remain backed by local source_refs."
+          }
+        ]
+      },
+      {
+        "record_id": "core.description-honest-uncertainty-single-image-limits-convention",
+        "file_path": "docs/raw/img2threejs-skill-dataset.json",
+        "heading": null,
+        "key_path": "categories.description_conventions[6]",
+        "score": 4.792604193113,
+        "snippets": [
+          "... of occluded or back-face regions as 'undetermined' rather than inventing plausible-looking detail not visible in the reference. \u0110\u00e1nh d\u1ea5u r\u00f5 r\u00e0ng c\u00e1c v\u00f9ng b\u1ecb che khu\u1ea5t ho\u1eb7c m\u1eb7t sau l\u00e0 'ch\u01b0a x\u00e1c \u0111\u1ecbnh' thay v\u00ec b\u1ecba ra chi ti\u1ebft tr\u00f4ng h\u1ee3p l\u00fd ..."
+        ],
+        "source_refs": [
+          {
+            "path": "docs/raw/img2threejs-skill-dataset.json",
+            "heading": null,
+            "key_path": "categories.description_conventions[6]"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source",
+            "ref": "docs/raw/img2threejs-skill-dataset.json",
+            "note": "img2threejs NotebookLM research distillation"
+          }
+        ]
+      },
+      {
+        "record_id": "core.description-cdwa-semantic-field-mapping",
+        "file_path": "docs/raw/img2threejs-skill-dataset.json",
+        "heading": null,
+        "key_path": "categories.description_conventions[0]",
+        "score": 3.556097513518,
+        "snippets": [
+          "... cues: Use as the top-level schema keys whenever an agent must produce a structured (not prose) description of a reference image D\u1ea5u hi\u1ec7u nh\u1eadn di\u1ec7n: D\u00f9ng l\u00e0m c\u00e1c kh\u00f3a schema c\u1ea5p cao nh\u1ea5t b\u1ea5t c\u1ee9 khi n\u00e0o agent ph\u1ea3i t\u1ea1o m\u00f4 t\u1ea3 c\u00f3 c\u1ea5u ..."
+        ],
+        "source_refs": [
+          {
+            "path": "docs/raw/img2threejs-skill-dataset.json",
+            "heading": null,
+            "key_path": "categories.description_conventions[0]"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source",
+            "ref": "docs/raw/img2threejs-skill-dataset.json",
+            "note": "img2threejs NotebookLM research distillation"
+          }
+        ]
+      }
+    ]
+  }
+}

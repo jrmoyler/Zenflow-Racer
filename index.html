@@ -135,29 +135,39 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 <div id="roster" class="screen hidden">
   <div class="head">
     <div>
-      <div class="eyebrow">Collective AI presents · Racing division</div>
+      <div class="eyebrow">COLLECTIVE AI · SKY RACING CHAMPIONSHIP</div>
       <h1>ZENFLOW <span>RACER</span></h1>
-      <div class="sub">Choose your director. Find your racing line. Own the circuit.</div>
+      <div class="sub">Find your flow. Race beyond the clouds.</div>
     </div>
-    <div class="tag">SYNERGY CIRCUIT<b>12 DIRECTORS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
+    <div class="tag">CHERRY BLOSSOM SKYWAY<b>12 DIRECTORS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
   </div>
-  <div class="session-line"><strong>01 / SELECT YOUR DIRECTOR</strong><span>SYNERGY GRAND PRIX</span></div>
+  <div class="showroom">
+    <section class="director-panel glass" aria-label="Selected director">
+      <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
+      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your director’s power</div>
+    </section>
+    <div id="kart-preview" aria-label="Selected director and kart preview"><div class="preview-caption"><span>MEET YOUR DIRECTOR</span><strong id="preview-name">ZENFLOW</strong></div></div>
+    <section class="track-panel glass" aria-label="Track preview"><div class="panel-kicker">TRACK PREVIEW</div><div class="track-thumbnail" role="img" aria-label="Cherry blossom floating islands circuit concept preview"><span>CIRCUIT CONCEPT</span></div><h2>Cherry Blossom<br>Skyway</h2><p>Find your flow above the clouds. Chase the perfect line through floating gardens and cascading waterfalls.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><button id="go" class="btn" disabled>Confirm &amp;<br>Start Race</button></section>
+  </div>
+  <div class="selector-heading"><span>CHOOSE YOUR DIRECTOR</span><span>← SWIPE TO EXPLORE →</span></div>
   <div id="grid" aria-label="Select a racing director"></div>
   <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>
   <div id="footer">
     <div id="pick">Choose a director to join the grid</div>
     <div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div>
-    <button id="go" class="btn" disabled>Enter Race</button>
+
   </div>
-  <div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> use item · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause. Touch: auto throttle · Gamepad: triggers drive, shoulder drift, X item.</div>
+  <div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause. Touch: auto throttle · Gamepad: triggers drive, shoulder drift, X item.</div>
 </div>
 
 <div id="hud" class="hidden">
+  <div class="race-brand">ZENFLOW<span>RACER</span></div>
   <div id="ranks"></div>
   <div id="timer" class="mono">00:00.00</div>
   <button id="pausebtn">PAUSE</button>
   <button id="mutebtn">SOUND ON</button>
   <div id="item"><div class="ic"></div><div class="lbl"></div></div>
+  <div id="specialHUD"><button id="tS" aria-label="Activate director power"><span id="specialLabel">ZEN POWER</span> <kbd>Q</kbd></button></div>
   <div id="speedo">KM/H<b>0</b></div>
   <canvas id="mini" width="300" height="300"></canvas>
   <div id="pos"><div class="n">12</div><div class="o">th</div></div>
@@ -175,11 +185,23 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 <div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="rematch" class="btn">Rematch</button></div></div></div>
 
 <script src="vendor/three.min.js"></script>
+<script src="vendor/postprocessing/CopyShader.js"></script>
+<script src="vendor/postprocessing/GammaCorrectionShader.js"></script>
+<script src="vendor/postprocessing/LuminosityHighPassShader.js"></script>
+<script src="vendor/postprocessing/EffectComposer.js"></script>
+<script src="vendor/postprocessing/RenderPass.js"></script>
+<script src="vendor/postprocessing/ShaderPass.js"></script>
+<script src="vendor/postprocessing/UnrealBloomPass.js"></script>
 <script src="core.js"></script>
 <script src="fallback-renderer.js"></script>
 <script src="world.js"></script>
+<script src="postfx.js"></script>
 <script src="vehicles.js"></script>
+<script src="effects.js"></script>
+<script src="abilities.js"></script>
 <script src="game.js"></script>
+<script src="vendor/anime.umd.min.js"></script>
+<script src="menu.js"></script>
 <script src="pwa.js" defer></script>
 </body>
 </html>

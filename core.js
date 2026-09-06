@@ -1,20 +1,20 @@
 'use strict';
 /* =========================================================
    ZENFLOW RACER — Collective AI Inc.
-   Single-file Three.js kart racer. Authored track, authored karts,
+   Modular Three.js kart racer. Authored track, authored karts,
    procedural textures, procedural audio. No external assets.
    ========================================================= */
 
-// ---------- Roster: Tier-2 Division Directors (June 2026 color lock) ----------
+// ---------- Roster: division identity with reference-driven racing liveries ----------
 const ROSTER = [
-  {id:'zenflow',   name:'ZenFlow',        role:'Central Nervous System', code:'ZF-01', acc:'#7C3AED', acc2:'#3B82F6', base:'#050810', stats:[4,4,4,3], mark:'lattice'},
+  {id:'zenflow',   name:'ZenFlow',        role:'Central Nervous System', code:'ZF-01', acc:'#20CFF5', acc2:'#AEF8FF', base:'#050810', stats:[4,4,4,3], mark:'lattice'},
   {id:'collective',name:'The Collective', role:'Revenue Engine',         code:'TC-01', acc:'#065F46', acc2:'#B45309', base:'#0B0F1C', stats:[3,4,5,2], mark:'arc'},
   {id:'hybrid',    name:'Hybrid Living',  role:'Education Platform',     code:'HL-01', acc:'#0EA5E9', acc2:'#FB923C', base:'#0B1120', stats:[3,5,4,2], mark:'crest'},
-  {id:'nexus',     name:'Nexus Labs',     role:'Storyteller',            code:'NL-01', acc:'#DC2626', acc2:'#F5F5F5', base:'#080A10', stats:[5,3,3,3], mark:'compass'},
+  {id:'nexus',     name:'Nexus Labs',     role:'Storyteller',            code:'NL-01', acc:'#FF9E32', acc2:'#FFE3A6', base:'#080A10', stats:[5,3,3,3], mark:'compass'},
   {id:'kinetic',   name:'Kinetic Edge',   role:'Human Performance',      code:'KE-01', acc:'#16A34A', acc2:'#F5F5F5', base:'#0A0F0A', stats:[4,5,3,3], mark:'poly'},
   {id:'juris',     name:'Juris Guard',    role:'AI Governance',          code:'JG-01', acc:'#C9A84C', acc2:'#8A9BB0', base:'#1C2333', stats:[3,2,5,5], mark:'shield'},
   {id:'signal',    name:'Signal Velocity',role:'Growth Intelligence',    code:'SV-01', acc:'#F43F5E', acc2:'#F5F5F5', base:'#08090F', stats:[5,4,2,2], mark:'arrow'},
-  {id:'loom',      name:'Binary Loom',    role:'Digital Infrastructure', code:'BL-01', acc:'#A3E635', acc2:'#F8FAFC', base:'#050505', stats:[4,3,4,3], mark:'hex'},
+  {id:'loom',      name:'Binary Loom',    role:'Digital Infrastructure', code:'BL-01', acc:'#B869F3', acc2:'#F2D6FF', base:'#050505', stats:[4,3,4,3], mark:'hex'},
   {id:'vector',    name:'Vector Shift',   role:'Autonomous Logistics',   code:'VS-01', acc:'#CBD5E1', acc2:'#0A1628', base:'#0A1628', stats:[5,2,3,4], mark:'eagle'},
   {id:'aether',    name:'Aether Link',    role:'Connectivity',           code:'AL-01', acc:'#B5451B', acc2:'#F0E6D3', base:'#1A0A05', stats:[3,4,4,3], mark:'orbit'},
   {id:'animus',    name:'Animus Prime',   role:'Robotics',               code:'AP-01', acc:'#22D3EE', acc2:'#F5F5F5', base:'#0C1018', stats:[4,3,3,5], mark:'bolt'},

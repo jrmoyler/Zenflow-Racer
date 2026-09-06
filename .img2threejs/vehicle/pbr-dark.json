@@ -1,0 +1,87 @@
+{
+  "ok": true,
+  "verdict": "pass",
+  "confidence": 0.712,
+  "estimatedFidelity": 0.712,
+  "targetThreshold": 0.7,
+  "materialId": "dark",
+  "sourceImage": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/dark-sample.png",
+  "outDir": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/pbr-dark",
+  "palette": [
+    "#2B4A92",
+    "#37548F",
+    "#1D4E92",
+    "#62BDF1",
+    "#3679B4"
+  ],
+  "maps": {
+    "albedo": {
+      "path": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/pbr-dark/dark_albedo.png",
+      "url": "dark_albedo.png",
+      "channel": "albedo",
+      "source": "reference-pixel-extraction"
+    },
+    "roughness": {
+      "path": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/pbr-dark/dark_roughness.png",
+      "url": "dark_roughness.png",
+      "channel": "roughness",
+      "source": "reference-pixel-extraction"
+    },
+    "height": {
+      "path": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/pbr-dark/dark_height.png",
+      "url": "dark_height.png",
+      "channel": "height",
+      "source": "reference-pixel-extraction"
+    },
+    "normal": {
+      "path": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/pbr-dark/dark_normal.png",
+      "url": "dark_normal.png",
+      "channel": "normal",
+      "source": "reference-pixel-extraction"
+    },
+    "ao": {
+      "path": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/pbr-dark/dark_ao.png",
+      "url": "dark_ao.png",
+      "channel": "ao",
+      "source": "reference-pixel-extraction"
+    }
+  },
+  "diagnostics": {
+    "sourceWidth": 128,
+    "sourceHeight": 128,
+    "mapSize": 256,
+    "cropBBoxPixels": {
+      "x": 0,
+      "y": 0,
+      "width": 128,
+      "height": 128
+    },
+    "mask": {
+      "backgroundColor": "#425E9C",
+      "backgroundNoise": 43.139,
+      "transparentPixelFraction": 0.0,
+      "foregroundCoverage": 1.0
+    },
+    "mapStats": {
+      "valueRange": 0.4267,
+      "heightP90Gradient": 0.0047,
+      "roughnessBase": 0.685,
+      "roughnessVariation": 0.05,
+      "normalStrength": 0.162,
+      "blurRadius": 5
+    },
+    "palette": [
+      "#2B4A92",
+      "#37548F",
+      "#1D4E92",
+      "#62BDF1",
+      "#3679B4"
+    ]
+  },
+  "warnings": [
+    "image is not clearly isolated from background; using most pixels as material evidence",
+    "object/background separation is weak",
+    "low high-frequency detail weakens normal/roughness inference"
+  ],
+  "limitation": "single-image PBR extraction is an estimate; 70%+ extraction confidence still needs render screenshot review"
+}

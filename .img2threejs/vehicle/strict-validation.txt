@@ -1,0 +1,1 @@
+PASS: validate_sculpt_spec.py spec.json --strict-quality, 2026-09-06. No fidelity or render gate claimed.
