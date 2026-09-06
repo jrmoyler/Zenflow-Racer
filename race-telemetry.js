@@ -85,7 +85,7 @@ function installRaceTelemetry(){
   document.getElementById('measure-export').onclick=()=>{
     const value=id=>document.getElementById('measure-'+id).value;
     const metadata={device:value('device'),os:value('os'),browser:value('browser'),hardwareClaim:value('hardware'),notes:value('notes'),
-      userAgent:navigator.userAgent,url:location.origin+location.pathname,query:location.search,
+      userAgent:navigator.userAgent,url:location.origin+location.pathname,options:{review:true,lowfx:LOWFX},
       release:document.querySelector('meta[name="zenflow-release"]')?.content??'development',
       exportedAt:new Date().toISOString(),graphics:graphics(),screen:{width:screen.width,height:screen.height,dpr:devicePixelRatio}};
     const blob=new Blob([JSON.stringify(recorder.report(metadata),null,2)],{type:'application/json'});

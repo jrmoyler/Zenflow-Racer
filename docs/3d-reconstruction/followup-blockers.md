@@ -13,9 +13,11 @@ rewrite, history reset, fabricated acceptance, or increased threshold/loop allow
 Continuation needs the supported resumption-capable img2threejs package/process requested
 by the user. The .95 fidelity target and all three rejection records are unchanged.
 
-Blender 4.5.0 was downloaded through `tools/setup-blender.sh`, but its executable exits 139
-(segmentation fault) even for `--version`; a background/factory-startup, one-thread attempt
-also exits 139. No author/export pass ran. A working Blender runtime is independently needed.
+The fresh Blender installation exited 139 even for `--version`. Its extracted executable
+was only 88,227,840 bytes. A retained ZenFlow installation contains the complete 163,508,312-byte
+Blender 4.5.0 executable and successfully reports build `8cb6b388974a`. This recovers Blender
+access; the initial startup failure is preserved as an incident, not a remaining blocker.
+No author/export pass ran because the supported review resumption remains unavailable.
 The available browser renders Software 3D, not WebGL. No new WebGL captures exist, and old
 Cycles or software images are not relabeled as WebGL evidence.
 
