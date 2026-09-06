@@ -4,10 +4,13 @@ import path from 'node:path';
 const root=process.cwd(), out=path.join(root,'dist');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
-const omit=new Set(['dist','node_modules','scripts','tests','docs','tools','.git','.vercel','package.json','package-lock.json','vercel.json','README.md']);
-for(const entry of await readdir(root,{withFileTypes:true})){
- if(omit.has(entry.name)||entry.name.startsWith('.')) continue;
- await cp(path.join(root,entry.name),path.join(out,entry.name),{recursive:true});
+// Only ship runtime assets. New documentation, exports and local files stay private.
+const runtime=['index.html','core.js','fallback-renderer.js','world.js','vehicles.js',
+ 'effects.js','abilities.js','postfx.js','game.js','menu.js','pwa.js','polish.css',
+ 'manifest.webmanifest','vendor','icons','references/race-reference.jpg'];
+for(const file of runtime){
+ await mkdir(path.dirname(path.join(out,file)),{recursive:true});
+ await cp(path.join(root,file),path.join(out,file),{recursive:true});
 }
 // Version every application byte so an installed game updates as a coherent release.
 const assets=[];
@@ -19,5 +22,5 @@ const shell=['./',...assets.filter(f=>/\.(js|css|html|webmanifest|png|jpg|jpeg|w
 await writeFile(path.join(out,'sw.js'),`const CACHE=${JSON.stringify(cache)};const SHELL=${JSON.stringify(shell)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('zenflow-racer-')&&k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request)));});\n`);
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.open(CACHE).then(cache=>cache.match(e.request)).then(c=>c||fetch(e.request)));});\n`);
 console.log('Static game built in dist/');

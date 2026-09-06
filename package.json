@@ -8,10 +8,11 @@
     "start": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
     "test": "node tests/game-regression.cjs",
-    "test:release": "node tests/build-shell.cjs"
+    "test:release": "node tests/build-shell.cjs",
+    "verify": "npm test && npm run build && npm run test:release"
   },
   "engines": {
-    "node": ">=18"
+    "node": "24.x"
   },
   "dependencies": {
     "animejs": "4.2.2",

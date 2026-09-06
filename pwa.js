@@ -1,5 +1,5 @@
 (() => {
-  if ('serviceWorker' in navigator && location.protocol !== 'file:' && location.hostname !== 'terminal.local') {
+  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !['terminal.local', 'localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
   }
   let installPrompt;

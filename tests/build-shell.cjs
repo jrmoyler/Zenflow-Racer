@@ -2,10 +2,11 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 (async()=>{
  const out=path.resolve(__dirname,'../dist');
+ for(const file of ['package.json','tests','docs','tools','references/select-reference.jpg'])assert.ok(!fs.existsSync(path.join(out,file)),`Non-runtime file leaked: ${file}`);
  const index=fs.readFileSync(path.join(out,'index.html'),'utf8');
  const listeners={};let cached=new Set();const origin='https://zenflow.example';
  const sw=fs.readFileSync(path.join(out,'sw.js'),'utf8');
- const context={URL,self:{location:{origin},addEventListener:(name,fn)=>listeners[name]=fn},caches:{open:async()=>({addAll:async files=>{for(const file of files){const relative=file==='./'?'index.html':file.replace(/^\.\//,'');assert.ok(fs.existsSync(path.join(out,relative)),`Missing precache asset ${file}`);}cached=new Set(files.map(f=>new URL(f,origin+'/').href));}}),match:async request=>cached.has(request.url)?{ok:true,offline:true}:undefined},fetch:()=>Promise.reject(Error('Network offline'))};
+ const context={URL,self:{location:{origin},addEventListener:(name,fn)=>listeners[name]=fn},caches:{open:async()=>({match:async request=>cached.has(request.url)?{ok:true,offline:true}:undefined,addAll:async files=>{for(const file of files){const relative=file==='./'?'index.html':file.replace(/^\.\//,'');assert.ok(fs.existsSync(path.join(out,relative)),`Missing precache asset ${file}`);}cached=new Set(files.map(f=>new URL(f,origin+'/').href));}}),match:async()=>{throw Error('Must not read unrelated release caches');}},fetch:()=>Promise.reject(Error('Network offline'))};
  vm.createContext(context);vm.runInContext(sw+';globalThis.shell=SHELL;globalThis.cacheKey=CACHE;',context);
  assert.match(context.cacheKey,/^zenflow-racer-[a-f0-9]{14}$/,'Release cache should use content hash');
  let install;listeners.install({waitUntil:p=>install=p});await install;
