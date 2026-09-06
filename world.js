@@ -20,13 +20,13 @@ catch(error){const replacement=canvas.cloneNode(false);canvas.replaceWith(replac
 renderer.setPixelRatio(LOWFX?0.7:Math.min(devicePixelRatio,MOBILEFX?1.15:1.6));
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();if(typeof game!=='undefined'&&['race','countdown'].includes(game.state)&&typeof pause==='function')pause();graphicsNotice('The graphics connection was interrupted. Restoring the circuit…',true);});
 canvas.addEventListener('webglcontextrestored',()=>{document.getElementById('graphics-notice')?.remove();});
-renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.88;
 renderer.shadowMap.enabled=!LOWFX&&!MOBILEFX;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0xc5c8ec,180,780);
 const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.3,1400);
-const hemi=new THREE.HemisphereLight(0xc7eaff,0x8272a0,1.35);scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe5ef,1.65);sun.position.set(-180,220,-120);sun.castShadow=true;
+const hemi=new THREE.HemisphereLight(0xc7eaff,0x8272a0,.92);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffe5ef,1.25);sun.position.set(-180,220,-120);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.near=20;sun.shadow.camera.far=700;
 sun.shadow.camera.left=-120;sun.shadow.camera.right=120;sun.shadow.camera.top=120;sun.shadow.camera.bottom=-120;sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.03;
 scene.add(sun);scene.add(sun.target);

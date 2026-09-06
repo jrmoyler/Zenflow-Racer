@@ -9,6 +9,7 @@
     document.getElementById('selected-name').textContent=d.name;
     document.getElementById('selected-code').textContent=d.code+' · '+d.role;
     document.getElementById('selected-stats').innerHTML=d.stats.map((v,i)=>'<div class="selected-stat"><div class="stat-label"><span>'+STAT_NAMES[i]+'</span><span>'+v*2+'/10</span></div><i><b style="width:'+v*20+'%"></b></i></div>').join('');
+    card.scrollIntoView?.({inline:'center',block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
     animate('.director-panel',{opacity:[.55,1],translateX:[-8,0],duration:300,ease:'outQuad'});
     animate('.preview-caption',{opacity:[0,1],translateY:[7,0],duration:450,ease:'outQuad'});
   }
@@ -22,6 +23,10 @@
       }
     });
   }
+  const step=(direction)=>{const cards=[...grid.querySelectorAll('.card')];if(!cards.length)return;const current=cards.findIndex(c=>c.classList.contains('sel'));const next=cards[(current+direction+cards.length)%cards.length];next.click();next.focus({preventScroll:true});};
+  document.getElementById('dir-prev')?.addEventListener('click',()=>step(-1));
+  document.getElementById('dir-next')?.addEventListener('click',()=>step(1));
+  grid.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();step(1);}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();step(-1);}});
   grid.addEventListener('click',()=>requestAnimationFrame(updateCardDetails));
   grid.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')requestAnimationFrame(updateCardDetails);});
   window.addEventListener('racerselect',()=>{updateCardDetails();addPortraits();});

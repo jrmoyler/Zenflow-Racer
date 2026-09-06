@@ -7,6 +7,7 @@
 <meta name="description" content="Twelve division directors. Three laps. One Synergy Circuit. Race the ZenFlow championship with drift boosts, tactical items and responsive touch controls.">
 <meta name="theme-color" content="#050A18">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -151,14 +152,14 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
       <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
       <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your director’s power</div>
     </section>
-    <div id="kart-preview" aria-label="Selected director and kart preview"><div class="preview-caption"><span>MEET YOUR DIRECTOR</span><strong id="preview-name">ZENFLOW</strong></div></div>
+    <div id="kart-preview" aria-label="Selected director and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous director">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next director">▶</button><div class="preview-caption"><span>MEET YOUR DIRECTOR</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
     <section class="track-panel glass" aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
       <button class="map-card selected" data-map="cherry" aria-pressed="true"><img src="assets/art/map-cherry.webp" alt="Cherry blossom islands with pagodas and waterfalls"><span>Cherry Blossom Skyway</span></button>
       <button class="map-card" data-map="stormforge" aria-pressed="false"><img src="assets/art/map-stormforge.webp" alt="Industrial floating citadel with enormous turbines"><span>Nexus Stormforge</span></button>
       <button class="map-card" data-map="canopy" aria-pressed="false"><img src="assets/art/map-canopy.webp" alt="Tropical islands with giant trees and glass garden tunnels"><span>Vital Canopy Run</span></button>
     </div><p id="map-description">Floating gardens, cascading waterfalls, and sweeping sky bridges.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><button id="go" class="btn" disabled>Start Race</button></section>
   </div>
-  <div class="selector-heading"><span>CHOOSE YOUR DIRECTOR</span><span>← SWIPE TO EXPLORE →</span></div>
+  <div class="selector-heading"><span>CHOOSE YOUR DIRECTOR</span><span>← → ARROWS OR SWIPE TO EXPLORE</span></div>
   <div id="grid" aria-label="Select a racing director"></div>
   <div class="menu-tools"><button id="title-return" type="button">← Title</button><button id="open-art" type="button">Division collection ↗</button></div>
   <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>

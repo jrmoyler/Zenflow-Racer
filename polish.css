@@ -66,3 +66,13 @@ button{touch-action:manipulation}button:focus-visible,.card:focus-visible{outlin
 @media(max-height:560px) and (orientation:landscape){.map-card img{height:36px}.map-card span{font-size:6px;padding:3px;min-height:21px}.menu-tools{margin:0}.menu-tools button{font-size:7px;padding:3px 7px}#map-description{display:none}}
 .race-brand #race-map-name{display:block;font-size:8px;letter-spacing:.08em;margin-top:6px;color:#e6fbff;max-width:175px;font-style:normal}
 @media(max-width:600px),(max-height:560px){.race-brand #race-map-name{display:none}}
+
+/* 360° showroom: the preview is interactive, with carousel controls and a spin hint. */
+#kart-preview{pointer-events:auto;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;background:radial-gradient(ellipse 62% 70% at 50% 58%,#0b1f3a4d,#0b1f3a1a 55%,transparent 75%)}.preview-caption strong{text-shadow:0 2px 6px #12314f,0 0 18px #0b2a4a}#kart-preview.dragging{cursor:grabbing}
+.preview-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid #a9fff9aa;background:#12304399;color:#e4ffff;font-size:15px;line-height:1;cursor:pointer;backdrop-filter:blur(4px);transition:background .15s,transform .15s,border-color .15s;z-index:2;display:flex;align-items:center;justify-content:center;padding:0}.preview-nav:hover{background:#2f7d95cc;border-color:#d1ffff}.preview-nav:active{transform:translateY(-50%) scale(.92)}.preview-nav.prev{left:4px}.preview-nav.next{right:4px}
+.preview-caption{pointer-events:none}.preview-hint{display:block;margin-top:7px;font:8px 'JetBrains Mono',monospace;font-style:normal;letter-spacing:.2em;color:#dffbff;text-shadow:0 1px 4px #0b2a4a}
+@media(max-width:600px) and (orientation:portrait){.preview-nav{width:38px;height:38px;font-size:13px}.preview-hint{font-size:6px;margin-top:4px}}
+@media(max-height:560px) and (orientation:landscape){.preview-nav{width:34px;height:34px;font-size:12px}.preview-hint{font-size:6px;margin-top:3px}}
+/* Race feedback: the position counter pulses whenever the player gains or loses a place. */
+#pos.bump .n{animation:posbump .35s ease-out}@keyframes posbump{0%{transform:scale(1.18)}100%{transform:scale(1)}}#pos .n{display:inline-block;transform-origin:left bottom}
+#item .lbl:empty{display:none}
