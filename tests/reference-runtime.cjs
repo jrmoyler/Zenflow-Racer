@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'..'),THREE=require(path.join(root,'vendor/three.min.js'));
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
-const core=read('core.js'),worldSource=read('world.js'),vehicleSource=read('vehicles.js');
+const core=read('core.js'),worldSource=read('world.js'),vehicleSource=read('vehicles.js'),materialSource=read('kart-materials.js');
 const canvas=()=>({width:128,height:128,getContext:()=>({createRadialGradient:()=>({addColorStop(){}}),fillRect(){}})});
 function geometryCheck(group){
  const hash=crypto.createHash('sha256'),bounds=new THREE.Box3(),geos=new Set();let meshes=0;
@@ -38,7 +38,7 @@ for(const mobile of [false,true]){
  }
  assert.equal(signatures.size,3,'three distinct modeled circuits');assert.throws(()=>run("selectMap('missing')"),/Unknown circuit/);
  if(!mobile){
-  run(vehicleSource.slice(0,vehicleSource.indexOf('// ---------- Item / token pickups')));run('kartGeos()');const roster=run('ROSTER');assert.equal(roster.length,12);const hashes=new Set(),sizes=new Set();
+  run(materialSource);run(vehicleSource.slice(0,vehicleSource.indexOf('// ---------- Item / token pickups')));run('kartGeos()');const roster=run('ROSTER');assert.equal(roster.length,12);const hashes=new Set(),sizes=new Set();
   for(const div of roster){c.div=div;const kart=run('buildKart(div)'),check=geometryCheck(kart);hashes.add(check.hash);sizes.add(check.bounds.toArray().map(v=>v.toFixed(3)).join(','));
    assert.ok(check.bounds.x>2&&check.bounds.x<12&&check.bounds.y>1&&check.bounds.y<8&&check.bounds.z>2&&check.bounds.z<12,'playable chassis bounds');assert.equal(kart.userData.wheels.length,4);
    const corners=new Set();for(const w of kart.userData.wheels){assert.equal(w.pivot.parent,kart);assert.equal(w.spin.parent,w.pivot);assert.ok(w.spin.children.length>=2);assert.ok(w.glow.isMesh);corners.add(`${Math.sign(w.pivot.position.x)},${Math.sign(w.pivot.position.z)}`);}assert.equal(corners.size,4,'one wheel per corner');assert.ok(kart.userData.pilot.parent===kart);
@@ -53,6 +53,6 @@ const index=fs.readFileSync(path.join(base,'index.html'),'utf8');
 const resources=[...index.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1]).filter(x=>!/^https?:|^#|^data:/.test(x));
 for(const resource of resources)assert.ok(fs.statSync(path.join(base,resource.split('?')[0])).size>0,'nonempty UI resource '+resource);
 const scripts=[...index.matchAll(/<script\b[^>]*src="([^"]+)"/g)].map(m=>m[1]);
-for(const [a,b] of [['maps.js','world.js'],['world.js','vehicles.js'],['vehicles.js','item-art.js'],['item-art.js','game.js']])assert.ok(scripts.includes(a)&&scripts.includes(b)&&scripts.indexOf(a)<scripts.indexOf(b),'runtime dependency '+a+' before '+b);
+for(const [a,b] of [['maps.js','world.js'],['core.js','kart-materials.js'],['kart-materials.js','vehicles.js'],['world.js','vehicles.js'],['vehicles.js','item-art.js'],['item-art.js','game.js']])assert.ok(scripts.includes(a)&&scripts.includes(b)&&scripts.indexOf(a)<scripts.indexOf(b),'runtime dependency '+a+' before '+b);
 const css=fs.readFileSync(path.join(base,'polish.css'),'utf8');for(const match of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g)){if(!/^(?:data:|https?:)/.test(match[1]))assert.ok(fs.statSync(path.join(base,match[1])).size>0,'CSS artwork '+match[1]);}
 console.log('PASS UI resource resolution and runtime script order');

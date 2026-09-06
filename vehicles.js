@@ -149,14 +149,8 @@ function buildDivisionCoachwork(div,root,add,m){
 
 function buildKart(div){
   const root=new THREE.Group();root.name=div.name+' Reference Chassis';
-  const color=new THREE.Color(div.id==='vector'?'#309DFF':div.acc),light=color.clone().lerp(new THREE.Color(0xc8ffff),.38);
-  const white=new THREE.MeshPhysicalMaterial({color:0xeaf5ff,roughness:.2,metalness:.08,clearcoat:1,clearcoatRoughness:.15,side:THREE.DoubleSide});
-  const dark=new THREE.MeshStandardMaterial({color:0x142943,metalness:.18,roughness:.45,side:THREE.DoubleSide});
-  const panel=new THREE.MeshPhysicalMaterial({color:color.clone(),emissive:color,emissiveIntensity:.15,roughness:.2,metalness:.25,clearcoat:1,side:THREE.DoubleSide});
-  const glow=new THREE.MeshStandardMaterial({color:light,emissive:light,emissiveIntensity:1.7,roughness:.2,side:THREE.DoubleSide});
-  const skin=new THREE.MeshPhysicalMaterial({color,emissive:color,emissiveIntensity:.18,roughness:.18,metalness:.3,clearcoat:1,transparent:true,opacity:.91,depthWrite:true,side:THREE.DoubleSide});
+  const {white,dark,panel,glow,skin,metal,tyre}=kartMaterials(div);
   const add=(g,m,parent=root,name='')=>{const o=new THREE.Mesh(g,m);o.name=name;o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
-  const metal=new THREE.MeshPhysicalMaterial({color:['collective','juris','aether','helix','hybrid'].includes(div.id)?(div.id==='juris'?'#C9A84C':div.id==='collective'?'#BE813B':'#EE8B36'):'#708CA3',metalness:.8,roughness:.22,clearcoat:1});
   buildDivisionCoachwork(div,root,add,{white,dark,panel,glow,metal});add(KART_GEO.floor,dark,root,'cockpit-well');
   const pilot=new THREE.Group();pilot.name='seated-humanoid';pilot.position.set(0,1,.37);root.add(pilot);add(KART_GEO.body,skin,pilot,'continuous-humanoid-surface');if(div.id==='kinetic'||div.id==='loom'){pilot.scale.set(.9,1,.94);add(KART_GEO.hair,skin,pilot,'swept-hair');}
   // Steering wheel is connected to the footwell, with hands meeting its upper grips.
@@ -165,7 +159,7 @@ function buildKart(div){
   const wheels=[];
   [[-1.23,.6,-1.25],[1.23,.6,-1.25],[-1.23,.6,1.28],[1.23,.6,1.28]].forEach((p,i)=>{
     const pivot=new THREE.Group(),spin=new THREE.Group();pivot.name=['wheel-fl','wheel-fr','wheel-rl','wheel-rr'][i];pivot.position.set(...p);root.add(pivot);pivot.add(spin);
-    add(KART_GEO.tyre,white,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
+    add(KART_GEO.tyre,tyre,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
     const luminous=glow.clone();const ring=add(KART_GEO.rim,luminous,pivot,'wheel-light-ring');ring.position.x=i%2?.255:-.255;
     wheels.push({pivot,spin,glow:ring,side:i%2?1:-1});
   });
