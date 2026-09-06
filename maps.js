@@ -25,5 +25,6 @@ function selectMap(id){
 function applyMapAtmosphere(){
   scene.fog.color.setHex(activeMap.fog);sun.color.setHex(activeMap.sun);hemi.color.setHex(activeMap.skyTop);hemi.groundColor.setHex(activeMap.id==='canopy'?0x537b60:0x8272a0);
   if(typeof game!=='undefined'&&game.skyMat?.uniforms.skyTop){game.skyMat.uniforms.skyTop.value.setHex(activeMap.skyTop);game.skyMat.uniforms.skyHorizon.value.setHex(activeMap.skyHorizon);}
+  if(typeof refreshMapEnvironment==='function')refreshMapEnvironment();
 }
 function updateMapScenery(dt){for(const rotor of mapSceneryAnimations)rotor.rotation.z+=dt*.2;}

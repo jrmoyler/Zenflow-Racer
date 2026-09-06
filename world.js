@@ -34,13 +34,14 @@ const rim=new THREE.DirectionalLight(0x00d9b5,0.35);rim.position.set(160,80,200)
 
 // Soft atmosphere is real scene lighting; every island remains dimensional geometry.
 const zenWorldTime={value:0};
+let refreshMapEnvironment=null;
 function buildSky(){
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)}},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
     fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);vec3 sky=mix(skyHorizon,skyTop,smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
   // Small cubemap supplies pastel specular reflections on the road and vehicles.
-  if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});new THREE.CubeCamera(.1,30,target).update(renderer,envScene);scene.environment=target.texture;}
+  if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});const envCamera=new THREE.CubeCamera(.1,30,target);refreshMapEnvironment=()=>envCamera.update(renderer,envScene);refreshMapEnvironment();scene.environment=target.texture;}
   return mat;
 }
 

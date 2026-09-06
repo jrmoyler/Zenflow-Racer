@@ -30,7 +30,7 @@ An embedded reference image can preserve the approved composition. A playable sc
 - [x] New runtime scripts, art and models are included in the production build and offline cache.
 - [ ] Title controls work with pointer and keyboard; mobile layout remains usable.
 - [ ] Race start, movement, pause, finish and rematch pass browser checks.
-- [ ] Evidence identifies the actual renderer; software fallback screenshots are not presented as WebGL fidelity proof.
+- [x] Evidence identifies the actual renderer; software fallback screenshots are not presented as WebGL fidelity proof.
 - [x] Blender installation/export results are documented accurately.
 
 ## Review status
@@ -49,5 +49,13 @@ Blender 4.5 portable was installed, but its executable crashed in this environme
 - Embedded artwork preserves composition through optimized image derivatives; it is not an assertion that runtime geometry is identical to that artwork.
 - The compatibility Canvas renderer remains simplified and does not reproduce the full WebGL assets.
 - Browser screenshots, actual device frame timing, race completion/rematch and mobile touch interaction need to be assessed using the integration lead's final browser evidence. The coordinator's Node geometry tests do not substitute for these checks.
-- The scene reflection cubemap is captured at initial sky creation; map switching updates the sky, fog and lighting but does not recapture this reflection texture.
+- Map switching updates sky, fog, lighting and recaptures the reflection cubemap in WebGL mode.
 
+
+## Hosted preview checks
+
+Vercel automatically built the PR branch successfully. Browser inspection confirmed the title controls, reference collection, circuit selectors, division selection, auto-throttle option, countdown, pause/resume and return to roster. Vital Canopy Run advanced to 104 km/h with the clock running; changing to Nexus Stormforge reset the race and selected the Hologram Decoy power. No game-origin browser errors were observed.
+
+The browser explicitly reported `data-renderer="canvas"`; WebGL is unavailable in this cloud browser. These interactions verify the compatibility renderer and shared game simulation, **not** WebGL appearance or performance. Full race completion/rematch and physical mobile/gamepad checks remain unverified.
+
+The compatibility showroom/portraits now display approved kart artwork, and each circuit has its matching scenic matte behind the live projected road. The interactive WebGL path continues using actual chassis and environment geometry.

@@ -29,6 +29,24 @@ class CanvasRaceRenderer {
     for(let i=0;i<17;i++)this.ellipse(-130+i*16,-1+Math.sin(i*2)*14,3,1.8,'#fce1ef');c.restore();
   }
   backdrop(w,h){
+    // Compatibility mode uses the approved circuit matte behind the live road.
+    // Collision, perspective projection, racers and controls remain dynamic.
+    const mapId=typeof activeMap!=='undefined'?activeMap.id:'cherry';
+    this.mapMattes ||= new Map();
+    if(!this.mapMattes.has(mapId)){
+      const image=new Image();this.mapMattes.set(mapId,image);
+      image.onload=()=>{this.background=null;};
+      image.src='assets/art/map-'+mapId+'.webp';
+    }
+    const matte=this.mapMattes.get(mapId);
+    if(matte.complete&&matte.naturalWidth){
+      // Exclude the baked map caption along the bottom of each reference.
+      const sourceHeight=matte.naturalHeight*.88;
+      const scale=Math.max(w/matte.naturalWidth,h/sourceHeight);
+      const sw=w/scale,sh=h/scale;
+      this.ctx.drawImage(matte,(matte.naturalWidth-sw)/2,Math.max(0,(sourceHeight-sh)*.38),sw,sh,0,0,w,h);
+      return;
+    }
     if(this.background&&this.bgW===w&&this.bgH===h){this.ctx.drawImage(this.background,0,0,w,h);return;}
     const target=document.createElement('canvas');target.width=w;target.height=h;const previous=this.ctx;this.ctx=target.getContext('2d');const c=this.ctx;
     const sky=c.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#b5b6e4');sky.addColorStop(.36,'#f1c9e1');sky.addColorStop(.64,'#d5dcf2');sky.addColorStop(1,'#aacbe7');c.fillStyle=sky;c.fillRect(0,0,w,h);
@@ -56,14 +74,41 @@ class CanvasRaceRenderer {
     c.strokeStyle=color;c.lineWidth=4;c.beginPath();c.moveTo(-32,-9);c.quadraticCurveTo(0,3,32,-9);c.stroke();c.strokeStyle='#bfffff';c.lineWidth=1.5;c.stroke();
     if(shield){c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.ellipse(0,-45,64,85,0,0,Math.PI*2);c.stroke();}c.restore();
   }
+  referenceKart(division){
+    const ids=['zenflow','collective','hybrid','nexus','kinetic','juris','signal','loom','vector','aether','animus','helix'];
+    const index=ids.indexOf(division.id);if(index<0)return null;
+    this.kartSheets ||= [];
+    const sheet=index<6?0:1;
+    if(!this.kartSheets[sheet]){
+      const image=new Image();this.kartSheets[sheet]=image;
+      image.onload=()=>{
+        // Update the same canvases already cached by the menu and game.
+        this.portraits?.forEach((canvas,id)=>this.paintReferencePortrait(canvas,{id}));
+        window.dispatchEvent(new Event('portraitsready'));
+      };
+      image.src='assets/art/division-karts-0'+(sheet+1)+'.webp';
+    }
+    const image=this.kartSheets[sheet];if(!image.complete||!image.naturalWidth)return null;
+    const cell=index%6,col=cell%3,row=Math.floor(cell/3);
+    // The labels sit outside these windows; every authored kart stays intact.
+    return {image,x:col*image.naturalWidth/3,y:row?(sheet?460:490):20,w:image.naturalWidth/3,h:sheet?375:415};
+  }
+  paintReferencePortrait(canvas,division){
+    const art=this.referenceKart(division);if(!art)return false;
+    const c=canvas.getContext('2d'),scale=Math.min(canvas.width/art.w,canvas.height/art.h),w=art.w*scale,h=art.h*scale;
+    c.clearRect(0,0,canvas.width,canvas.height);c.fillStyle='#bbd1e8';c.fillRect(0,0,canvas.width,canvas.height);
+    c.drawImage(art.image,art.x,art.y,art.w,art.h,(canvas.width-w)/2,(canvas.height-h)/2,w,h);return true;
+  }
   renderDirectorPortrait(division){
     this.portraits ||= new Map();if(this.portraits.has(division.id))return this.portraits.get(division.id);
-    const canvas=document.createElement('canvas');canvas.width=192;canvas.height=192;
-    const previous=this.ctx;this.ctx=canvas.getContext('2d');const c=this.ctx;
-    const bg=c.createRadialGradient(96,90,10,96,100,140);bg.addColorStop(0,'#536987');bg.addColorStop(1,'#1f334d');c.fillStyle=bg;c.fillRect(0,0,192,192);
-    // Crop the very same procedural driver used by the compatibility race kart.
-    this.kart(96,256,190,division.acc,0,false,false);
-    this.ctx=previous;this.portraits.set(division.id,canvas);return canvas;
+    const canvas=document.createElement('canvas');canvas.width=256;canvas.height=224;
+    canvas.setAttribute('aria-label',division.name+' kart');
+    if(!this.paintReferencePortrait(canvas,division)){
+      const previous=this.ctx;this.ctx=canvas.getContext('2d');
+      this.ctx.fillStyle='#bbd1e8';this.ctx.fillRect(0,0,256,224);
+      this.kart(128,185,145,division.acc,0,false,false);this.ctx=previous;
+    }
+    this.portraits.set(division.id,canvas);return canvas;
   }
   powerMotif(kind,x,y,size,color){
     const c=this.ctx,t=performance.now()*.003;c.save();c.translate(x,y-28*size/100);c.scale(size/100,size/100);c.strokeStyle=color;c.fillStyle=color;c.lineWidth=2.4;c.globalAlpha=.8;
@@ -89,7 +134,15 @@ class CanvasRaceRenderer {
     if(r.specialActive>0||r.phase>0||r.ram>0||r.reflect>0||r.regen>0||r.specialCooldown>ability.cooldown-1.2)this.powerMotif(r.div.id,x,y,size,r.div.acc);
   }
   renderRosterPreview(division,rect){
-    if(!division||!rect)return;const c=this.ctx;c.save();c.setTransform(this.ratio,0,0,this.ratio,0,0);this.kart(rect.x+rect.width*.5,rect.y+rect.height*.76,Math.min(rect.width*.53,rect.height*.64),division.acc,Math.sin(performance.now()*.0005)*1.8);c.restore();
+    if(!division||!rect)return;const c=this.ctx;c.save();c.setTransform(this.ratio,0,0,this.ratio,0,0);
+    const art=this.referenceKart(division);
+    if(art){
+      const scale=Math.min(rect.width*.94/art.w,rect.height*.86/art.h),w=art.w*scale,h=art.h*scale;
+      const x=rect.x+(rect.width-w)/2,y=rect.y+(rect.height-h)/2-8;
+      c.save();c.beginPath();c.roundRect(x,y,w,h,16);c.clip();
+      c.drawImage(art.image,art.x,art.y,art.w,art.h,x,y,w,h);c.restore();
+    }else this.kart(rect.x+rect.width*.5,rect.y+rect.height*.76,Math.min(rect.width*.53,rect.height*.64),division.acc,0);
+    c.restore();
   }
   render(){
     if(typeof track==='undefined'||!track.len)return;
