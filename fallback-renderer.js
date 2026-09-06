@@ -14,7 +14,7 @@ class CanvasRaceRenderer {
   meshData(g){
     const cached=this.geometryCache.get(g);if(cached)return cached;
     const pos=g.attributes.position;if(!pos)return null;g.computeBoundingBox();g.computeBoundingSphere();
-    const extent=g.boundingBox.getSize(new THREE.Vector3()),cell=Math.max(extent.x,extent.y,extent.z)/28;
+    const extent=g.boundingBox.getSize(new THREE.Vector3()),cell=Math.min(Math.max(extent.x,extent.y,extent.z)/28,Math.min(...[extent.x,extent.y,extent.z].filter(v=>v>.001))/8);
     const vertices=[],sourceIndices=[],remap=[],buckets=new Map();
     for(let i=0;i<pos.count;i++){
       const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i),key=cell>0?[Math.round(x/cell),Math.round(y/cell),Math.round(z/cell)].join(','):String(i);

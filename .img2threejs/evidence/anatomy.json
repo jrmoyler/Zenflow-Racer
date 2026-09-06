@@ -1,0 +1,45 @@
+{
+  "applies": true,
+  "styleHeads": 7.5,
+  "proportions": {
+    "headUnit": 0.1333,
+    "torso": 3.45,
+    "legs": 4.05,
+    "shoulderWidth": 1.8,
+    "hipWidth": 1.25
+  },
+  "pose": {
+    "type": "neutral standing reference, adapted to existing seated steering rig",
+    "jointAngles": {
+      "shoulderAbduction": 8,
+      "elbowFlexion": 8,
+      "kneeFlexion": 0
+    }
+  },
+  "faceLandmarks": {
+    "eyeLine": 0.5,
+    "eyeSpacing": 0,
+    "noseBase": 0.67,
+    "mouthLine": 0.8,
+    "hairline": 0,
+    "observable": false,
+    "note": "Normalized guide planes only, NOT observed features: mannequin has no eyes, nose, mouth or hair. Do not build them. Landmark gate tests absence plus cranium/jaw shape."
+  },
+  "features": [
+    "ovoid cranium narrows to jaw",
+    "no facial appendages",
+    "pectoral lobes continuous with tapered abdominal core",
+    "shoulder elbow knee hinge seam relief"
+  ],
+  "confidence": 0.8,
+  "evidenceRef": "zenflow-front",
+  "measurementsPixels": {
+    "crownY": 69,
+    "chinY": 121,
+    "ankleY": 447,
+    "floorY": 458,
+    "shoulderSpan": 94,
+    "hipSpan": 64
+  },
+  "note": "7.48HU=(458-69)/(121-69); rough manual pixel measurements. Seated joints use existing steering/contact transforms."
+}

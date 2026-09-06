@@ -1,0 +1,20 @@
+{
+  "referenceAreaFraction": 0.2821388888888889,
+  "angles": [
+    {
+      "path": ".tools/baseline-review/zenflow-side.png",
+      "areaFraction": 0.39210416666666664,
+      "ratio": 1.3897558334153786,
+      "degenerate": false
+    },
+    {
+      "path": ".tools/baseline-review/zenflow-rear.png",
+      "areaFraction": 0.24632870370370372,
+      "ratio": 0.8730760395129796,
+      "degenerate": false
+    }
+  ],
+  "degenerate": false,
+  "collapseRatio": 0.15,
+  "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+}

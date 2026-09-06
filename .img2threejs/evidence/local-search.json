@@ -1,0 +1,93 @@
+{
+  "query": "articulated humanoid joint socket clearcoat roughness sRGB continuous sculpt",
+  "collection": "core_3d",
+  "index": {
+    "status": "hit",
+    "reason": "current",
+    "fingerprint": "6857e5ab528b42ac12f4f411f862610a0bffce8e47aee3610a7603c318072fe8",
+    "cache_path": "/root/.codex/skills/remote-skills/skill-6a715a2bf31c8191923d4bbab422e87d/.cache/spec-search/core_3d.json"
+  },
+  "matches": [
+    {
+      "record_id": "core.pbr-color-space-srgb-vs-linearnocolorspace",
+      "file_path": "docs/raw/img2threejs-skill-dataset.json",
+      "heading": null,
+      "key_path": "categories.material_pbr[11]",
+      "score": 7.564010512127,
+      "snippets": [
+        "Distinction between human-viewable color data (needs gamma/sRGB) and mathematical data maps (must stay linear/uncorrected). Ph\u00e2n bi\u1ec7t gi\u1eefa d\u1eef li\u1ec7u m\u00e0u \u0111\u1ec3 ng\u01b0\u1eddi xem (c\u1ea7n gamma/sRGB) v\u00e0 c\u00e1c b\u1ea3n \u0111\u1ed3 d\u1eef li\u1ec7u to\u00e1n h\u1ecdc (ph\u1ea3i gi\u1eef tuy\u1ebfn t\u00ednh/kh\u00f4ng hi\u1ec7u ..."
+      ],
+      "source_refs": [
+        {
+          "path": "docs/raw/img2threejs-skill-dataset.json",
+          "heading": null,
+          "key_path": "categories.material_pbr[11]"
+        }
+      ],
+      "evidence_refs": [
+        {
+          "kind": "source",
+          "ref": "docs/raw/img2threejs-skill-dataset.json",
+          "note": "img2threejs NotebookLM research distillation"
+        }
+      ]
+    },
+    {
+      "record_id": "core.description-pbr-vocabulary-caption-calibration",
+      "file_path": "docs/raw/img2threejs-skill-dataset.json",
+      "heading": null,
+      "key_path": "categories.description_conventions[7]",
+      "score": 5.983315580042,
+      "snippets": [
+        "Embedding a technical material-attribute block (Albedo, Metalness, Roughness, Normals) with measured reflectance ranges directly into the structured description, not just prose. Nh\u00fang m\u1ed9t kh\u1ed1i thu\u1ed9c t\u00ednh v\u1eadt li\u1ec7u k\u1ef9 thu\u1eadt (Albedo, Metalness, ..."
+      ],
+      "source_refs": [
+        {
+          "path": "docs/raw/img2threejs-skill-dataset.json",
+          "heading": null,
+          "key_path": "categories.description_conventions[7]"
+        }
+      ],
+      "evidence_refs": [
+        {
+          "kind": "source",
+          "ref": "docs/raw/img2threejs-skill-dataset.json",
+          "note": "img2threejs NotebookLM research distillation"
+        }
+      ]
+    },
+    {
+      "record_id": "core.socket-pivot",
+      "file_path": "grimoire/glossary/3d_vocabulary.md",
+      "heading": "Animation, Physics, And Destruction",
+      "key_path": null,
+      "score": 5.511200483252,
+      "snippets": [
+        "A pivot is a local rotation origin; a socket is an attachment point for a child part. In a runtime hierarchy, a socket Object3D is a child of the relevant pivot."
+      ],
+      "source_refs": [
+        {
+          "path": "grimoire/glossary/3d_vocabulary.md",
+          "heading": "Animation, Physics, And Destruction",
+          "key_path": null
+        },
+        {
+          "path": "grimoire/readiness/action_rigging.md",
+          "heading": "Hierarchy Pattern",
+          "key_path": null
+        }
+      ],
+      "evidence_refs": [
+        {
+          "kind": "source",
+          "ref": "grimoire/readiness/action_rigging.md"
+        },
+        {
+          "kind": "notebooklm-research",
+          "ref": "notebooklm:4b03c2f9-8393-411f-b5b4-039ab9532843",
+          "note": "Validated generic schema vocabulary; numeric claims remain backed by local source_refs."
+        }
+      ]
+    }
+  ]
+}

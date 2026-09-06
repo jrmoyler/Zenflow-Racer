@@ -1,0 +1,36 @@
+[
+  {
+    "reference": "drivers-01",
+    "result": {
+      "admitted": true,
+      "reasons": [],
+      "provenance": {
+        "viewpoint": "roster-reference-sheet",
+        "sourcePath": "references/visual-targets/drivers-01.png",
+        "width": 1536,
+        "height": 1024,
+        "foregroundCoverage": 0.3816,
+        "largestComponentFraction": 0.8971,
+        "pHash": 12674682779482834176,
+        "duplicateOfHash": null
+      }
+    }
+  },
+  {
+    "reference": "drivers-02",
+    "result": {
+      "admitted": true,
+      "reasons": [],
+      "provenance": {
+        "viewpoint": "roster-reference-sheet",
+        "sourcePath": "references/visual-targets/drivers-02.png",
+        "width": 1536,
+        "height": 1024,
+        "foregroundCoverage": 0.4092,
+        "largestComponentFraction": 0.9293,
+        "pHash": 17529564278096889600,
+        "duplicateOfHash": null
+      }
+    }
+  }
+]

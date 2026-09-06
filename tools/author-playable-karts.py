@@ -110,7 +110,7 @@ def bonnet(body,kart,mat):
         u=j/(len(rows)-1);span=.76*math.sin(math.pi*u)**.38
         for k in range(segments+1):
             a=(k/segments*2-1)*span
-            verts.append((math.sin(a)*w,-z,y+math.cos(a)*h+.009))
+            verts.append((math.sin(a)*w,-z,y+math.cos(a)*h+(.045 if sharp else .009)))
     for j in range(len(rows)-1):
         for k in range(segments):
             a=j*(segments+1)+k;b=a+segments+1;faces.append((a,a+1,b+1,b))
