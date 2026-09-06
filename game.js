@@ -664,6 +664,7 @@ function renderSelectedPreview(dt){const el=document.getElementById('kart-previe
  if(!previewSpin.dragging){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
  if(!previewKart||!renderer.setScissor)return;
+ previewScene.environment=scene.environment;
  animateShowroomKart(previewKart,game.time,dt,previewAngle);
  const stage=previewStage.userData;stage.ticks.rotation.z=-previewAngle;stage.ring.material.opacity=.58+Math.sin(game.time*2.2)*.14;stage.halo.rotation.z=game.time*.15;
  previewCamera.aspect=rect.width/rect.height;const narrow=rect.width<rect.height*1.15;

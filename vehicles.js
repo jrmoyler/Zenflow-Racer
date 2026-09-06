@@ -405,11 +405,11 @@ function itemIconSVG(key){
 let itemBoxes=[],tokens=[],mines=[],missiles=[];
 const pickupGroup=new THREE.Group();scene.add(pickupGroup);
 function buildPickups(){
-  const boxG=starGeo(1.1,.5);const boxMat=new THREE.MeshPhysicalMaterial({color:0xd4a843,metalness:.85,roughness:.18,emissive:0xd4a843,emissiveIntensity:.18,clearcoat:1});
-  const coreG=new THREE.IcosahedronGeometry(.42,1);const coreMat=new THREE.MeshStandardMaterial({color:0x000,emissive:0x00d9b5,emissiveIntensity:3});
+  const boxG=new THREE.BoxGeometry(1.45,1.45,.32);const boxMat=new THREE.MeshPhysicalMaterial({color:0x66e8ff,metalness:.25,roughness:.1,emissive:0x00bfff,emissiveIntensity:.25,transparent:true,opacity:.72,depthWrite:false,clearcoat:1});
+  const coreG=starGeo(.44,.38);const coreMat=new THREE.MeshStandardMaterial({color:0xc4ffff,emissive:0x39dcff,emissiveIntensity:1.1});
   const rows=[0.11,0.30,0.47,0.64,0.80,0.93];
   rows.forEach(u=>{[-5,-1.7,1.7,5].forEach(lat=>{const g=new THREE.Group();const m=new THREE.Mesh(boxG,boxMat);m.castShadow=true;g.add(m);const cc=new THREE.Mesh(coreG,coreMat);g.add(cc);pickupGroup.add(g);itemBoxes.push({u,lat,mesh:g,star:m,core:cc,t:0});});});
-  // tokens: gold hex coins in arcs
+  // tokens: round gold coins in arcs
   const tokG=new THREE.CylinderGeometry(.5,.5,.12,32);tokG.rotateX(Math.PI/2);const tokMat=new THREE.MeshPhysicalMaterial({color:0xd4a843,metalness:.9,roughness:.2,emissive:0xd4a843,emissiveIntensity:.35,clearcoat:.8});
   const embG=starGeo(.24,.06);const embMat=new THREE.MeshStandardMaterial({color:0x2a1a04,roughness:.5,metalness:.4});
   const arcs=[[0.06,-3,1],[0.2,3,-1],[0.38,-4,.5],[0.55,0,0],[0.72,4,-.5],[0.86,-2,1]];

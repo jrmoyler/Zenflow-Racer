@@ -140,9 +140,9 @@ class CanvasRaceRenderer {
     if(r.specialActive>0||r.phase>0||r.ram>0||r.reflect>0||r.regen>0||r.specialCooldown>ability.cooldown-1.2)this.powerMotif(r.div.id,x,y,size,r.div.acc);
   }
   renderRosterPreview(division,rect,angle=0){
-    // Compatibility turntable: the chassis art pivots through a full 360° on a holographic pedestal.
+    // Keep the compatibility illustration legible; only the pedestal rotates.
     if(!division||!rect)return;const c=this.ctx;c.save();c.setTransform(this.ratio,0,0,this.ratio,0,0);
-    const cx=rect.x+rect.width*.5,cy=rect.y+rect.height*.5,turn=Math.cos(angle),facing=Math.max(.06,Math.abs(turn)),mirror=turn<0?-1:1;
+    const cx=rect.x+rect.width*.5,cy=rect.y+rect.height*.5,turn=Math.cos(angle),facing=.97+.03*turn,mirror=1;
     const px=Math.min(rect.width*.42,rect.height*.5),py=px*.28,baseY=rect.y+rect.height*.82;
     c.fillStyle='rgba(127,233,255,.16)';c.beginPath();c.ellipse(cx,baseY,px,py,0,0,Math.PI*2);c.fill();
     c.strokeStyle='rgba(169,255,255,.7)';c.lineWidth=2;c.beginPath();c.ellipse(cx,baseY,px,py,0,0,Math.PI*2);c.stroke();

@@ -63,6 +63,9 @@ for(const mobile of [false,true]){
    run('if(authoredIdle)KART_CLIPS.clips.idle=authoredIdle;resolveKartRig(kart);for(let i=0;i<120;i++)animateShowroomKart(kart,4+i/60,1/60)');finiteTransforms(kart);if(run('!!authoredIdle'))assert.ok(run('KART_CLIPS.clips.idle.tracks')&&Object.keys(run('KART_CLIPS.clips.idle.tracks')).every(n=>ud.clipNodes[n]),'authored idle clip targets resolve on the rig');
    let sharedDisposals=0;const shared=Object.values(run('KART_GEO'));const onSharedDispose=()=>sharedDisposals++;for(const g of shared)g.addEventListener('dispose',onSharedDispose);run('disposeKart(kart)');assert.equal(sharedDisposals,0,'kart disposal preserves cached geometry');for(const g of shared)g.removeEventListener('dispose',onSharedDispose);console.log(`PASS kart ${div.id}: ${check.meshes} meshes; ${check.bounds.toArray().map(v=>v.toFixed(2)).join(' × ')}; rig ${RIG_ONCE.length+4} nodes`);
   }
+  run(read('item-models.js'));
+  for(const name of ['buildReferenceMine','buildReferenceMissile']){const item=run(name+'()'),check=geometryCheck(item);assert.ok(check.bounds.x<3&&check.bounds.z<3,'projectile fits its collision envelope');assert.ok(check.meshes>=6,'projectile uses authored parts');}
+  console.log('PASS reference mine and missile: finite authored geometry and collision bounds');
   assert.equal(hashes.size,12,'all divisions have different actual geometry');assert.ok(sizes.size>=6,'division silhouettes have materially distinct bounds');
  }
 }
