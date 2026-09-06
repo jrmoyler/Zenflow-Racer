@@ -16,13 +16,13 @@ const ABILITIES={
 const abilityZones=[];
 function initAbility(r){r.specialCooldown=0;r.specialActive=0;r.specialPulse=0;r.phase=0;r.slow=0;r.ram=0;r.reflect=0;r.regen=0;r.lastLostTokens=0;r.specialAI=1+rng()*4;}
 function clearAbilities(){abilityZones.length=0;if(typeof clearPowerEffects==='function')clearPowerEffects();}
-function abilityFX(r,kind=r.div.id){if(typeof spawnPowerEffect==='function')spawnPowerEffect(kind,r.u,r.lat,r.div.acc,r);}
+function abilityFX(r,kind=r.div.id){if(typeof spawnPowerEffect==='function')spawnPowerEffect(kind,r.u,r.lat,r.div.acc,r);if(typeof raceFX!=='undefined')raceFX.onSpecial(r,kind);}
 function powerProtected(r,attacker,reflectable=true){
  if(r.finished||r.phase>0)return true;
  if(r.reflect>0&&reflectable){r.reflect=0;abilityFX(r,'juris');if(attacker&&attacker!==r)hitRacer(attacker,'reflection',null);return true;}
  return false;
 }
-function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker))return false;if(r.shield>0){r.shield=0;return false;}r.slow=Math.max(r.slow||0,duration);return true;}
+function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker))return false;if(r.shield>0){r.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);return false;}r.slow=Math.max(r.slow||0,duration);return true;}
 function useSpecial(r){
  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.spin>0&&r.div.id!=='helix')return false;
  const power=ABILITIES[r.div.id];if(!power)return false;
@@ -30,7 +30,7 @@ function useSpecial(r){
  if(r.isPlayer){setToast(power.name,'teal');SFX.ui();}
  switch(r.div.id){
  case 'zenflow':r.specialActive=4;break;
- case 'collective':{let taken=0;for(const o of game.racers){if(o===r||!o.tokens||Math.abs(du_dist(r.u,o.u))>35||r.tokens>=10||taken>=3||powerProtected(o,r))continue;if(o.shield>0){o.shield=0;continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}break;}
+ case 'collective':{let taken=0;for(const o of game.racers){if(o===r||!o.tokens||Math.abs(du_dist(r.u,o.u))>35||r.tokens>=10||taken>=3||powerProtected(o,r))continue;if(o.shield>0){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}break;}
  case 'hybrid':r.phase=3.5;r.specialActive=3.5;break;
  case 'nexus':abilityZones.push({kind:'decoy',owner:r,u:r.u,lat:r.lat,life:8});r.specialActive=8;break;
  case 'kinetic':r.ram=4;r.specialActive=4;break;
@@ -47,12 +47,13 @@ function useSpecial(r){
 function stepAbilities(dt){
  for(const r of game.racers){
   for(const key of ['specialCooldown','phase','slow','ram','reflect','regen'])r[key]=Math.max(0,(r[key]||0)-dt);
-  if(!r.isPlayer&&!r.finished){r.specialAI-=dt;if(r.specialAI<=0){useSpecial(r);r.specialAI=1.2+rng()*2.8;}}
+  // AI decision timer; game.js supplies aiWantsSpecial (defensive powers when threatened, offensive when a rival is in range).
+  if(!r.isPlayer&&!r.finished){r.specialAI-=dt;if(r.specialAI<=0){if(typeof aiWantsSpecial!=='function'||aiWantsSpecial(r))useSpecial(r);r.specialAI=1.2+rng()*2.8;}}
   if(r.finished||!(r.specialActive>0))continue;
   r.specialActive=Math.max(0,r.specialActive-dt);
   if(r.div.id==='zenflow')for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<18&&!o.regen&&!o.phase&&!o.reflect&&!o.shield)o.slow=Math.max(o.slow||0,.18);}
   if(r.div.id==='aether')for(const t of tokens){if(t.t<=0&&r.tokens<10&&Math.abs(du_dist(r.u,t.u))<24){t.t=9;t.mesh.visible=false;r.tokens++;if(r.isPlayer)SFX.token(r.tokens);}}
-  if(r.div.id==='animus'){r.specialPulse-=dt;if(r.specialPulse<=0){r.specialPulse=1.5;let target=null,best=32;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best){target=o;best=d;}}if(target){if(powerSlow(target,1.1,r))target.speed*=.84;abilityFX(target,'animus');}}}
+  if(r.div.id==='animus'){r.specialPulse-=dt;if(r.specialPulse<=0){r.specialPulse=1.5;let target=null,best=32;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best){target=o;best=d;}}if(target){if(powerSlow(target,1.1,r))target.speed*=.84;abilityFX(target,'animus-pulse');}}}
  }
  for(let i=abilityZones.length-1;i>=0;i--){const z=abilityZones[i];z.life-=dt;if(z.life<=0){abilityZones.splice(i,1);continue;}
   if(z.kind==='snare'){for(const r of game.racers)if(r!==z.owner&&Math.abs(du_dist(z.u,r.u))<7&&Math.abs(z.lat-r.lat)<2.4)powerSlow(r,.7,z.owner);}

@@ -1,6 +1,6 @@
 # Division abilities
 
-Use Q, gamepad Y, or the on-screen SPECIAL button. Each ability starts ready; cooldowns advance only during active simulation. AI racers use the same powers and cooldowns, with a randomized decision interval. Item use remains E / gamepad X.
+Use Q, gamepad Y, or the on-screen SPECIAL button. Each ability starts ready; cooldowns advance only during active simulation. AI racers use the same powers and cooldowns, with a randomized decision timer that fires only when the power's condition is met (defensive powers when threatened, offensive ones with a rival in range). Item use remains E / gamepad X.
 
 | Division ID | Power | Cooldown | Gameplay |
 |---|---|---:|---|

@@ -10,7 +10,8 @@
     "test": "node tests/game-regression.cjs",
     "test:release": "node tests/build-shell.cjs",
     "verify": "npm test && npm run build && npm run test:release && npm run test:runtime",
-    "test:runtime": "node tests/reference-runtime.cjs"
+    "test:runtime": "node tests/reference-runtime.cjs",
+    "blender:karts": "node tools/export-kart-rig.cjs && bash tools/render-karts-blender.sh"
   },
   "engines": {
     "node": "24.x"

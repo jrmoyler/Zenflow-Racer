@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'..'),out=path.resolve(process.argv[2]||path.join(root,'.tools/kart-meshes'));
 const THREE=require(path.join(root,'vendor/three.min.js'));
 const ctx=vm.createContext({THREE,console,TEX:{},lerp:(a,b,t)=>a+(b-a)*t});
-const source=fs.readFileSync(path.join(root,'vehicles.js'),'utf8').split('// ---------- Item / token pickups ----------')[0];
+const source=fs.readFileSync(path.join(root,'kart-materials.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'vehicles.js'),'utf8').split('// ---------- Item / token pickups ----------')[0];
 vm.runInContext(source+'\nkartGeos();',ctx);
 const roster=vm.runInNewContext(fs.readFileSync(path.join(root,'core.js'),'utf8').match(/const ROSTER = (\[[\s\S]*?\n\]);/)[1]);
 fs.mkdirSync(out,{recursive:true});const stats=[];

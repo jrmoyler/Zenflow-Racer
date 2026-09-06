@@ -129,6 +129,12 @@ class CanvasRaceRenderer {
       case 'helix':for(let strand=0;strand<2;strand++){c.beginPath();for(let j=-110;j<33;j+=3){const xx=Math.sin(j*.065+t+strand*Math.PI)*56;j===-110?c.moveTo(xx,j):c.lineTo(xx,j);}c.stroke();}for(let j=-100;j<30;j+=17)line([[Math.sin(j*.065+t)*56,j],[-Math.sin(j*.065+t)*56,j]]);break;
     }c.restore();
   }
+  speedLines(cx,cy,color,alpha,phase,count=12,radius=Math.min(this.width,this.height)*.3){
+    // Radial streaks (anime-style speed lines) used for slipstream and boost feedback in compatibility mode.
+    const c=this.ctx;if(!(alpha>0))return;c.save();c.globalAlpha=Math.min(1,alpha);c.strokeStyle=color;c.lineCap='round';
+    for(let i=0;i<count;i++){const a=i/count*Math.PI*2+phase,len=28+((phase*90+i*47)%70);c.lineWidth=1+(i%3)*.6;c.beginPath();c.moveTo(cx+Math.cos(a)*radius,cy+Math.sin(a)*radius*.62);c.lineTo(cx+Math.cos(a)*(radius+len),cy+Math.sin(a)*(radius+len)*.62);c.stroke();}
+    c.restore();
+  }
   racerPower(r,x,y,size){
     if(typeof ABILITIES==='undefined'||!r.div)return;const ability=ABILITIES[r.div.id];if(!ability)return;
     if(r.specialActive>0||r.phase>0||r.ram>0||r.reflect>0||r.regen>0||r.specialCooldown>ability.cooldown-1.2)this.powerMotif(r.div.id,x,y,size,r.div.acc);
@@ -185,7 +191,14 @@ class CanvasRaceRenderer {
       else if(s.type==='zone'){this.powerMotif(s.obj.kind==='snare'?'loom':'nexus',x,y,Math.min(scale*4,180),s.obj.owner.div.acc);}
       else {c.save();c.translate(x,y-scale*1.4);if(s.type==='token'){c.fillStyle='#edc36d';c.strokeStyle='#fff4ba';c.lineWidth=Math.max(1,scale*.09);c.beginPath();c.ellipse(0,0,scale*.35,scale*.55,0,0,Math.PI*2);c.fill();c.stroke();}else if(s.type==='mine'){c.fillStyle='#fc626b';c.beginPath();c.arc(0,scale*.9,scale*.6,0,Math.PI*2);c.fill();c.strokeStyle='#ffd7ca';c.lineWidth=2;c.stroke();}else if(s.type==='missile'){this.polygon([[0,-scale],[-scale*.3,scale*.6],[scale*.3,scale*.6]],'#f6c379');}else{this.ellipse(0,0,scale*.64,scale*.68,'rgba(145,244,255,.32)');c.strokeStyle='#c9ffff';c.lineWidth=1.5;c.beginPath();c.ellipse(0,0,scale*.64,scale*.68,0,0,Math.PI*2);c.stroke();c.fillStyle='#d6ffff';for(let petal=-1;petal<=1;petal++){c.beginPath();c.moveTo(0,scale*.32);c.quadraticCurveTo(petal*scale*.7,-scale*.05,petal*scale*.35,-scale*.42);c.quadraticCurveTo(petal*scale*.15,-scale*.12,0,scale*.32);c.fill();}}c.restore();}
     }
-    if(player){const py=Math.min(h*.84,horizon+camHeight*focal/near);this.racerPower(player,w*.5,py,Math.min(140,w*.22));this.kart(w*.5,py,Math.min(140,w*.22),player.div.acc,player.steer,player.boost>0,player.shield>0);if(player.drifting){c.fillStyle=player.driftTier>1?'#bc85ff':'#66e0ff';for(let i=0;i<6;i++){const sx=w*.5+(player.driftDir<0?-1:1)*(45+i*5),sy=py+Math.sin(performance.now()*.02+i)*9;c.fillRect(sx,sy,3,2);}}}
+    if(player){const py=Math.min(h*.84,horizon+camHeight*focal/near);const now=performance.now();
+      // Slipstream: teal streaks converge on the player while the draft is building or towing.
+      const slip=Math.max(player.slipBonus||0,player.slipOn?.35:0);
+      if(slip>.02)this.speedLines(w*.5,py-60,'#b8ffef',slip*.7,now*.0011,10);
+      // Boost: hot streaks from the screen edges, scaled by the remaining boost.
+      if(player.boost>0)this.speedLines(w*.5,h*.5,'#ffd28a',Math.min(1,player.boost/1.2)*.55,now*.0021,16,Math.max(w,h)*.42);
+      this.racerPower(player,w*.5,py,Math.min(140,w*.22));this.kart(w*.5,py,Math.min(140,w*.22),player.div.acc,player.steer,player.boost>0,player.shield>0);
+      if(player.drifting){const tier=player.driftTier|0;c.fillStyle=['#66e0ff','#66e0ff','#ffcf68','#ff7ad9'][Math.min(3,tier)];for(let i=0;i<6+tier*3;i++){const sx=w*.5+(player.driftDir<0?-1:1)*(45+i*5),sy=py+Math.sin(now*.02+i)*9;c.fillRect(sx,sy,3,2);}}}
     // Gentle lens vignette, also maintaining HUD contrast around small screens.
     const vignette=c.createRadialGradient(w/2,h/2,h*.2,w/2,h/2,Math.max(w,h)*.8);vignette.addColorStop(0,'transparent');vignette.addColorStop(1,'rgba(59,52,106,.18)');c.fillStyle=vignette;c.fillRect(0,0,w,h);
   }

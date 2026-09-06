@@ -82,7 +82,18 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,217,181,.0) 100%);opacity:0;transition:opacity .2s}
 #vig.boost{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,217,181,.22) 100%)}
 #vig.hit{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.35) 100%)}
-#wrong{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:800;color:#EF4444;font-size:26px;letter-spacing:.1em;text-shadow:0 2px 0 #000;display:none}
+#wrong{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:800;color:#EF4444;font-size:26px;letter-spacing:.1em;text-shadow:0 2px 0 #000;display:none;animation:wrongin .45s ease-out}
+@keyframes wrongin{from{opacity:0;transform:translate(-50%,-50%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+#toastsub{position:absolute;left:50%;top:26%;transform:translate(-50%,calc(-50% + clamp(26px,5.4vw,52px)));font-size:clamp(11px,1.8vw,16px);letter-spacing:.1em;color:var(--white);text-shadow:0 2px 0 rgba(0,0,0,.6);opacity:0;transition:opacity .15s;white-space:nowrap}
+#toast.show+#toastsub:not(:empty){opacity:1}
+#countmap{position:absolute;left:50%;top:calc(104px + var(--sa-t));transform:translateX(-50%);font-size:clamp(10px,1.6vw,14px);letter-spacing:.18em;color:var(--white);text-shadow:0 2px 0 rgba(0,0,0,.6);opacity:0;transition:opacity .3s;white-space:nowrap;background:rgba(5,10,24,.45);padding:5px 12px;border-radius:3px;border:1px solid rgba(26,37,64,.8)}
+#speedbar{display:block;width:96px;height:3px;margin:6px 0 0 auto;background:rgba(255,255,255,.14);border-radius:2px;position:relative;overflow:hidden}
+#speedbar::after{content:'';position:absolute;left:0;top:0;bottom:0;width:var(--v,0%);background:linear-gradient(90deg,#8ab8ff,#e8f4ff);transition:width .08s linear}
+#speedbar.boost::after{background:var(--teal);box-shadow:0 0 8px var(--teal)}#speedbar.slip::after{background:linear-gradient(90deg,#6fd6ff,#b8ffef)}
+#item.spin::before{content:'';position:absolute;inset:-3px;border-radius:inherit;background:conic-gradient(var(--teal) calc(var(--spin,0)*100%),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));pointer-events:none}
+#vig.slip{opacity:1;background:radial-gradient(ellipse at center,transparent 55%,rgba(111,214,255,.16) 100%)}
+#ranks div.gap{color:var(--teal);font-weight:700;margin-top:3px}
+#pause p.keys{margin-top:8px;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em}#pause p.keys kbd{background:var(--card2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--white)}
 #ranks{position:absolute;left:calc(14px + var(--sa-l));top:calc(14px + var(--sa-t));display:flex;flex-direction:column;gap:2px;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em}
 #ranks div{display:flex;align-items:center;gap:6px;color:var(--silver);text-shadow:0 1px 0 #000;background:rgba(5,10,24,.35);padding:1px 6px 1px 3px;border-radius:2px;width:max-content}
 #ranks div i{width:8px;height:8px;border-radius:2px;background:var(--c);transform:rotate(45deg);flex-shrink:0}
@@ -100,6 +111,10 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 #tD{right:calc(18px + var(--sa-r));bottom:calc(200px + var(--sa-b))}
 #tI{right:calc(104px + var(--sa-r));bottom:calc(200px + var(--sa-b));width:64px;height:64px;font-size:10px}
 #tB{right:calc(18px + var(--sa-r));bottom:calc(290px + var(--sa-b));width:56px;height:56px;font-size:10px;opacity:.8}
+#tP{right:calc(104px + var(--sa-r));bottom:calc(290px + var(--sa-b));width:64px;height:64px;font-size:10px;opacity:.75}
+#tP.ready{opacity:1;color:var(--teal);border-color:var(--teal);box-shadow:0 0 16px rgba(0,217,181,.55);animation:tpready 1.4s ease-in-out infinite}
+@keyframes tpready{0%,100%{box-shadow:0 0 10px rgba(0,217,181,.35)}50%{box-shadow:0 0 20px rgba(0,217,181,.8)}}
+html[data-touch="on"] #tS{display:none}
 
 /* ---------- Results / pause ---------- */
 #results{background:rgba(5,10,24,.86);backdrop-filter:blur(6px)}
@@ -108,7 +123,8 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 #results h2 span{color:var(--gold)}
 #results .sub{font-family:'JetBrains Mono';font-size:11px;color:var(--silver);margin:4px 0 14px;letter-spacing:.06em}
 #board{display:flex;flex-direction:column;gap:4px;max-height:44vh;overflow-y:auto;touch-action:pan-y}
-#board div{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:6px 8px;border-radius:3px;background:var(--card2);font-size:13px}
+#board div{display:grid;grid-template-columns:28px 1fr auto auto auto;gap:10px;align-items:center;padding:6px 8px;border-radius:3px;background:var(--card2);font-size:13px}
+#board div i.bl,#board div i.gp{min-width:64px;text-align:right}#board div i.fastest{color:var(--gold)}#board div.hd{background:transparent;font-family:'JetBrains Mono';font-size:9px;letter-spacing:.12em;color:var(--silver);padding:2px 8px}#board div.hd i,#board div.hd b{font-size:9px}
 #board div.me{outline:1px solid var(--gold);background:rgba(212,168,67,.12)}
 #board div b{font-family:'JetBrains Mono';color:var(--silver);font-size:12px}
 #board div em{font-style:normal;display:inline-block;width:10px;height:10px;transform:rotate(45deg);background:var(--c);margin-right:8px;vertical-align:middle;border-radius:1px}
@@ -168,7 +184,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
     <div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div>
 
   </div>
-  <div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause. Touch: auto throttle · Gamepad: triggers drive, shoulder drift, X item.</div>
+  <div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle, POWER button · Gamepad: triggers drive, shoulder drift, X item, Y power, rumble.</div>
 </div>
 
 <div id="hud" class="hidden">
@@ -179,21 +195,21 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
   <button id="mutebtn">SOUND ON</button>
   <div id="item"><div class="ic"></div><div class="lbl"></div></div>
   <div id="specialHUD"><button id="tS" aria-label="Activate director power"><span id="specialLabel">ZEN POWER</span> <kbd>Q</kbd></button></div>
-  <div id="speedo">KM/H<b>0</b></div>
+  <div id="speedo">KM/H<b>0</b><i id="speedbar" aria-hidden="true"></i></div>
   <canvas id="mini" width="300" height="300"></canvas>
   <div id="pos"><div class="n">12</div><div class="o">th</div></div>
   <div id="lapwrap"><span id="lap">LAP 1/3</span><span class="tok"><em></em><span id="tok">0</span></span></div>
   <div id="driftmeter" hidden aria-live="off"></div>
   <div id="vig"></div>
-  <div id="toast" role="status" aria-live="polite"></div>
-  <div id="count"></div>
+  <div id="toast" role="status" aria-live="polite"></div><div id="toastsub" class="mono" aria-hidden="true"></div>
+  <div id="count"></div><div id="countmap" class="mono" aria-hidden="true"></div>
   <div id="wrong">WRONG WAY</div>
 </div>
-<div id="touch"><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button></div>
+<div id="touch"><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate director power">POWER</button></div>
 
-<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">SYNERGY GRAND PRIX</div><h2>Race paused.</h2><p>Take a breath. Your race is right where you left it.</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="resume" class="btn">Resume</button></div></div></div>
+<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">SYNERGY GRAND PRIX</div><h2>Race paused.</h2><p>Take a breath. Your race is right where you left it.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
 
-<div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="rematch" class="btn">Rematch</button></div></div></div>
+<div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="nextmap" class="btn ghost">Next Circuit</button><button id="rematch" class="btn">Rematch</button></div></div></div>
 
 <dialog id="art-gallery" aria-labelledby="art-title"><header><h2 id="art-title">Division collection</h2><button id="close-art" aria-label="Close division collection">Close ×</button></header><p>The original kart and power reference artwork.</p><div class="art-pages"><figure><img loading="lazy" src="assets/art/division-karts-01.webp" alt="First six distinct division kart designs"><figcaption>Division karts · 01–06</figcaption></figure><figure><img loading="lazy" src="assets/art/division-karts-02.webp" alt="Second six distinct division kart designs"><figcaption>Division karts · 07–12</figcaption></figure><figure><img loading="lazy" src="assets/art/division-effects-01.webp" alt="First six signature division power effects"><figcaption>Signature powers · 01–06</figcaption></figure><figure><img loading="lazy" src="assets/art/division-effects-02.webp" alt="Second six signature division power effects"><figcaption>Signature powers · 07–12</figcaption></figure><figure><img loading="lazy" src="assets/art/item-icons.webp" alt="Signal Burst, Aegis Shield, Loom Mine, Vector Missile, Overseer Pulse, Node Cluster"><figcaption>Race items</figcaption></figure></div></dialog>
 <script src="vendor/three.min.js"></script>
@@ -205,12 +221,15 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 <script src="vendor/postprocessing/ShaderPass.js"></script>
 <script src="vendor/postprocessing/UnrealBloomPass.js"></script>
 <script src="core.js"></script>
+<script src="kart-materials.js"></script>
+<script src="kart-clips.js"></script>
 <script src="fallback-renderer.js"></script>
 <script src="maps.js"></script>
 <script src="world.js"></script>
 <script src="postfx.js"></script>
 <script src="vehicles.js"></script>
 <script src="item-art.js"></script>
+<script src="racefx.js"></script>
 <script src="effects.js"></script>
 <script src="abilities.js"></script>
 <script src="game.js"></script>

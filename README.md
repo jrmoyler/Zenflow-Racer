@@ -3,11 +3,11 @@
 Reference-driven floating-island arcade racer with three selectable circuits, twelve distinct division chassis, twelve powers, and six illustrated items. See [abilities](docs/abilities.md), [verification](docs/upgrade-verification.md) and the original visual references in references/.
 
 ## Play
-Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. The character select shows the selected director's actual race chassis on a 360° holographic turntable: it turns continuously, can be dragged to spin, and the arrow buttons or keyboard arrows step through the roster. Twelve directors compete across three complete laps. Drift to charge boosts; collect tokens and items.
+Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. The character select shows the selected director's actual race chassis on a 360° holographic turntable: it turns continuously, can be dragged to spin, and the arrow buttons or keyboard arrows step through the roster. Twelve directors compete across three complete laps. Hop then hold to drift and release for a surge boost; tuck in behind rivals for a slipstream; collect tokens and items. Results list best lap and gap to the leader; Next Circuit cycles the three maps.
 
-- Keyboard: W/Up accelerate, S/Down brake/reverse, A/D or arrows steer, Shift/Space drift, E/Ctrl use item, Q director power, Escape pause.
-- Touch: automatic acceleration; steering, brake, drift and item buttons. Touch controls can also be enabled manually.
-- Gamepad: triggers accelerate/brake, left stick steer, shoulder buttons drift, X use item, Y director power, Start pause. Requires a standard-mapped controller/browser.
+- Keyboard: W/Up accelerate, S/Down brake/reverse, A/D or arrows steer, Shift/Space drift, E/Ctrl use item, Q director power, Escape pause, R restart (pause/results), M sound.
+- Touch: automatic acceleration; steering, brake, drift, item and POWER buttons; vibration on hits where supported. Touch controls can also be enabled manually.
+- Gamepad: triggers accelerate/brake, left stick steer, shoulder buttons drift, X use item, Y director power, Start pause. Requires a standard-mapped controller/browser. Rumble on hits and boosts where the browser exposes vibrationActuator.
 - Auto throttle is optional on desktop. Fullscreen appears in supported browsers.
 - Best times are stored on this device per circuit, director, and difficulty. Original records migrate to Cherry Blossom Skyway.
 
@@ -32,7 +32,7 @@ Signed race-distance tracking prevents reverse lap shortcuts. Correct finish ord
 A Canvas compatibility renderer automatically activates if WebGL is unavailable, using the same physics/AI/items and stabilized road visuals. Normal capable devices use the Three.js 3D circuit.
 
 ## Verification and limits
-34 Node/Three regression cases pass: full forward laps, reverse exploit prevention, braking, pause/countdown, frozen simulation, blur release, finish ranking and result labels. Rendering is stubbed in those tests.
+70 Node/Three regression cases pass: full forward laps, reverse exploit prevention, braking, pause/countdown, frozen simulation, blur release, finish ranking and result labels, plus boost surge, hop-to-drift, slipstream, angle-based wall scrub, lap splits and best lap, AI power and item rules, rubber-band caps, mine cap, results board, Next Circuit, text-field-safe key handling, kart materials, rig animation, Blender clips and race FX pools. Rendering is stubbed in those tests.
 Browser checked: director selection, desktop layout, 390×844 portrait and 844×390 landscape layouts, countdown, acceleration/rank updates, pause/resume, touch button events and mute. This cloud browser has no WebGL, so visual checks exercised Canvas compatibility mode. WebGL track frame math and vehicle construction passed numerical/runtime checks; GPU performance, real-device multi-touch, physical gamepads, PWA install/offline lifecycle and full GPU visual appearance still need hardware verification. Awards, zero bugs and universal device performance are not claimed.
 
 ## Art tools
@@ -55,4 +55,12 @@ The actual race uses Three.js geometry with twelve distinct chassis. The images 
 
 ## Blender chassis workflow
 
-`node tools/export-kart-meshes.cjs` exports the exact runtime chassis geometry for import using `tools/import-karts-blender.py`. Blender 4.5.0 was downloaded in the implementation environment, but its binary crashed on startup; the system package installer was also blocked by environment privileges. The importer is provided for a working Blender installation; no successful Blender render is claimed from this environment.
+Blender 4.5.0 (installed by `bash tools/setup-blender.sh` into the gitignored `.tools/`) is the animation authoring tool for the twelve division karts. `npm run blender:karts` runs the whole reproducible pipeline headlessly:
+
+1. `node tools/export-kart-rig.cjs` walks the real `buildKart()` hierarchy for every ROSTER division (with today's `vehicles.js` rig: `body` > `pilot` > `torso`/`head`/`arm-l`/`arm-r`, `steering-wheel`, `exhaust-l/r`, `wheel-*` > `spin`, ...) and writes per-kart JSON (node tree, local transforms, local-space meshes, PBR material parameters) to `.tools/kart-rig/`. Three `(x,y,z)` maps to Blender `(x,-z,y)`.
+2. `tools/build-kart-rig-blender.py` rebuilds the twelve rigs in Blender (Empties for Groups, meshes with Principled BSDF materials, emission for glow parts, alpha for the pilot) in a 4x3 grid of named collections; contract nodes missing from an in-progress rig get placeholder Empties.
+3. `tools/author-kart-clips.py` authors one slotted Action per clip on the named nodes with real Blender keyframes (Bezier/SINE/BACK/BOUNCE easing, anticipation, overshoot, secondary motion, cyclic loops): `idle`, `drive`, `drift`, `boost`, `spinout`, `hit`, `victory`, `defeat`.
+4. `tools/export-kart-clips.py` samples the f-curves at 30 fps into additive rest-relative deltas, converts back to the kart's Three frame (with a coordinate round-trip self-check), simplifies redundant keys and writes `kart-clips.js`, which `vehicles.js` layers onto the procedural pose per racer state. The file is plain script so the offline cache precaches it.
+5. `tools/render-karts-blender.sh` renders `docs/kart-review/` (a lit three-quarter still per kart and an eight-frame contact sheet per clip). EEVEE is attempted first; on this GPU-less host Blender aborts without EGL, so the driver falls back per process to Cycles CPU with denoising, which is what produced the committed images.
+
+Blender 4.5.0 ran successfully headless in this implementation environment (see `docs/kart-review/README.md` and `render-manifest.json` for the engine, samples and timings). The renders are geometry and animation evidence, not WebGL-identical shading. The older `tools/export-kart-meshes.cjs` / `tools/import-karts-blender.py` pair still exports a flattened world-space mesh lineup for material review. `tests/kart-clips-regression.cjs` guards the generated clip file against the rig contract.
