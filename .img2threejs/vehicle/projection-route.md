@@ -1,0 +1,1 @@
+Projection is not applicable: reference shows unpatterned white dielectric paint and a translucent stylized anonymous humanoid, no identifiable person or surface pattern. Reference PBR evidence was extracted for material inference; no screenshot albedo projection that would bake scenery onto glass.

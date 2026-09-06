@@ -1,0 +1,96 @@
+{
+  "passed": false,
+  "checks": {
+    "silhouetteIoU": 0.3737,
+    "aspectRatioDelta": 0.0833,
+    "scaleDelta": 0.3005,
+    "bilateralSymmetryError": 0.1352,
+    "colorDelta": {
+      "checked": 18,
+      "maxDeltaE": 28.87,
+      "perComponent": [
+        {
+          "componentId": null,
+          "deltaE": 16.58
+        },
+        {
+          "componentId": null,
+          "deltaE": 9.76
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 9.76
+        },
+        {
+          "componentId": null,
+          "deltaE": 9.76
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 16.58
+        },
+        {
+          "componentId": null,
+          "deltaE": 16.58
+        },
+        {
+          "componentId": null,
+          "deltaE": 28.87
+        },
+        {
+          "componentId": null,
+          "deltaE": 28.87
+        },
+        {
+          "componentId": null,
+          "deltaE": 28.87
+        },
+        {
+          "componentId": null,
+          "deltaE": 28.87
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        },
+        {
+          "componentId": null,
+          "deltaE": 21.44
+        }
+      ],
+      "gated": false
+    }
+  },
+  "failures": [
+    "silhouette IoU 0.374 is below threshold 0.85",
+    "aspect-ratio delta 0.083 exceeds threshold 0.05",
+    "scale delta 0.300 exceeds threshold 0.08"
+  ],
+  "renderHash": "9a935d0017c785c9",
+  "passId": "blockout",
+  "mapStrippedRender": ".img2threejs/vehicle/front.png"
+}

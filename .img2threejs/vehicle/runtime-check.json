@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "checks": [
+    "12 division builds",
+    "finite geometry",
+    "four wheels",
+    "forward and exhaust placement",
+    "disposal no exceptions"
+  ],
+  "models": [
+    {
+      "id": "zenflow",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "collective",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "hybrid",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "nexus",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "kinetic",
+      "meshes": 28,
+      "triangles": 21304
+    },
+    {
+      "id": "juris",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "signal",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "loom",
+      "meshes": 28,
+      "triangles": 21304
+    },
+    {
+      "id": "vector",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "aether",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "animus",
+      "meshes": 27,
+      "triangles": 16552
+    },
+    {
+      "id": "helix",
+      "meshes": 27,
+      "triangles": 16552
+    }
+  ]
+}

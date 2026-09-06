@@ -1,0 +1,14 @@
+{
+  "admitted": true,
+  "reasons": [],
+  "provenance": {
+    "viewpoint": "reference",
+    "sourcePath": "/workspace/scratch/d28b7e8ce77d/zenflow-repo/.img2threejs/vehicle/reference-crop.png",
+    "width": 444,
+    "height": 341,
+    "foregroundCoverage": 0.7987,
+    "largestComponentFraction": 0.9968,
+    "pHash": 14203496588414113333,
+    "duplicateOfHash": null
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "applies": true,
+  "styleHeads": 7,
+  "proportions": {
+    "headUnit": 0.14,
+    "torso": 2.7,
+    "legs": 3.3,
+    "shoulderWidth": 1.8,
+    "hipWidth": 1.2
+  },
+  "pose": {
+    "type": "seated, shoulders level, hands forward on steering wheel",
+    "jointAngles": {
+      "elbowFlexion": 90,
+      "hipFlexion": 100,
+      "kneeFlexion": 100
+    }
+  },
+  "faceLandmarks": {
+    "eyeLine": 0.45,
+    "noseBase": 0.65,
+    "mouthLine": 0.8,
+    "eyeSpacing": 0.25,
+    "hairline": 0.05
+  },
+  "features": [],
+  "confidence": 0.55,
+  "note": "Head and shoulder ratio estimated from selection center figure; legs occluded and inferred, not landmark-certified. Face landmarks approximated from visible head in center crop; low confidence .55."
+}

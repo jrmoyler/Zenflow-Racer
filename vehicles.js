@@ -36,95 +36,70 @@ function disposeKart(root){
   geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());if(root.parent)root.parent.remove(root);
 }
 const KART_GEO={};
+// Reference reconstruction: rounded section surfaces retain an open cockpit.
+function sectionSurface(rows,segments=48){
+  const positions=[],uv=[],indices=[];
+  rows.forEach((row,j)=>{for(let i=0;i<=segments;i++){const a=i/segments*Math.PI*2,front=Math.max(0,-Math.cos(a)),w=row[1]*(1-front*.12);positions.push(Math.sin(a)*w,row[0],Math.cos(a)*row[2]+(row[3]||0));uv.push(i/segments,j/(rows.length-1));}});
+  for(let j=0;j<rows.length-1;j++)for(let i=0;i<segments;i++){const a=j*(segments+1)+i,b=a+segments+1;indices.push(a,b,a+1,b,b+1,a+1);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();return g;
+}
+function bodyLoft(rows,segments=32){
+  const p=[],uv=[],idx=[];rows.forEach((r,j)=>{for(let i=0;i<=segments;i++){const a=i/segments*Math.PI*2;p.push(Math.sin(a)*r[1],r[0],Math.cos(a)*r[2]+(r[3]||0));uv.push(i/segments,j/(rows.length-1));}});
+  for(let j=0;j<rows.length-1;j++)for(let i=0;i<segments;i++){const a=j*(segments+1)+i,b=a+segments+1;idx.push(a,a+1,b,b,a+1,b+1);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g;
+}
+function limbSurface(points,radii){
+  const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),N=22,R=12,frames=curve.computeFrenetFrames(N,false),pos=[],uv=[],ix=[];
+  for(let i=0;i<=N;i++){const t=i/N,c=curve.getPointAt(t),q=t*(radii.length-1),k=Math.min(radii.length-2,Math.floor(q)),r=lerp(radii[k],radii[k+1],q-k);for(let j=0;j<=R;j++){const a=j/R*Math.PI*2,v=c.clone().addScaledVector(frames.normals[i],Math.cos(a)*r).addScaledVector(frames.binormals[i],Math.sin(a)*r);pos.push(v.x,v.y,v.z);uv.push(j/R,t);}}
+  for(let i=0;i<N;i++)for(let j=0;j<R;j++){const a=i*(R+1)+j,b=a+R+1;ix.push(a,a+1,b,b,a+1,b+1);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();return g;
+}
 function kartGeos(){
-  // Hull: authored arrow-hull silhouette, extruded with bevel (top-down shape in XZ, extruded in Y)
-  const hull=new THREE.Shape();
-  hull.moveTo(0,2.35);hull.bezierCurveTo(.55,2.3,.85,1.9,.95,1.4);hull.lineTo(1.05,.3);hull.lineTo(1.0,-.6);hull.bezierCurveTo(1.05,-1.2,1.1,-1.6,.95,-1.75);hull.lineTo(.5,-1.9);hull.lineTo(-.5,-1.9);hull.lineTo(-.95,-1.75);hull.bezierCurveTo(-1.1,-1.6,-1.05,-1.2,-1.0,-.6);hull.lineTo(-1.05,.3);hull.lineTo(-.95,1.4);hull.bezierCurveTo(-.85,1.9,-.55,2.3,0,2.35);
-  const hullG=new THREE.ExtrudeGeometry(hull,{depth:.3,bevelEnabled:true,bevelThickness:.12,bevelSize:.16,bevelSegments:4,steps:1});hullG.rotateX(-Math.PI/2);hullG.translate(0,0.26,0);hullG.scale(1.15,1,1);hullG.rotateY(Math.PI);
-  // Front wing (extruded airfoil, low)
-  const fw=new THREE.Shape();fw.moveTo(-1.5,0);fw.lineTo(1.5,0);fw.lineTo(1.5,.09);fw.bezierCurveTo(.5,.2,-.5,.2,-1.5,.09);fw.closePath();
-  const fwingG=new THREE.ExtrudeGeometry(fw,{depth:.5,bevelEnabled:true,bevelThickness:.02,bevelSize:.02,bevelSegments:1});fwingG.translate(0,.18,2.0);
-  // Wheel arches (half-torus over each wheel)
-  const archG=new THREE.TorusGeometry(.62,.09,6,16,Math.PI);archG.rotateY(Math.PI/2);
-  // Suspension arms
-  const armG=new THREE.CylinderGeometry(.045,.045,.9,6);armG.rotateZ(Math.PI/2);
-  const discG=new THREE.CylinderGeometry(.24,.24,.04,18);discG.rotateZ(Math.PI/2);
-  // Nose cone (lathe)
-  const noseG=new THREE.LatheGeometry([new THREE.Vector2(0,0),new THREE.Vector2(.22,.02),new THREE.Vector2(.38,.3),new THREE.Vector2(.5,.9),new THREE.Vector2(.42,1.15),new THREE.Vector2(0,1.2)],14);noseG.rotateX(Math.PI/2);noseG.translate(0,.62,1.9);
-  // Cockpit pod
-  const podG=new THREE.LatheGeometry([new THREE.Vector2(0,0),new THREE.Vector2(.62,0),new THREE.Vector2(.7,.22),new THREE.Vector2(.66,.55),new THREE.Vector2(.5,.85),new THREE.Vector2(.25,1.0),new THREE.Vector2(0,1.02)],16);podG.scale(1,1,1.35);podG.translate(0,.5,-.2);
-  // Side pods (extruded teardrop)
-  const sp=new THREE.Shape();sp.moveTo(0,.9);sp.bezierCurveTo(.5,.9,.62,.4,.6,-.3);sp.bezierCurveTo(.58,-.8,.4,-1.0,0,-1.0);sp.lineTo(0,.9);
-  const sideG=new THREE.ExtrudeGeometry(sp,{depth:.48,bevelEnabled:true,bevelThickness:.08,bevelSize:.08,bevelSegments:2});sideG.rotateX(-Math.PI/2);
-  // Rear wing (extruded airfoil) + endplates
-  const wing=new THREE.Shape();wing.moveTo(-1.35,0);wing.lineTo(1.35,0);wing.lineTo(1.35,.16);wing.bezierCurveTo(.6,.34,-.6,.34,-1.35,.16);wing.closePath();
-  const wingG=new THREE.ExtrudeGeometry(wing,{depth:.55,bevelEnabled:true,bevelThickness:.03,bevelSize:.03,bevelSegments:1});wingG.translate(0,1.25,-1.95);
-  const plate=new THREE.Shape();plate.moveTo(0,0);plate.lineTo(.7,0);plate.lineTo(.8,.55);plate.lineTo(.15,.7);plate.lineTo(0,.5);plate.closePath();
-  const plateG=new THREE.ExtrudeGeometry(plate,{depth:.06,bevelEnabled:false});plateG.rotateY(Math.PI/2);
-  // Wheel: tyre (torus-ish lathe with tread) + rim + hub
-  const tyreG=new THREE.LatheGeometry([new THREE.Vector2(.28,-.24),new THREE.Vector2(.42,-.22),new THREE.Vector2(.48,-.12),new THREE.Vector2(.49,.12),new THREE.Vector2(.42,.22),new THREE.Vector2(.28,.24)],20);tyreG.rotateZ(Math.PI/2);
-  const rimG=new THREE.LatheGeometry([new THREE.Vector2(0,-.27),new THREE.Vector2(.16,-.27),new THREE.Vector2(.22,-.16),new THREE.Vector2(.36,-.12),new THREE.Vector2(.36,.12),new THREE.Vector2(.22,.16),new THREE.Vector2(.16,.27),new THREE.Vector2(0,.27)],12);rimG.rotateZ(Math.PI/2);
-  // Five machined spokes in one geometry, shared by every wheel.
-  const spokeParts=[];for(let s=0;s<5;s++){const spoke=new THREE.BoxGeometry(.055,.58,.07);spoke.rotateX(s/5*Math.PI*2);spokeParts.push(spoke);}
-  const spokeG=mergeKartGeometry(spokeParts);spokeParts.forEach(g=>g.dispose());
-  // Anti-grav glow ring on wheel face
-  const glowG=new THREE.TorusGeometry(.34,.05,6,24);glowG.rotateY(Math.PI/2);
-  // Agent core (pilot): helmet lathe + visor + halo
-  const helmG=new THREE.LatheGeometry([new THREE.Vector2(0,0),new THREE.Vector2(.36,0),new THREE.Vector2(.4,.2),new THREE.Vector2(.36,.5),new THREE.Vector2(.2,.64),new THREE.Vector2(0,.66)],18);
-  const visorG=new THREE.SphereGeometry(.41,20,10,Math.PI*.62,Math.PI*.76,Math.PI*.36,Math.PI*.3);
-  const haloG=new THREE.TorusGeometry(.5,.035,6,32);haloG.rotateX(Math.PI/2);
-  const bodyG=new THREE.LatheGeometry([new THREE.Vector2(.12,0),new THREE.Vector2(.42,0),new THREE.Vector2(.48,.25),new THREE.Vector2(.36,.55),new THREE.Vector2(.18,.62)],14);
-  const exhaustG=new THREE.LatheGeometry([new THREE.Vector2(0,0),new THREE.Vector2(.16,0),new THREE.Vector2(.14,.5),new THREE.Vector2(.19,.55),new THREE.Vector2(0,.55)],10);exhaustG.rotateX(-Math.PI/2);
-  const starG=starGeo(.32,.06);
-  Object.assign(KART_GEO,{hullG,noseG,podG,sideG,wingG,plateG,tyreG,rimG,spokeG,glowG,helmG,visorG,haloG,bodyG,exhaustG,starG,fwingG,archG,armG,discG});
+  const shell=sectionSurface([[.48,.92,1.8,0],[.65,1.03,1.93,0],[.82,1.08,1.97,0],[.91,1.02,1.91,0],[.95,.93,1.75,.08],[1.01,.74,1.26,.25],[1.02,.65,.94,.36],[.93,.61,.9,.36],[.60,.56,.82,.36]]);
+  const lower=sectionSurface([[.22,.72,1.55,0],[.28,.9,1.79,0],[.43,1.01,1.88,0],[.59,1.03,1.89,0],[.68,.98,1.83,0]]);
+  const band=sectionSurface([[.66,1.028,1.925,0],[.70,1.047,1.94,0],[.745,1.057,1.945,0],[.772,1.035,1.918,0]]);
+  const floor=bodyLoft([[.32,0,0,.3],[.34,.6,.91,.3],[.48,.6,.91,.3],[.5,0,0,.3]]);
+  const tyre=new THREE.LatheGeometry([new THREE.Vector2(.30,-.24),new THREE.Vector2(.46,-.24),new THREE.Vector2(.55,-.20),new THREE.Vector2(.595,-.12),new THREE.Vector2(.61,0),new THREE.Vector2(.595,.12),new THREE.Vector2(.55,.20),new THREE.Vector2(.46,.24),new THREE.Vector2(.30,.24)],40);tyre.rotateZ(Math.PI/2);
+  const rim=new THREE.TorusGeometry(.47,.034,10,40);rim.rotateY(Math.PI/2);
+  const hub=new THREE.CylinderGeometry(.32,.32,.47,32);hub.rotateZ(Math.PI/2);
+  const wheelBand=new THREE.LatheGeometry([new THREE.Vector2(.555,-.14),new THREE.Vector2(.608,-.08),new THREE.Vector2(.614,.08),new THREE.Vector2(.555,.14)],40);wheelBand.rotateZ(Math.PI/2);
+  const torso=bodyLoft([[0,.19,.17,.02],[.12,.29,.22,.02],[.33,.27,.19,0],[.52,.31,.2,0],[.75,.4,.235,.01],[.9,.41,.22,.025],[1.0,.33,.17,.02],[1.065,.2,.145,.02],[1.12,.115,.11,.02],[1.27,.12,.11,0]],40);
+  const head=bodyLoft([[1.18,.075,.075,0],[1.22,.12,.11,-.012],[1.28,.15,.13,-.025],[1.39,.185,.15,-.013],[1.50,.20,.16,0],[1.62,.18,.153,.015],[1.7,.125,.11,.02],[1.735,.01,.01,.02]],36);
+  const arms=[];const legs=[];
+  for(const s of [-1,1]){
+    arms.push(limbSurface([[s*.32,.91,.025],[s*.43,.85,-.015],[s*.46,.66,-.17],[s*.44,.53,-.29],[s*.35,.56,-.48],[s*.28,.47,-.68]],[.14,.155,.11,.095,.07,.065]));
+    legs.push(limbSurface([[s*.19,.06,.01],[s*.22,-.05,-.2],[s*.27,-.10,-.43],[s*.28,-.12,-.57],[s*.27,-.35,-.75],[s*.24,-.53,-.91]],[.16,.17,.15,.14,.1,.075]));
+  }
+  const hands=[];for(const s of [-1,1])hands.push(limbSurface([[s*.28,.47,-.66],[s*.275,.49,-.71],[s*.255,.47,-.76]],[.065,.085,.035]));
+  const body=mergeKartGeometry([torso,head,...arms,...legs,...hands]);[torso,head,...arms,...legs,...hands].forEach(g=>g.dispose());
+  const locks=[];for(let i=0;i<9;i++){const x=(i-4)*.048;locks.push(limbSurface([[x*.6,1.72,.035],[x,1.64,.16],[x*1.2,1.44,.21],[x*1.2,1.19,.22],[x*1.3,1.03,.19]],[.035,.047,.045,.038,.012]));}const hair=mergeKartGeometry(locks);locks.forEach(g=>g.dispose());Object.assign(KART_GEO,{shell,lower,band,floor,tyre,rim,hub,wheelBand,body,hair});
 }
 function buildKart(div){
-  const G=KART_GEO,root=new THREE.Group(),grp=new THREE.Group();grp.rotation.y=Math.PI;root.add(grp);
-  const acc=new THREE.Color(div.acc),acc2=new THREE.Color(div.acc2),base=new THREE.Color(div.base).lerp(new THREE.Color(0x222a3a),.4);
-  const paint=new THREE.MeshPhysicalMaterial({color:acc,metalness:.55,roughness:.28,clearcoat:.9,clearcoatRoughness:.15});
-  const dark=new THREE.MeshStandardMaterial({color:base,metalness:.7,roughness:.4});
-  const trim=new THREE.MeshStandardMaterial({color:acc2,metalness:.6,roughness:.35});
-  const glow=new THREE.MeshStandardMaterial({color:0x000,emissive:acc,emissiveIntensity:2.2});
-  const tyre=new THREE.MeshStandardMaterial({map:TEX.tread,color:0x2a2c33,roughness:.9});
-  const rimM=new THREE.MeshStandardMaterial({color:0xe6ebf3,metalness:.95,roughness:.18});
-  const brakeM=new THREE.MeshStandardMaterial({color:0x9a6a3a,metalness:.9,roughness:.35});
-  const add=(g,m,x=0,y=0,z=0,sx=1,sy=1,sz=1,cast=true)=>{const me=new THREE.Mesh(g,m);me.position.set(x,y,z);me.scale.set(sx,sy,sz);me.castShadow=cast;grp.add(me);return me;};
-  add(G.hullG,paint);add(G.noseG,trim);const pod=add(G.podG,dark,0,-.12,.05,.95,.8,.95);add(G.fwingG,trim);
-  [-1,1].forEach(s=>{[1.35,-1.4].forEach(z=>{const ar=add(G.archG,paint,s*1.15,.5,z);ar.rotation.z=0;add(G.armG,rimM,s*.75,.45,z,.9,1,1);add(G.discG,brakeM,s*.95,.48,z);});});
-  const spL=add(G.sideG,dark,-1.05,.3,-.25,1,1,1);spL.rotation.y=Math.PI;const spR=add(G.sideG,dark,1.05,.3,-.25);spR.scale.x=-1;
-  add(G.wingG,paint,0,0,0);[-1.4,1.34].forEach(x=>add(G.plateG,trim,x,1.15,-2.35));
-  add(G.exhaustG,rimM,-.55,.55,-2.3);add(G.exhaustG,rimM,.55,.55,-2.3);
-  const exhaustMat=glow.clone();
-  const exL=add(G.glowG,exhaustMat,-.55,.55,-2.86,.35,.35,.35,false);exL.rotation.y=Math.PI/2;const exR=add(G.glowG,exhaustMat,.55,.55,-2.86,.35,.35,.35,false);exR.rotation.y=Math.PI/2;
-  // livery accent strip via emissive-free plane decal on hull sides
-  const stripe=new THREE.Mesh(new THREE.PlaneGeometry(2.6,.22),new THREE.MeshStandardMaterial({color:acc2,roughness:.5,polygonOffset:true,polygonOffsetFactor:-1}));stripe.rotation.y=Math.PI/2;stripe.position.set(-1.07,.55,-.1);stripe.rotation.z=.08;grp.add(stripe);
-  const stripe2=stripe.clone();stripe2.rotation.y=-Math.PI/2;stripe2.position.x=1.07;grp.add(stripe2);
-  // number/mark plate on nose
-  const markTex=toTex(texMark(div.mark,div.acc2,'#F5F5F5',128),false);
-  const plate=new THREE.Mesh(new THREE.PlaneGeometry(.7,.7),new THREE.MeshStandardMaterial({map:markTex,transparent:true,roughness:.5,polygonOffset:true,polygonOffsetFactor:-1}));plate.position.set(0,.98,1.45);plate.rotation.x=-1.05;grp.add(plate);
-  // Agent core pilot
-  const pilot=new THREE.Group();pilot.position.set(0,.7,-.35);pilot.scale.set(.74,.74,.74);
-  const body=new THREE.Mesh(G.bodyG,dark);pilot.add(body);
-  const helm=new THREE.Mesh(G.helmG,new THREE.MeshPhysicalMaterial({color:acc,metalness:.5,roughness:.25,clearcoat:1}));helm.position.y=.62;helm.castShadow=true;pilot.add(helm);
-  const visor=new THREE.Mesh(G.visorG,new THREE.MeshStandardMaterial({color:0x0a0f1e,emissive:acc2,emissiveIntensity:.9,metalness:.4,roughness:.15,side:THREE.DoubleSide}));visor.position.set(0,.62,0);pilot.add(visor);
-  const halo=new THREE.Mesh(G.haloG,glow);halo.position.y=1.42;halo.userData.halo=true;pilot.add(halo);
-  const star=new THREE.Mesh(G.starG,new THREE.MeshStandardMaterial({color:0x000,emissive:0xd4a843,emissiveIntensity:2.5}));star.position.set(0,1.42,0);star.userData.star=true;pilot.add(star);
-  grp.add(pilot);
-  // Wheels (with fold pivot for anti-grav)
-  const wheels=[];const wpos=[[-1.15,.48,1.35],[1.15,.48,1.35],[-1.2,.5,-1.4],[1.2,.5,-1.4]];
-  wpos.forEach((p,i)=>{const pivot=new THREE.Group();pivot.position.set(p[0],p[1],p[2]);const spin=new THREE.Group();
-    const t=new THREE.Mesh(G.tyreG,tyre);t.castShadow=true;spin.add(t);spin.add(new THREE.Mesh(G.rimG,rimM));
-    const spokes=new THREE.Mesh(G.spokeG,rimM);spokes.position.x=(i%2?.24:-.24);spin.add(spokes);
-    const gl=new THREE.Mesh(G.glowG,glow.clone());gl.position.x=(i%2?.5:-.5);gl.material.emissiveIntensity=0;gl.material.transparent=true;pivot.add(gl);
-    pivot.add(spin);grp.add(pivot);wheels.push({pivot,spin,glow:gl,side:i%2?1:-1});});
-  // underglow ring for anti-grav
-  const under=new THREE.Mesh(new THREE.TorusGeometry(1.5,.08,6,40),new THREE.MeshStandardMaterial({color:0x000,emissive:acc,emissiveIntensity:0,transparent:true,opacity:.8}));under.rotation.x=Math.PI/2;under.position.y=.15;under.scale.set(1,1,1.4);grp.add(under);
-  // Shield bubble (item)
-  const shield=new THREE.Mesh(new THREE.IcosahedronGeometry(2.4,2),new THREE.MeshPhysicalMaterial({color:0x00d9b5,transparent:true,opacity:.22,roughness:.1,metalness:.1,transmission:0,side:THREE.DoubleSide,emissive:0x00d9b5,emissiveIntensity:.6}));shield.position.y=.9;shield.visible=false;grp.add(shield);
-  // Consolidate stationary bodywork by material. Moving wheels and pilot stay articulated.
-  batchKartBody(grp);
-  root.userData={wheels,pilot,halo,star,under,shield,exhaust:[exL,exR],glow};
-  return root;
+  const root=new THREE.Group();root.name='ZenFlow Reference Kart';
+  const color=new THREE.Color(div.acc),light=color.clone().lerp(new THREE.Color(0xc8ffff),.6);
+  const white=new THREE.MeshPhysicalMaterial({color:0xeaf5ff,roughness:.2,metalness:.08,clearcoat:1,clearcoatRoughness:.15,side:THREE.DoubleSide});
+  const dark=new THREE.MeshStandardMaterial({color:0x142943,metalness:.18,roughness:.45,side:THREE.DoubleSide});
+  const panel=new THREE.MeshPhysicalMaterial({color:color.clone().lerp(new THREE.Color(0x145aa8),.3),emissive:color,emissiveIntensity:.15,roughness:.2,metalness:.25,clearcoat:1,side:THREE.DoubleSide});
+  const glow=new THREE.MeshStandardMaterial({color:light,emissive:light,emissiveIntensity:1.7,roughness:.2,side:THREE.DoubleSide});
+  const skin=new THREE.MeshPhysicalMaterial({color,emissive:color,emissiveIntensity:.18,roughness:.18,metalness:.3,clearcoat:1,transparent:true,opacity:.91,depthWrite:true,side:THREE.DoubleSide});
+  const add=(g,m,parent=root,name='')=>{const o=new THREE.Mesh(g,m);o.name=name;o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
+  add(KART_GEO.shell,white,root,'continuous-white-shell');add(KART_GEO.lower,panel,root,'sculpted-colored-flanks');add(KART_GEO.band,glow,root,'perimeter-light-band');add(KART_GEO.floor,dark,root,'cockpit-well');
+  const pilot=new THREE.Group();pilot.name='seated-humanoid';pilot.position.set(0,1,.37);root.add(pilot);add(KART_GEO.body,skin,pilot,'continuous-humanoid-surface');if(div.id==='kinetic'||div.id==='loom'){pilot.scale.set(.9,1,.94);add(KART_GEO.hair,skin,pilot,'swept-hair');}
+  // Steering wheel is connected to the footwell, with hands meeting its upper grips.
+  const wheel=new THREE.Mesh(new THREE.TorusGeometry(.25,.035,10,32),dark);wheel.position.set(0,1.45,-.34);wheel.rotation.x=-.7;wheel.name='steering-wheel';root.add(wheel);
+  const stem=add(limbSurface([[0,.64,-.58],[0,1.15,-.46],[0,1.44,-.34]],[.03,.03,.03]),dark,root,'steering-column');
+  const wheels=[];
+  [[-1.23,.6,-1.25],[1.23,.6,-1.25],[-1.23,.6,1.28],[1.23,.6,1.28]].forEach((p,i)=>{
+    const pivot=new THREE.Group(),spin=new THREE.Group();pivot.name=['wheel-fl','wheel-fr','wheel-rl','wheel-rr'][i];pivot.position.set(...p);root.add(pivot);pivot.add(spin);
+    add(KART_GEO.tyre,white,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
+    const luminous=glow.clone();const ring=add(KART_GEO.rim,luminous,pivot,'wheel-light-ring');ring.position.x=i%2?.255:-.255;
+    wheels.push({pivot,spin,glow:ring,side:i%2?1:-1});
+  });
+  const exhaust=[];for(const x of [-.48,.48]){const e=add(new THREE.TorusGeometry(.11,.045,8,20),glow.clone(),root,'rear-flow-emitter');e.position.set(x,.37,1.89);exhaust.push(e);}
+  const under=add(new THREE.TorusGeometry(1,.035,8,48),glow.clone(),root,'underbody-flow-ring');under.rotation.x=Math.PI/2;under.scale.set(.85,1.6,1);under.position.y=.19;
+  const shield=add(new THREE.SphereGeometry(2.15,24,16),new THREE.MeshPhysicalMaterial({color:0x00d9b5,emissive:0x00d9b5,emissiveIntensity:.35,transparent:true,opacity:.16,roughness:.15,side:THREE.DoubleSide}),root,'aegis-shield');shield.position.y=.9;shield.visible=false;
+  const halo=new THREE.Group(),star=new THREE.Group();halo.visible=star.visible=false;pilot.add(halo,star);
+  root.userData={wheels,pilot,halo,star,under,shield,exhaust,glow};return root;
 }
 
 // ---------- Item / token pickups ----------

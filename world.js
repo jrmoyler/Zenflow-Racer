@@ -20,33 +20,28 @@ catch(error){const replacement=canvas.cloneNode(false);canvas.replaceWith(replac
 renderer.setPixelRatio(LOWFX?0.7:Math.min(devicePixelRatio,MOBILEFX?1.15:1.6));
 canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();if(typeof game!=='undefined'&&['race','countdown'].includes(game.state)&&typeof pause==='function')pause();graphicsNotice('The graphics connection was interrupted. Restoring the circuit…',true);});
 canvas.addEventListener('webglcontextrestored',()=>{document.getElementById('graphics-notice')?.remove();});
-renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
 renderer.shadowMap.enabled=!LOWFX&&!MOBILEFX;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0x0b1224,160,700);
+scene.fog=new THREE.Fog(0xc5c8ec,180,780);
 const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.3,1400);
-const hemi=new THREE.HemisphereLight(0x3a4a7a,0x1a1408,0.55);scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffd9a0,1.55);sun.position.set(-180,220,-120);sun.castShadow=true;
+const hemi=new THREE.HemisphereLight(0xc7eaff,0x8272a0,1.35);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffe5ef,1.65);sun.position.set(-180,220,-120);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.near=20;sun.shadow.camera.far=700;
 sun.shadow.camera.left=-120;sun.shadow.camera.right=120;sun.shadow.camera.top=120;sun.shadow.camera.bottom=-120;sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.03;
 scene.add(sun);scene.add(sun.target);
 const rim=new THREE.DirectionalLight(0x00d9b5,0.35);rim.position.set(160,80,200);scene.add(rim);
 
-// Sky dome: dusk gradient (deep navy -> amber horizon) + star field + sun disc
+// Soft atmosphere is real scene lighting; every island remains dimensional geometry.
+const zenWorldTime={value:0};
 function buildSky(){
-  const geo=new THREE.SphereGeometry(1000,48,24);
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
-    uniforms:{stars:{value:TEX.stars},sunDir:{value:new THREE.Vector3(-180,120,-120).normalize()},time:{value:0}},
-    vertexShader:`varying vec3 vP;varying vec2 vUv;void main(){vP=normalize(position);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`uniform sampler2D stars;uniform vec3 sunDir;uniform float time;varying vec3 vP;varying vec2 vUv;
-      void main(){float h=vP.y;vec3 zen=vec3(.02,.04,.10);vec3 mid=vec3(.09,.13,.27);vec3 hor=vec3(.72,.42,.16);vec3 hor2=vec3(.95,.72,.36);
-      float sd=max(dot(vP,sunDir),0.);
-      vec3 c=mix(mid,zen,smoothstep(.08,.7,h));c=mix(hor,c,smoothstep(-.02,.22,h));
-      c+=hor2*pow(sd,6.)*.55*smoothstep(-.05,.25,h);c+=vec3(1.,.9,.7)*pow(sd,420.)*1.2;
-      vec3 st=texture2D(stars,vUv*vec2(2.,1.)).rgb*smoothstep(.12,.5,h)*(.8+.2*sin(time*.7+vUv.x*40.));
-      c+=st*.9;c=mix(c,vec3(.03,.05,.09),1.-smoothstep(-.4,-.02,h));
-      gl_FragColor=vec4(c,1.);}`});
-  const m=new THREE.Mesh(geo,mat);scene.add(m);return mat;
+    uniforms:{time:zenWorldTime},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec3 direction;uniform float time;void main(){vec3 d=normalize(direction);vec3 sky=mix(vec3(.98,.76,.84),vec3(.53,.65,.91),smoothstep(-.05,.75,d.y));sky=mix(vec3(.63,.78,.94),sky,smoothstep(-.7,-.03,d.y));float cloud=sin(d.x*15.+d.z*8.)*.5+sin(d.x*33.-d.z*19.)*.2;sky+=vec3(.09,.075,.085)*smoothstep(.33,.68,cloud)*exp(-pow((d.y-.14)*5.,2.));gl_FragColor=vec4(sky,1.);}`});
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
+  // Small cubemap supplies pastel specular reflections on the road and vehicles.
+  if(!FALLBACK_GRAPHICS){const envScene=new THREE.Scene();envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10,24,12),mat));const target=new THREE.WebGLCubeRenderTarget(64,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});new THREE.CubeCamera(.1,30,target).update(renderer,envScene);scene.environment=target.texture;}
+  return mat;
 }
 
 // ---------- Track definition: the Synergy Circuit ----------
@@ -134,47 +129,25 @@ function buildWall(lat,h0,h1,mat,pred,uvScale=8){
 const world=new THREE.Group();scene.add(world);
 function buildTrackMeshes(){
   const W=TRACK_W/2;
-  TEX.asphalt.repeat.set(1,1);
-  const road=new THREE.MeshStandardMaterial({map:TEX.asphalt,roughnessMap:TEX.asphaltR,roughness:.92,metalness:.05,color:0xc9ccd4});
-  const roadM=buildRibbon([[-W,0],[-W*.5,0],[0,0],[W*.5,0],[W,0]],road,null,14,1);roadM.receiveShadow=true;world.add(roadM);
-  const lineM=new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.8,polygonOffset:true,polygonOffsetFactor:-1});
-  world.add(buildRibbon([[-W+.25,0.012],[-W+.5,0.012]],lineM));world.add(buildRibbon([[W-.5,0.012],[W-.25,0.012]],lineM));
-  // curbs (raised, red/white)
-  const curb=new THREE.MeshStandardMaterial({map:TEX.curb,roughness:.7,metalness:.1});
-  world.add(buildRibbon([[-W-1.2,-0.05],[-W-1.0,0.16],[-W,0.16],[-W,0.02]],curb,null,3,1));
-  world.add(buildRibbon([[W,0.02],[W,0.16],[W+1.0,0.16],[W+1.2,-0.05]],curb,null,3,1));
-  // grass verges + dirt shoulders (non-antigrav)
-  const notAG=i=>track.ag[i]<0.5, isAG=i=>track.ag[i]>=0.5;
-  const dirt=new THREE.MeshStandardMaterial({map:TEX.dirt,roughness:1});
-  world.add(buildRibbon([[-W-3.2,-0.4],[-W-1.2,-0.05]],dirt,notAG,6,1));
-  world.add(buildRibbon([[W+1.2,-0.05],[W+3.2,-0.4]],dirt,notAG,6,1));
-  const grassV=new THREE.MeshStandardMaterial({map:TEX.grass,roughness:1});
-  const gv=[[-W-18,-2.6],[-W-9,-1.2],[-W-3.2,-0.4]];world.add(buildRibbon(gv,grassV,notAG,20,3));
-  world.add(buildRibbon(gv.map(p=>[-p[0],p[1]]).reverse(),grassV,notAG,20,3));
-  // Low guardrail on normal sections (dark steel, teal light strip on top)
-  const rail=new THREE.MeshStandardMaterial({color:0x2a3142,roughness:.55,metalness:.7,side:THREE.DoubleSide});
-  const railLight=new THREE.MeshStandardMaterial({color:0x0a1a1a,emissive:0x00d9b5,emissiveIntensity:1.4,roughness:.4});
-  world.add(buildWall(-W-1.4,0,0.9,rail,notAG));world.add(buildWall(W+1.4,0,0.9,rail,notAG));
-  world.add(buildRibbon([[-W-1.5,0.9],[-W-1.3,0.9]],railLight,notAG));world.add(buildRibbon([[W+1.3,0.9],[W+1.5,0.9]],railLight,notAG));
-  // Anti-gravity glowing checker rails (tall, emissive) + deck underside
-  TEX.rail.repeat.set(1,1);
-  const agRail=new THREE.MeshStandardMaterial({map:TEX.rail,emissiveMap:TEX.rail,emissive:0xffffff,emissiveIntensity:1.1,roughness:.35,metalness:.2,side:THREE.DoubleSide});
-  world.add(buildWall(-W-1.3,0,2.4,agRail,isAG,10));world.add(buildWall(W+1.3,0,2.4,agRail,isAG,10));
-  const agDeck=new THREE.MeshStandardMaterial({map:TEX.hex,emissiveMap:TEX.hex,emissive:0x00d9b5,emissiveIntensity:.35,roughness:.6,metalness:.5,color:0x9aa3b8,side:THREE.DoubleSide});
-  world.add(buildRibbon([[-W-1.4,-0.05],[-W-1.4,-1.6],[W+1.4,-1.6],[W+1.4,-0.05]],agDeck,isAG,12,4));
-  const agTrim=new THREE.MeshStandardMaterial({color:0x101418,emissive:0x00d9b5,emissiveIntensity:2,roughness:.3});
-  world.add(buildRibbon([[-W-1.6,-1.6],[-W-1.2,-1.6]],agTrim,isAG));world.add(buildRibbon([[W+1.2,-1.6],[W+1.6,-1.6]],agTrim,isAG));
-  // Normal-section deck underside so elevated bridge segments read as structure
-  const bridgeDeck=new THREE.MeshStandardMaterial({color:0x2a3040,roughness:.8,metalness:.4,side:THREE.DoubleSide});
-  world.add(buildRibbon([[-W-3.3,-0.42],[-W-3.3,-1.4],[W+3.3,-1.4],[W+3.3,-0.42]],bridgeDeck,i=>notAG(i)&&track.pos[i%N_SAMP].y>2.2,12,4));
-  // Finish line decal + centre lane dash
-  const fin=new THREE.MeshStandardMaterial({map:TEX.finish,roughness:.8,polygonOffset:true,polygonOffsetFactor:-2});
-  TEX.finish.repeat.set(1,1);
-  world.add(buildRibbon([[-W,0.02],[W,0.02]],fin,i=>i<9,2,1));
-  // Start grid slots
-  const gridM=new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.9,polygonOffset:true,polygonOffsetFactor:-1,transparent:true,opacity:.75});
-  for(let k=0;k<12;k++){const u=-(0.006+Math.floor(k/2)*0.0065),lat=(k%2?2.2:-2.2)+(Math.floor(k/2)%2?1.4:-1.4)*0;const m=buildRibbon([[lat-1.4,0.015],[lat-1.25,0.015]],gridM,i=>Math.abs(((i/N_SAMP)-wrap01(u)+0.5)%1-0.5)<0.0025);world.add(m);
-    const m2=buildRibbon([[lat+1.25,0.015],[lat+1.4,0.015]],gridM,i=>Math.abs(((i/N_SAMP)-wrap01(u)+0.5)%1-0.5)<0.0025);world.add(m2);}
+  const road=new THREE.MeshPhysicalMaterial({color:0x5b439c,roughness:.21,metalness:.42,clearcoat:1,clearcoatRoughness:.12,envMapIntensity:1.1,side:THREE.DoubleSide});
+  world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road));
+  const under=new THREE.MeshStandardMaterial({color:0x6b458e,roughness:.34,metalness:.5,side:THREE.DoubleSide});
+  world.add(buildRibbon([[-W-.5,-.12],[-W-.3,-.85],[W+.3,-.85],[W+.5,-.12]],under));
+  const cyan=new THREE.MeshBasicMaterial({color:0x72ffff}),pink=new THREE.MeshBasicMaterial({color:0xeab0ff});
+  for(const side of[-1,1]){
+    world.add(buildRibbon([[side*(W-.25),.035],[side*(W-.05),.035]].sort((a,b)=>a[0]-b[0]),cyan));
+    world.add(buildRibbon([[side*(W+.02),-.08],[side*(W+.48),-.08]].sort((a,b)=>a[0]-b[0]),pink));
+    world.add(buildRibbon([[side*2.1,.042],[side*2.27,.042]].sort((a,b)=>a[0]-b[0]),cyan));
+    const glow=new THREE.MeshBasicMaterial({color:0x26e9ff,transparent:true,opacity:.1,depthWrite:false});
+    world.add(buildRibbon([[side*1.8,.047],[side*2.6,.047]].sort((a,b)=>a[0]-b[0]),glow));
+    world.add(buildWall(side*(W+.32),.1,1.05,new THREE.MeshPhysicalMaterial({color:0x5fffea,transparent:true,opacity:.2,roughness:.08,metalness:.2,side:THREE.DoubleSide,depthWrite:false})));
+    world.add(buildRibbon([[side*(W+.22),1.05],[side*(W+.43),1.05]].sort((a,b)=>a[0]-b[0]),cyan));
+  }
+  const finish=new THREE.MeshStandardMaterial({map:TEX.finish,roughness:.5,emissive:0x8899cc,emissiveIntensity:.3});
+  world.add(buildRibbon([[-W,.052],[W,.052]],finish,i=>i<8,2));
+  // Flush luminous flow pads are outside the center driving lane and are not barriers.
+  const pad=new THREE.MeshBasicMaterial({color:0xa9ffff});
+  for(let k=0;k<15;k++){const u=k/15+.02,side=k%2?1:-1;world.add(buildRibbon([[side*3.5,.055],[side*5.2,.055]].sort((a,b)=>a[0]-b[0]),pad,i=>Math.abs(i/N_SAMP-u)<.0018));}
 }
 
 // ---------- Environment kit ----------
@@ -195,7 +168,11 @@ function treeCanopyGeo(seed,tint){ // organic lobed canopy: 8 merged lobes, nois
   const p=m.attributes.position,col=new Float32Array(p.count*3);const c1=new THREE.Color(tint[0]),c2=new THREE.Color(tint[1]),c=new THREE.Color();
   let ymin=1e9,ymax=-1e9;for(let i=0;i<p.count;i++){ymin=Math.min(ymin,p.getY(i));ymax=Math.max(ymax,p.getY(i));}
   for(let i=0;i<p.count;i++){const t=clamp((p.getY(i)-ymin)/(ymax-ymin),0,1);const n=fbm(p.getX(i)*.7+seed,p.getZ(i)*.7,2);c.copy(c1).lerp(c2,smooth(t)*.85+n*.3);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
-  m.setAttribute('color',new THREE.Float32BufferAttribute(col,3));return m;
+  m.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  // Noise displacement keeps shared lobe vertices coincident; average their normals.
+  const normals=m.attributes.normal,buckets=new Map(),keys=[];
+  for(let i=0;i<p.count;i++){const key=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>Math.round(v*10000)).join(',');keys.push(key);const sum=buckets.get(key)||new THREE.Vector3();sum.x+=normals.getX(i);sum.y+=normals.getY(i);sum.z+=normals.getZ(i);buckets.set(key,sum);}
+  buckets.forEach(v=>v.normalize());for(let i=0;i<p.count;i++){const v=buckets.get(keys[i]);normals.setXYZ(i,v.x,v.y,v.z);}return m;
 }
 function cypressGeo(seed){const prof=[];const r=mulberry(seed);for(let i=0;i<=22;i++){const t=i/22;const w=Math.sin(t*Math.PI)*1.6*(1-t*.35)+Math.sin(t*19)*.18+.05;prof.push(new THREE.Vector2(w,t*9.5+.3));}prof.push(new THREE.Vector2(0,10));
   const g=new THREE.LatheGeometry(prof,14);displace(g,.5,1.4,seed);const p=g.attributes.position,col=new Float32Array(p.count*3);const c1=new THREE.Color(0x14301f),c2=new THREE.Color(0x3d7a3a),c=new THREE.Color();
@@ -209,116 +186,82 @@ function starGeo(size=1,depth=.25){ // Collective 4-point diamond star
   const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:true,bevelThickness:.05,bevelSize:.04,bevelSegments:2});g.center();return g;}
 
 function buildEnvironment(){
-  // Terrain height is shared by hills and distant foliage so trees never sink into hills.
-  const terrainHeight=(x,z)=>{const d=Math.hypot(x+10,z+110),ring=smooth(clamp((d-250)/220,0,1));return ring*(fbm(x/90,z/90,4)*60+10)+fbm(x/30,z/30,2)*ring*8;};
-  const groundTexture=TEX.grass.clone();groundTexture.needsUpdate=true;groundTexture.repeat.set(70,70);
-  const grassMat=new THREE.MeshStandardMaterial({map:groundTexture,roughness:1});
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(1400,1400,1,1),grassMat);ground.rotation.x=-Math.PI/2;ground.position.y=-0.6;ground.receiveShadow=true;world.add(ground);
-  const hillG=new THREE.PlaneGeometry(1400,1400,MOBILEFX?72:110,MOBILEFX?72:110);const hp=hillG.attributes.position;
-  for(let i=0;i<hp.count;i++){const x=hp.getX(i),z=-hp.getY(i);hp.setZ(i,terrainHeight(x,z));}
-  hillG.computeVertexNormals();const hillMat=new THREE.MeshStandardMaterial({color:0x2a3f2e,roughness:1,map:groundTexture});
-  const hills=new THREE.Mesh(hillG,hillMat);hills.rotation.x=-Math.PI/2;hills.position.y=-0.7;world.add(hills);
-
-  // Trees (two canopy palettes), instanced
-  const canopyA=treeCanopyGeo(11,[0x1a3a22,0x5a9a48]),canopyB=treeCanopyGeo(37,[0x142e2c,0x3f8a6a]),cypG=cypressGeo(5),trunkG=treeTrunkGeo();
-  const canMatA=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.92});
-  const canMatB=canMatA;
-  const trunkMat=new THREE.MeshStandardMaterial({color:0x4a3222,roughness:.9});
-  const spots=[];const tmp=new THREE.Vector3(),tr=new THREE.Vector3();
-  for(let i=0;i<N_SAMP;i+=7){ if(track.ag[i]>0.2||track.pos[i].y>4)continue;
-    for(const side of [-1,1]){ if(rng()<.45)continue;const lat=side*(TRACK_W/2+8+rng()*22);trackPoint(i/N_SAMP,lat,0,tmp);
-      // keep clear of other track passes
-      let ok=true;for(let j=0;j<N_SAMP;j+=12){if(tmp.distanceTo(track.pos[j])<12){ok=false;break;}} if(!ok)continue;
-      spots.push({x:tmp.x,z:tmp.z,s:.8+rng()*.7,r:rng()*6.3,k:rng()<.25?2:rng()<.5?0:1});}
+  const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:.03,flatShading:true});
+  const grassMat=new THREE.MeshStandardMaterial({color:0x527e67,roughness:.88});
+  const barkMat=new THREE.MeshStandardMaterial({color:0x4a354f,roughness:.86});
+  const pinkMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8});
+  const stoneMat=new THREE.MeshStandardMaterial({color:0xbfc0d6,roughness:.78});
+  const islands=[];
+  function clearance(x,z){let d=Infinity;for(let i=0;i<N_SAMP;i+=3)d=Math.min(d,Math.hypot(x-track.pos[i].x,z-track.pos[i].z));return d;}
+  islands.push({x:-102,y:-5,z:-126,r:36,depth:58,temple:true});
+  for(let k=0;k<26;k++){const u=k/26+.008,i=sampleIdx(u);if(track.ag[i]>.3)continue;for(const side of[-1,1]){const r=18+random()*9,p=new THREE.Vector3();trackPoint(u,side*(r+19),-4,p);if(clearance(p.x,p.z)<r+11||islands.some(a=>Math.hypot(a.x-p.x,a.z-p.z)<a.r+r+6))continue;islands.push({x:p.x,y:p.y,z:p.z,r,depth:30+random()*35,temple:islands.length%3===0});}}
+  // Outer sanctuary islands make the floating world visible from every racing sector.
+  for(let k=0;k<10;k++){const a=k/10*Math.PI*2,r=22+random()*18,x=-20+Math.cos(a)*290,z=-120+Math.sin(a)*290;islands.push({x,y:20+random()*60,z,r,depth:40+random()*70,temple:k%3===0});}
+  world.userData.islands=islands;
+  function islandGeometry(r,depth,seed){
+    const rnd=mulberry(seed),segments=32,rings=[{y:0,s:1},{y:-depth*.035,s:.99},{y:-depth*.12,s:.84},{y:-depth*.15,s:.96},{y:-depth*.29,s:.7},{y:-depth*.33,s:.84},{y:-depth*.49,s:.53},{y:-depth*.54,s:.66},{y:-depth*.73,s:.31},{y:-depth*.78,s:.37},{y:-depth,s:.035}],p=[],colors=[],idx=[],angles=[];
+    for(let k=0;k<segments;k++)angles.push(.89+rnd()*.16);
+    rings.forEach((ring,j)=>{for(let k=0;k<segments;k++){const a=k/segments*Math.PI*2,rr=r*ring.s*angles[k]*(j>1?.92+rnd()*.17:1),shade=.72+rnd()*.35; p.push(Math.cos(a)*rr+(j>1?Math.sin(j*1.5)*r*.12:0),ring.y+(j>0?(rnd()-.5)*2:0),Math.sin(a)*rr*.83);const c=new THREE.Color(j===0?0x637c73:j===1?0x5b6470:j%2?0x66687e:0x3e425c).multiplyScalar(shade);colors.push(c.r,c.g,c.b);if(j<rings.length-1){const n=(k+1)%segments,a0=j*segments+k,b0=j*segments+n,c0=(j+1)*segments+k,d0=(j+1)*segments+n;idx.push(a0,b0,c0,b0,d0,c0);}}});
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(idx);g.computeVertexNormals();return g;
   }
-  for(let i=0;i<(MOBILEFX?95:160);i++){const a=rng()*6.3,d=260+rng()*160;spots.push({x:-10+Math.cos(a)*d,z:-110+Math.sin(a)*d,s:1.4+rng()*1.2,r:rng()*6.3,k:rng()<.3?2:rng()<.5?0:1});}
-  const mk=(geo,mat,list,yoff)=>{const im=new THREE.InstancedMesh(geo,mat,list.length);const M=new THREE.Matrix4(),q=new THREE.Quaternion(),sv=new THREE.Vector3();list.forEach((sp,i)=>{q.setFromAxisAngle(new THREE.Vector3(0,1,0),sp.r);sv.set(sp.s,sp.s,sp.s);M.compose(new THREE.Vector3(sp.x,yoff-0.5+terrainHeight(sp.x,sp.z),sp.z),q,sv);im.setMatrixAt(i,M);});im.castShadow=true;im.receiveShadow=true;world.add(im);return im;};
-  mk(canopyA,canMatA,spots.filter(s=>s.k===0),0);mk(canopyB,canMatB,spots.filter(s=>s.k===1),0);mk(cypG,canMatA,spots.filter(s=>s.k===2),0);mk(trunkG,trunkMat,spots.filter(s=>s.k!==2),0);
-  // Rocks
-  const rocks=[];for(let c=0;c<9;c++){const a=rng()*6.3,d=230+rng()*90;for(let i=0;i<5;i++){rocks.push({x:-10+Math.cos(a)*d+(rng()-.5)*14,z:-110+Math.sin(a)*d+(rng()-.5)*14,s:.8+rng()*2.4,r:rng()*6.3});}}
-  mk(rockGeo(5),new THREE.MeshStandardMaterial({color:0x4a4550,roughness:.95}),rocks,0.2);
+  // Each flower is five individually modeled, irregular petals. The sprays retain
+  // open space between branch tips instead of obscuring the tree with solid crowns.
+  function blossomSprayGeometry(){
+    const rnd=mulberry(8841),positions=[],colors=[],color=new THREE.Color(),v=new THREE.Vector3();
+    const count=MOBILEFX?330:590,palette=[0xffd5f3,0xf79cdc,0xe77bc8,0xffedf9];
+    for(let i=0;i<count;i++){
+      const branch=i%6,a=branch*Math.PI/3,az=rnd()*Math.PI*2,rad=Math.pow(rnd(),.45);
+      const center=new THREE.Vector3(Math.cos(a)*2.65+Math.cos(az)*rad*1.55,2.35+branch*.14+(rnd()-.5)*1.6,Math.sin(a)*2.05+Math.sin(az)*rad*1.3);
+      const rotation=new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd()-.5)*2,az,(rnd()-.5)*2));
+      const radius=.095+rnd()*.085;color.setHex(palette[Math.floor(rnd()*palette.length)]);
+      for(let petal=0;petal<5;petal++){
+        const angle=petal*Math.PI*.4,cs=Math.cos(angle),sn=Math.sin(angle),length=radius*(.85+rnd()*.35),width=length*.62;
+        const base=[0,0,0],left=[cs*length*.58-sn*width,sn*length*.58+cs*width,.018],tip=[cs*length*1.5,sn*length*1.5,.045],right=[cs*length*.58+sn*width,sn*length*.58-cs*width,.018];
+        for(const point of[base,left,tip,base,tip,right]){v.set(...point).applyQuaternion(rotation).add(center);positions.push(v.x,v.y,v.z);colors.push(color.r,color.g,color.b);}
+      }
+    }
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.computeVertexNormals();return g;
+  }
+  const pinkGeo=blossomSprayGeometry(),greenGeo=treeCanopyGeo(37,[0x28584e,0x79a988]);
+  const blossomMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75,side:THREE.DoubleSide});
+  // Bending branch network, shared across trees; blossom canopies sit on branch tips.
+  const branchGeos=[];
+  function branch(points,radius){branchGeos.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),radius<.09?4:9,radius,radius<.09?4:6,false));}
+  branch([[0,0,0],[.4,2,.1],[-.1,4,.1],[.5,6,0]],.3);
+  for(let j=0;j<6;j++){const a=j*Math.PI/3;branch([[.1,2.2+j*.25,0],[Math.cos(a)*1.3,4+j*.18,Math.sin(a)],[Math.cos(a)*2.6,5.5+j*.2,Math.sin(a)*2]],.12);
+    for(let k=0;k<5;k++){const b=a+(k-2)*.35;const start=[Math.cos(a)*1.8,4.8+j*.15,Math.sin(a)*1.4],end=[Math.cos(b)*(2.7+k*.17),5.5+j*.14+(k%3)*.45,Math.sin(b)*(2.25+k*.12)];branch([start,[(start[0]+end[0])*.5,(start[1]+end[1])*.5+.25,(start[2]+end[2])*.5],end],.038+k*.005);}
+  }
+  const trunk=mergeGeos(branchGeos);branchGeos.forEach(g=>g.dispose());
+  const cherrySpots=[],bonsaiSpots=[];
+  const pondMat=new THREE.MeshPhysicalMaterial({color:0x83d6e5,roughness:.09,metalness:.5,clearcoat:1,transparent:true,opacity:.85,side:THREE.DoubleSide});
+  const waterfallMat=new THREE.ShaderMaterial({side:THREE.DoubleSide,transparent:true,depthWrite:false,uniforms:{time:zenWorldTime},vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vUv;uniform float time;void main(){float strand=pow(.5+.5*sin(vUv.x*79.+sin(vUv.y*14.+time*2.)*.3),7.);float rush=.5+.5*sin(vUv.y*100.+time*7.+vUv.x*13.);vec3 c=mix(vec3(.26,.61,.89),vec3(.84,.96,1.),strand*.8+rush*.16);float edge=smoothstep(0.,.08,vUv.x)*smoothstep(0.,.08,1.-vUv.x);float fade=smoothstep(0.,.15,vUv.y);gl_FragColor=vec4(c,edge*fade*.82);}`});
+  function waterfall(island,width,angle){
+    const length=island.depth+40,seg=20,p=[],uv=[],idx=[];for(let j=0;j<=seg;j++){const t=j/seg;for(let k=0;k<=8;k++){const q=k/8,x=(q-.5)*width,z=island.r*.8+Math.sin(Math.min(t*5,Math.PI/2))*2.5;const ca=Math.cos(angle),sa=Math.sin(angle);p.push(island.x+x*ca-z*sa,island.y+.08-t*length,island.z+x*sa+z*ca);uv.push(q,1-t);if(j<seg&&k<8){const a=j*9+k;idx.push(a,a+9,a+1,a+1,a+9,a+10);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();world.add(new THREE.Mesh(g,waterfallMat));
+  }
+  const roofMat=new THREE.MeshStandardMaterial({color:0x38354e,roughness:.58,metalness:.15,side:THREE.DoubleSide});
+  const woodMat=new THREE.MeshStandardMaterial({color:0x725062,roughness:.8});
+  const plasterMat=new THREE.MeshStandardMaterial({color:0xe7d6df,roughness:.8});
+  function roofGeometry(width,depth){const p=[],idx=[];for(let z=0;z<=16;z++){const zz=(z/16-.5)*2;for(let x=0;x<=16;x++){const xx=(x/16-.5)*2;const y=(1-Math.abs(zz))*2.5+Math.pow(Math.abs(xx),6)*1.5+Math.pow(Math.abs(zz),8)*.6;p.push(xx*width/2,y,zz*depth/2);if(x<16&&z<16){const a=z*17+x;idx.push(a,a+17,a+1,a+1,a+17,a+18);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setIndex(idx);g.computeVertexNormals();return g;}
+  function temple(island){const group=new THREE.Group();group.position.set(island.x-island.r*.12,island.y+.35,island.z-island.r*.16);const levels=3;for(let j=0;j<levels;j++){const scale=1-j*.2,y=j*5;const floor=new THREE.Mesh(new THREE.BoxGeometry(12*scale,3.7,8*scale),plasterMat);floor.position.y=y+2;group.add(floor);for(const x of[-1,1])for(const z of[-1,1]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,4.6,8),woodMat);post.position.set(x*6.2*scale,y+2,z*4.2*scale);group.add(post);}const roof=new THREE.Mesh(roofGeometry(18*scale,13*scale),roofMat);roof.position.y=y+3.7;roof.castShadow=true;group.add(roof);for(let k=-2;k<=2;k++){const window=new THREE.Mesh(new THREE.PlaneGeometry(.6,2),woodMat);window.position.set(k*1.5*scale,y+2,4*scale+.02);group.add(window);}const deck=new THREE.Mesh(new THREE.BoxGeometry(15*scale,.35,10.5*scale),stoneMat);deck.position.y=y+.2;group.add(deck);}world.add(group);}
+  islands.forEach((island,n)=>{
+    const cliff=new THREE.Mesh(islandGeometry(island.r,island.depth,n+80),cliffMat);cliff.position.set(island.x,island.y,island.z);cliff.castShadow=true;cliff.receiveShadow=true;world.add(cliff);
+    const shape=new THREE.Shape(),rimRandom=mulberry(n+80);for(let k=0;k<32;k++){const a=k/32*Math.PI*2,r=island.r*(.89+rimRandom()*.16)+.08;if(k===0)shape.moveTo(Math.cos(a)*r,-Math.sin(a)*r*.83);else shape.lineTo(Math.cos(a)*r,-Math.sin(a)*r*.83);}shape.closePath();const cap=new THREE.Mesh(new THREE.ShapeGeometry(shape),grassMat);cap.rotation.x=-Math.PI/2;cap.position.set(island.x,island.y+.02,island.z);cap.receiveShadow=true;world.add(cap);
+    const pond=new THREE.Mesh(new THREE.CircleGeometry(island.r*.36,40),pondMat);pond.rotation.x=-Math.PI/2;pond.scale.y=.68;pond.position.set(island.x+island.r*.12,island.y+.09,island.z+island.r*.23);world.add(pond);
+    // A continuous stream bridges the pond to the visible waterfall lip.
+    const stream=new THREE.Mesh(new THREE.PlaneGeometry(island.r*.29,island.r*.53),pondMat);stream.rotation.x=-Math.PI/2;stream.position.set(island.x,island.y+.1,island.z+island.r*.55);world.add(stream);
+    waterfall(island,island.r*.29,0);if(n%3===0)waterfall(island,island.r*.18,-.9);
+    if(island.temple)temple(island);
+    const count=Math.floor(island.r/4);for(let j=0;j<count;j++){const a=j/count*Math.PI*2+random()*.2,d=island.r*(.56+random()*.2),spot={x:island.x+Math.cos(a)*d,y:island.y+.06,z:island.z+Math.sin(a)*d*.78,s:1+random()*.6,rot:random()*6.3};(j%3===0?bonsaiSpots:cherrySpots).push(spot);}
+    // Irregular pale stepping stones on the moss, grouped around the pond.
+    const stones=[];for(let k=0;k<8;k++){const g=rockGeo(n*19+k);g.scale(.8,.18,.65);g.translate(island.x+Math.cos(k*.4)*island.r*.5,island.y+.15,island.z+Math.sin(k*.4)*island.r*.38);stones.push(g);}const stoneGeo=mergeGeos(stones);stones.forEach(g=>g.dispose());world.add(new THREE.Mesh(stoneGeo,stoneMat));
+  });
+  function instanceTrees(spots,isBonsai){if(!spots.length)return;const can=new THREE.InstancedMesh(isBonsai?greenGeo:pinkGeo,isBonsai?pinkMat:blossomMat,spots.length),tr=new THREE.InstancedMesh(trunk,barkMat,spots.length),matrix=new THREE.Matrix4(),q=new THREE.Quaternion(),axis=new THREE.Vector3(0,1,0);spots.forEach((s,i)=>{q.setFromAxisAngle(axis,s.rot);matrix.compose(new THREE.Vector3(s.x,s.y,s.z),q,new THREE.Vector3(s.s,s.s*(isBonsai?.72:1),s.s));tr.setMatrixAt(i,matrix);matrix.compose(new THREE.Vector3(s.x,s.y+s.s*(isBonsai?2.6:3.6),s.z),q,new THREE.Vector3(s.s*(isBonsai?1.25:1),s.s*(isBonsai?.38:1),s.s));can.setMatrixAt(i,matrix);});can.castShadow=true;tr.castShadow=true;world.add(can,tr);}
+  instanceTrees(cherrySpots,false);instanceTrees(bonsaiSpots,true);
+  // Small uninhabited fragments hang beneath the large islands, never in driving space.
+  for(let k=0;k<14;k++){const host=islands[k%islands.length],g=islandGeometry(3+random()*3,10+random()*9,k+600),m=new THREE.Mesh(g,cliffMat);m.position.set(host.x+host.r*1.4,host.y-35-random()*30,host.z+host.r);world.add(m);}
+  // Static architecture shares material batches; transparent water remains separate.
+  world.updateMatrixWorld(true);const batches=new Map();
+  world.traverse(mesh=>{if(!mesh.isMesh||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});
+  for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);meshes.forEach(mesh=>mesh.parent.remove(mesh));geometries.forEach(g=>g.dispose());world.add(merged);}
 
-  // Lamp posts (gold sodium glow) along non-AG track
-  const lampG=lampGeo();const lamps=[];const lampHeads=[];
-  for(let i=40;i<N_SAMP;i+=95){ if(track.ag[i]>0.2)continue; const side=Math.floor(i/95)%2?1:-1;trackPoint(i/N_SAMP,side*(TRACK_W/2+4.2),0,tmp);lamps.push({x:tmp.x,z:tmp.z,y:tmp.y,s:1,r:0});lampHeads.push(tmp.clone().add(new THREE.Vector3(0,7.1,0)));}
-  const lampMat=new THREE.MeshStandardMaterial({color:0x1b2130,metalness:.8,roughness:.4});
-  const li=new THREE.InstancedMesh(lampG,lampMat,lamps.length);{const M=new THREE.Matrix4();lamps.forEach((l,i)=>{M.makeTranslation(l.x,l.y,l.z);li.setMatrixAt(i,M);});li.castShadow=true;world.add(li);}
-  const headG=new THREE.SphereGeometry(.42,10,8);const headMat=new THREE.MeshStandardMaterial({color:0xfff2c8,emissive:0xd4a843,emissiveIntensity:3});
-  const hi=new THREE.InstancedMesh(headG,headMat,lampHeads.length);{const M=new THREE.Matrix4();lampHeads.forEach((p,i)=>{M.makeTranslation(p.x,p.y,p.z);hi.setMatrixAt(i,M);});world.add(hi);}
-
-  // Pennant strings between consecutive lamp heads
-  {const tri=[];const pal=[0xd4a843,0xf5f5f5,0x00d9b5,0xdc2626];const cols=[];
-    for(let i=0;i<lampHeads.length-1;i++){const a=lampHeads[i],b=lampHeads[i+1];if(a.distanceTo(b)>70)continue;const n=Math.floor(a.distanceTo(b)/2.2);
-      for(let k=0;k<n;k++){const t=(k+.5)/n;const p=a.clone().lerp(b,t);p.y-=Math.sin(t*Math.PI)*2.6;const d=b.clone().sub(a).normalize().multiplyScalar(.45);
-        tri.push(p.x-d.x,p.y,p.z-d.z, p.x+d.x,p.y,p.z+d.z, p.x,p.y-1.1,p.z);const c=new THREE.Color(pal[k%4]);for(let q=0;q<3;q++)cols.push(c.r,c.g,c.b);}}
-    const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.Float32BufferAttribute(tri,3));pg.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));pg.computeVertexNormals();
-    world.add(new THREE.Mesh(pg,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:.9})));}
-  // Structural pillars under elevated track
-  const pilG=pillarGeo();const pils=[];
-  for(let i=0;i<N_SAMP;i+=22){const p=track.pos[i];if(p.y<3)continue;const up=track.up[i];if(up.y<0.2)continue;pils.push({x:p.x,z:p.z,h:p.y-1.4});}
-  const pilMat=new THREE.MeshStandardMaterial({color:0x3b4356,roughness:.7,metalness:.5});
-  const pi=new THREE.InstancedMesh(pilG,pilMat,pils.length);{const M=new THREE.Matrix4();pils.forEach((p,i)=>{M.makeScale(1,p.h/10,1);M.setPosition(p.x,-0.5,p.z);pi.setMatrixAt(i,M);});pi.castShadow=true;pi.receiveShadow=true;world.add(pi);}
-
-  // Anti-gravity gantry arches spanning the track
-  const archMat=new THREE.MeshStandardMaterial({color:0xb9c2d3,metalness:.85,roughness:.35});
-  const archLight=new THREE.MeshStandardMaterial({color:0x061a1a,emissive:0x00d9b5,emissiveIntensity:2.2});
-  const arcCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-TRACK_W/2-2.2,0,0),new THREE.Vector3(-TRACK_W/2-1,6,0),new THREE.Vector3(0,8.5,0),new THREE.Vector3(TRACK_W/2+1,6,0),new THREE.Vector3(TRACK_W/2+2.2,0,0)]);
-  const archG=new THREE.TubeGeometry(arcCurve,24,.55,8,false);const archLG=new THREE.TubeGeometry(arcCurve,24,.62,6,false);archLG.scale(1,.985,1);
-  for(let i=0;i<N_SAMP;i+=70){ if(track.ag[i]<0.5)continue;const g=new THREE.Group();g.position.copy(track.pos[i]);
-    const m=new THREE.Matrix4().makeBasis(track.right[i],track.up[i],track.tan[i].clone().negate());g.quaternion.setFromRotationMatrix(m);
-    const a=new THREE.Mesh(archG,archMat);a.castShadow=true;g.add(a);const l=new THREE.Mesh(archLG,archLight);l.scale.set(.92,.92,.6);l.position.y=.3;g.add(l);world.add(g);}
-
-  // Banner gantries over normal sections
-  const gantry=(i,tex)=>{const g=new THREE.Group();g.position.copy(track.pos[i]);const m=new THREE.Matrix4().makeBasis(track.right[i],track.up[i],track.tan[i].clone().negate());g.quaternion.setFromRotationMatrix(m);
-    const postG=new THREE.LatheGeometry([new THREE.Vector2(.9,0),new THREE.Vector2(.7,.5),new THREE.Vector2(.35,.8),new THREE.Vector2(.35,9),new THREE.Vector2(.7,9.4),new THREE.Vector2(.7,10)],10);
-    const pm=new THREE.MeshStandardMaterial({color:0x2a3142,metalness:.8,roughness:.4});
-    [-1,1].forEach(s=>{const p=new THREE.Mesh(postG,pm);p.position.set(s*(TRACK_W/2+2.6),-0.2,0);p.castShadow=true;g.add(p);});
-    const beam=new THREE.Mesh(new THREE.BoxGeometry(TRACK_W+7,1.1,1.1),pm);beam.position.y=9.8;g.add(beam);
-    const ban=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_W+4,4.4),new THREE.MeshStandardMaterial({map:tex,roughness:.6,emissiveMap:tex,emissive:0xffffff,emissiveIntensity:.35,side:THREE.DoubleSide}));ban.position.y=7;g.add(ban);
-    const trim=new THREE.Mesh(new THREE.BoxGeometry(TRACK_W+7,.18,1.3),new THREE.MeshStandardMaterial({color:0x111,emissive:0xd4a843,emissiveIntensity:2}));trim.position.y=9.2;g.add(trim);
-    world.add(g);};
-  gantry(4,TEX.bannerMain);gantry(430,TEX.bannerZF);gantry(1240,TEX.bannerNL);gantry(1560,TEX.bannerAG);
-
-  // Grandstand at the start straight (right side) with crowd
-  const gs=new THREE.Group();trackPoint(0.045,TRACK_W/2+10,0,tmp);gs.position.set(tmp.x,-0.5,tmp.z);gs.rotation.y=Math.PI;
-  const stepMat=new THREE.MeshStandardMaterial({color:0x1c2338,roughness:.8});const crowdMat=new THREE.MeshStandardMaterial({map:TEX.crowd,roughness:1,transparent:false});
-  for(let r=0;r<5;r++){const step=new THREE.Mesh(new THREE.BoxGeometry(70,1.6,3.2),stepMat);step.position.set(0,r*1.6+.8,-r*3.2);step.receiveShadow=true;step.castShadow=true;gs.add(step);
-    const crowd=new THREE.Mesh(new THREE.PlaneGeometry(68,2.6),crowdMat);crowd.position.set(0,r*1.6+2.9,-r*3.2-1.0);gs.add(crowd);crowd.userData.crowd=true;}
-  const roof=new THREE.Mesh(new THREE.BoxGeometry(74,.5,20),new THREE.MeshStandardMaterial({color:0x0d1326,metalness:.6,roughness:.5}));roof.position.set(0,12,-8);roof.castShadow=true;gs.add(roof);
-  const roofTrim=new THREE.Mesh(new THREE.BoxGeometry(74,.3,.4),new THREE.MeshStandardMaterial({color:0x111,emissive:0xd4a843,emissiveIntensity:2.5}));roofTrim.position.set(0,11.8,2);gs.add(roofTrim);
-  for(let x=-30;x<=30;x+=15){const post=new THREE.Mesh(new THREE.CylinderGeometry(.35,.45,12,8),stepMat);post.position.set(x,6,-17);gs.add(post);}
-  world.add(gs);
-
-  // The Synergy Spire — central landmark: tiered spire, orbital rings, gold windows
-  const spire=new THREE.Group();spire.position.set(-102,-0.5,-126);
-  const prof=[];for(let i=0;i<=24;i++){const t=i/24;const r=22*(1-t)*(1-t*.55)+2.2+Math.max(0,Math.sin(t*22))*1.2;prof.push(new THREE.Vector2(r,t*120));}prof.push(new THREE.Vector2(0,128));
-  const spireMat=new THREE.MeshStandardMaterial({map:TEX.windows,emissiveMap:TEX.windows,emissive:0xffffff,emissiveIntensity:.6,color:0x9aa8c4,roughness:.4,metalness:.6});
-  TEX.windows.repeat.set(4,3);
-  const body=new THREE.Mesh(new THREE.LatheGeometry(prof,28),spireMat);body.castShadow=true;spire.add(body);
-  const ringMat=new THREE.MeshStandardMaterial({color:0x2a2a30,emissive:0x00d9b5,emissiveIntensity:1.6,metalness:.8,roughness:.3});
-  [[40,26],[78,18],[108,11]].forEach(([y,r])=>{const ring=new THREE.Mesh(new THREE.TorusGeometry(r,.7,8,64),ringMat);ring.rotation.x=Math.PI/2;ring.position.y=y;ring.userData.spin=1/r;spire.add(ring);});
-  const beacon=new THREE.Mesh(starGeo(5,1.2),new THREE.MeshStandardMaterial({color:0xfff2c8,emissive:0xd4a843,emissiveIntensity:3}));beacon.position.y=134;beacon.userData.spin=.5;spire.add(beacon);
-  const beaconLight=new THREE.PointLight(0xd4a843,3,220);beaconLight.position.y=130;spire.add(beaconLight);
-  world.add(spire);
-
-  // Orbital ring in the sky (parent-brand motif)
-  const orb=new THREE.Mesh(new THREE.TorusGeometry(420,3.5,8,120),new THREE.MeshBasicMaterial({color:0x00d9b5,transparent:true,opacity:.35,fog:false}));
-  orb.position.set(-10,330,-110);orb.rotation.x=Math.PI/2.4;orb.userData.spin=.02;world.add(orb);
-
-  // Distant city blocks (skyline) — lathe/box mix w/ windows
-  const cityMat=new THREE.MeshStandardMaterial({map:TEX.windows,emissiveMap:TEX.windows,emissive:0xffffff,emissiveIntensity:.5,color:0x3a4356,roughness:.6});
-  const cityGeometries=[],crownGeometries=[];
-  const crownMat=new THREE.MeshStandardMaterial({color:0x2a3142,emissive:0xd4a843,emissiveIntensity:.6});
-  for(let i=0;i<40;i++){const a=rng()*6.3,d=420+rng()*120;const g=new THREE.Group();g.position.set(-10+Math.cos(a)*d,-1,-110+Math.sin(a)*d);g.rotation.y=rng()*6.3;let y=0,w=16+rng()*14;
-    const tiers=2+Math.floor(rng()*3);for(let t=0;t<tiers;t++){const h=18+rng()*40;const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,w*(.7+rng()*.3)),cityMat);b.position.y=y+h/2;b.rotation.y=(rng()-.5)*.3;g.add(b);y+=h;w*=.72;}
-    if(rng()<.5){const sp=new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(w*.5,0),new THREE.Vector2(w*.2,6),new THREE.Vector2(w*.08,18),new THREE.Vector2(0,26)],8),crownMat);sp.position.y=y;g.add(sp);}
-    g.updateMatrixWorld(true);g.children.forEach(mesh=>{mesh.geometry.applyMatrix4(mesh.matrixWorld);(mesh.material===cityMat?cityGeometries:crownGeometries).push(mesh.geometry);});}
-  // The skyline is static: two draws instead of a draw for every tower tier.
-  for(const [geometries,material] of [[cityGeometries,cityMat],[crownGeometries,crownMat]]){if(!geometries.length)continue;world.add(new THREE.Mesh(mergeGeos(geometries),material));geometries.forEach(g=>g.dispose());}
-
-  // Floating agent-node buoys along anti-grav (teal orbs on stalks)
-  const buoyMat=new THREE.MeshStandardMaterial({color:0x081818,emissive:0x00d9b5,emissiveIntensity:2.6});
-  const buoyG=new THREE.IcosahedronGeometry(.8,1);const buoys=[];
-  for(let i=0;i<N_SAMP;i+=28){if(track.ag[i]<.5)continue;for(const s of[-1,1]){trackPoint(i/N_SAMP,s*(TRACK_W/2+4.5),3.5+Math.sin(i*.2)*1.2,tmp);buoys.push(tmp.clone());}}
-  const bi=new THREE.InstancedMesh(buoyG,buoyMat,buoys.length);{const M=new THREE.Matrix4();buoys.forEach((p,i)=>{M.makeTranslation(p.x,p.y,p.z);bi.setMatrixAt(i,M);});world.add(bi);}
 }
