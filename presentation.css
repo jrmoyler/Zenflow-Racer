@@ -61,3 +61,7 @@ button,.btn,.mono,kbd,.eyebrow{font-family:var(--body)}
  #item{top:calc(160px + var(--sa-t));right:calc(20px + var(--sa-r));width:72px;height:72px}#speedo{top:calc(245px + var(--sa-t));right:calc(20px + var(--sa-r))}#specialHUD #tS{top:calc(312px + var(--sa-t));right:calc(20px + var(--sa-r));max-width:174px}
  #mutebtn{top:calc(20px + var(--sa-t));right:calc(210px + var(--sa-r))}
 }
+#settings-panel{overflow-x:hidden}#settings-panel .panel{width:min(580px,100%);flex-shrink:0}
+@media(max-height:560px) and (orientation:landscape){
+ .showroom{flex:none;height:auto;min-height:290px;align-items:stretch;margin-bottom:8px}#kart-preview{min-height:290px}.director-panel,.track-panel{align-self:stretch;height:auto}.selector-heading{flex:none}#grid{flex:none}.menu-tools{flex:none}
+}

@@ -45,7 +45,28 @@ all twelve actual shipping GLBs. Added checks cover cloned skin material changes
 and immutable templates, transition commit order and duplicate input gating,
 reduced-motion completion and offline font availability.
 
-Browser review and deployment status are recorded below after inspection.
+Hosted browser review on runtime commit `ecabbdf9ecc3cb695ed6d9bfb2cbfabc75fa0965`:
+
+- Vercel preview built successfully, including the full verification suite.
+- Desktop title → selection → Stormforge race entry → pause → roster passed.
+  Automatic throttle advanced the race; pause focused Resume. No game-origin
+  errors were observed (the browser extension emitted unrelated errors).
+- 390 × 844 CSS viewport: title actions fit, settings opened with focused controls,
+  Touch controls toggled, Done returned to title, and selection remained scrollable.
+- Actual Canopy scene appeared after selecting Canopy, not just its label.
+- 844 × 390 CSS viewport exposed a short landscape panel/carousel overlap. The
+  final CSS gives the showroom a non-shrinking content height and scrolls the
+  menu. Settings width is also constrained to its padded content area.
+- Browser selected **Software 3D**, approximately 0.5–1 FPS in this cloud host;
+  this is not WebGL/material or physical-device performance acceptance.
+
+Actual DOM/geometry captures (software renderer, no image compositing):
+[title](presentation-review/title-software.jpg) and
+[selection](presentation-review/selection-software.jpg). They document the UI
+and inherited geometry, not a passing reference-likeness score.
+
+Final changes after the captured runtime: only settings-width/landscape layout
+corrections and this review evidence. Build/offline-shell checks pass again.
 
 ## Remaining limits
 
