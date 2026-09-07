@@ -7,13 +7,16 @@ function createImmersionWater(map,kind){
   return new THREE.ShaderMaterial({
     side:THREE.DoubleSide,transparent:true,depthWrite:false,
     uniforms:{time:zenWorldTime,tint:{value:tint},gain:{value:kind==='sea'?1.15:.85}},
-    vertexShader:`varying vec2 vUv;varying vec3 vPos;void main(){vUv=uv;vPos=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec2 vUv;varying vec3 vPos;uniform float time;uniform vec3 tint;uniform float gain;
+    vertexShader:`varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;void main(){vUv=uv;vec4 viewPosition=modelViewMatrix*vec4(position,1.);vNormal=normalize(normalMatrix*normal);vView=-viewPosition.xyz;gl_Position=projectionMatrix*viewPosition;}`,
+    fragmentShader:`varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float time;uniform vec3 tint;uniform float gain;
 void main(){vec2 uv=vUv*mix(6.,14.,gain);float w=sin(uv.x*2.8+time*1.35)*cos(uv.y*2.1-time*1.05);
 float w2=sin((uv.x+uv.y)*4.6+time*1.8)*.45;float foam=pow(max(0.,w+w2),3.);
 vec3 col=tint+vec3(.16,.22,.28)*(w+w2)*.4+vec3(.85,.95,1.)*foam*.18;
-float fres=pow(1.-abs(normalize(vec3(.08,1.,.12)).y),2.);
-gl_FragColor=vec4(mix(col,vec3(.9,.96,1.),fres*.28),mix(.78,.9,gain));}`
+float fres=pow(1.-clamp(abs(dot(normalize(vNormal),normalize(vView))),0.,1.),5.);
+gl_FragColor=vec4(mix(col,vec3(.9,.96,1.),fres*.28),clamp(mix(.78,.9,gain),0.,1.));
+#include <tonemapping_fragment>
+#include <encodings_fragment>
+}`
   });
 }
 function immersionBudget(n){return (typeof MOBILEFX!=='undefined'&&MOBILEFX)?Math.max(8,n>>1):n;}
@@ -44,7 +47,10 @@ function buildImmersionRails(){
     vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
     fragmentShader:`varying vec2 vUv;uniform float time;uniform vec3 color;
 void main(){float pulse=.35+.65*sin(vUv.y*14.-time*3.2);float edge=smoothstep(0.,.25,vUv.x)*smoothstep(0.,.25,1.-vUv.x);
-gl_FragColor=vec4(color,pulse*edge*.55);}`});
+gl_FragColor=vec4(color,pulse*edge*.55);
+#include <tonemapping_fragment>
+#include <encodings_fragment>
+}`});
   const W=typeof TRACK_W==='number'?TRACK_W/2:7;
   for(const side of[-1,1]){
     const mesh=buildRibbon([[side*(W-.55),.058],[side*(W-.18),.058]].sort((a,b)=>a[0]-b[0]),mat);
