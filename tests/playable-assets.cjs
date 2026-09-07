@@ -13,7 +13,10 @@ run(read('core.js').split('function hexToRgb')[0]);run(read('kart-clips.js'));ru
  for(const div of run('ROSTER')){
   const bytes=fs.readFileSync(path.join(root,'assets/models',div.id+'.glb'));totalBytes+=bytes.length;assert.equal(bytes.readUInt32LE(0),0x46546c67);assert.equal(bytes.readUInt32LE(4),2);assert.equal(bytes.readUInt32LE(8),bytes.length);
   const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString().trim());assert.equal(gltf.images?.length||0,0,'No reference images can enter playable meshes');assert.ok(bytes.length<4*1024*1024,'bounded uncompressed asset size');
-  c.div=div;const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');assert.notEqual(a.userData.body,b.userData.body);assert.notEqual(a.userData.exhaust[0].material,b.userData.exhaust[0].material);
+  c.div=div;const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');
+  const skin=a.getObjectByName('head-mesh').material,templateSkin=run('KART_ASSETS.templates.get(div.id)').getObjectByName('head-mesh').material;
+  assert.notEqual(skin,templateSkin,'lighting never mutates cached model material');assert.equal(skin.emissiveIntensity,.16,div.id+': loaded driver receives energy-skin lighting');assert.equal(skin.metalness,.28);
+  assert.notEqual(a.userData.body,b.userData.body);assert.notEqual(a.userData.exhaust[0].material,b.userData.exhaust[0].material);
   assert.equal(a.getObjectByName('torso').geometry,b.getObjectByName('torso').geometry,'immutable meshes shared');
   a.updateMatrixWorld(true);const torsoBox=new THREE.Box3().setFromObject(a.getObjectByName('torso')),headBox=new THREE.Box3().setFromObject(a.getObjectByName('head-mesh')),torsoSize=torsoBox.getSize(new THREE.Vector3());
   assert.ok(torsoSize.y>1.4&&torsoSize.x>.65&&torsoSize.z>.65,div.id+': full torso, hips and legs survive Blender processing');

@@ -78,7 +78,7 @@ function kmLivery(div,mode,S){
   for(const y of[.12,.88]){g.beginPath();g.moveTo(S*.1,S*y);g.lineTo(S*.4,S*y);g.moveTo(S*.6,S*y);g.lineTo(S*.9,S*y);g.stroke();}
   g.fillStyle=color?'#52657B':rough?'#777777':'#808080';g.textAlign='center';g.font=`600 ${S*.022}px sans-serif`;
   g.fillText(String(KART_ORDER.indexOf(id)+1).padStart(2,'0'),S*.25,S*.74);g.fillText(div.code,S*.75,S*.74);
-  g.font=`500 ${S*.012}px sans-serif`;g.fillText('COLLECTIVE AI',S*.75,S*.77);
+  g.font=`500 ${S*.012}px sans-serif`;g.fillText('ZENFLOW RACER',S*.75,S*.77);
   return cv;
 }
 
@@ -96,7 +96,7 @@ function kmTyre(div,mode,W,H){
   for(const [a,b] of [[.125,.25],[.75,.875]]){const y0=a*H,y1=b*H;for(let k=-1;k<=N;k++){const x=k*bw+bw*.25;g.fillStyle=P.block;g.fillRect(x,y0,bw*.55,y1-y0);g.fillStyle=P.groove;g.fillRect(x+bw*.55,y0+(y1-y0)*.2,bw*.12,(y1-y0)*.6);}}
   g.fillStyle=P.wall;g.fillRect(0,0,W,H*.125);g.fillRect(0,H*.875,W,H*.125);
   // Sidewall lettering: two repeats per circumference; the far sidewall reads the other way round.
-  const label=`${div.name.toUpperCase()} · ZENFLOW ·`;g.font=`700 ${H*.062}px "Space Grotesk",system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillStyle=P.letter;
+  const label=`${div.name.toUpperCase()} · ZENFLOW ·`;g.font=`700 ${H*.062}px "Orbitron",system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillStyle=P.letter;
   for(let k=-1;k<=2;k++){g.fillText(label,(k+.5)*W/2,H*.062);g.save();g.setTransform(-1,0,0,-1,W,H);g.fillText(label,(k+.5)*W/2,H*.062);g.restore();}
   g.fillStyle=P.pin;g.fillRect(0,H*.012,W,Math.max(1,H*.014));g.fillRect(0,H*.974,W,Math.max(1,H*.014));
   return cv;

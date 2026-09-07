@@ -64,7 +64,7 @@ module.exports=function registerKartMaterialTests({test,assert}){
   const shared=new Set(Object.values(f.TEX));for(const t of textures)assert.ok(shared.has(t),'every kart texture lives in TEX');
   assert.equal(f.TEX['kart-zenflow-livery'],first.white.map);assert.equal(f.TEX['kart-zenflow-tyre'],first.tyre.map);assert.equal(f.TEX['kart-carbon'],first.dark.map);
   assert.ok(document.canvases.every(c=>c.width<=512&&c.height<=512),'desktop canvases stay within 512px');
-  assert.ok(document.texts.includes('01')&&document.texts.includes('ZF-01')&&document.texts.includes('COLLECTIVE AI'),'livery carries racing number, code and sponsor text');
+  assert.ok(document.texts.includes('01')&&document.texts.includes('ZF-01')&&document.texts.includes('ZENFLOW RACER'),'livery carries racing number, code and sponsor text');
   const created=document.canvases.length;f.materials(roster[0]);assert.equal(document.canvases.length,created,'repeat calls draw nothing new');
  });
  test('Twelve divisions get twelve distinct livery and tyre textures at a shared detail set',()=>{

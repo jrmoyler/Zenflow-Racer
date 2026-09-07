@@ -45,10 +45,10 @@
  const dismiss=()=>{title.classList.add('hidden');document.body.classList.remove('title-open');roster.inert=false;};
  document.body.classList.add('title-open');
  roster.inert=true;
- document.getElementById('title-start').onclick=()=>{dismiss();document.getElementById('go').click();};
- document.getElementById('title-select').onclick=()=>{dismiss();document.querySelector('#grid .sel')?.focus();};
- document.getElementById('title-settings').onclick=()=>{dismiss();document.getElementById('autothrottle').focus();document.querySelector('.race-options').scrollIntoView({block:'nearest'});};
- document.getElementById('title-return').onclick=()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();};
+ document.getElementById('title-start').onclick=()=>{audioInit();SFX.go();transitionScene('ENTERING THE GRID',()=>{dismiss();startRace();});};
+ document.getElementById('title-select').onclick=()=>{audioInit();SFX.ui();transitionScene('CHARACTER SELECT',()=>{dismiss();document.querySelector('#grid .sel')?.focus({preventScroll:true});});};
+ document.getElementById('title-settings').onclick=()=>{audioInit();transitionScene('RACE SETTINGS',()=>{dismiss();document.getElementById('autothrottle').focus();document.querySelector('.race-options').scrollIntoView({block:'nearest'});});};
+ document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();});
  const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: glass gardens, spore-light and a rolling turquoise sea.'};
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
@@ -58,8 +58,8 @@
    document.getElementById('race-map-name').textContent=button.textContent.trim();
  };
  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',()=>{
-   if(typeof chooseMap!=='function'||chooseMap(button.dataset.map)===false)return;
-   syncMap(button.dataset.map);
+   if(typeof chooseMap!=='function'||button.dataset.map===chosenMapId)return;
+   transitionScene(button.textContent.trim().toUpperCase(),()=>{if(chooseMap(button.dataset.map)!==false)syncMap(button.dataset.map);});
  }));
  window.addEventListener('mapselect',event=>syncMap(event.detail.id));
  syncMap(typeof chosenMapId==='string'?chosenMapId:'cherry');

@@ -505,6 +505,7 @@ function frame(now){
   if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
   const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
+  if(typeof sceneCut!=='undefined'&&sceneCut.busy){renderRaceScene();if(game.state==='roster')renderSelectedPreview(0);return;}
   if(typeof tickTitleAttract==='function'&&tickTitleAttract(dt)){renderRaceScene();return;}
   if(game.state==='paused')pollGamepad();
   if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster'&&staticFrameDirty){(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));staticFrameDirty=false;}if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
@@ -634,25 +635,25 @@ function buildRosterUI(){
   grid.innerHTML=ROSTER.map((d,i)=>`<div class="card" role="button" tabindex="0" aria-pressed="false" aria-label="Select ${d.name}" data-i="${i}" style="--acc:${d.acc}"><div class="bar"></div><div class="nm">${d.name}</div><div class="rl">${d.code} · ${d.role}</div>
     <div class="st">${STAT_NAMES.map((s,k)=>`<span>${s}</span><i><b style="--w:${d.stats[k]*20}%"></b></i>`).join('')}</div></div>`).join('');
   grid.querySelectorAll('.card').forEach(c=>{const d=ROSTER[+c.dataset.i];const cv=texMark(d.mark,d.acc,d.acc2,96);cv.className='mark';c.appendChild(cv);
-    c.onclick=()=>{if(game.state!=='boot'){audioInit();SFX.ui();}grid.querySelectorAll('.card').forEach(x=>{x.classList.remove('sel');x.setAttribute('aria-pressed','false');});c.classList.add('sel');c.setAttribute('aria-pressed','true');selected=d;document.getElementById('pick').innerHTML=`Selected: <b>${d.name}</b> · Division Director`;document.getElementById('go').disabled=false;saved.selected=d.id;persist();updateBestTime();updateSelectedPreview(d);};c.onkeydown=e=>{if(e.code==='Enter'||e.code==='Space'){e.preventDefault();c.click();}};});
+    c.onclick=()=>{if(game.state!=='boot'){audioInit();SFX.ui();}grid.querySelectorAll('.card').forEach(x=>{x.classList.remove('sel');x.setAttribute('aria-pressed','false');});c.classList.add('sel');c.setAttribute('aria-pressed','true');selected=d;document.getElementById('pick').innerHTML=`Selected: <b>${d.name}</b> · Racer`;document.getElementById('go').disabled=false;saved.selected=d.id;persist();updateBestTime();updateSelectedPreview(d);};c.onkeydown=e=>{if(e.code==='Enter'||e.code==='Space'){e.preventDefault();c.click();}};});
   const initial=ROSTER.findIndex(d=>d.id===saved.selected);grid.querySelectorAll('.card')[Math.max(0,initial)]?.click();
   document.getElementById('go').onclick=()=>{if(!selected)return;audioInit();SFX.go();startRace();};
 }
-function openRoster(){clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
-function startRace(){document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
+function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
+function startRace(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace);if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------
 async function boot(){
  try{
   await loadKartAssets((done,total)=>{document.getElementById('loading').textContent='ASSEMBLING 3D RACERS · '+done+'/'+total;});
-  buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
+  buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
   if(typeof raceTelemetry!=='undefined')raceTelemetry.ready();
   requestAnimationFrame(frame);
  }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}
 }
-if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('800 20px "Space Grotesk"'),document.fonts.load('400 12px "JetBrains Mono"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
+if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('800 20px "Orbitron"'),document.fonts.load('500 12px "Rajdhani"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
 
 // Isolated selection showroom: the same kart geometry used in the race, presented
 // on a holographic turntable that completes full 360° turns and can be spun by hand.
@@ -699,7 +700,7 @@ function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previ
 })();
 function renderSelectedPreview(dt){if(document.body?.classList.contains('title-open'))return;const el=document.getElementById('kart-preview');if(!el||!selected||!el.getBoundingClientRect)return;const rect=el.getBoundingClientRect();if(rect.width<1||rect.height<1)return;
  // Full turntable rotation (about eleven seconds per 360°), plus hand-spun momentum.
- if(!previewSpin.dragging){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
+ if(!previewSpin.dragging&&!matchMedia('(prefers-reduced-motion: reduce)').matches){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
  if(!previewKart||!renderer.setScissor)return;
  previewScene.environment=scene.environment;

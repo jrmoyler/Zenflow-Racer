@@ -27,8 +27,10 @@ function applyMapAtmosphere(){
   scene.fog.near=activeMap.id==='stormforge'?200:activeMap.id==='canopy'?300:260;
   scene.fog.far=activeMap.id==='canopy'?1180:activeMap.id==='stormforge'?860:980;
   sun.color.setHex(activeMap.sun);hemi.color.setHex(activeMap.skyTop);hemi.groundColor.setHex(activeMap.id==='canopy'?0x537b60:activeMap.id==='stormforge'?0x4a5368:0x8272a0);
-  hemi.intensity=activeMap.id==='stormforge'?0.32:0.4;
-  sun.intensity=activeMap.id==='canopy'?1.35:activeMap.id==='stormforge'?1.05:1.25;
+  hemi.intensity=activeMap.id==='stormforge'?.58:.72;
+  sun.intensity=activeMap.id==='canopy'?1.2:activeMap.id==='stormforge'?1.05:1.15;
+  if(typeof rim!=='undefined'){rim.color.setHex(activeMap.id==='stormforge'?0x8bcaff:activeMap.id==='canopy'?0xb6f6ff:0xaecaff);rim.intensity=.55;}
+  if(typeof renderer!=='undefined')renderer.toneMappingExposure=activeMap.id==='stormforge'?.88:.94;
   if(typeof game!=='undefined'&&game.skyMat?.uniforms.skyTop){game.skyMat.uniforms.skyTop.value.setHex(activeMap.skyTop);game.skyMat.uniforms.skyHorizon.value.setHex(activeMap.skyHorizon);}
   if(typeof refreshMapEnvironment==='function')refreshMapEnvironment();
 }
