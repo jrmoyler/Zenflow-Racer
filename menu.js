@@ -45,10 +45,15 @@
  const dismiss=()=>{title.classList.add('hidden');document.body.classList.remove('title-open');roster.inert=false;};
  document.body.classList.add('title-open');
  roster.inert=true;
- document.getElementById('title-start').onclick=()=>{dismiss();document.getElementById('go').click();};
- document.getElementById('title-select').onclick=()=>{dismiss();document.querySelector('#grid .sel')?.focus();};
- document.getElementById('title-settings').onclick=()=>{dismiss();document.getElementById('autothrottle').focus();document.querySelector('.race-options').scrollIntoView({block:'nearest'});};
- document.getElementById('title-return').onclick=()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();};
+ document.getElementById('title-start').onclick=()=>{audioInit();SFX.go();transitionScene('ENTERING THE GRID',()=>{dismiss();startRace();});};
+ document.getElementById('title-select').onclick=()=>{audioInit();SFX.ui();transitionScene('CHARACTER SELECT',()=>{dismiss();document.querySelector('#grid .sel')?.focus({preventScroll:true});});};
+ const settings=document.getElementById('settings-panel');
+ const openSettings=()=>{audioInit();transitionScene('RACE SETTINGS',()=>{title.inert=true;roster.inert=true;settings.classList.remove('hidden');document.getElementById('autothrottle').focus();});};
+ document.getElementById('title-settings').onclick=openSettings;
+ document.getElementById('menu-settings').onclick=openSettings;
+ document.getElementById('settings-close').onclick=()=>transitionScene(document.body.classList.contains('title-open')?'ZENFLOW RACER':'CHARACTER SELECT',()=>{settings.classList.add('hidden');title.inert=false;roster.inert=document.body.classList.contains('title-open');document.getElementById(roster.inert?'title-settings':'menu-settings').focus();});
+ settings.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.getElementById('settings-close').click();}});
+ document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();});
  const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: glass gardens, spore-light and a rolling turquoise sea.'};
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
@@ -58,8 +63,8 @@
    document.getElementById('race-map-name').textContent=button.textContent.trim();
  };
  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',()=>{
-   if(typeof chooseMap!=='function'||chooseMap(button.dataset.map)===false)return;
-   syncMap(button.dataset.map);
+   if(typeof chooseMap!=='function'||button.dataset.map===chosenMapId)return;
+   transitionScene(button.textContent.trim().toUpperCase(),()=>{if(chooseMap(button.dataset.map)!==false){if(selectMap(button.dataset.map))miniBounds=null;syncMap(button.dataset.map);}});
  }));
  window.addEventListener('mapselect',event=>syncMap(event.detail.id));
  syncMap(typeof chosenMapId==='string'?chosenMapId:'cherry');

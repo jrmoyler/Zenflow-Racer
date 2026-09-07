@@ -237,7 +237,7 @@ function kartAnimState(ud){
   if(ud.anim)return ud.anim;
   const weights={},times={};for(const s of KART_STATES){weights[s]=0;times[s]=0;}
   ud.clipState={weights,times,active:'idle'};
-  return ud.anim={t:0,prevSpeed:0,accel:0,lat:0,sway:0,wheel:0,heave:0,heaveV:0,roll:0,pitch:0,stretch:0,flinch:0,hopPrev:0,hitPrev:0,overspin:0,headYaw:0,headPitch:0,look:0,susp:[0,0,0,0],suspV:[0,0,0,0],fold:[0,0,0,0]};
+  return ud.anim={t:Math.max(0,ROSTER.findIndex(d=>d.id===ud.chassis))*.37,prevSpeed:0,accel:0,lat:0,sway:0,wheel:0,heave:0,heaveV:0,roll:0,pitch:0,stretch:0,flinch:0,hopPrev:0,hitPrev:0,overspin:0,headYaw:0,headPitch:0,look:0,susp:[0,0,0,0],suspV:[0,0,0,0],fold:[0,0,0,0]};
 }
 // Resolve clip target nodes by name once per kart and remember their rest transforms.
 function resolveKartRig(root){
@@ -277,7 +277,7 @@ function sampleKartClip(clipName,time,weight,ud){
 }
 // Crossfade state weights (~.15 s) and layer every active clip on top of the procedural pose.
 function applyKartClips(ud,target,dt){
-  const cs=ud.clipState,k=Math.min(1,dt/.15);cs.active=target;
+  const cs=ud.clipState,k=1-Math.exp(-Math.max(0,dt)/.09);cs.active=target;
   for(let i=0;i<KART_STATES.length;i++){const s=KART_STATES[i],on=s===target?1:0,w=cs.weights[s];
     if(on&&w<=0)cs.times[s]=0;const nw=w+(on-w)*k;cs.weights[s]=nw<1e-3&&!on?0:nw;if(cs.weights[s]>0){cs.times[s]+=dt;sampleKartClip(s,cs.times[s],cs.weights[s],ud);}}
 }

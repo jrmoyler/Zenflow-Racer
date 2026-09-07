@@ -3,25 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ZenFlow Racer — Synergy Circuit</title>
-<meta name="description" content="Twelve division directors. Three laps. One Synergy Circuit. Race the ZenFlow championship with drift boosts, tactical items and responsive touch controls.">
-<meta name="theme-color" content="#050A18">
+<title>ZenFlow Racer</title>
+<meta name="description" content="Twelve racers. Three laps. One Synergy Circuit. Race the ZenFlow championship with drift boosts, tactical items and responsive touch controls.">
+<meta name="theme-color" content="#182942">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts.css">
 <style>
 :root{
-  --navy:#050A18; --navy2:#0A0F1E; --card:#0D1326; --card2:#111827;
-  --gold:#D4A843; --gold2:#C9963F; --teal:#00D9B5; --white:#F5F5F5; --silver:#8B9BAE; --border:#1A2540;
+  --navy:#182942; --navy2:#223956; --card:#203952; --card2:#2b4763;
+  --gold:#a8f8ff; --gold2:#77dcea; --teal:#a0f6ff; --white:#effcff; --silver:#d1e6f1; --border:#8ad5e6;
   --sa-t:env(safe-area-inset-top,0px); --sa-b:env(safe-area-inset-bottom,0px);
   --sa-l:env(safe-area-inset-left,0px); --sa-r:env(safe-area-inset-right,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Orbitron',system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
 #gl{position:fixed;inset:0;display:block}
-.mono{font-family:'JetBrains Mono',monospace}
+.mono{font-family:'Rajdhani',monospace}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;padding:calc(16px + var(--sa-t)) calc(16px + var(--sa-r)) calc(16px + var(--sa-b)) calc(16px + var(--sa-l))}
 .hidden{display:none!important}
 
@@ -40,20 +39,20 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 .card .bar{height:3px;width:42px;background:var(--acc);border-radius:2px;margin-bottom:8px}
 .card .mark{position:absolute;right:10px;top:8px;width:34px;height:34px}
 .card .nm{font-weight:700;font-size:14px;line-height:1.1;letter-spacing:-.01em;padding-right:34px}
-.card .rl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--silver);margin:3px 0 8px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .rl{font-family:'Rajdhani',monospace;font-size:10px;color:var(--silver);margin:3px 0 8px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .st{display:grid;grid-template-columns:auto 1fr;grid-template-rows:repeat(4,auto);gap:4px 8px;font-size:9px;color:var(--silver);letter-spacing:.1em;text-transform:uppercase;align-items:center;margin-top:auto}
 .card .st i{display:block;height:4px;background:#1c2742;border-radius:2px;overflow:hidden}
 .card .st i b{display:block;height:100%;background:var(--acc);width:var(--w)}
 .card .star{position:absolute;right:12px;bottom:10px;width:10px;height:10px;opacity:.55}
 #footer{width:100%;max-width:960px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px 0;border-top:1px solid var(--border);flex-shrink:0}
-#pick{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--silver)}
+#pick{font-family:'Rajdhani',monospace;font-size:12px;color:var(--silver)}
 #pick b{color:var(--gold);font-weight:700}
-.btn{font-family:'Space Grotesk';font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;padding:12px 22px;border-radius:4px;border:1px solid var(--gold);background:var(--gold);color:#120c02;cursor:pointer;transition:filter .12s,transform .1s}
+.btn{font-family:'Orbitron';font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;padding:12px 22px;border-radius:4px;border:1px solid var(--gold);background:var(--gold);color:#120c02;cursor:pointer;transition:filter .12s,transform .1s}
 .btn:active{transform:scale(.97)}
 .btn[disabled]{opacity:.35;filter:grayscale(1);cursor:default}
 .btn.ghost{background:transparent;color:var(--white);border-color:var(--border)}
 #ctrlhint{font-size:11px;color:var(--silver);margin-top:8px;text-align:center;line-height:1.5;max-width:960px;flex-shrink:0}
-#ctrlhint kbd{font-family:'JetBrains Mono';background:var(--card2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--white)}
+#ctrlhint kbd{font-family:'Rajdhani';background:var(--card2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--white)}
 
 /* ---------- HUD ---------- */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10}
@@ -62,25 +61,25 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 #pos .o{font-weight:800;font-size:clamp(18px,3.6vw,32px);color:var(--gold);margin-left:2px;margin-bottom:6px}
 #pos.p1 .n,#pos.p1 .o{color:#FFE28A}
 #pos.pl .n,#pos.pl .o{color:#c6cfe0}
-#lapwrap{position:absolute;left:calc(16px + var(--sa-l));bottom:calc(6px + var(--sa-b));font-family:'JetBrains Mono';font-size:12px;color:var(--white);letter-spacing:.08em;text-shadow:0 1px 0 #000}
+#lapwrap{position:absolute;left:calc(16px + var(--sa-l));bottom:calc(6px + var(--sa-b));font-family:'Rajdhani';font-size:12px;color:var(--white);letter-spacing:.08em;text-shadow:0 1px 0 #000}
 #lapwrap .tok{display:inline-flex;align-items:center;gap:5px;margin-left:12px}
-#lapwrap .tok em{display:inline-block;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff0b0,#d4a843 45%,#7d5a14);box-shadow:0 0 6px rgba(212,168,67,.6)}
+#lapwrap .tok em{display:inline-block;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff0b0,#a8f8ff 45%,#7d5a14);box-shadow:0 0 6px rgba(168,248,255,.6)}
 #item{position:absolute;right:calc(16px + var(--sa-r));top:calc(14px + var(--sa-t));width:84px;height:84px;border-radius:50%;border:3px solid rgba(255,255,255,.85);background:radial-gradient(circle,rgba(13,19,38,.9),rgba(5,10,24,.75));box-shadow:0 0 0 3px rgba(5,10,24,.7),0 6px 20px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform .15s}
 #item.pop{transform:scale(1.14)}
 #item .ic{width:56px;height:56px}
 #item .lbl{position:absolute;bottom:4px;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--silver);font-weight:700}
 #mini{position:absolute;right:calc(16px + var(--sa-r));bottom:calc(16px + var(--sa-b));width:150px;height:150px;opacity:.92;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
-#speedo{position:absolute;right:calc(20px + var(--sa-r));top:calc(112px + var(--sa-t));text-align:right;font-family:'JetBrains Mono';font-size:11px;color:var(--silver);letter-spacing:.1em;text-shadow:0 1px 0 #000}
-#speedo b{display:block;font-family:'Space Grotesk';font-weight:800;font-size:26px;color:var(--white);line-height:1;letter-spacing:-.03em}
-#timer{position:absolute;left:50%;top:calc(12px + var(--sa-t));transform:translateX(-50%);font-family:'JetBrains Mono';font-size:13px;color:var(--white);letter-spacing:.12em;text-shadow:0 1px 0 #000;background:rgba(5,10,24,.45);padding:4px 12px;border-radius:3px;border:1px solid rgba(26,37,64,.8)}
-#toast{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(28px,7vw,64px);letter-spacing:-.02em;color:var(--white);text-shadow:0 4px 0 rgba(0,0,0,.6),0 0 40px rgba(212,168,67,.4);opacity:0;transition:opacity .15s,transform .25s}
+#speedo{position:absolute;right:calc(20px + var(--sa-r));top:calc(112px + var(--sa-t));text-align:right;font-family:'Rajdhani';font-size:11px;color:var(--silver);letter-spacing:.1em;text-shadow:0 1px 0 #000}
+#speedo b{display:block;font-family:'Orbitron';font-weight:800;font-size:26px;color:var(--white);line-height:1;letter-spacing:-.03em}
+#timer{position:absolute;left:50%;top:calc(12px + var(--sa-t));transform:translateX(-50%);font-family:'Rajdhani';font-size:13px;color:var(--white);letter-spacing:.12em;text-shadow:0 1px 0 #000;background:rgba(5,10,24,.45);padding:4px 12px;border-radius:3px;border:1px solid rgba(26,37,64,.8)}
+#toast{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(28px,7vw,64px);letter-spacing:-.02em;color:var(--white);text-shadow:0 4px 0 rgba(0,0,0,.6),0 0 40px rgba(168,248,255,.4);opacity:0;transition:opacity .15s,transform .25s}
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #toast.gold{color:var(--gold)}
 #toast.teal{color:var(--teal)}
-#count{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(90px,22vw,200px);color:var(--gold);letter-spacing:-.06em;text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(212,168,67,.35);opacity:0}
-#count.go{color:var(--teal);text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(0,217,181,.45)}
-#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,217,181,.0) 100%);opacity:0;transition:opacity .2s}
-#vig.boost{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,217,181,.22) 100%)}
+#count{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(90px,22vw,200px);color:var(--gold);letter-spacing:-.06em;text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(168,248,255,.35);opacity:0}
+#count.go{color:var(--teal);text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(146,237,255,.45)}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(146,237,255,.0) 100%);opacity:0;transition:opacity .2s}
+#vig.boost{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(146,237,255,.22) 100%)}
 #vig.hit{opacity:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(239,68,68,.35) 100%)}
 #wrong{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:800;color:#EF4444;font-size:26px;letter-spacing:.1em;text-shadow:0 2px 0 #000;display:none;animation:wrongin .45s ease-out}
 @keyframes wrongin{from{opacity:0;transform:translate(-50%,-50%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
@@ -93,27 +92,27 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Spa
 #item.spin::before{content:'';position:absolute;inset:-3px;border-radius:inherit;background:conic-gradient(var(--teal) calc(var(--spin,0)*100%),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));pointer-events:none}
 #vig.slip{opacity:1;background:radial-gradient(ellipse at center,transparent 55%,rgba(111,214,255,.16) 100%)}
 #ranks div.gap{color:var(--teal);font-weight:700;margin-top:3px}
-#pause p.keys{margin-top:8px;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em}#pause p.keys kbd{background:var(--card2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--white)}
-#ranks{position:absolute;left:calc(14px + var(--sa-l));top:calc(14px + var(--sa-t));display:flex;flex-direction:column;gap:2px;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em}
+#pause p.keys{margin-top:8px;font-family:'Rajdhani';font-size:10px;letter-spacing:.06em}#pause p.keys kbd{background:var(--card2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:var(--white)}
+#ranks{position:absolute;left:calc(14px + var(--sa-l));top:calc(14px + var(--sa-t));display:flex;flex-direction:column;gap:2px;font-family:'Rajdhani';font-size:10px;letter-spacing:.06em}
 #ranks div{display:flex;align-items:center;gap:6px;color:var(--silver);text-shadow:0 1px 0 #000;background:rgba(5,10,24,.35);padding:1px 6px 1px 3px;border-radius:2px;width:max-content}
 #ranks div i{width:8px;height:8px;border-radius:2px;background:var(--c);transform:rotate(45deg);flex-shrink:0}
-#ranks div.me{color:var(--white);font-weight:700;background:rgba(212,168,67,.18)}
-#pausebtn{position:absolute;left:50%;top:calc(40px + var(--sa-t));transform:translateX(-50%);pointer-events:auto;background:transparent;border:0;color:var(--silver);font-family:'JetBrains Mono';font-size:10px;letter-spacing:.14em;cursor:pointer;padding:6px 10px}
-#mutebtn{position:absolute;right:calc(112px + var(--sa-r));top:calc(20px + var(--sa-t));pointer-events:auto;background:rgba(5,10,24,.5);border:1px solid var(--border);color:var(--silver);font-family:'JetBrains Mono';font-size:10px;letter-spacing:.14em;cursor:pointer;padding:6px 8px;border-radius:3px}
+#ranks div.me{color:var(--white);font-weight:700;background:rgba(168,248,255,.18)}
+#pausebtn{position:absolute;left:50%;top:calc(40px + var(--sa-t));transform:translateX(-50%);pointer-events:auto;background:transparent;border:0;color:var(--silver);font-family:'Rajdhani';font-size:10px;letter-spacing:.14em;cursor:pointer;padding:6px 10px}
+#mutebtn{position:absolute;right:calc(112px + var(--sa-r));top:calc(20px + var(--sa-t));pointer-events:auto;background:rgba(5,10,24,.5);border:1px solid var(--border);color:var(--silver);font-family:'Rajdhani';font-size:10px;letter-spacing:.14em;cursor:pointer;padding:6px 8px;border-radius:3px}
 
 /* touch controls */
 #touch{position:fixed;inset:0;z-index:12;pointer-events:none;display:none}
 #touch.on{display:block}
 .tz{position:absolute;pointer-events:auto;bottom:calc(120px + var(--sa-b));width:76px;height:76px;border-radius:50%;border:1px solid rgba(139,155,174,.45);background:rgba(13,19,38,.45);display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:800;font-size:12px;letter-spacing:.08em;backdrop-filter:blur(2px)}
-.tz.act{background:rgba(212,168,67,.35);border-color:var(--gold)}
+.tz.act{background:rgba(168,248,255,.35);border-color:var(--gold)}
 #tL{left:calc(18px + var(--sa-l))}
 #tR{left:calc(104px + var(--sa-l))}
 #tD{right:calc(18px + var(--sa-r));bottom:calc(200px + var(--sa-b))}
 #tI{right:calc(104px + var(--sa-r));bottom:calc(200px + var(--sa-b));width:64px;height:64px;font-size:10px}
 #tB{right:calc(18px + var(--sa-r));bottom:calc(290px + var(--sa-b));width:56px;height:56px;font-size:10px;opacity:.8}
 #tP{right:calc(104px + var(--sa-r));bottom:calc(290px + var(--sa-b));width:64px;height:64px;font-size:10px;opacity:.75}
-#tP.ready{opacity:1;color:var(--teal);border-color:var(--teal);box-shadow:0 0 16px rgba(0,217,181,.55);animation:tpready 1.4s ease-in-out infinite}
-@keyframes tpready{0%,100%{box-shadow:0 0 10px rgba(0,217,181,.35)}50%{box-shadow:0 0 20px rgba(0,217,181,.8)}}
+#tP.ready{opacity:1;color:var(--teal);border-color:var(--teal);box-shadow:0 0 16px rgba(146,237,255,.55);animation:tpready 1.4s ease-in-out infinite}
+@keyframes tpready{0%,100%{box-shadow:0 0 10px rgba(146,237,255,.35)}50%{box-shadow:0 0 20px rgba(146,237,255,.8)}}
 html[data-touch="on"] #tS{display:none}
 
 /* ---------- Results / pause ---------- */
@@ -121,22 +120,22 @@ html[data-touch="on"] #tS{display:none}
 #results .panel,#pause .panel{width:min(94vw,520px);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px 18px}
 #results h2{font-weight:800;font-size:28px;letter-spacing:-.02em}
 #results h2 span{color:var(--gold)}
-#results .sub{font-family:'JetBrains Mono';font-size:11px;color:var(--silver);margin:4px 0 14px;letter-spacing:.06em}
+#results .sub{font-family:'Rajdhani';font-size:11px;color:var(--silver);margin:4px 0 14px;letter-spacing:.06em}
 #board{display:flex;flex-direction:column;gap:4px;max-height:44vh;overflow-y:auto;touch-action:pan-y}
 #board div{display:grid;grid-template-columns:28px 1fr auto auto auto;gap:10px;align-items:center;padding:6px 8px;border-radius:3px;background:var(--card2);font-size:13px}
-#board div i.bl,#board div i.gp{min-width:64px;text-align:right}#board div i.fastest{color:var(--gold)}#board div.hd{background:transparent;font-family:'JetBrains Mono';font-size:9px;letter-spacing:.12em;color:var(--silver);padding:2px 8px}#board div.hd i,#board div.hd b{font-size:9px}
-#board div.me{outline:1px solid var(--gold);background:rgba(212,168,67,.12)}
-#board div b{font-family:'JetBrains Mono';color:var(--silver);font-size:12px}
+#board div i.bl,#board div i.gp{min-width:64px;text-align:right}#board div i.fastest{color:var(--gold)}#board div.hd{background:transparent;font-family:'Rajdhani';font-size:9px;letter-spacing:.12em;color:var(--silver);padding:2px 8px}#board div.hd i,#board div.hd b{font-size:9px}
+#board div.me{outline:1px solid var(--gold);background:rgba(168,248,255,.12)}
+#board div b{font-family:'Rajdhani';color:var(--silver);font-size:12px}
 #board div em{font-style:normal;display:inline-block;width:10px;height:10px;transform:rotate(45deg);background:var(--c);margin-right:8px;vertical-align:middle;border-radius:1px}
-#board div i{font-family:'JetBrains Mono';font-style:normal;font-size:11px;color:var(--silver)}
+#board div i{font-family:'Rajdhani';font-style:normal;font-size:11px;color:var(--silver)}
 .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
 #pause{background:rgba(5,10,24,.7);backdrop-filter:blur(4px)}
 #pause h2{font-weight:800;font-size:24px;letter-spacing:-.02em;margin-bottom:6px}
 #pause p{color:var(--silver);font-size:12px;line-height:1.6}
 #diff{display:flex;gap:6px;margin-top:10px}
-#diff button{flex:1;font-family:'JetBrains Mono';font-size:11px;padding:8px 4px;background:var(--card2);border:1px solid var(--border);color:var(--silver);border-radius:3px;cursor:pointer;letter-spacing:.06em}
+#diff button{flex:1;font-family:'Rajdhani';font-size:11px;padding:8px 4px;background:var(--card2);border:1px solid var(--border);color:var(--silver);border-radius:3px;cursor:pointer;letter-spacing:.06em}
 #diff button.on{border-color:var(--gold);color:var(--gold)}
-#loading{background:var(--navy);z-index:30;font-family:'JetBrains Mono';font-size:12px;color:var(--silver);letter-spacing:.12em}
+#loading{background:var(--navy);z-index:30;font-family:'Rajdhani';font-size:12px;color:var(--silver);letter-spacing:.12em}
 #loading .d{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite;margin-bottom:14px}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (max-width:520px){#grid{grid-template-columns:repeat(2,1fr);gap:8px}#footer{flex-wrap:wrap;gap:8px}#pick{width:100%;font-size:11px}#diff{flex:1;margin-top:0}#diff button{padding:8px 2px;font-size:10px}#go{padding:10px 14px}#ctrlhint{display:none}#ranks{font-size:9px}#ranks div:nth-child(n+7){display:none}#mini{width:110px;height:110px}#speedo{top:calc(100px + var(--sa-t))}#item{width:70px;height:70px}#item .ic{width:46px;height:46px}#timer{font-size:11px}#mutebtn{right:calc(96px + var(--sa-r))}}
@@ -144,6 +143,7 @@ html[data-touch="on"] #tS{display:none}
 </style>
 <link rel="stylesheet" href="polish.css">
 <link rel="stylesheet" href="reference-polish.css">
+<link rel="stylesheet" href="presentation.css">
 </head>
 <body>
 <canvas id="gl" aria-label="ZenFlow racing circuit"></canvas>
@@ -151,42 +151,41 @@ html[data-touch="on"] #tS{display:none}
 <div id="loading" class="screen"><div class="d"></div><div>ASSEMBLING CIRCUIT</div></div>
 
 <section id="title-screen" aria-label="ZenFlow Racer main menu">
-  <div class="title-stage"><div class="title-copy"><p class="eyebrow">COLLECTIVE AI · SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Find your flow. Race beyond the clouds.</p></div>
-    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start race" disabled><span>Start Race</span></button><button id="title-select" aria-label="Select division" disabled><span>Select Division</span></button><button id="title-settings" aria-label="Settings" disabled><span>Settings</span></button></nav>
-  </div><p class="title-status" role="status">Preparing your racing division…</p>
+  <div class="title-stage"><div class="title-copy"><p class="eyebrow">SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Find your flow. Race beyond the clouds.</p></div>
+    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start race" disabled><span>Start Race</span></button><button id="title-select" aria-label="Character select" disabled><span>Character Select</span></button><button id="title-settings" aria-label="Settings" disabled><span>Settings</span></button></nav>
+  </div><p class="title-status" role="status">Preparing the starting grid…</p>
 </section>
 <div id="roster" class="screen hidden">
   <div class="head">
     <div>
-      <div class="eyebrow">COLLECTIVE AI · SKY RACING CHAMPIONSHIP</div>
+      <div class="eyebrow">SKY RACING CHAMPIONSHIP</div>
       <h1>ZENFLOW <span>RACER</span></h1>
       <div class="sub">Find your flow. Race beyond the clouds.</div>
     </div>
-    <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>12 DIRECTORS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
+    <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>12 RACERS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
   </div>
   <div class="showroom">
-    <section class="director-panel glass" aria-label="Selected director">
+    <section class="director-panel glass" aria-label="Selected racer">
       <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
-      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your director’s power</div>
+      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div>
     </section>
-    <div id="kart-preview" aria-label="Selected director and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous director">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next director">▶</button><div class="preview-caption"><span>MEET YOUR DIRECTOR</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
+    <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
     <section class="track-panel glass" aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
       <button class="map-card selected" data-map="cherry" aria-pressed="true"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Cherry Blossom Skyway</span></button>
       <button class="map-card" data-map="stormforge" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Nexus Stormforge</span></button>
       <button class="map-card" data-map="canopy" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Vital Canopy Run</span></button>
     </div><p id="map-description">Floating gardens, cascading waterfalls, and sweeping sky bridges.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><button id="go" class="btn" disabled>Start Race</button></section>
   </div>
-  <div class="selector-heading"><span>CHOOSE YOUR DIRECTOR</span><span>← → ARROWS OR SWIPE TO EXPLORE</span></div>
-  <div id="grid" aria-label="Select a racing director"></div>
-  <div class="menu-tools"><button id="title-return" type="button">← Title</button></div>
-  <div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div>
+  <div class="selector-heading"><span>CHOOSE YOUR RACER</span><span>← → ARROWS OR SWIPE TO EXPLORE</span></div>
+  <div id="grid" aria-label="Select a racer"></div>
+  <div class="menu-tools"><button id="title-return" type="button">← Title</button><button id="menu-settings" type="button">Race settings</button></div>
   <div id="footer">
-    <div id="pick">Choose a director to join the grid</div>
-    <div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div>
+    <div id="pick">Choose a racer to join the grid</div>
 
   </div>
-  <div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle; hold DRIFT on “1” for a rocket start; POWER button · Gamepad: triggers drive, shoulder drift, X item, Y power, rumble.</div>
 </div>
+
+<section id="settings-panel" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race settings"><div class="panel"><div class="panel-kicker">ZENFLOW RACER</div><h2>RACE SETTINGS</h2><p class="settings-label">CONTROLS</p><div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div><p class="settings-label">RACE DIFFICULTY</p><div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div><details><summary>How to race</summary><div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle; hold DRIFT on “1” for a rocket start; POWER button · Gamepad: triggers drive, shoulder drift, X item, Y power, rumble.</div></details><button id="settings-close" class="btn">Done</button></div></section>
 
 <div id="hud" class="hidden">
   <div class="race-brand">ZENFLOW<span>RACER</span><small id="race-map-name">Cherry Blossom Skyway</small></div>
@@ -195,7 +194,7 @@ html[data-touch="on"] #tS{display:none}
   <button id="pausebtn">PAUSE</button>
   <button id="mutebtn">SOUND ON</button>
   <div id="item"><div class="ic"></div><div class="lbl"></div></div>
-  <div id="specialHUD"><button id="tS" aria-label="Activate director power"><span id="specialLabel">ZEN POWER</span> <kbd>Q</kbd></button></div>
+  <div id="specialHUD"><button id="tS" aria-label="Activate racer power"><span id="specialLabel">ZEN POWER</span> <kbd>Q</kbd></button></div>
   <div id="speedo">KM/H<b>0</b><i id="speedbar" aria-hidden="true"></i></div>
   <canvas id="mini" width="300" height="300"></canvas>
   <div id="pos"><div class="n">12</div><div class="o">th</div></div>
@@ -206,7 +205,7 @@ html[data-touch="on"] #tS{display:none}
   <div id="count"></div><div id="countmap" class="mono" aria-hidden="true"></div>
   <div id="wrong">WRONG WAY</div>
 </div>
-<div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate director power">POWER</button></div>
+<div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate racer power">POWER</button></div>
 
 <div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">SYNERGY GRAND PRIX</div><h2>Race paused.</h2><p>Take a breath. Your race is right where you left it.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
 
@@ -239,6 +238,7 @@ html[data-touch="on"] #tS{display:none}
 <script src="abilities.js"></script>
 <script src="kart-assets.js"></script>
 <script src="race-telemetry.js"></script>
+<script src="presentation.js"></script>
 <script src="game.js"></script>
 <script src="title-attract.js"></script>
 <script src="vendor/anime.umd.min.js"></script>

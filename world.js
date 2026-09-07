@@ -5,9 +5,9 @@ const LOWFX=/lowfx/.test(location.search);
 const MOBILEFX=matchMedia('(pointer: coarse)').matches||((navigator.deviceMemory||8)<4);
 function graphicsNotice(message,retry){
   let panel=document.getElementById('graphics-notice');
-  if(!panel){panel=document.createElement('div');panel.id='graphics-notice';panel.setAttribute('role','alert');panel.style.cssText='position:fixed;inset:0;z-index:10000;background:#050a18;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:32px;text-align:center;color:#f5f5f5;font:18px/1.6 system-ui';document.body.append(panel);}
+  if(!panel){panel=document.createElement('div');panel.id='graphics-notice';panel.setAttribute('role','alert');panel.style.cssText='position:fixed;inset:0;z-index:10000;background:#203952;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:32px;text-align:center;color:#f5f5f5;font:18px/1.6 system-ui';document.body.append(panel);}
   panel.replaceChildren();const copy=document.createElement('p');copy.textContent=message;panel.append(copy);
-  if(retry){const button=document.createElement('button');button.textContent='Reload circuit';button.style.cssText='padding:14px 24px;background:#d4a843;border:0;border-radius:8px;color:#050a18;font:700 16px system-ui;cursor:pointer';button.onclick=()=>location.reload();panel.append(button);}
+  if(retry){const button=document.createElement('button');button.textContent='Reload circuit';button.style.cssText='padding:14px 24px;background:#a8f8ff;border:0;border-radius:8px;color:#050a18;font:700 16px system-ui;cursor:pointer';button.onclick=()=>location.reload();panel.append(button);}
 }
 let renderer;
 try{
@@ -36,7 +36,7 @@ const sun=new THREE.DirectionalLight(0xffe5ef,1.25);sun.position.set(-180,220,-1
 sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.near=20;sun.shadow.camera.far=700;
 sun.shadow.camera.left=-120;sun.shadow.camera.right=120;sun.shadow.camera.top=120;sun.shadow.camera.bottom=-120;sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.03;
 scene.add(sun);scene.add(sun.target);
-const rim=new THREE.DirectionalLight(0x00d9b5,0.35);rim.position.set(160,80,200);scene.add(rim);
+const rim=new THREE.DirectionalLight(0xaecaff,0.55);rim.position.set(160,80,200);scene.add(rim);
 
 // Soft atmosphere is real scene lighting; every island remains dimensional geometry.
 const zenWorldTime={value:0};

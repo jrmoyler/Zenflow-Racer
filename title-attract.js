@@ -1,13 +1,26 @@
-/* Live attract scene built from the same playable GLBs, circuit and wheel rigs. */
-const titleAttract={karts:[],u:.02,time:0};
-function clearTitleAttract(){for(const kart of titleAttract.karts)disposeKart(kart);titleAttract.karts.length=0;}
+/* The opening film uses the actual race rig and road frames, never reference art. */
+const titleAttract={karts:[],racers:[],u:.025,time:0,started:false};
+function clearTitleAttract(){for(const kart of titleAttract.karts)disposeKart(kart);titleAttract.karts.length=0;titleAttract.racers.length=0;titleAttract.started=false;}
 function tickTitleAttract(dt){
  const showing=document.body.classList.contains('title-open')&&game.state==='roster';
  if(!showing){if(titleAttract.karts.length)clearTitleAttract();return false;}
- if(!titleAttract.karts.length){for(const id of ['zenflow','collective','signal']){const kart=buildKart(ROSTER.find(d=>d.id===id));scene.add(kart);titleAttract.karts.push(kart);}}
- titleAttract.time+=dt;titleAttract.u=wrap01(titleAttract.u+dt*15/track.len);
- for(let i=0;i<titleAttract.karts.length;i++){const kart=titleAttract.karts[i];animateShowroomKart(kart,titleAttract.time,dt);orientOnTrack(kart,wrap01(titleAttract.u-i*.005),i===0?1.5:i===1?-2:4,.04,0);for(const w of kart.userData.wheels)w.spin.rotation.x=titleAttract.time*18;}
- const p=trackPoint(titleAttract.u,0,1,new THREE.Vector3()),forward=trackTan(titleAttract.u,new THREE.Vector3()),up=trackUp(titleAttract.u,new THREE.Vector3()),right=trackRight(titleAttract.u,new THREE.Vector3());
- camera.position.copy(p).addScaledVector(forward,8).addScaledVector(right,8).addScaledVector(up,4.5);camera.up.copy(up);camera.lookAt(p.clone().addScaledVector(right,innerWidth>800?5:1.5));camera.fov=52;camera.updateProjectionMatrix();
- game.time+=dt;updateMapScenery(dt);return true;
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(!titleAttract.karts.length){
+  const ids=[selected?.id||'zenflow','collective','nexus'].filter((id,i,all)=>all.indexOf(id)===i);
+  for(const id of ids){const racer=new Racer(ROSTER.find(d=>d.id===id),false,titleAttract.racers.length);titleAttract.racers.push(racer);titleAttract.karts.push(racer.mesh);}
+ }
+ const step=reduced?0:dt;titleAttract.time+=step;titleAttract.u=wrap01(titleAttract.u+step*13/track.len);
+ for(let i=0;i<titleAttract.racers.length;i++){
+  const r=titleAttract.racers[i];r.u=wrap01(titleAttract.u-i*.004);r.distance=r.u;r.lat=i===0?1:i===1?-3:4;
+  r.speed=reduced?0:13;r.throttle=!reduced;r.steer=clamp(trackCurv(r.u)*8,-.5,.5);
+  animateKart(r,step,trackAG(r.u));
+ }
+ const p=trackPoint(titleAttract.u,0,0,new THREE.Vector3()),forward=trackTan(titleAttract.u,new THREE.Vector3()),up=trackUp(titleAttract.u,new THREE.Vector3()),right=trackRight(titleAttract.u,new THREE.Vector3());
+ // Keep the pack on the right of desktop copy, above the menu in portrait.
+ const portrait=innerWidth<innerHeight,orbit=Math.sin(titleAttract.time*.075);
+ const eye=p.clone().addScaledVector(forward,portrait?9:8.2+orbit).addScaledVector(right,portrait?6:10).addScaledVector(up,portrait?5.8:4.1);
+ const target=p.clone().addScaledVector(right,portrait?0:6).addScaledVector(up,portrait?-2.1:.6);
+ const blend=titleAttract.started?1-Math.exp(-dt*3):1;camera.position.lerp(eye,blend);camera.up.lerp(up,blend).normalize();camera.lookAt(target);camera.fov=portrait?58:50;camera.updateProjectionMatrix();titleAttract.started=true;
+ sun.target.position.copy(p);sun.position.copy(p).addScaledVector(up,140).addScaledVector(right,-90).addScaledVector(forward,60);
+ game.time+=step;updateMapScenery(step);return true;
 }
