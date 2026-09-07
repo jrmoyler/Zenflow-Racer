@@ -45,3 +45,19 @@ button,.btn,.mono,kbd,.eyebrow{font-family:var(--body)}
  #roster h1{font-size:25px}.director-panel p{font-size:11px}.director-panel h2{font-size:17px}.director-panel #selected-code{font-size:10px}.selected-stat .stat-label{font-size:10px}.panel-kicker{font-size:8px}.map-card span{font-size:10px}#go{font-size:12px;min-height:44px}.race-options label,.race-options button,#diff button{font-size:11px}.selector-heading{font-size:10px}#ctrlhint{display:none}#pause .panel,#results .panel{padding:15px}#pause h2,#results h2{font-size:21px}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:0s!important;transition-duration:0s!important;scroll-behavior:auto!important}}
+/* Settings have their own game surface so selection stays about the racer. */
+#footer{display:none}.menu-tools{width:100%;justify-content:space-between;margin-top:12px}
+#settings-panel{z-index:100;background:#28395670;backdrop-filter:blur(7px);overflow-y:auto;touch-action:pan-y}
+#settings-panel .panel{width:min(580px,94vw);max-height:90dvh;overflow:auto;touch-action:pan-y;padding:28px;border:1px solid #b3ffffaa;border-radius:18px;background:linear-gradient(145deg,#355875f5,#1c3049fa);box-shadow:0 18px 70px #1b2b4670,inset 0 1px #d2ffff66;animation:panel-arrive .3s ease-out}
+#settings-panel h2{font:700 clamp(19px,3vw,28px) var(--display);color:#d3fbff;margin:5px 0 24px}.settings-label{font:700 13px var(--body);letter-spacing:.14em;color:#b3ecfa;margin:18px 0 8px}
+#settings-panel .race-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0}#settings-panel .race-options label,#settings-panel .race-options button{font-size:16px;min-height:48px;padding:10px}#settings-panel .race-options label{display:flex;align-items:center;gap:10px}#settings-panel .race-options input{width:20px;height:20px}#settings-panel .besttime{display:none}
+#settings-panel #diff{display:flex;width:100%;margin:0}#settings-panel #diff button{min-height:48px;font-size:14px;flex:1}#settings-panel details{margin:20px 0;color:#d3efff;font:500 15px/1.5 var(--body)}#settings-panel summary{cursor:pointer;padding:8px 0}#settings-panel #ctrlhint{display:block;text-align:left;font-size:14px;margin-top:8px;color:#c4e2f2}#settings-panel #ctrlhint kbd{font-size:13px}#settings-close{display:block;margin:20px 0 0 auto;min-width:140px}
+@media(max-width:450px){#settings-panel .panel{padding:20px}#settings-panel .race-options label{font-size:14px}#settings-panel #diff button{font-size:12px;padding:8px}}
+@media(min-width:900px) and (min-height:600px){
+ #lapwrap{left:auto;right:calc(20px + var(--sa-r));top:calc(20px + var(--sa-t));bottom:auto;display:flex;align-items:center;justify-content:center;width:174px;height:48px;background:#243b56d9;border:1px solid #a3dfed99;border-radius:9px;font-size:16px}
+ #lapwrap .tok{font-size:12px;margin-left:10px}
+ #pos{left:auto;right:calc(20px + var(--sa-r));top:calc(78px + var(--sa-t));bottom:auto;align-items:center;justify-content:center;width:174px;height:62px;line-height:1;background:#243b56d9;border:1px solid #a3dfed99;border-radius:9px}
+ #pos .n{font-size:44px;letter-spacing:0}#pos .o{font-size:20px;margin-bottom:0}#pos:after{content:'/ 12';font:500 18px var(--display);margin-left:12px;color:#e1f8ff;text-shadow:none}
+ #item{top:calc(160px + var(--sa-t));right:calc(20px + var(--sa-r));width:72px;height:72px}#speedo{top:calc(245px + var(--sa-t));right:calc(20px + var(--sa-r))}#specialHUD #tS{top:calc(312px + var(--sa-t));right:calc(20px + var(--sa-r));max-width:174px}
+ #mutebtn{top:calc(20px + var(--sa-t));right:calc(210px + var(--sa-r))}
+}

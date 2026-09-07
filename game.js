@@ -548,7 +548,7 @@ function simStep(dt){
 }
 // idle orbit while roster is open
 let rosterAngle=0;
-function rosterOrbit(dt){if(typeof updateMapScenery==='function')updateMapScenery(dt);rosterAngle+=dt*.08;const c=new THREE.Vector3(-40,20,-140);camera.position.set(c.x+Math.cos(rosterAngle)*230,70+Math.sin(rosterAngle*.7)*20,c.z+Math.sin(rosterAngle)*230);camera.up.set(0,1,0);camera.lookAt(c.x,30,c.z);camera.fov=60;camera.updateProjectionMatrix();game.time+=dt;if(game.skyMat)game.skyMat.uniforms.time.value=game.time;
+function rosterOrbit(dt){if(matchMedia('(prefers-reduced-motion: reduce)').matches)dt=0;if(typeof updateMapScenery==='function')updateMapScenery(dt);rosterAngle+=dt*.08;const c=new THREE.Vector3(-40,20,-140);camera.position.set(c.x+Math.cos(rosterAngle)*230,70+Math.sin(rosterAngle*.7)*20,c.z+Math.sin(rosterAngle)*230);camera.up.set(0,1,0);camera.lookAt(c.x,30,c.z);camera.fov=60;camera.updateProjectionMatrix();game.time+=dt;if(game.skyMat)game.skyMat.uniforms.time.value=game.time;
   itemBoxes.forEach(b=>{b.star.rotation.y+=dt*1.6;orientOnTrack(b.mesh,b.u,b.lat,1.6,0);b.mesh.rotateY(b.star.rotation.y);});world.traverse(o=>{if(o.userData.spin)o.rotation.y+=o.userData.spin*dt;});}
 
 // ---------- Input ----------
@@ -639,7 +639,7 @@ function buildRosterUI(){
   const initial=ROSTER.findIndex(d=>d.id===saved.selected);grid.querySelectorAll('.card')[Math.max(0,initial)]?.click();
   document.getElementById('go').onclick=()=>{if(!selected)return;audioInit();SFX.go();startRace();};
 }
-function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
+function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
 function startRace(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace);if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------
@@ -704,7 +704,8 @@ function renderSelectedPreview(dt){if(document.body?.classList.contains('title-o
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
  if(!previewKart||!renderer.setScissor)return;
  previewScene.environment=scene.environment;
- animateShowroomKart(previewKart,game.time,dt,previewAngle);
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ animateShowroomKart(previewKart,reduced?0:game.time,reduced?0:dt,previewAngle);
  const stage=previewStage.userData;stage.ticks.rotation.z=-previewAngle;stage.ring.material.opacity=.58+Math.sin(game.time*2.2)*.14;stage.halo.rotation.z=game.time*.15;
  previewCamera.aspect=rect.width/rect.height;const narrow=rect.width<rect.height*1.15;
  previewCamera.position.set(5.5,2.9,-7.3).multiplyScalar(narrow?1.45:1.08);previewCamera.lookAt(0,.55,0);previewCamera.updateProjectionMatrix();

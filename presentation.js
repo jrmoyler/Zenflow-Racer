@@ -33,18 +33,18 @@ for(const type of ['keydown','keyup','pointerdown','click'])document.addEventLis
 // A paused/results dialog owns focus; returning to gameplay clears the old key state.
 addEventListener('DOMContentLoaded',()=>{
   let active=null,previous=null;
-  const dialogs=['pause','results'].map(id=>document.getElementById(id));
+  const dialogs=['pause','results','settings-panel'].map(id=>document.getElementById(id));
   const sync=()=>{
     const next=dialogs.find(el=>!el.classList.contains('hidden'))||null;
     if(next===active)return;
     document.getElementById('hud').inert=!!next;
-    if(next){previous=document.activeElement;active=next;(next.querySelector('#resume')||next.querySelector('#rematch'))?.focus({preventScroll:true});}
+    if(next){previous=document.activeElement;active=next;(next.querySelector('#resume')||next.querySelector('#rematch')||next.querySelector('input'))?.focus({preventScroll:true});}
     else{active=null;if(previous?.isConnected&&!previous.closest('.hidden'))previous.focus({preventScroll:true});previous=null;}
   };
   const observer=new MutationObserver(sync);dialogs.forEach(el=>observer.observe(el,{attributes:true,attributeFilter:['class']}));
   document.addEventListener('keydown',event=>{
     if(event.key!=='Tab'||!active)return;
-    const buttons=[...active.querySelectorAll('button:not(:disabled)')];if(!buttons.length)return;
+    const buttons=[...active.querySelectorAll('button:not(:disabled),input:not(:disabled),summary')];if(!buttons.length)return;
     const first=buttons[0],last=buttons[buttons.length-1];
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
     else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
