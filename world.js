@@ -44,7 +44,10 @@ let refreshMapEnvironment=null;
 function buildSky(){
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)}},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);float h=smoothstep(-.12,.82,d.y);vec3 sky=mix(skyHorizon,skyTop,h);sky=mix(vec3(.55,.64,.8),sky,smoothstep(-.85,-.02,d.y));vec3 sunDir=normalize(vec3(-.35,.42,-.55));float disc=pow(max(0.,dot(d,sunDir)),86.);float glow=pow(max(0.,dot(d,sunDir)),7.);sky+=vec3(1.,.93,.78)*disc*1.45+vec3(1.,.68,.42)*glow*.38;float cloud=sin(d.x*14.+d.z*9.+time*.08)*.5+sin(d.x*31.-d.z*17.+time*.13)*.22;sky+=vec3(.13,.11,.12)*smoothstep(.28,.72,cloud)*exp(-pow((d.y-.18)*4.2,2.));float star=smoothstep(.996,1.,sin(d.x*220.)*sin(d.z*180.+d.y*40.));sky+=vec3(.9,.95,1.)*star*smoothstep(.2,.6,d.y)*.55;gl_FragColor=vec4(sky,1.);}`});
+    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);float h=smoothstep(-.12,.82,d.y);vec3 sky=mix(skyHorizon,skyTop,h);sky=mix(vec3(.55,.64,.8),sky,smoothstep(-.85,-.02,d.y));vec3 sunDir=normalize(vec3(-.35,.42,-.55));float disc=pow(max(0.,dot(d,sunDir)),86.);float glow=pow(max(0.,dot(d,sunDir)),7.);sky+=vec3(1.,.93,.78)*disc*1.45+vec3(1.,.68,.42)*glow*.38;float cloud=sin(d.x*14.+d.z*9.+time*.08)*.5+sin(d.x*31.-d.z*17.+time*.13)*.22;sky+=vec3(.13,.11,.12)*smoothstep(.28,.72,cloud)*exp(-pow((d.y-.18)*4.2,2.));float star=smoothstep(.996,1.,sin(d.x*220.)*sin(d.z*180.+d.y*40.));sky+=vec3(.9,.95,1.)*star*smoothstep(.2,.6,d.y)*.55;gl_FragColor=vec4(sky,1.);
+#include <tonemapping_fragment>
+#include <encodings_fragment>
+}`});
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
   if(!FALLBACK_GRAPHICS){refreshMapEnvironment=()=>{scene.environment=createSurfaceEnvironment(renderer,activeMap);};refreshMapEnvironment();}
   return mat;
