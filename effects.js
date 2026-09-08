@@ -15,18 +15,24 @@ void main(){vUv=uv;vec3 p=position;if(mode==3.)p.x+=sin(p.z*4.-time*12.)*.12*(1.
 #ifdef USE_INSTANCING
 local=instanceMatrix*local;
 #endif
-vec4 view=modelViewMatrix*local;vNormal=normalize(normalMatrix*normal);vView=normalize(-view.xyz);gl_Position=projectionMatrix*view;}`,fragmentShader:`uniform vec3 tint;uniform float time;uniform float fade;uniform float mode;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;
+vec4 view=modelViewMatrix*local;vec3 surfaceNormal=normal;
+#ifdef USE_INSTANCING
+surfaceNormal=mat3(instanceMatrix)*surfaceNormal;
+#endif
+vNormal=normalize(normalMatrix*surfaceNormal);vView=normalize(-view.xyz);gl_Position=projectionMatrix*view;}`,fragmentShader:`uniform vec3 tint;uniform float time;uniform float fade;uniform float mode;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+1.),f.x),f.y);}
 void main(){float rim=pow(1.-abs(dot(normalize(vNormal),normalize(vView))),2.);float a=.7;vec3 color=tint;
-if(mode==0.){float lines=pow(.5+.5*sin(vUv.y*95.-time*3.),8.);a=.08+lines*.35+rim*.35;}
-else if(mode==1.){a=.1+rim*.65;color=mix(tint,vec3(.8,1.,1.),rim);}
-else if(mode==2.){float scan=step(.45,fract(vUv.y*65.-time*1.5));a=(.15+scan*.6)*(.7+.3*sin(time*7.));color=mix(tint,vec3(1.),scan*.4);}
-else if(mode==3.){float edge=pow(max(0.,sin(vUv.y*3.14159)),.7);float tongues=.55+.45*sin(vUv.x*38.-time*13.+sin(vUv.y*12.));a=edge*tongues*(1.-vUv.x);color=mix(vec3(1.,.9,.65),tint,vUv.x);}
-else if(mode==4.){a=.18+rim*.6;color=mix(tint,vec3(1.),rim*.7);}
+if(mode==0.){float lines=pow(.5+.5*sin(vUv.y*95.-time*3.),8.);float currents=pow(noise(vUv*vec2(48.,22.)-vec2(time*.3,time)),5.);a=.025+lines*.16+rim*.35+currents*.45;}
+else if(mode==1.){float flow=noise(vUv*vec2(18.,8.)-vec2(time*2.,0.));a=.035+rim*.55+pow(flow,5.)*.3;color=mix(tint,vec3(.8,1.,1.),rim);}
+else if(mode==2.){float scan=step(.83,fract(vUv.y*110.-time*1.5));float grain=noise(vUv*120.);a=(.11+scan*.4+rim*.22)*(.85+grain*.15);color=mix(tint,vec3(1.),scan*.4);}
+else if(mode==3.){float edge=pow(max(0.,sin(vUv.y*3.14159)),.7);float flow=noise(vec2(vUv.x*13.-time*9.,vUv.y*7.));float tongues=smoothstep(.15,.8,flow);float shock=pow(max(0.,cos(vUv.x*42.)),10.);a=edge*(.2+tongues*.8)*(1.-vUv.x);color=mix(vec3(1.,.95,.78),tint,vUv.x)+shock*(1.-vUv.x)*.45;}
+else if(mode==4.){float scan=pow(.5+.5*sin(vUv.y*100.+time*4.),18.);float fracture=noise(vUv*32.);a=.10+rim*.58+scan*.09;color=mix(tint,vec3(1.),rim*.7)*(.8+fracture*.2);}
 else if(mode==5.){a=pow(max(0.,sin(vUv.y*3.14159)),2.)*(.4+.6*pow(.5+.5*sin(vUv.x*28.-time*12.),4.));color=mix(tint,vec3(1.),.4);}
-else if(mode==6.){a=.8*(.6+.4*sin(time*5.+vUv.x*8.));}
-else if(mode==7.){a=sin(vUv.y*3.14159)*.8;}
-else if(mode==9.){float r=length(vUv-.5);a=.95;color=mix(tint,vec3(1.,.96,.7),rim*.6);}
-else{a=.7+rim*.25;}gl_FragColor=vec4(color,a*fade);}`});}
+else if(mode==6.){float charge=noise(vUv*vec2(24.,4.)-vec2(time*3.,0.));a=(.28+charge*.5)*sin(vUv.y*3.14159);}
+else if(mode==7.){float filament=pow(.5+.5*cos(vUv.y*28.+sin(vUv.x*21.-time*4.)),5.);a=sin(vUv.y*3.14159)*(.3+filament*.6);color=mix(tint,vec3(1.),filament*.45);}
+else if(mode==9.){float light=max(0.,dot(normalize(vNormal),normalize(vec3(-.4,.8,.6))));a=.98;color=mix(tint*.4,tint,light)+vec3(1.,.86,.55)*pow(rim,3.)*.6;}
+else{float light=.5+.5*abs(dot(normalize(vNormal),normalize(vec3(-.4,.8,.6))));a=.85;color=tint*light+vec3(.2)*rim;}gl_FragColor=vec4(color,a*fade);}`});}
 function addPowerPart(root,geometry,color,mode,name){const mesh=new THREE.Mesh(geometry,powerShader(color,mode));mesh.name=name;root.add(mesh);return mesh;}
 function silhouetteGeometry(){return cachedPowerGeometry('human',()=>{const s=new THREE.Shape();const pts=[[-.18,1.65],[-.3,1.48],[-.55,1.38],[-.83,.65],[-.66,.58],[-.39,1.04],[-.3,.55],[-.4,-.3],[-.16,-.3],[0,.38],[.16,-.3],[.4,-.3],[.3,.55],[.39,1.04],[.66,.58],[.83,.65],[.55,1.38],[.3,1.48],[.18,1.65]];s.moveTo(...pts[0]);pts.slice(1).forEach(p=>s.lineTo(...p));s.absellipse(0,1.89,.27,.31,-Math.PI/2,Math.PI*1.5,false);return new THREE.ExtrudeGeometry(s,{depth:.16,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.05,bevelThickness:.05});});}
 function addPowerInstances(root,color,kind,count){const geo=cachedPowerGeometry('petal',()=>{const shape=new THREE.Shape();shape.moveTo(0,-.6);shape.bezierCurveTo(.42,-.1,.3,.4,0,.65);shape.bezierCurveTo(-.3,.4,-.42,-.1,0,-.6);return new THREE.ShapeGeometry(shape,6);});const mesh=new THREE.InstancedMesh(geo,powerShader(color,8),count);mesh.name=kind;mesh.frustumCulled=false;root.add(mesh);return mesh;}
@@ -56,13 +62,14 @@ function spawnPowerEffect(kind,u,lat,color,owner){
  else if(kind==='animus'){const body=cachedPowerGeometry('drone-body',()=>new THREE.LatheGeometry([new THREE.Vector2(0,-.55),new THREE.Vector2(.2,-.48),new THREE.Vector2(.65,-.1),new THREE.Vector2(.72,.08),new THREE.Vector2(.4,.26),new THREE.Vector2(0,.4)],16));const drone=new THREE.Group();drone.name='sentinel-drone';drone.position.y=2.3;mesh.add(drone);const armor=new THREE.Mesh(body,new THREE.MeshStandardMaterial({color:'#e1f3ff',metalness:.7,roughness:.22}));armor.rotation.x=Math.PI/2;drone.add(armor);const eye=addPowerPart(drone,cachedPowerGeometry('sentinel-eye',()=>new THREE.SphereGeometry(.25,16,10)),color,8,'sentinel-eye');eye.position.z=-.48;const iris=powerRing(drone,.36,color);iris.position.z=-.42;for(let side=0;side<2;side++)for(let feather=0;feather<3;feather++){const sign=side?1:-1;addPowerPart(drone,powerCurve('sentinel-feather-'+side+'-'+feather,[[sign*.5,0,0],[sign*.85,.05+feather*.13,.12],[sign*(1.7-feather*.18),.55+feather*.12,.5]],.075),color,8,'sentinel-feather');}for(let i=0;i<2;i++){const wing=addPowerPart(mesh,ribbonGeometry('drone-wing',.3,.7,1.6,.16),color,5,'drone-wing');wing.position.y=2.3;wing.rotation.y=i*Math.PI+Math.PI/2;}addPowerInstances(mesh,color,'drone-motes',10);}
  else if(kind==='animus-pulse'){const ring=powerRing(mesh,1.3,color,'pulse-ring');ring.rotation.x=Math.PI/2;ring.position.y=-.55;addPowerInstances(mesh,color,'pulse-motes',powerLow?6:10);}
  else if(kind==='helix'){for(let i=0;i<2;i++){const strand=addPowerPart(mesh,ribbonGeometry('dna-strand',2,1.25,4,.11),i?'#eeffff':color,7,'dna-strand');strand.rotation.x=-Math.PI/2;strand.rotation.z=i*Math.PI;strand.position.y=-1;}addPowerInstances(mesh,'#ffb4e3','healing-petals',powerLow?16:30);const ring=powerRing(mesh,2,color);ring.rotation.x=Math.PI/2;ring.position.y=-.8;}
+ addPowerMechanism(mesh,kind,color);
  scene.add(mesh);powerEffects.push({kind,u,lat,owner,mesh,life:duration,duration});
 }
 function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=powerEffects[i];f.life-=dt;if(f.life<=0){removePowerEffect(f);powerEffects.splice(i,1);continue;}
  const age=f.duration-f.life,motion=powerReduced?.25:1,clock=age*motion,follow=!['nexus','loom','signal','collective','vector'].includes(f.kind);if(follow&&f.owner){f.u=f.owner.u;f.lat=f.owner.lat;}
  orientOnTrack(f.mesh,f.u,f.lat,1.1,0);
  f.mesh.traverse(p=>{if(p.material?.uniforms){p.material.uniforms.time.value=clock;p.material.uniforms.fade.value=Math.min(1,f.life*2,age*5+.2);}
-  if(p.isInstancedMesh){for(let n=0;n<p.count;n++){const t=n/p.count,a=t*Math.PI*2+clock*1.6;let radius=2,up=0;powerDummy.rotation.set(clock+n,clock*.7+n,0);powerDummy.scale.setScalar(.16);
+  if(p.isInstancedMesh&&!p.userData.staticPowerDetail){for(let n=0;n<p.count;n++){const t=n/p.count,a=t*Math.PI*2+clock*1.6;let radius=2,up=0;powerDummy.rotation.set(clock+n,clock*.7+n,0);powerDummy.scale.setScalar(.16);
    if(f.kind==='helix'){radius=1.4;up=((clock+n*.19)%3.8)-.8;powerDummy.scale.set(.14,.3,.14);}
    else if(f.kind==='collective'){radius=Math.max(.15,6*(1-(age*.9+t)%1));up=.3+Math.sin(a)*.5;powerDummy.scale.setScalar(.25+t*.12);}
    else if(f.kind==='aether'){radius=1+((1-t-clock*.35)%1+1)%1*6;up=Math.sin(a*2)*.65;powerDummy.scale.setScalar(.25+t*.15);powerDummy.rotation.z=-a;}
@@ -70,6 +77,7 @@ function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=
    else{radius=1.4;up=2.1+Math.sin(a)*.3;powerDummy.scale.setScalar(.12);}
    powerDummy.position.set(Math.cos(a)*radius,up,Math.sin(a)*radius);powerDummy.updateMatrix();p.setMatrixAt(n,powerDummy.matrix);}p.instanceMatrix.needsUpdate=true;
   }
+  if(p.name==='sentinel-rotor')p.rotation.y=clock*22;
   if(p.name==='sonic-wavefront'){p.position.z=-3-p.userData.wave*3-(clock*9)%3;}
   if(p.name==='phase-echo'){p.position.z=3+Math.sin(clock*2)*.4;}
   if(p.name==='phase-ghost')p.position.x=Math.sin(clock*5)*.12;
@@ -82,3 +90,24 @@ function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=
   if(p.name==='pulse-ring'){const grow=1+age*3.2;p.scale.set(grow,grow,1);}
   if(p.name==='sentinel-drone'||p.name==='drone-wing')p.position.y=2.3+Math.sin(clock*3)*.18;
  });}}
+
+// Readable source hardware and cross-bracing ground the signature effects in 3D.
+// These meshes reuse immutable geometry and participate in the emitter's teardown.
+function addPowerMechanism(root,kind,color){
+ if(kind==='helix'){
+  const rungs=new THREE.InstancedMesh(cachedPowerGeometry('dna-crosslinks',()=>new THREE.CylinderGeometry(.035,.035,2.5,5)),powerShader('#e5fff4',7),12);
+  rungs.name='dna-base-pairs';rungs.userData.staticPowerDetail=true;
+  for(let i=0;i<12;i++){const t=(i+.5)/12,a=t*Math.PI*4;powerDummy.position.set(0,-1+t*4,0);powerDummy.rotation.set(Math.PI/2,0,a);powerDummy.scale.set(1,Math.sin(t*Math.PI)*.5+.5,1);powerDummy.updateMatrix();rungs.setMatrixAt(i,powerDummy.matrix);}root.add(rungs);
+ }else if(kind==='animus'){
+  const drone=root.getObjectByName('sentinel-drone');if(!drone)return;
+  for(const side of [-1,1]){
+   const nacelle=new THREE.Mesh(cachedPowerGeometry('sentinel-nacelle',()=>new THREE.TorusGeometry(.42,.085,6,20)),new THREE.MeshStandardMaterial({color:0x364553,metalness:.8,roughness:.36}));nacelle.rotation.x=Math.PI/2;nacelle.position.set(side*.86,.12,.1);drone.add(nacelle);
+   const rotor=new THREE.Group();rotor.name='sentinel-rotor';rotor.position.copy(nacelle.position);drone.add(rotor);
+   for(let i=0;i<3;i++){const blade=new THREE.Mesh(cachedPowerGeometry('sentinel-rotor-blade',()=>new THREE.BoxGeometry(.055,.018,.68)),new THREE.MeshStandardMaterial({color:0x8da0aa,metalness:.7,roughness:.38}));blade.rotation.y=i*Math.PI/3;rotor.add(blade);}
+  }
+ }else if(kind==='signal'){
+  for(let i=0;i<3;i++){
+   const arc=addPowerPart(root,powerCurve('sonic-ion-branch-'+i,[[0,0,-2],[.25-i*.18,.1,-5],[.6-i*.3,.35,-8],[.15,-.1,-10],[.45-i*.35,.25,-14],[0,0,-20]],.023),i===1?'#fff4e7':color,5,'sonic-ion-filament');arc.rotation.z=i*Math.PI*2/3;
+  }
+ }
+}

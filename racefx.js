@@ -52,7 +52,14 @@ local=instanceMatrix*local;
 #endif
 gl_Position=projectionMatrix*modelViewMatrix*local;}`);
   const FLAME_FRAG=glsl(`uniform float time;varying vec3 vC;varying float vF;varying vec2 vUv;
-void main(){float t=vUv.y;float streak=.62+.38*sin(vUv.x*25.13+t*14.-time*38.);float a=pow(1.-t,1.7)*streak*vF;vec3 hot=vec3(1.,.97,.86);vec3 c=mix(hot,vC,smoothstep(0.,.42,t));c=mix(c,vC*.35,smoothstep(.5,1.,t));gl_FragColor=vec4(c*a,a);}`);
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+1.),f.x),f.y);}
+void main(){float t=vUv.y;vec2 flow=vec2(vUv.x*8.,t*9.-time*17.);float turbulence=noise(flow)*.6+noise(flow*2.1)*.27+noise(flow*4.3)*.13;
+float envelope=pow(max(0.,1.-t),1.4);float tongues=smoothstep(.18,.8,turbulence+envelope*.25);
+float diamonds=pow(max(0.,cos(t*38.-time*2.)),8.)*envelope;
+float a=envelope*(.22+tongues*.65+diamonds*.22)*vF;
+vec3 hot=vec3(1.,.94,.76);vec3 c=mix(hot,vC,smoothstep(.08,.6,t));c=mix(c,vec3(.94,.24,.035),smoothstep(.55,1.,t)*.62);c+=diamonds*vec3(.55,.65,.85);
+if(a<.008)discard;gl_FragColor=vec4(c*a,a);}`);
   const SKID_VERT=glsl(`attribute float aSide;attribute float aBorn;attribute float aStr;uniform float time;varying float vA;
 void main(){float age=time-aBorn;float life=clamp(1.-age/6.,0.,1.);vA=aStr*life*(.4+.6*life)*sin(aSide*3.14159);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`);
   const SKID_FRAG=glsl(`uniform vec3 color;varying float vA;void main(){gl_FragColor=vec4(color,vA*.62);}`);
@@ -63,7 +70,12 @@ void main(){float t=vUv.x;float edge=pow(sin(vUv.y*3.14159),.6);float head=smoot
   const POINT_VERT=glsl(`attribute float aSize;attribute float aAlpha;attribute vec3 aColor;uniform float uScale;varying float vA;varying vec3 vC;
 void main(){vA=aAlpha;vC=aColor;vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=aSize*(uScale/max(1.,-mv.z));gl_Position=projectionMatrix*mv;}`);
   const POINT_FRAG=glsl(`uniform float additive;varying float vA;varying vec3 vC;
-void main(){vec2 q=gl_PointCoord-.5;float d=length(q);float a=smoothstep(.5,.18,d)*vA;if(a<.003)discard;gl_FragColor=additive>.5?vec4(vC*a,a):vec4(vC,a);}`);
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+1.),f.x),f.y);}
+void main(){vec2 q=gl_PointCoord-.5;float d=length(q);float a;vec3 c=vC;
+if(additive>.5){float core=exp(-dot(q,q)*85.);float rays=exp(-abs(q.x)*55.)*exp(-abs(q.y)*8.)+exp(-abs(q.y)*55.)*exp(-abs(q.x)*8.);a=(core+rays*.25)*smoothstep(.5,.3,d)*vA;c=mix(vC,vec3(1.),core*.6);}
+else{float n=noise(gl_PointCoord*5.7)*.55+noise(gl_PointCoord*12.1)*.3+noise(gl_PointCoord*23.)*.15;float density=smoothstep(.12,.75,n);a=smoothstep(.5,.12,d)*(density*.8+.2)*vA;float light=clamp(.72-q.y*.5+n*.35,.35,1.15);c*=light;}
+if(a<.003)discard;gl_FragColor=additive>.5?vec4(c*a,a):vec4(c,a);}`);
   const SPEED_VERT=glsl(`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`);
   const SPEED_FRAG=glsl(`uniform float time,intensity,flash,aspect;uniform vec3 tint,flashColor;varying vec2 vUv;
 void main(){vec2 p=(vUv-.5)*vec2(aspect,1.);float r=length(p);float a=atan(p.y,p.x);float bins=72.;float fb=a/6.2831853*bins;float bin=floor(fb+.5);float rnd=fract(sin(bin*12.9898)*43758.5453);float rnd2=fract(sin(bin*78.233)*12345.678);

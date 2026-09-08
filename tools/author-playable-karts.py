@@ -3,7 +3,7 @@
   blender -b .tools/zenflow-karts.blend --python tools/author-playable-karts.py -- .tools/playable-karts.blend
 
 Imports the existing articulated assembly only as a proportion/pivot scaffold. This pass
-welds disconnected triangles, reconstructs the pilot as voxel-unioned anatomical surfaces,
+welds disconnected triangles, reconstructs the pilot as a continuous tailored suit,
 resolves body surface normals, authors real enamel bonnet panels, and refines wheel rims.
 No reference screenshots, billboards or image-projected surfaces are embedded.
 """
@@ -27,7 +27,7 @@ def apply(obj,mod):
 
 
 def continuous_torso(obj):
-    # Replace the overlapping torso/pectoral/abdominal lobes by one anatomical envelope.
+    # Replace the former muscle lobes with one fitted garment envelope.
     # Retain seated leg vertices below the hip; the capped volumes are joined downstream.
     bm=bmesh.new();bm.from_mesh(obj.data)
     bmesh.ops.delete(bm,geom=[v for v in bm.verts if v.co.z>.10],context='VERTS')
@@ -42,19 +42,9 @@ def continuous_torso(obj):
         rx=a[1]+(b[1]-a[1])*t;ry=a[2]+(b[2]-a[2])*t
         for k in range(around):
             theta=k/around*math.tau;x=rx*math.sin(theta);front=max(0,math.cos(theta))**3
-            # Smooth pectoral fan and shallow segmented abdominal relief, no intersecting shells.
-            pec=.074*sum(math.exp(-((x-side*.17)/.145)**2-((z-.79)/.12)**2) for side in [-1,1])
-            # Broad sloping collarbones and a shallow pectoral fold stay in one skin surface.
-            clavicle=.026*math.exp(-((z-(.965-.14*abs(x)))/.027)**2)*math.exp(-((abs(x)-.19)/.18)**4)
-            pec_fold=.014*math.exp(-((z-(.655+.10*abs(x)))/.020)**2)*math.exp(-((abs(x)-.17)/.15)**4)
-            oblique=.026*math.exp(-((abs(x)-(.17+.14*(z-.25)))/.055)**2)*math.exp(-((z-.43)/.24)**4)
-            abdomen=.034*sum(math.exp(-((x-side*.10)/.085)**2-((z-height)/.052)**2) for side in [-1,1] for height in [.24,.38,.51])
-            sternum=.017*math.exp(-(x/.035)**2)*math.exp(-((z-.60)/.40)**4)
-            back=max(0,-math.cos(theta))**4
-            scapula=.036*sum(math.exp(-((x-side*.20)/.12)**2-((z-.78)/.20)**2) for side in [-1,1])
-            spine=.014*math.exp(-(x/.03)**2)*math.exp(-((z-.62)/.35)**4)
-            lat=.022*math.exp(-((abs(x)-(.16+.20*(z-.30)))/.075)**2)*math.exp(-((z-.55)/.26)**4)
-            y=ry*math.cos(theta)+(pec+clavicle-pec_fold+abdomen+oblique-sternum)*front-(scapula+lat-spine)*back
+            # Shallow cloth compression around the seated waist, no sculpted muscle relief.
+            fold=.005*math.sin(z*48)*math.exp(-((z-.4)/.2)**2)
+            y=ry*math.cos(theta)+fold*front
             verts.append((x,y,z))
     for j in range(levels):
         for k in range(around):
@@ -87,7 +77,7 @@ def reconstruct_skin(obj,voxel,torso=False):
 def material(name,h,metal=.55,rough=.19):
     mat=bpy.data.materials.new(name);mat.use_nodes=True;b=mat.node_tree.nodes.get('Principled BSDF')
     b.inputs['Base Color'].default_value=color(h);b.inputs['Metallic'].default_value=metal;b.inputs['Roughness'].default_value=rough
-    b.inputs['Coat Weight'].default_value=.28;b.inputs['Coat Roughness'].default_value=.10
+    b.inputs['Coat Weight'].default_value=0 if rough>.6 else .28;b.inputs['Coat Roughness'].default_value=.10
     mat.diffuse_color=color(h);return mat
 
 def mesh_child(root,name,verts,faces,mat):
@@ -175,7 +165,7 @@ for mat in bpy.data.materials:
 report=[]
 for root in [o for o in bpy.data.objects if o.get('zf_root')]:
     kart=root['zf_kart'];objects=[o for o in bpy.data.objects if o.get('zf_kart')==kart]
-    skin=material(kart+'-reference-anatomical-enamel',PALETTE[kart],.92,.19)
+    skin=material(kart+'-woven-race-suit','182532',.02,.78)
     enamel=material(kart+'-reference-bonnet-enamel','008AC2' if kart=='zenflow' else PALETTE[kart] if kart!='juris' else TRIM[kart],.55,.20)
     dish=material(kart+'-recessed-wheel-enamel','083649' if kart=='zenflow' else '132839',.65,.24)
     ring=material(kart+'-reference-luminous-rim',TRIM[kart] if kart in ('collective','hybrid','nexus','aether','helix') else PALETTE[kart],.45,.17)
@@ -209,7 +199,7 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
     pearl=material(kart+'-fairing-pearl','F8FBFF',.24,.23)
     # Faceted split fairings are authored in vehicles.js and retained through Blender.
     root['zf_blender_authored']=True
-    root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union anatomical torso and arms','controlled smooth and decimated anatomy','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling','cambered blade panels, division-specific nose inserts and rear diffusers'])
+    root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union fitted torso and sleeves','controlled smooth and decimated garment surfaces','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls','cambered blade panels, division-specific nose inserts and rear diffusers'])
     report.append({'id':kart,'operations':json.loads(root['zf_author_operations'])})
     print('AUTHORED',kart,flush=True)
 os.makedirs(os.path.dirname(target),exist_ok=True);bpy.ops.wm.save_as_mainfile(filepath=target,compress=True)

@@ -48,12 +48,12 @@ function buildFinishCeremony(){
  top.forEach((r,i)=>{
   const stand=new THREE.Group();stand.position.x=places[i];root.add(stand);
   const height=heights[i],accent=new THREE.Color(r.div.acc);
-  const base=new THREE.Mesh(new THREE.CylinderGeometry(2.18,2.38,height,48),new THREE.MeshStandardMaterial({color:0x344d73,metalness:.55,roughness:.3}));
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(2.18,2.38,height,48),new THREE.MeshStandardMaterial({color:0x202633,metalness:.4,roughness:.62}));
   base.position.y=height/2;base.receiveShadow=true;base.castShadow=true;stand.add(base);
-  const trim=new THREE.Mesh(new THREE.TorusGeometry(2.13,.035,6,64),new THREE.MeshStandardMaterial({color:accent,emissive:accent,emissiveIntensity:1.4,metalness:.2,roughness:.25}));
+  const trim=new THREE.Mesh(new THREE.TorusGeometry(2.13,.035,6,64),new THREE.MeshStandardMaterial({color:accent,emissive:accent,emissiveIntensity:.12,metalness:.3,roughness:.4}));
   trim.rotation.x=Math.PI/2;trim.position.y=height+.02;stand.add(trim);
   const plaque=document.createElement('canvas');plaque.width=128;plaque.height=128;
-  const ctx=plaque.getContext('2d');ctx.fillStyle='#20354d';ctx.fillRect(0,0,128,128);ctx.fillStyle='#e1fbff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 86px Orbitron, sans-serif';ctx.fillText(String(i+1),64,70);
+  const ctx=plaque.getContext('2d');ctx.fillStyle='#202633';ctx.fillRect(0,0,128,128);ctx.fillStyle='#f3f0e7';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 100px Rajdhani, sans-serif';ctx.fillText(String(i+1),64,70);
   const texture=new THREE.CanvasTexture(plaque);texture.encoding=THREE.sRGBEncoding;
   const number=new THREE.Mesh(new THREE.PlaneGeometry(.7,.7),new THREE.MeshBasicMaterial({map:texture}));number.position.set(0,height*.5,-2.39);number.rotation.y=Math.PI;stand.add(number);
   const mount=new THREE.Group();mount.position.y=height;stand.add(mount);

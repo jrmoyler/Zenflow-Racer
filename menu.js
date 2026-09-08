@@ -10,8 +10,8 @@
     document.getElementById('selected-code').textContent=d.code+' · '+d.role;
     document.getElementById('selected-stats').innerHTML=d.stats.map((v,i)=>'<div class="selected-stat"><div class="stat-label"><span>'+STAT_NAMES[i]+'</span><span>'+v*2+'/10</span></div><i><b style="width:'+v*20+'%"></b></i></div>').join('');
     card.scrollIntoView?.({inline:'center',block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-    animate('.director-panel',{opacity:[.55,1],translateX:[-8,0],duration:300,ease:'outQuad'});
-    animate('.preview-caption',{opacity:[0,1],translateY:[7,0],duration:450,ease:'outQuad'});
+    animate('#selected-stats b',{scaleX:[.65,1],duration:240,ease:'outQuad'});
+    animate('.preview-caption',{translateY:[6,0],duration:240,ease:'outQuad'});
   }
   function addPortraits(){
     grid.querySelectorAll('.card').forEach(card=>{
@@ -32,9 +32,22 @@
   window.addEventListener('racerselect',()=>{updateCardDetails();addPortraits();});
   window.addEventListener('portraitsready',addPortraits);
   updateCardDetails();addPortraits();
-  animate('#roster .head',{opacity:[0,1],translateY:[-12,0],duration:650,ease:'outQuad'});
-  animate('.glass',{opacity:[0,1],translateY:[15,0],duration:700,ease:'outQuad'});
-  animate('#grid',{opacity:[0,1],translateY:[20,0],duration:800,ease:'outQuad'});
+  // Animate on actual entry, rather than spending the animation behind loading.
+  const rosterScreen=document.getElementById('roster');
+  let visible=false;
+  const enter=()=>{
+    const next=!document.body.classList.contains('title-open')&&!rosterScreen.classList.contains('hidden');
+    if(next&&!visible){
+      animate('#roster .head',{translateY:[-10,0],duration:250,ease:'outQuad'});
+      animate('.race-panel',{translateY:[12,0],duration:300,ease:'outQuad'});
+      animate('#grid',{translateY:[16,0],duration:350,ease:'outQuad'});
+    }
+    visible=next;
+  };
+  const entryObserver=new MutationObserver(enter);
+  entryObserver.observe(rosterScreen,{attributes:true,attributeFilter:['class']});
+  entryObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+  enter();
 })();
 
 // The main menu overlays the live scene; controls and title are selectable DOM text.
@@ -54,7 +67,7 @@
  document.getElementById('settings-close').onclick=()=>transitionScene(document.body.classList.contains('title-open')?'ZENFLOW RACER':'CHARACTER SELECT',()=>{settings.classList.add('hidden');title.inert=false;roster.inert=document.body.classList.contains('title-open');document.getElementById(roster.inert?'title-settings':'menu-settings').focus();});
  settings.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.getElementById('settings-close').click();}});
  document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();});
- const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: glass gardens, spore-light and a rolling turquoise sea.'};
+ const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: race-panel gardens, spore-light and a rolling turquoise sea.'};
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
    document.querySelectorAll('[data-map]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});

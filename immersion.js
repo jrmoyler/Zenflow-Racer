@@ -194,7 +194,7 @@ function updateImmersion(dt){
   if(activeMap.id==='stormforge'&&typeof hemi!=='undefined'){
     IMMERSION.flash=Math.max(0,IMMERSION.flash-dt*2.2);
     if((w&&w.rnd?w.rnd():Math.random())<dt*.12)IMMERSION.flash=1;
-    hemi.intensity=.38+IMMERSION.flash*.85;
+    hemi.intensity=.58+IMMERSION.flash*.65;
   }
   const lanterns=IMMERSION.lanterns;
   if(lanterns&&typeof zenWorldTime!=='undefined'){
