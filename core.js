@@ -19,6 +19,14 @@ const ROSTER = [
   {id:'aether',    name:'Aether Link',    role:'Connectivity',           code:'AL-01', acc:'#B5451B', acc2:'#F0E6D3', base:'#1A0A05', stats:[3,4,4,3], mark:'orbit'},
   {id:'animus',    name:'Animus Prime',   role:'Robotics',               code:'AP-01', acc:'#22D3EE', acc2:'#F5F5F5', base:'#0C1018', stats:[4,3,3,5], mark:'bolt'},
   {id:'helix',     name:'Vital Helix',    role:'Health Intelligence',    code:'VH-01', acc:'#14B8A6', acc2:'#F97316', base:'#061414', stats:[3,4,5,2], mark:'helix'},
+  {id:'ledger',   name:'Quantum Ledger', role:'FinTech & Web3',          code:'QL-01', acc:'#8B5CF6', acc2:'#EDE9FE', base:'#0B0814', stats:[3,3,5,4], mark:'hex'},
+  {id:'terra',    name:'Terra Axis',     role:'Physical Infrastructure',code:'TA-01', acc:'#2563EB', acc2:'#93C5FD', base:'#071018', stats:[3,2,4,5], mark:'pylon'},
+  {id:'obsidian', name:'Obsidian Arc',   role:'Unified Security',       code:'OA-01', acc:'#EA580C', acc2:'#1C1917', base:'#0A0807', stats:[4,3,3,5], mark:'chevron'},
+  {id:'civic',    name:'Civic Core',     role:'Non-Profit Soul',        code:'CC-01', acc:'#7DD3FC', acc2:'#F0F9FF', base:'#071018', stats:[3,4,5,2], mark:'halo'},
+  {id:'cognara',  name:'Cognara Mind',   role:'Behavioral Science',     code:'CM-01', acc:'#E0267E', acc2:'#FCE7F3', base:'#14080F', stats:[3,4,4,3], mark:'wave'},
+  {id:'gaia',     name:'Gaia Synthesis', role:'AgriTech & Environment',  code:'GS-01', acc:'#22C55E', acc2:'#2563EB', base:'#06140C', stats:[3,4,4,3], mark:'leaf'},
+  {id:'nomad',    name:'Nomad Nexus',    role:'Global Mobility',        code:'NN-01', acc:'#FBBF24', acc2:'#78350F', base:'#120E08', stats:[4,3,4,3], mark:'horizon'},
+  {id:'eon',      name:'Eon Core',       role:'Longevity Science',      code:'EC-01', acc:'#06B6D4', acc2:'#ECFEFF', base:'#061418', stats:[2,5,4,3], mark:'infinity'},
 ];
 const STAT_NAMES = ['Speed','Accel','Handling','Weight'];
 
@@ -139,6 +147,13 @@ function texMark(mark,acc,acc2,size=256){ // division logo mark, drawn abstractl
     case 'eagle':{g.beginPath();g.moveTo(cx,cy+R*.2);g.quadraticCurveTo(cx-R*.5,cy-R*.9,cx-R*1.05,cy-R*.3);g.quadraticCurveTo(cx-R*.55,cy-R*.35,cx-R*.25,cy+R*.1);g.lineTo(cx,cy+R*.7);g.lineTo(cx+R*.25,cy+R*.1);g.quadraticCurveTo(cx+R*.55,cy-R*.35,cx+R*1.05,cy-R*.3);g.quadraticCurveTo(cx+R*.5,cy-R*.9,cx,cy+R*.2);g.fill();break;}
     case 'orbit':{g.beginPath();g.arc(cx,cy,R*.42,0,7);g.fill();g.lineWidth=s*.035;g.beginPath();g.ellipse(cx,cy,R*1.05,R*.4,-.5,0,7);g.stroke();g.fillStyle=acc2;g.beginPath();g.arc(cx+R*.8,cy-R*.35,s*.05,0,7);g.fill();break;}
     case 'bolt':{g.beginPath();g.moveTo(cx+R*.15,cy-R);g.lineTo(cx-R*.55,cy+R*.15);g.lineTo(cx-R*.05,cy+R*.15);g.lineTo(cx-R*.2,cy+R);g.lineTo(cx+R*.6,cy-R*.2);g.lineTo(cx+R*.1,cy-R*.2);g.closePath();g.fill();g.strokeStyle=acc2;g.lineWidth=s*.025;g.beginPath();g.moveTo(cx-R*1.05,cy);g.lineTo(cx-R*.7,cy);g.moveTo(cx+R*.7,cy);g.lineTo(cx+R*1.05,cy);g.stroke();break;}
+    case 'pylon':{g.lineWidth=s*.065;g.beginPath();g.moveTo(cx-R,cy+R*.75);g.lineTo(cx-R*.62,cy-R*.6);g.lineTo(cx+R*.62,cy-R*.6);g.lineTo(cx+R,cy+R*.75);g.moveTo(cx-R*.7,cy);g.lineTo(cx+R*.7,cy);g.stroke();break;}
+    case 'chevron':{for(const y of [-.35,.25]){g.beginPath();g.moveTo(cx-R*.8,cy+R*(y-.3));g.lineTo(cx,cy+R*(y+.3));g.lineTo(cx+R*.8,cy+R*(y-.3));g.stroke();}break;}
+    case 'halo':{g.beginPath();g.ellipse(cx,cy-R*.2,R,R*.4,0,0,Math.PI*2);g.stroke();g.beginPath();g.arc(cx,cy+R*.45,R*.23,0,Math.PI*2);g.fill();break;}
+    case 'wave':{for(const shift of [-.35,.35]){g.beginPath();for(let i=0;i<=40;i++){const x=-R+i/40*2*R,y=Math.sin(i/40*Math.PI*2)*R*.36+shift*R;i?g.lineTo(cx+x,cy+y):g.moveTo(cx+x,cy+y);}g.stroke();}break;}
+    case 'leaf':{g.beginPath();g.moveTo(cx-R*.6,cy+R*.8);g.bezierCurveTo(cx-R,cy-R*.5,cx,cy-R,cx+R*.8,cy-R*.8);g.bezierCurveTo(cx+R,cy+R*.3,cx+R*.2,cy+R,cx-R*.6,cy+R*.8);g.stroke();g.beginPath();g.moveTo(cx-R*.6,cy+R*.8);g.lineTo(cx+R*.6,cy-R*.6);g.stroke();break;}
+    case 'horizon':{g.beginPath();g.arc(cx,cy+R*.25,R*.7,Math.PI,Math.PI*2);g.stroke();g.beginPath();g.moveTo(cx-R,cy+R*.3);g.lineTo(cx+R,cy+R*.3);g.moveTo(cx-R*.6,cy+R*.7);g.lineTo(cx+R*.6,cy+R*.7);g.stroke();break;}
+    case 'infinity':{g.beginPath();for(let i=0;i<=80;i++){const t=i/80*Math.PI*2,x=Math.cos(t)*R,y=Math.sin(t*2)*R*.48;i?g.lineTo(cx+x,cy+y):g.moveTo(cx+x,cy+y);}g.stroke();break;}
     case 'helix':{g.lineWidth=s*.05;for(let k=0;k<2;k++){g.strokeStyle=k?acc2:acc;g.beginPath();for(let y=-R;y<=R;y+=4){const x=Math.sin((y/R)*Math.PI*1.5+k*Math.PI)*R*.55;y===-R?g.moveTo(cx+x,cy+y):g.lineTo(cx+x,cy+y);}g.stroke();}g.strokeStyle=acc;g.lineWidth=s*.02;for(let y=-R*.8;y<=R*.8;y+=R*.32){const x=Math.sin((y/R)*Math.PI*1.5)*R*.55;g.beginPath();g.moveTo(cx+x,cy+y);g.lineTo(cx-x,cy+y);g.stroke();}break;}
   }
   // parent diamond star, bottom-right — signals Collective AI parentage

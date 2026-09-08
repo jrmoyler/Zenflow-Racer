@@ -21,12 +21,16 @@ function assertClosedSkin(geometry,label){
  assert.equal([...edges.values()].filter(n=>n===1).length,0,label+': no open skin boundary');
 }
 (async()=>{
- const progress=[];c.progress=(n,total)=>progress.push([n,total]);await run('loadKartAssets(progress)');assert.equal(progress.length,12);assert.equal(run('KART_ASSETS.templates.size'),12);
+ const progress=[];c.progress=(n,total)=>progress.push([n,total]);await run('loadKartAssets(progress)');assert.equal(progress.length,run('ROSTER.length'));assert.equal(run('KART_ASSETS.templates.size'),run('ROSTER.length'));assert.equal(run('ROSTER.length'),20);
  let totalBytes=0,totalTriangles=0;
  for(const div of run('ROSTER')){
   const bytes=fs.readFileSync(path.join(root,'assets/models',div.id+'.glb'));totalBytes+=bytes.length;assert.equal(bytes.readUInt32LE(0),0x46546c67);assert.equal(bytes.readUInt32LE(4),2);assert.equal(bytes.readUInt32LE(8),bytes.length);
   const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString().trim());assert.equal(gltf.images?.length||0,0,'No reference images can enter playable meshes');assert.ok(bytes.length<4*1024*1024,'bounded uncompressed asset size');
+  const triangles=(gltf.meshes||[]).reduce((sum,mesh)=>sum+mesh.primitives.reduce((n,p)=>n+gltf.accessors[p.indices===undefined?p.attributes.POSITION:p.indices].count/3,0),0);if(['ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'].includes(div.id))assert.ok(triangles<50000,div.id+': under 50,000 triangle budget ('+triangles+')');
   c.div=div;const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');
+  for(const [i,name] of ['wheel-fl','wheel-fr','wheel-rl','wheel-rr'].entries())assert.deepEqual(a.getObjectByName(name).position.toArray().map(v=>Math.round(v*100)/100),Array.from(run('KART_WHEEL_REST')[i]),div.id+': wheel '+name+' local pivot');
+  for(const state of ['idle','drive','drift','boost','spinout','hit','victory','defeat']){c.clipKart=a;c.clipState=state;run('resetClipNodes(clipKart.userData);sampleKartClip(clipState,.25,1,clipKart.userData)');a.updateMatrixWorld(true);a.traverse(o=>assert.ok(o.matrixWorld.elements.every(Number.isFinite),div.id+': '+state+' transform'));}
+  run('resetClipNodes(clipKart.userData)');a.updateMatrixWorld(true);
   assertClosedSkin(a.getObjectByName('head-mesh').geometry,div.id+' head');
   const skin=a.getObjectByName('head-mesh').material,templateSkin=run('KART_ASSETS.templates.get(div.id)').getObjectByName('head-mesh').material;
   assert.notEqual(skin,templateSkin,'lighting never mutates cached model material');assert.ok(skin.roughness>=.7&&skin.metalness<.05&&!(skin.clearcoat>0),div.id+': loaded suit remains matte fabric');
@@ -47,5 +51,5 @@ function assertClosedSkin(geometry,label){
   let disposed=0;a.getObjectByName('torso').geometry.addEventListener('dispose',()=>disposed++);c.kart=a;run('disposeKart(kart)');assert.equal(disposed,0,'despawn retains cached GLB geometry');c.kart=b;run('disposeKart(kart)');
  }
  assert.ok(totalBytes<40*1024*1024,'whole roster download budget');
- console.log(`PASS playable assets: 12 actual GLBs, independent live rigs/materials, shared geometry, animation, ghost cloning and disposal; ${(totalBytes/1048576).toFixed(2)} MiB, ${Math.round(totalTriangles)} triangles.`);
+ console.log(`PASS playable assets: ${run('ROSTER.length')} actual GLBs, independent live rigs/materials, shared geometry, animation, ghost cloning and disposal; ${(totalBytes/1048576).toFixed(2)} MiB, ${Math.round(totalTriangles)} triangles.`);
 })().catch(e=>{console.error(e);process.exitCode=1;});

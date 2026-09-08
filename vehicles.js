@@ -128,7 +128,7 @@ function buildDivisionCoachwork(div,root,add,m){
   const ring=(r,t,mat,x,y,z,name='intake-ring')=>{const o=add(new THREE.TorusGeometry(r,t,10,32),mat,root,name);o.position.set(x,y,z);return o;};
   const plate=(points,mat=white,name='cambered-body-panel',thickness=.055)=>add(sculptedPanel(points,thickness),mat,root,name);
   const nose=(length=2.15,width=.65,height=.92)=>{
-    if(id==='signal'||id==='vector'){
+    if(id==='signal'||id==='vector'||id==='obsidian'){
       const o=plate([[0,.30,-length],[width,.67,-1.27],[width*.76,height,-.45],[0,height+.07,-.62],[-width*.76,height,-.45],[-width,.67,-1.27]],white,'wedge-bonnet');
       plate([[0,.34,-length+.13],[width*.72,.72,-1.2],[.29,height+.065,-.61],[0,height+.10,-.73],[-.29,height+.065,-.61],[-width*.72,.72,-1.2]],panel,'arrow-bonnet-inlay',.026);return o;
     }
@@ -173,6 +173,71 @@ function buildDivisionCoachwork(div,root,add,m){
       ribbon([[s*.15,.44,-1.94],[s*.37,.65,-1.5],[s*.38,.98,-.72]],glow,.025,.02,'robot-sensor-strip');}
     pipe([[.5,.7,1.12],[.68,1.65,1.35],[.65,2.05,1.3]],metal,.05);
     const drone=hull([[1.0,.05,2.05,.04],[1.1,.32,2.14,.24],[1.45,.32,2.14,.24],[1.58,.03,2.12,.03]],white,.65,'companion-drone');ring(.12,.04,glow,.65,2.15,1.02,'drone-optic');
+  }else if(id==='ledger'){
+    // Closed crystal planes keep the nose short; grille and flank cells are actual geometry.
+    plate([[0,.52,-2.08],[.60,.59,-1.78],[.63,.88,-1.16],[.38,1.08,-.5],[0,1.15,-.71],[-.38,1.08,-.5],[-.63,.88,-1.16],[-.60,.59,-1.78]],white,'ledger-crystal-nose',.12);fenders();
+    const hex=(x,y,z,r,side=false)=>{const g=new THREE.TorusGeometry(r,.016,4,6);const cell=add(g,panel,root,side?'ledger-honeycomb-flank':'ledger-hex-grille');cell.position.set(x,y,z);if(side)cell.rotation.y=Math.PI/2;return cell;};
+    const grilleShape=new THREE.Shape();[[-.54,.51],[-.54,.89],[-.28,1.015],[.37,1.015],[.56,.88],[.56,.51],[.29,.435],[-.29,.435]].forEach(([x,y],i)=>i?grilleShape.lineTo(x,y):grilleShape.moveTo(x,y));grilleShape.closePath();
+    const grilleBacking=add(new THREE.ExtrudeGeometry(grilleShape,{depth:.07,bevelEnabled:true,bevelSize:.008,bevelThickness:.008,bevelSegments:2}),dark,root,'ledger-recessed-grille-backing');grilleBacking.position.z=-2.004;
+    ribbon([[-.55,.51,-2.04],[-.55,.90,-2.04],[-.28,1.03,-2.04],[.37,1.03,-2.04],[.58,.89,-2.04],[.58,.51,-2.04],[.29,.42,-2.04],[-.29,.42,-2.04],[-.55,.51,-2.04]],white,.024,.027,'ledger-grille-bezel');
+    for(let row=0;row<3;row++)for(let col=0;col<5;col++)hex((col-2)*.17+(row%2)*.085,.57+row*.145,-2.02,.09);
+    for(const side of [-1,1]){
+      hull([[-.7,.05,.64,.08],[-.3,.14,.68,.19],[.65,.14,.68,.19],[1.1,.03,.63,.04]],white,side*.85,'ledger-white-sidepod');
+      for(let row=0;row<2;row++)for(let col=0;col<4;col++)hex(side*.996,.65+row*.15,-.30+col*.20,.09,true);
+      ribbon([[side*.5,.67,-1.98],[side*.65,.93,-1.3],[side*.42,1.14,-.57]],glow,.025,.018,'headlight-signature');
+      plate([[side*.2,.8,1.1],[side*.65,1.15,1.31],[side*.64,.81,1.76],[side*.18,.68,1.89]],white,'ledger-faceted-rear-cowl');
+    }
+  }else if(id==='terra'){
+    hull([[-2.08,.48,.71,.28],[-1.89,.64,.78,.35],[-1.15,.66,.85,.35],[-.48,.44,.98,.11]],white,0,'terra-pylon-nose');fenders(true);
+    for(const side of [-1,1]){
+      ribbon([[side*.9,.40,-1.9],[side*.99,.4,-.55],[side*.99,.43,.8],[side*.85,.43,1.76]],panel,.12,.085,'terra-structural-rail');
+      ribbon([[side*.75,.5,-1.8],[side*.86,1.25,-1.27],[side*.77,.6,-.58]],white,.17,.13,'terra-overpass-arch');
+      ribbon([[side*.75,.51,.69],[side*.86,1.28,1.25],[side*.75,.53,1.85]],white,.17,.13,'terra-rear-overpass-arch');
+      for(const z of [-1.55,-1.05])ribbon([[side*.12,1.08,z],[side*.49,1.09,z],[side*.62,.96,z]],dark,.017,.012,'terra-panel-seam');
+      ribbon([[side*.12,.75,-2.1],[side*.36,.75,-2.1],[side*.54,.78,-2.04]],glow,.065,.026,'terra-block-headlight');
+    }
+  }else if(id==='obsidian'){
+    nose(2.45,.52,1.0);
+    for(const side of [-1,1]){
+      plate([[side*.06,.32,-2.46],[side*1.42,.4,-1.52],[side*1.1,.63,-.76],[side*.51,.57,-1.25]],white,'obsidian-knife-canard');
+      plate([[side*.52,.78,-.68],[side*.96,.91,-.38],[side*.99,.88,.71],[side*.69,1.04,.89]],dark,'obsidian-carbon-shoulder');
+      plate([[side*.67,.74,.73],[side*1.13,1.57,1.93],[side*.95,1.57,1.63],[side*.55,.87,1.02]],white,'obsidian-razor-tail');
+      ribbon([[side*.14,.63,-2.04],[side*.51,.74,-1.59],[side*.73,.83,-1.02]],glow,.026,.017,'obsidian-slit-headlight');
+      ribbon([[side*.46,.95,-1.12],[0,.77,-1.67],[side*.40,.85,-1.20]],panel,.065,.03,'obsidian-nose-chevron');
+    }
+  }else if(id==='civic'){
+    hull([[-2.1,.03,.72,.04],[-1.94,.42,.72,.32],[-1.48,.66,.80,.39],[-.83,.58,.98,.24],[-.43,.43,1,.06]],white,0,'civic-oval-nose');fenders(true);
+    const lamp=ring(.18,.05,glow,0,.76,-2.1,'civic-single-oval-lamp');lamp.scale.x=1.5;
+    const hoop=ring(.65,.058,white,0,1.49,1.48,'civic-halo-hoop');ring(.65,.022,glow,0,1.49,1.418,'civic-halo-light');
+    for(const side of [-1,1]){hull([[-1.75,.01,.48,.02],[-1.2,.24,.62,.20],[.8,.23,.71,.25],[1.7,.02,.63,.03]],white,side*.88,'civic-pill-flank');const lamp=ring(.10,.037,glow,side*.67,.79,-1.76,'civic-round-headlamp');lamp.scale.x=1.4;}
+  }else if(id==='cognara'){
+    hull([[-2.12,.04,.58,.05],[-1.91,.50,.68,.25],[-1.24,.65,.85,.34],[-.51,.43,1.03,.11]],white,0,'cognara-lab-shell');fenders(true);
+    for(const side of [-1,1]){ring(.17,.045,metal,side*.33,.77,-1.99,'cognara-sensor-housing');ring(.112,.043,glow,side*.33,.77,-2.015,'cognara-sensor-core');}
+    ribbon([[0,.72,-2.1],[.23,1.04,-1.64],[-.24,1.20,-1.15],[.11,1.19,-.64],[.64,1.13,-.13],[.73,1.15,.65]],panel,.068,.033,'cognara-neural-ribbon');
+    for(const side of [-1,1])hull([[.65,.03,.75,.04],[.9,.22,1.04,.30],[1.47,.22,.97,.26],[1.7,.02,.69,.03]],white,side*.63,'cognara-rear-pod');
+  }else if(id==='gaia'){
+    nose(2.1,.50,.88);
+    for(const side of [-1,1]){
+      for(const z of [-1.23,1.26])plate([[side*.82,.77,z-.65],[side*1.14,1.30,z-.14],[side*1.20,1.25,z+.15],[side*.94,.70,z+.62],[side*.83,.94,z+.08]],white,'gaia-leaf-fender',.065);
+      ribbon([[side*.09,.48,-2.12],[side*.83,.71,-1.22],[side*.43,1.15,-.36],[side*.83,1.18,.73],[side*.24,1.48,1.61]],panel,.075,.04,'gaia-vine-wrap');
+      hull([[1.08,.03,.87,.04],[1.27,.22,1.25,.40],[1.55,.15,1.39,.31],[1.86,.01,1.06,.02]],white,side*.33,'gaia-seed-pod');
+    }
+    const trace=panel.clone();trace.color.set(div.acc2);trace.emissive.set(div.acc2);
+    ribbon([[.14,.56,-2.0],[.76,.80,-1.22],[.45,1.19,-.4],[.75,1.22,.72]],trace,.012,.013,'gaia-circuit-blue-trace');
+  }else if(id==='nomad'){
+    hull([[-2.05,.12,.69,.10],[-1.77,.53,.84,.31],[-1.04,.56,.96,.28],[-.44,.41,1.1,.08]],white,0,'nomad-raised-bonnet');
+    for(const side of [-1,1]){
+      for(const z of [-1.25,1.28]){ribbon([[side*1.04,.77,z-.60],[side*1.04,1.32,z],[side*1.04,.78,z+.60]],white,.15,.075,'nomad-raised-arch');for(let i=0;i<5;i++){const coil=ring(.095,.02,metal,side*.89,.55+i*.105,z,'nomad-coil-spring');coil.rotation.x=Math.PI/2;}}
+      hull([[-.45,.04,.66,.06],[-.26,.23,.73,.23],[.57,.23,.73,.23],[.76,.03,.7,.04]],white,side*.98,'nomad-side-case');
+      ribbon([[side*.66,1.01,-1.7],[side*.61,1.19,-.71],[side*.80,1.12,.3],[side*.71,1.20,1.11]],panel,.065,.035,'nomad-horizon-stripe');
+      for(const z of [-.14,.42])ribbon([[side*.90,.95,z],[side*1.15,.95,z],[side*1.18,.60,z]],metal,.025,.02,'nomad-case-strap');
+      ribbon([[side*.1,.79,-2.05],[side*.39,.86,-1.95],[side*.51,.93,-1.7]],glow,.036,.02,'nomad-headlight');
+    }
+    for(const x of [-.48,0,.48])pipe([[x,1.16,1.15],[x,1.34,1.43],[x,1.25,1.81]],metal,.033);
+  }else if(id==='eon'){
+    hull([[-2.1,.035,.63,.04],[-1.92,.44,.75,.30],[-1.35,.59,.84,.33],[-.52,.43,.99,.12]],white,0,'eon-medical-tourer');fenders(true);
+    for(const side of [-1,1]){const infinity=ring(.135,.03,glow,side*.115,.78,-2.02,'eon-infinity-ring');infinity.scale.x=1.16;hull([[.70,.035,.77,.04],[.98,.24,.88,.19],[1.55,.24,.78,.21],[1.81,.025,.65,.03]],white,side*.60,'eon-smooth-rear-cowl');}
+    ribbon([[0,.91,-1.95],[0,1.13,-1.4],[0,1.21,-.92],[0,1.13,-.44]],glow,.035,.025,'eon-spine-light');
   }else{
     const sharp=id==='signal'||id==='vector';nose(sharp?2.55:2.15, id==='juris'?.73:.57,1.02);
     for(const s of [-1,1]){
@@ -289,7 +354,8 @@ function buildKart(div){
   const wheels=[];
   KART_WHEEL_REST.forEach((p,i)=>{
     const pivot=new THREE.Group(),spin=new THREE.Group();pivot.name=['wheel-fl','wheel-fr','wheel-rl','wheel-rr'][i];spin.name='spin';pivot.position.set(...p);root.add(pivot);pivot.add(spin);
-    add(KART_GEO.tyre,div.id==='kinetic'||div.id==='animus'?tyre:white,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
+    add(KART_GEO.tyre,['kinetic','animus','nomad','terra'].includes(div.id)?tyre:white,spin,'rounded-wheel-shell');add(KART_GEO.hub,panel,spin,'recessed-colored-hub');add(KART_GEO.wheelBand,panel,spin,'translucent-tire-band');
+    if(div.id==='nomad')for(let j=0;j<18;j++){const a=j/18*Math.PI*2;const block=add(new THREE.BoxGeometry(.39,.045,.095),tyre,spin,'nomad-tread-block');block.position.set(0,Math.cos(a)*.557,Math.sin(a)*.557);block.rotation.x=a;}
     const luminous=glow.clone();const ring=add(KART_GEO.rim,luminous,pivot,'wheel-light-ring');ring.position.x=i%2?.255:-.255;
     wheels.push({pivot,spin,glow:ring,side:i%2?1:-1,rest:new THREE.Vector3(...p)});
   });

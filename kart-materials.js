@@ -1,7 +1,7 @@
 // ---------- Kart material factory ----------
-// Procedural PBR liveries for the twelve division chassis. Every map is a canvas drawn at
+// Procedural PBR liveries for the twenty division chassis. Every map is a canvas drawn at
 // runtime (no external assets) and cached ONCE per division in the global TEX store, so
-// disposeKart() keeps the maps alive across races while the 12-kart grid shares them.
+// disposeKart() keeps the maps alive across races while the race grid shares them.
 // Materials themselves are fresh instances per call (disposeKart disposes them).
 // Every generator degrades to plain untextured materials when no drawable 2D canvas exists
 // (Node regression contexts with stub canvases, or no document at all).
@@ -9,7 +9,7 @@
 // UV conventions (see vehicles.js): coachwork/ribbon/limb surfaces put u around the
 // cross-section (0 top, .25 right flank, .5 underside, .75 left flank) and v along the
 // length (0 front, 1 rear). Canvas x = u, canvas y = (1-v) because CanvasTexture flips Y.
-const KART_ORDER=['zenflow','collective','hybrid','nexus','kinetic','juris','signal','loom','vector','aether','animus','helix'];
+const KART_ORDER=['zenflow','collective','hybrid','nexus','kinetic','juris','signal','loom','vector','aether','animus','helix','ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'];
 const KM_CTX_API=['fillRect','fillText','getImageData','putImageData','createImageData','beginPath','moveTo','lineTo','closePath','fill','stroke','arc','save','restore','translate','rotate','scale','setTransform','drawImage','createLinearGradient','createRadialGradient'];
 const KM_LOCAL_TEX={};
 let KM_NOISE=null;
@@ -69,7 +69,7 @@ function kmLivery(div,mode,S){
   // all-over sponsor wrap. These UV panels stay subordinate to sculpted coachwork.
   const accent=color?div.acc:rough?'#505050':'#848484';
   const trim=color?(['collective','juris','aether','hybrid','helix'].includes(id)?div.acc2:'#DCEBF6'):rough?'#454545':'#838383';
-  const widths={zenflow:.055,collective:.10,hybrid:.035,nexus:.04,kinetic:.045,juris:.065,signal:.07,loom:.028,vector:.08,aether:.04,animus:.022,helix:.026};
+  const widths={zenflow:.055,collective:.10,hybrid:.035,nexus:.04,kinetic:.045,juris:.065,signal:.07,loom:.028,vector:.08,aether:.04,animus:.022,helix:.026,ledger:.045,terra:.065,obsidian:.04,civic:.035,cognara:.03,gaia:.035,nomad:.065,eon:.03};
   const width=widths[id]||.04;
   g.fillStyle=accent;g.fillRect(0,0,S*width,S);g.fillRect(S*(1-width),0,S*width,S);
   for(const x of[.17,.83]){g.strokeStyle=trim;g.lineWidth=S*.012;g.beginPath();g.moveTo(S*x,0);g.lineTo(S*(x+.035),S*.35);g.lineTo(S*x,S);g.stroke();}
@@ -168,12 +168,12 @@ function kartTextures(div){
 function kartMaterials(div){
   const color=new THREE.Color(div.id==='vector'?'#309DFF':div.acc),light=color.clone().lerp(new THREE.Color(0xc8ffff),.38);
   const T=kartTextures(div),side=THREE.DoubleSide,v2=(x)=>new THREE.Vector2(x,x);
-  const metalTint=['collective','juris','aether','helix','hybrid'].includes(div.id)?(div.id==='juris'?'#C9A84C':div.id==='collective'?'#BE813B':'#EE8B36'):'#708CA3';
+  const metalTint=div.id==='obsidian'?'#393D43':div.id==='nomad'?div.acc2:['collective','juris','aether','helix','hybrid'].includes(div.id)?(div.id==='juris'?'#C9A84C':div.id==='collective'?'#BE813B':'#EE8B36'):'#708CA3';
   const white=new THREE.MeshPhysicalMaterial({color:T.livery?0xffffff:0xeaf5ff,map:T.livery,roughnessMap:T.liveryRough,roughness:T.liveryRough?1:.2,normalMap:T.liveryNormal,normalScale:v2(.18),metalness:.22,envMapIntensity:1.1,clearcoat:1,clearcoatRoughness:.12,side});
   const dark=new THREE.MeshStandardMaterial({color:T.carbon?0xffffff:0x142943,map:T.carbon,normalMap:T.carbonNormal,normalScale:v2(.5),metalness:.15,roughness:.35,side});
   const panel=new THREE.MeshPhysicalMaterial({color:color.clone(),map:T.panel,emissive:color,emissiveMap:T.panelEm,emissiveIntensity:.08,roughness:.19,metalness:.38,envMapIntensity:1.2,clearcoat:1,side});
   const glow=new THREE.MeshStandardMaterial({color:light,emissive:light,emissiveMap:T.glowEm,emissiveIntensity:1.7,roughness:.2,side});
-  const skin=new THREE.MeshPhysicalMaterial({color:color.clone().lerp(new THREE.Color(0x17202b),.65),roughness:.78,metalness:.02,clearcoat:0,side});skin.name=div.id+'-woven-race-suit';
+  const skin=new THREE.MeshPhysicalMaterial({color:0x182532,roughness:.78,metalness:.02,clearcoat:0,side});skin.name=div.id+'-woven-race-suit';
   const metal=new THREE.MeshPhysicalMaterial({color:metalTint,map:T.metal,roughnessMap:T.metalRough,metalness:.85,roughness:T.metalRough?1:.22,clearcoat:1});
   const tyre=new THREE.MeshStandardMaterial({color:T.tyre?0xffffff:0x1c1d20,map:T.tyre,normalMap:T.tyreNormal,normalScale:v2(.8),roughness:.85,metalness:0});
   return {white,dark,panel,glow,skin,metal,tyre,color,light};

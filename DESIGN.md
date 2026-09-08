@@ -13,3 +13,6 @@ Coral primary action, ivory secondary action, lavender selected state with borde
 
 ## Validation
 Check title → selection → race → pause → results and settings keyboard focus, responsive overflow at phone portrait/landscape and desktop, and legibility against real gameplay. Browser inspection and engine test suite provide evidence; physical-device behavior requires real-device measurement.
+
+## Wave 2 loadout
+Twenty selectable divisions retain twelve-kart race grids. A compact Loadout action below the signature power opens an opaque equipment drawer with searchable add-ons, cooldowns and gameplay descriptions. Equip one of all 24 source powers per racer, or leave the slot empty. The original character → circuit → race flow remains mandatory. F / left-stick press / ADD-ON casts independently of Q / Y / POWER. The loadout dialog traps focus, returns it on close, and uses 44px controls with a scrollable list on compact displays. Contact animations use simulation-driven Anime.js envelopes so pausing freezes them.

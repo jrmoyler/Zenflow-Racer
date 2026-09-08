@@ -24,7 +24,7 @@ npm run build
 npm run test:release
 ```
 
-Vercel uses the checked-in vercel.json configuration. The build outputs dist/. Three r128 is vendored with its MIT license to preserve compatibility with the original renderer, GLTFLoader, and EffectComposer. Do not bump the runtime Three version in a Vercel deploy — `outputEncoding` / example postprocessing paths are pinned. Anime.js 4.2.2 animates menus. Rendering modules are separated from game rules for ongoing work.
+Vercel uses the checked-in vercel.json configuration. The build outputs dist/. Three r128 is vendored with its MIT license to preserve compatibility with the original renderer, GLTFLoader, and EffectComposer. Do not bump the runtime Three version in a Vercel deploy — `outputEncoding` / example postprocessing paths are pinned. Anime.js 4.2.2 animates menus and simulation-timed contact effects. Rendering modules are separated from game rules for ongoing work.
 
 ## Improvements
 Signed race-distance tracking prevents reverse lap shortcuts. Correct finish ordering, brake priority, source-aware input clearing, pause/visibility lifecycle, remembered settings, record persistence, responsive UI, drift feedback, audio limiting/cleanup, detailed correctly oriented karts, reduced draw calls, improved track geometry, mobile graphics settings, and WebGL recovery.
@@ -46,7 +46,7 @@ Browser checked: director selection, desktop layout, 390×844 portrait and 844×
 
 ## Art tools
 
-Anime.js 4.2.2 animates the menus. Three.js r128 stays pinned to preserve original renderer compatibility; EffectComposer, UnrealBloomPass and final gamma conversion are vendored. Distinct power effects use pooled instancing and analytic shader motion informed by the Zukan Arena effect implementation.
+Anime.js 4.2.2 animates menus and simulation-timed contact effects. Three.js r128 stays pinned to preserve original renderer compatibility; EffectComposer, UnrealBloomPass and final gamma conversion are vendored. Distinct power effects use pooled instancing and analytic shader motion informed by the Zukan Arena effect implementation.
 
 Blender 4.5.0 is an optional offline art/review tool; run `bash tools/setup-blender.sh` on Linux to install a portable copy. The img2threejs skill assessment and gated reconstruction evidence are retained in `.img2threejs/vehicle`. These tools are not included in the browser bundle and are not run on Vercel.
 
@@ -73,3 +73,11 @@ Blender 4.5.0 (installed by `bash tools/setup-blender.sh` into the gitignored `.
 5. `tools/render-karts-blender.sh` renders `docs/kart-review/` (a lit three-quarter still per kart and an eight-frame contact sheet per clip). EEVEE is attempted first; on this GPU-less host Blender aborts without EGL, so the driver falls back per process to Cycles CPU with denoising, which is what produced the committed images.
 
 Blender 4.5.0 ran successfully headless in this implementation environment (see `docs/kart-review/README.md` and `render-manifest.json` for the engine, samples and timings). The renders are geometry and animation evidence, not WebGL-identical shading. The older `tools/export-kart-meshes.cjs` / `tools/import-karts-blender.py` pair still exports a flattened world-space mesh lineup for material review. `tests/kart-clips-regression.cjs` guards the generated clip file against the rig contract.
+
+## Wave 2 and equippable add-ons
+
+Select any of **20 divisions** for a twelve-kart race. Quantum Ledger, Terra Axis, Obsidian Arc, Civic Core, Cognara Mind, Gaia Synthesis, Nomad Nexus and Eon Core each have a distinct chassis, dressed pilot and signature power.
+
+On character select, open **ADD-ON LOADOUT** and equip one of **24 powers**, or keep the slot empty. Your loadout is saved separately for each division. Confirm the racer, choose a circuit, then enter the race. Use **F**, **left-stick press**, or the touch **ADD-ON** button; **Q / Y / POWER** remains the division power and **E / X / ITEM** uses track pickups. Every add-on has its own cooldown.
+
+See [divisional rules](docs/abilities.md), [add-on catalog and source mapping](docs/addon-powers.md), and the [supplied specs](references/specs/). Reference artwork guides geometry and effects; it is excluded from the playable release. Both upstream projects are credited in `references/upstream/`.

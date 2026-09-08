@@ -1,0 +1,359 @@
+{
+  "version": 1,
+  "uniquePowerCount": 24,
+  "policy": "MIT source adapted as design and timing inputs. Upstream reference screenshots are review inputs only; never imported into runtime scenes. External FBX, HDR, snake mesh and photographic material libraries were not copied.",
+  "repositories": {
+    "casting": {
+      "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS",
+      "commit": "8c377c886ac2c68b26bc65c8f3507905818b974a",
+      "license": "casting/LICENSE",
+      "licenseSPDX": "MIT",
+      "copyright": "Copyright (c) 2026 mohamedachrefelouafi"
+    },
+    "ability": {
+      "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS",
+      "commit": "bf58757ab9b6057515470aa074cdb4026bc54ed7",
+      "license": "ability/LICENSE",
+      "licenseSPDX": "MIT",
+      "copyright": "Copyright (c) 2026 mohamedachrefelouafi"
+    }
+  },
+  "powers": [
+    {
+      "id": "ward",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/WardAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/WardAbility.js",
+          "sha256": "ef9ce0ea808cb48c3d63d5abc8baca3c91cbe1de07bf211f10b337ffd3a236c3"
+        }
+      ],
+      "reference": "casting/screenshots/ward.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/ward.jpg"
+    },
+    {
+      "id": "acid",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/AcidAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/AcidAbility.js",
+          "sha256": "01c9c21e46fa6c5e5db24be68873c36db8e4d0a93165874af26ecbece06956a2"
+        }
+      ],
+      "reference": "casting/screenshots/acid.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/acid.jpg"
+    },
+    {
+      "id": "growth",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/ArborBloomAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/ArborBloomAbility.js",
+          "sha256": "3e9afb0514f56f884641dcdca4bede7018ad27fc62f62702090160151cad2311"
+        }
+      ],
+      "reference": "casting/screenshots/growth.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/growth.jpg"
+    },
+    {
+      "id": "cyber",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/CyberSerpentAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/CyberSerpentAbility.js",
+          "sha256": "de5394cc93c278be6dde9d1458048fd6a0160254d797995d12a03ad918505553"
+        }
+      ],
+      "reference": "casting/screenshots/cyber.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/cyber.jpg"
+    },
+    {
+      "id": "venom",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/VenomSurgeAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/VenomSurgeAbility.js",
+          "sha256": "7758af2f9500909c36cde992e53d0429ce44ee2d3c7191174f4f9bffcfed8512"
+        }
+      ],
+      "reference": "casting/screenshots/venom.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/venom.jpg"
+    },
+    {
+      "id": "monolith",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/MonolithRiftAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/MonolithRiftAbility.js",
+          "sha256": "58414ed57b793ce2e758e8421233160470a9d7a88b01a8dec1350fcd9fe8ffb3"
+        }
+      ],
+      "reference": "casting/screenshots/quake.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/quake.jpg"
+    },
+    {
+      "id": "ink",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/SumiTideAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/SumiTideAbility.js",
+          "sha256": "abd1f7992673c4657cd6a585f9f57195e7e7102f62890255f597a17c98ae0e29"
+        }
+      ],
+      "reference": "casting/screenshots/ink.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/ink.jpg"
+    },
+    {
+      "id": "astral",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/AstralVoidAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/AstralVoidAbility.js",
+          "sha256": "7482a1ed91a512d604b5cb06303eb654ee648d91ea2ac12bbcba6e8ebd63cdfe"
+        }
+      ],
+      "reference": "casting/screenshots/astral.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/astral.jpg"
+    },
+    {
+      "id": "cascade",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/BalefulCascadeAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/BalefulCascadeAbility.js",
+          "sha256": "273211873f5a5265050b71bdf504fa0f96993393d260bd2ab034b0b124e50378"
+        }
+      ],
+      "reference": "casting/screenshots/cascade.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/cascade.jpg"
+    },
+    {
+      "id": "rend",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/abilities/CelestialRendAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/abilities/CelestialRendAbility.js",
+          "sha256": "b9f316606eabf751dbcf6c3363ef9530b347a66faca1c13bcbec52c31dffb748"
+        }
+      ],
+      "reference": "casting/screenshots/rend.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/docs/screenshots/rend.jpg"
+    },
+    {
+      "id": "pyre",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/PyreAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/PyreAbility.js",
+          "sha256": "6ec9fb4a98f3cb4e39681f003b3dfad834006bfdbb44754fc31e8e7d2c9a2fd1"
+        }
+      ],
+      "reference": "ability/screenshots/pyre-crown.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/pyre-crown.jpg"
+    },
+    {
+      "id": "kraken",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/KrakenAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/KrakenAbility.js",
+          "sha256": "53caf497eac5b4c5cec0ae6deec40b0c8c7ad893a37c85829af9af03a2ba67c7"
+        }
+      ],
+      "reference": "ability/screenshots/kraken-crown.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/kraken-crown.jpg"
+    },
+    {
+      "id": "electrical",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/ElectricalSphereAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/ElectricalSphereAbility.js",
+          "sha256": "d8113c2133cb4e2eb5e1d335196d2fdd676846d60a4c91e9f37a93a7884aaabc"
+        }
+      ],
+      "reference": "ability/screenshots/electrical-sphere.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/electrical-sphere.jpg"
+    },
+    {
+      "id": "earth-spire",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/EarthAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/EarthAbility.js",
+          "sha256": "e7b6853b7ca865699078288e4207f66c6062fa254b6eeeb07184dc57fded09c5"
+        }
+      ],
+      "reference": "ability/screenshots/earthen-spire.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/earthen-spire.jpg"
+    },
+    {
+      "id": "verdant-gate",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/PortalAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/PortalAbility.js",
+          "sha256": "dd2f41f1a927ae6952e120bbaf0d8d6f4f9b18bee4fc1de47c1e4dac69f8527b"
+        }
+      ],
+      "reference": "ability/screenshots/verdant-gate.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/verdant-gate.jpg"
+    },
+    {
+      "id": "tide-ring",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/AetherRingAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/AetherRingAbility.js",
+          "sha256": "860752f1f9369f3f454a1a3bb207c2af2e9d0fb3b74bdd5e175c6df9f85014d0"
+        }
+      ],
+      "reference": "ability/screenshots/tidewrought-ring.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/tidewrought-ring.jpg"
+    },
+    {
+      "id": "fire-portal",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/abilities/FirePortalAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/abilities/FirePortalAbility.js",
+          "sha256": "b273934c4251c9ca0aa779febb6d31f2f0d775bfa7d84f7620419792a3a98de2"
+        }
+      ],
+      "reference": "ability/screenshots/fire-portal.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/fire-portal.jpg"
+    },
+    {
+      "id": "electric-boost",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/effects/ElectricBoost.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/effects/ElectricBoost.js",
+          "sha256": "5c5228850b9b27475e41f1639fd041ae9b3827959f9fefae70bc79c912907fa2"
+        }
+      ],
+      "reference": "ability/screenshots/self-buffs.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/self-buffs.jpg"
+    },
+    {
+      "id": "magic-boost",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/effects/MagicBoost.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/effects/MagicBoost.js",
+          "sha256": "eef1c2e08ea3ffa9932a63184a8314c8a5ebf15542f4d8082a877f0037a09f72"
+        }
+      ],
+      "reference": "ability/screenshots/self-buffs.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/self-buffs.jpg"
+    },
+    {
+      "id": "fire-boost",
+      "sources": [
+        {
+          "repository": "ability",
+          "path": "src/effects/FireBoost.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/effects/FireBoost.js",
+          "sha256": "bc46e7b5bde6e963c01ec7b1a43e6957ff6a3e60ef7020ed439e8920d2ff9784"
+        }
+      ],
+      "reference": "ability/screenshots/self-buffs.jpg",
+      "referenceSource": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/docs/screenshots/self-buffs.jpg"
+    },
+    {
+      "id": "fire",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/archive/abilities/FireAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/archive/abilities/FireAbility.js",
+          "sha256": "3d956f509bd5b5dd0a3852f08b4956de48b2680a1e2106039deb641af7936adc"
+        },
+        {
+          "repository": "ability",
+          "path": "src/archive/abilities/FireAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/archive/abilities/FireAbility.js",
+          "sha256": "3d956f509bd5b5dd0a3852f08b4956de48b2680a1e2106039deb641af7936adc"
+        }
+      ],
+      "reference": "Archived source material/geometry anatomy; no dedicated screenshot shipped upstream.",
+      "deduplication": "Both archived ability files are byte-identical; exposed as one power."
+    },
+    {
+      "id": "water",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/archive/abilities/WaterAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/archive/abilities/WaterAbility.js",
+          "sha256": "3730fe0fe77323688051f225ab248639649f452cc13be3c38c43a54d03012005"
+        },
+        {
+          "repository": "ability",
+          "path": "src/archive/abilities/WaterAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/archive/abilities/WaterAbility.js",
+          "sha256": "3730fe0fe77323688051f225ab248639649f452cc13be3c38c43a54d03012005"
+        }
+      ],
+      "reference": "Archived source material/geometry anatomy; no dedicated screenshot shipped upstream.",
+      "deduplication": "Both archived ability files are byte-identical; exposed as one power."
+    },
+    {
+      "id": "earth",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/archive/abilities/EarthAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/archive/abilities/EarthAbility.js",
+          "sha256": "7af066be0e4cfc682b205d07da9d34979efac29b05a77716098e53187139967e"
+        },
+        {
+          "repository": "ability",
+          "path": "src/archive/abilities/EarthAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/archive/abilities/EarthAbility.js",
+          "sha256": "7af066be0e4cfc682b205d07da9d34979efac29b05a77716098e53187139967e"
+        }
+      ],
+      "reference": "Archived source material/geometry anatomy; no dedicated screenshot shipped upstream.",
+      "deduplication": "Both archived ability files are byte-identical; exposed as one power."
+    },
+    {
+      "id": "wind",
+      "sources": [
+        {
+          "repository": "casting",
+          "path": "src/archive/abilities/WindAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbiltyCastingExtendedThreeJS/blob/8c377c886ac2c68b26bc65c8f3507905818b974a/src/archive/abilities/WindAbility.js",
+          "sha256": "9519858ad961fe259b697a7ae1f50edafed4616bfd8708ddee4647f2d9e1e081"
+        },
+        {
+          "repository": "ability",
+          "path": "src/archive/abilities/WindAbility.js",
+          "url": "https://github.com/achrefelouafi/LinearAbilityExtThreeJS/blob/bf58757ab9b6057515470aa074cdb4026bc54ed7/src/archive/abilities/WindAbility.js",
+          "sha256": "9519858ad961fe259b697a7ae1f50edafed4616bfd8708ddee4647f2d9e1e081"
+        }
+      ],
+      "reference": "Archived source material/geometry anatomy; no dedicated screenshot shipped upstream.",
+      "deduplication": "Both archived ability files are byte-identical; exposed as one power."
+    }
+  ]
+}

@@ -30,7 +30,7 @@ module.exports=function registerKartMaterialTests({test,assert}){
   return {c,run,materials,TEX:run('TEX')};
  }
  const materialTextures=m=>Object.values(m).filter(v=>v&&v.isTexture);
- test('Stub canvas contexts yield plain materials for all twelve divisions without retrying textures',()=>{
+ test('Stub canvas contexts yield plain materials for all twenty divisions without retrying textures',()=>{
   for(const document of [stubDocument(),undefined]){
    const f=fixture({document,core:!!document});
    for(const div of roster){
@@ -68,15 +68,15 @@ module.exports=function registerKartMaterialTests({test,assert}){
   assert.ok(document.texts.includes('01')&&document.texts.includes('ZF-01')&&document.texts.includes('ZENFLOW RACER'),'livery carries racing number, code and sponsor text');
   const created=document.canvases.length;f.materials(roster[0]);assert.equal(document.canvases.length,created,'repeat calls draw nothing new');
  });
- test('Twelve divisions get twelve distinct livery and tyre textures at a shared detail set',()=>{
+ test('Twenty divisions get twenty distinct livery and tyre textures at a shared detail set',()=>{
   const document=fakeDocument(),f=fixture({document});
   const sets=roster.map(div=>f.materials(div));
-  assert.equal(new Set(sets.map(m=>m.white.map)).size,12,'distinct livery colour maps');
-  assert.equal(new Set(sets.map(m=>m.white.normalMap)).size,12);assert.equal(new Set(sets.map(m=>m.tyre.map)).size,12,'distinct sidewall lettering');
+  assert.equal(new Set(sets.map(m=>m.white.map)).size,20,'distinct livery colour maps');
+  assert.equal(new Set(sets.map(m=>m.white.normalMap)).size,20);assert.equal(new Set(sets.map(m=>m.tyre.map)).size,20,'distinct sidewall lettering');
   assert.equal(new Set(sets.map(m=>m.dark.map)).size,1,'carbon weave is shared');assert.equal(new Set(sets.map(m=>m.tyre.normalMap)).size,1,'tread relief is shared');
   assert.equal(new Set(sets.map(m=>m.metal.map)).size,1);assert.equal(new Set(sets.map(m=>m.glow.emissiveMap)).size,1);
-  assert.ok(document.texts.includes('12')&&document.texts.includes('VH-01'),'last roster entry is numbered 12');
-  assert.equal(Object.keys(f.TEX).filter(k=>k.startsWith('kart-')).length,12*4+9,'one cached texture per division map plus shared tiles');
+  assert.ok(document.texts.includes('20')&&document.texts.includes('EC-01'),'last roster entry is numbered 20');
+  assert.equal(Object.keys(f.TEX).filter(k=>k.startsWith('kart-')).length,20*4+9,'one cached texture per division map plus shared tiles');
   const mobile=fixture({document:fakeDocument(),mobile:true});mobile.materials(roster[3]);
   assert.ok(mobile.c.document.canvases.every(c=>c.width<=256&&c.height<=256),'mobile canvases stay within 256px');
   assert.equal(mobile.TEX['kart-nexus-livery'].anisotropy,4);

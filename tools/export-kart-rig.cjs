@@ -3,7 +3,7 @@
 // for every ROSTER division so Blender can rebuild it 1:1, author animation on the named
 // nodes and hand keyframed clips back to kart-clips.js.
 //
-//   node tools/export-kart-rig.cjs [outDir=.tools/kart-rig]
+//   node tools/export-kart-rig.cjs [outDir=.tools/kart-rig] [division-id ...]
 //
 // The exporter is generic: it walks whatever hierarchy buildKart() currently produces, so it
 // works with both the legacy single-group chassis and the animation rig contract
@@ -45,7 +45,8 @@ const material=m=>{if(!m)return null;const c=k=>m[k]?.isColor?r3(m[k].toArray())
  return {type:m.type,color:c('color')||[1,1,1],emissive:c('emissive')||[0,0,0],emissiveIntensity:round(m.emissiveIntensity??0),
   metalness:round(m.metalness??0),roughness:round(m.roughness??.5),opacity:round(m.opacity??1),transparent:!!m.transparent,
   clearcoat:round(m.clearcoat??0),wireframe:!!m.wireframe};};
-for(const div of roster){
+const selected=process.argv.slice(3);
+for(const div of roster.filter(div=>!selected.length||selected.includes(div.id))){
  ctx.div=div;const kart=vm.runInContext('buildKart(div)',ctx);kart.updateMatrixWorld(true);
  const geometries={},nodes=[],ids=new Map();let triangles=0;
  kart.traverse(o=>{

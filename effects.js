@@ -7,7 +7,7 @@ const powerReduced=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-
 const POWER_CAP=powerLow?12:24;
 const powerDummy=new THREE.Object3D();
 // Reference colors remain readable and consistent regardless of chassis paint.
-const referencePowerColors={zenflow:'#69dcff',collective:'#70ff9a',hybrid:'#68cfff',nexus:'#ffc369',kinetic:'#74ffac',juris:'#ffcf68',signal:'#ff508f',loom:'#b45aff',vector:'#c8efff',aether:'#ffd27a',animus:'#66edff',helix:'#6affcb','animus-pulse':'#8ff4ff'};
+const referencePowerColors={zenflow:'#69dcff',collective:'#70ff9a',hybrid:'#68cfff',nexus:'#ffc369',kinetic:'#74ffac',juris:'#ffcf68',signal:'#ff508f',loom:'#b45aff',vector:'#c8efff',aether:'#ffd27a',animus:'#66edff',helix:'#6affcb','animus-pulse':'#8ff4ff',ledger:'#b794f6',terra:'#60a5fa',obsidian:'#fb923c',civic:'#7dd3fc',cognara:'#f472b6',gaia:'#4ade80',nomad:'#fbbf24',eon:'#67e8f9'};
 function cachedPowerGeometry(key,build){return powerShapes[key]||(powerShapes[key]=build());}
 function ribbonGeometry(key,turns=2,radius=1,length=8,width=.22){return cachedPowerGeometry(key,()=>{const points=[],uv=[],indices=[],segments=64;for(let i=0;i<=segments;i++){const t=i/segments,a=t*turns*Math.PI*2,r=radius*(.5+.5*Math.sin(t*Math.PI));for(const side of [-1,1]){points.push(Math.cos(a)*(r+side*width),Math.sin(a)*(r+side*width),t*length);uv.push(t,(side+1)/2);}if(i<segments){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(points,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();return g;});}
 function powerShader(color,mode=0){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:mode===3?THREE.AdditiveBlending:THREE.NormalBlending,uniforms:{time:{value:0},fade:{value:1},tint:{value:new THREE.Color(color)},mode:{value:mode}},vertexShader:`varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float time;uniform float mode;
@@ -43,12 +43,12 @@ function addClock(root,index){const g=new THREE.Group();g.name='temporal-clock';
 function addTokenInstances(root,count){const geo=cachedPowerGeometry('fortune-token',()=>{const shape=new THREE.Shape();for(let i=0;i<8;i++){const a=i*Math.PI/4;const x=Math.cos(a),y=Math.sin(a);i?shape.lineTo(x,y):shape.moveTo(x,y);}shape.closePath();return new THREE.ExtrudeGeometry(shape,{depth:.14,bevelEnabled:true,bevelSegments:1,bevelSize:.09,bevelThickness:.05,steps:1});});const tokens=new THREE.InstancedMesh(geo,powerShader('#ffd27a',9),count);tokens.name='gold-tokens';tokens.frustumCulled=false;root.add(tokens);return tokens;}
 function kartProjection(root,owner,color,mode,name,z=0){if(!owner?.mesh)return null;const ghost=owner.mesh.clone(true),mat=powerShader(color,mode);ghost.traverse(o=>{if(o.isMesh){o.material=mat;o.castShadow=false;o.receiveShadow=false;}});ghost.name=name;ghost.position.set(0,-1.1,z);ghost.rotation.set(0,0,0);root.add(ghost);return ghost;}
 function mirrorGeometry(){return cachedPowerGeometry('verdict-crystal',()=>{const sh=new THREE.Shape();sh.moveTo(0,-1.2);sh.lineTo(-.73,-.28);sh.lineTo(-.57,.9);sh.lineTo(.43,1.12);sh.lineTo(.78,.18);sh.closePath();return new THREE.ExtrudeGeometry(sh,{depth:.1,bevelEnabled:true,bevelSegments:1,bevelSize:.09,bevelThickness:.09,steps:1});});}
-function removePowerEffect(fx){scene.remove(fx.mesh);const mats=new Set();fx.mesh.traverse(o=>{if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])mats.add(m);if(o.isInstancedMesh)o.dispose?.();});mats.forEach(m=>m.dispose());}
+function removePowerEffect(fx){scene.remove(fx.mesh);const mats=new Set();fx.mesh.traverse(o=>{if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])mats.add(m);if(o.userData.ownedGeometry)o.geometry?.dispose();if(o.isInstancedMesh)o.dispose?.();});mats.forEach(m=>m.dispose());}
 function clearPowerEffects(){while(powerEffects.length)removePowerEffect(powerEffects.pop());}
 function spawnPowerEffect(kind,u,lat,color,owner){
  if(powerEffects.length>=POWER_CAP)removePowerEffect(powerEffects.shift());
  color=referencePowerColors[kind]||color;
- const mesh=new THREE.Group(),duration={zenflow:4,hybrid:3.5,nexus:8,kinetic:4,juris:4,loom:5,aether:5,animus:4,helix:5,'animus-pulse':.9}[kind]||1.2;
+ const mesh=new THREE.Group(),duration={zenflow:4,hybrid:3.5,nexus:8,kinetic:4,juris:4,loom:5,aether:5,animus:4,helix:5,'animus-pulse':.9,ledger:4,terra:3.5,obsidian:4,civic:5,cognara:4,gaia:5,nomad:1.2,eon:5}[kind]||1.2;
  if(kind==='zenflow'){const dome=addPowerPart(mesh,cachedPowerGeometry('dome',()=>new THREE.SphereGeometry(1,24,12,0,Math.PI*2,0,Math.PI*.62)),color,0,'time-dome');dome.scale.set(8,3,8);dome.position.y=-1;addPowerInstances(mesh,color,'clock-fragments',powerLow?12:24);for(let n=0;n<3;n++)addClock(mesh,n);for(let n=0;n<3;n++){const ring=powerRing(mesh,7-n*.6,color);ring.rotation.x=Math.PI/2;ring.position.y=n*.85-.6;}}
  else if(kind==='hybrid'){kartProjection(mesh,owner,color,1,'phase-ghost');kartProjection(mesh,owner,'#ffc67e',1,'phase-echo',3);for(let i=0;i<3;i++){const veil=addPowerPart(mesh,ribbonGeometry('phase-veil-'+i,.4,1.3+i*.25,7,.24),color,1,'veil');veil.rotation.z=i*2.1;}}
  else if(kind==='nexus'){if(!kartProjection(mesh,owner,color,2,'hologram-kart'))addPowerPart(mesh,silhouetteGeometry(),color,2,'hologram-human');const sheet=addPowerPart(mesh,cachedPowerGeometry('scan-sheet',()=>new THREE.PlaneGeometry(4,4,1,24)),color,2,'scan-sheet');sheet.position.z=.5;sheet.position.y=1;const ring=powerRing(mesh,2.2,color);ring.rotation.x=Math.PI/2;ring.position.y=-.9;}
@@ -62,16 +62,23 @@ function spawnPowerEffect(kind,u,lat,color,owner){
  else if(kind==='animus'){const body=cachedPowerGeometry('drone-body',()=>new THREE.LatheGeometry([new THREE.Vector2(0,-.55),new THREE.Vector2(.2,-.48),new THREE.Vector2(.65,-.1),new THREE.Vector2(.72,.08),new THREE.Vector2(.4,.26),new THREE.Vector2(0,.4)],16));const drone=new THREE.Group();drone.name='sentinel-drone';drone.position.y=2.3;mesh.add(drone);const armor=new THREE.Mesh(body,new THREE.MeshStandardMaterial({color:'#e1f3ff',metalness:.7,roughness:.22}));armor.rotation.x=Math.PI/2;drone.add(armor);const eye=addPowerPart(drone,cachedPowerGeometry('sentinel-eye',()=>new THREE.SphereGeometry(.25,16,10)),color,8,'sentinel-eye');eye.position.z=-.48;const iris=powerRing(drone,.36,color);iris.position.z=-.42;for(let side=0;side<2;side++)for(let feather=0;feather<3;feather++){const sign=side?1:-1;addPowerPart(drone,powerCurve('sentinel-feather-'+side+'-'+feather,[[sign*.5,0,0],[sign*.85,.05+feather*.13,.12],[sign*(1.7-feather*.18),.55+feather*.12,.5]],.075),color,8,'sentinel-feather');}for(let i=0;i<2;i++){const wing=addPowerPart(mesh,ribbonGeometry('drone-wing',.3,.7,1.6,.16),color,5,'drone-wing');wing.position.y=2.3;wing.rotation.y=i*Math.PI+Math.PI/2;}addPowerInstances(mesh,color,'drone-motes',10);}
  else if(kind==='animus-pulse'){const ring=powerRing(mesh,1.3,color,'pulse-ring');ring.rotation.x=Math.PI/2;ring.position.y=-.55;addPowerInstances(mesh,color,'pulse-motes',powerLow?6:10);}
  else if(kind==='helix'){for(let i=0;i<2;i++){const strand=addPowerPart(mesh,ribbonGeometry('dna-strand',2,1.25,4,.11),i?'#eeffff':color,7,'dna-strand');strand.rotation.x=-Math.PI/2;strand.rotation.z=i*Math.PI;strand.position.y=-1;}addPowerInstances(mesh,'#ffb4e3','healing-petals',powerLow?16:30);const ring=powerRing(mesh,2,color);ring.rotation.x=Math.PI/2;ring.position.y=-.8;}
+ addWaveTwoPower(mesh,kind,color,owner);
  addPowerMechanism(mesh,kind,color);
  scene.add(mesh);powerEffects.push({kind,u,lat,owner,mesh,life:duration,duration});
 }
-function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=powerEffects[i];f.life-=dt;if(f.life<=0){removePowerEffect(f);powerEffects.splice(i,1);continue;}
- const age=f.duration-f.life,motion=powerReduced?.25:1,clock=age*motion,follow=!['nexus','loom','signal','collective','vector'].includes(f.kind);if(follow&&f.owner){f.u=f.owner.u;f.lat=f.owner.lat;}
+function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=powerEffects[i];
+ const zoneKind={nexus:'decoy',loom:'snare',gaia:'roots'}[f.kind];
+ if(zoneKind&&f.owner&&typeof abilityZones!=='undefined'){const zone=abilityZones.find(z=>z.kind===zoneKind&&z.owner===f.owner&&z.life>0);if(!zone){removePowerEffect(f);powerEffects.splice(i,1);continue;}f.u=zone.u;f.lat=zone.lat;f.life=Math.min(f.life,zone.life+dt);}
+ f.life-=dt;if(f.life<=0){removePowerEffect(f);powerEffects.splice(i,1);continue;}
+ const age=f.duration-f.life,motion=powerReduced?.25:1,clock=age*motion,follow=!['nexus','loom','signal','collective','vector','gaia','nomad'].includes(f.kind);if(follow&&f.owner){f.u=f.owner.u;f.lat=f.owner.lat;}
  orientOnTrack(f.mesh,f.u,f.lat,1.1,0);
+ stepWaveTwoGeometry(f,dt,clock);
  f.mesh.traverse(p=>{if(p.material?.uniforms){p.material.uniforms.time.value=clock;p.material.uniforms.fade.value=Math.min(1,f.life*2,age*5+.2);}
   if(p.isInstancedMesh&&!p.userData.staticPowerDetail){for(let n=0;n<p.count;n++){const t=n/p.count,a=t*Math.PI*2+clock*1.6;let radius=2,up=0;powerDummy.rotation.set(clock+n,clock*.7+n,0);powerDummy.scale.setScalar(.16);
-   if(f.kind==='helix'){radius=1.4;up=((clock+n*.19)%3.8)-.8;powerDummy.scale.set(.14,.3,.14);}
+   if(f.kind==='helix'||f.kind==='eon'){radius=1.4;up=((clock+n*.19)%3.8)-.8;powerDummy.scale.set(.14,.3,.14);}
    else if(f.kind==='collective'){radius=Math.max(.15,6*(1-(age*.9+t)%1));up=.3+Math.sin(a)*.5;powerDummy.scale.setScalar(.25+t*.12);}
+   else if(f.kind==='ledger'){radius=2.8;up=.35+Math.sin(a*3)*.18;powerDummy.scale.setScalar(.25);powerDummy.rotation.z=0;}
+   else if(f.kind==='gaia'){radius=2;up=-.7+Math.sin(a)*.2;powerDummy.scale.set(.2,.4,.2);}
    else if(f.kind==='aether'){radius=1+((1-t-clock*.35)%1+1)%1*6;up=Math.sin(a*2)*.65;powerDummy.scale.setScalar(.25+t*.15);powerDummy.rotation.z=-a;}
    else if(f.kind==='zenflow'){radius=6+Math.sin(n*3)*2;up=-.6+((n*.41+clock*.2)%2.2);powerDummy.scale.set(.09,.22,.09);}
    else{radius=1.4;up=2.1+Math.sin(a)*.3;powerDummy.scale.setScalar(.12);}
@@ -110,4 +117,68 @@ function addPowerMechanism(root,kind,color){
    const arc=addPowerPart(root,powerCurve('sonic-ion-branch-'+i,[[0,0,-2],[.25-i*.18,.1,-5],[.6-i*.3,.35,-8],[.15,-.1,-10],[.45-i*.35,.25,-14],[0,0,-20]],.023),i===1?'#fff4e7':color,5,'sonic-ion-filament');arc.rotation.z=i*Math.PI*2/3;
   }
  }
+}
+
+// Wave 2 signatures use the exact spec durations and retain a distinct silhouette.
+function addWaveTwoPower(root,kind,color,owner){
+ const solid=(geo,c,name)=>{const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:c,metalness:.62,roughness:.3,transparent:true}));m.name=name;root.add(m);return m;};
+ if(kind==='ledger'){
+  addTokenInstances(root,powerLow?8:12);
+  for(let i=0;i<6;i++){const a=i*Math.PI/3,g=new THREE.Group();g.name='vault-lock';g.position.set(Math.sin(a)*3,.15,Math.cos(a)*3);g.rotation.y=a;root.add(g);
+   const shackle=powerRing(g,.21,color,'vault-shackle');shackle.position.y=.44;
+   const lock=addPowerPart(g,cachedPowerGeometry('vault-lock',()=>new THREE.BoxGeometry(.56,.45,.16)),color,4,'locked-token');lock.position.y=.14;
+   const rib=addPowerPart(root,powerCurve('vault-rib-'+i,[[Math.sin(a)*3,-1,Math.cos(a)*3],[Math.sin(a)*3,1.8,Math.cos(a)*3],[Math.sin(a)*1.4,2.4,Math.cos(a)*1.4]],.07),color,4,'hex-vault-cage');
+  }for(const y of [-.8,1.8]){const ring=addPowerPart(root,cachedPowerGeometry('hex-vault-ring',()=>new THREE.TorusGeometry(3,.065,5,6)),color,4,'vault-hex');ring.rotation.x=Math.PI/2;ring.position.y=y;}
+ }else if(kind==='terra'){
+  for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2,x=Math.sin(a)*2,z=Math.cos(a)*2;
+   const column=solid(cachedPowerGeometry('anchor-column',()=>new THREE.CylinderGeometry(.13,.24,2.7,8)),'#334b68','anchor-pylon');column.position.set(x,.2,z);
+   const foot=solid(cachedPowerGeometry('anchor-foot',()=>new THREE.CylinderGeometry(.34,.46,.3,8)),'#889cae','anchor-foot');foot.position.set(x,-1,z);
+   for(let n=0;n<3;n++){const ring=powerRing(root,.3,color,'pylon-ring');ring.rotation.x=Math.PI/2;ring.position.set(x,-.5+n*.65,z);}
+  }
+ }else if(kind==='obsidian'){
+  const shape=new THREE.Shape();shape.moveTo(0,1.65);shape.lineTo(-.9,.6);shape.lineTo(-.6,-.85);shape.lineTo(0,-1.15);shape.lineTo(.6,-.85);shape.lineTo(.9,.6);shape.closePath();
+  const geo=cachedPowerGeometry('perimeter-chevron',()=>new THREE.ExtrudeGeometry(shape,{depth:.16,bevelEnabled:true,bevelSize:.06,bevelThickness:.06,bevelSegments:1,steps:1}));
+  for(let i=0;i<6;i++){const a=i*Math.PI/3,g=new THREE.Group();g.position.set(Math.sin(a)*2.7,.15,Math.cos(a)*2.7);g.rotation.y=a;g.name='shield-facet';root.add(g);
+   const panel=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#1d2633',metalness:.8,roughness:.24,transparent:true,opacity:.96}));g.add(panel);
+   const edge=new THREE.LineSegments(cachedPowerGeometry('perimeter-chevron-edge',()=>new THREE.EdgesGeometry(geo)),new THREE.LineBasicMaterial({color,transparent:true}));g.add(edge);
+   const slash=addPowerPart(g,powerCurve('perimeter-v',[[ -.65,.6,-.07],[0,.02,-.1],[.65,.6,-.07]],.065),color,4,'perimeter-edge');
+  }
+ }else if(kind==='civic'){
+  // Dynamic line vertices are owned by this emitter (not the immutable cache).
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(33*3),3));
+  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color,transparent:true,opacity:.9}));line.name='civic-beneficiary';line.userData.ownedGeometry=true;line.frustumCulled=false;root.add(line);
+  for(let i=0;i<2;i++){const ribbon=addPowerPart(root,ribbonGeometry('shared-slip-'+i,.18,.7,9,.12),color,1,'shared-slip');ribbon.position.set(i?1.2:-1.2,-.7,1);}
+ }else if(kind==='cognara'){
+  for(let i=0;i<2;i++){const orb=addPowerPart(root,cachedPowerGeometry('predict-sensor',()=>new THREE.SphereGeometry(.13,12,8)),color,8,'neural-sensor');orb.position.set(i?.48:-.48,1.2,-.3);}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(49*3),3));
+  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color,transparent:true,opacity:.85}));line.name='predictive-road-line';line.userData.ownedGeometry=true;line.frustumCulled=false;root.add(line);
+ }else if(kind==='gaia'){
+  for(let i=0;i<5;i++){const pts=[];for(let n=0;n<=18;n++){const z=-7+n*14/18;pts.push([(i-2)*.8+Math.sin(n*.85+i)*.4,-.91+Math.sin(n+i)*.08,z]);}
+   const vine=addPowerPart(root,powerCurve('root-braid-'+i,pts,.065),i%2?'#205c30':color,7,'root-net-vine');}
+  addPowerInstances(root,'#c4ffa0','root-leaves',powerLow?12:22);
+ }else if(kind==='nomad'){
+  for(const z of [0,-6]){const ring=addPowerPart(root,cachedPowerGeometry('waypoint-disc',()=>new THREE.TorusGeometry(1.8,.12,8,48)),color,5,'waypoint-portal');ring.position.z=z;
+   for(let i=0;i<8;i++){const a=i*Math.PI/4;const tick=addPowerPart(root,cachedPowerGeometry('waypoint-marker',()=>new THREE.BoxGeometry(.12,.3,.1)),color,9,'waypoint-marker');tick.position.set(Math.sin(a)*2,Math.cos(a)*2,z);tick.rotation.z=-a;}}
+ }else if(kind==='eon'){
+  const pts=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;pts.push([Math.sin(a)*2.2,Math.sin(a*2)*.75+.45,Math.cos(a)*.25]);}
+  addPowerPart(root,powerCurve('infinity-loop',pts,.065),color,7,'infinity-ring');addPowerInstances(root,'#b9fff8','second-wind-petals',powerLow?16:28);
+ }
+}
+function stepWaveTwoGeometry(f,dt,clock){
+ const fade=Math.min(1,f.life*2,(f.duration-f.life)*5+.2);
+ f.mesh.traverse(p=>{if(p.material&&!p.material.uniforms&&p.material.transparent)p.material.opacity=fade;
+  if(p.name==='pylon-ring')p.scale.setScalar(1+Math.sin(clock*4+p.position.y)*.06);
+  if(p.name==='waypoint-portal')p.rotation.z=clock*2;
+ });
+ if((f.kind!=='cognara'&&f.kind!=='civic')||!f.owner)return;
+ const line=f.mesh.getObjectByName(f.kind==='civic'?'civic-beneficiary':'predictive-road-line');if(!line)return;
+ if(typeof track==='undefined'||!track||typeof trackPoint!=='function')return;
+ let target=null;
+ if(f.kind==='civic'&&typeof game!=='undefined')target=game.racers.filter(r=>r!==f.owner&&!r.finished&&Math.abs(du_dist(f.owner.u,r.u))<14&&Math.abs(r.lat-f.owner.lat)<4).sort((a,b)=>Math.abs(du_dist(f.owner.u,a.u))-Math.abs(du_dist(f.owner.u,b.u)))[0];
+ line.visible=f.kind==='cognara'||!!target;if(!line.visible)return;
+ f.mesh.updateMatrixWorld(true);const inverse=new THREE.Matrix4().copy(f.mesh.matrixWorld).invert(),v=new THREE.Vector3(),a=line.geometry.attributes.position;
+ const distance=target?du_dist(f.owner.u,target.u):24;
+ for(let i=0;i<a.count;i++){const t=i/(a.count-1),u=((f.owner.u+distance*t/track.len)%1+1)%1,lat=target?f.owner.lat+(target.lat-f.owner.lat)*t:f.owner.lat*(1-t*.7);
+  trackPoint(u,lat,target?.7+Math.sin(t*Math.PI):.13,v);v.applyMatrix4(inverse);a.setXYZ(i,v.x,v.y,v.z);}
+ a.needsUpdate=true;
 }
