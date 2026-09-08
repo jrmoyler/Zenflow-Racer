@@ -12,7 +12,7 @@ assert.equal(run('tickFinishCeremony(.016)'),true);
 assert.equal(run('finishCeremony.karts.map(k=>k.name).join()'),'1,2,3');
 assert.deepEqual(racers.map(r=>r.mesh.position.toArray()),before,'ceremony preserves racing transforms');
 assert.ok(racers.every(r=>!r.mesh.visible));assert.equal(scene.children.length,4);
-for(const [w,h] of [[390,844],[844,390],[1400,900]]){c.innerWidth=w;c.innerHeight=h;run('tickFinishCeremony(.016)');assert.ok(c.camera.position.toArray().every(Number.isFinite));assert.ok(c.camera.quaternion.toArray().every(Number.isFinite));}
+for(const [w,h] of [[390,844],[844,390],[1400,900]]){c.innerWidth=w;c.innerHeight=h;c.camera.aspect=w/h;run('tickFinishCeremony(.016)');assert.ok(c.camera.position.toArray().every(Number.isFinite));assert.ok(c.camera.quaternion.toArray().every(Number.isFinite));c.camera.updateMatrixWorld();if(w>=900){const center=run('finishCeremony.root').localToWorld(new THREE.Vector3(0,1.5,0)).project(c.camera);assert.ok(center.x<-.25,'podium is left of the desktop standings');}}
 reduced=true;const time=run('finishCeremony.time');run('tickFinishCeremony(1)');assert.equal(run('finishCeremony.time'),time);
 let releases=0;run('finishCeremony.root').traverse(o=>{o.geometry?.addEventListener('dispose',()=>releases++);o.material?.addEventListener('dispose',()=>releases++);o.material?.map?.addEventListener('dispose',()=>releases++);});
 c.game.state='roster';assert.equal(run('tickFinishCeremony(.016)'),false);assert.equal(disposed,3);assert.equal(releases,21);assert.equal(scene.children.length,3);assert.ok(racers.every(r=>r.mesh.visible));

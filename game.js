@@ -648,7 +648,7 @@ function startRace(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing)retu
 // ---------- Boot ----------
 async function boot(){
  try{
-  await loadKartAssets((done,total)=>{document.getElementById('loading').textContent='ASSEMBLING 3D RACERS · '+done+'/'+total;});
+  await loadKartAssets((done,total)=>{document.getElementById('loading-status').textContent='ASSEMBLING RACERS · '+done+' / '+total;const progress=document.getElementById('loading-progress');progress.max=total;progress.value=done;});
   buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();

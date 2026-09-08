@@ -80,3 +80,9 @@ button,.btn,.mono,kbd,.eyebrow{font-family:var(--body)}
 @media(max-height:560px) and (min-width:700px){
  #results{align-items:center;justify-content:flex-end}#results .panel{width:48vw;max-height:94dvh;padding:14px}#results #board{max-height:40dvh}
 }
+/* Keep loading above the menu, with progress tied to completed model loads. */
+#loading{z-index:500;gap:18px;background:linear-gradient(155deg,#d9eaf4,#b6c8e8 50%,#e7c7de);padding:24px}
+.loading-wordmark{font:800 clamp(38px,8vw,94px)/1.04 var(--display);letter-spacing:.015em;color:#bcfaff;text-align:center;text-shadow:0 2px 0 #31516c,0 5px 12px #49688966;-webkit-text-stroke:1px #6090a8}
+.loading-wordmark span{display:block;color:#f0f3ff;letter-spacing:.08em}.loading-caption{font:700 clamp(10px,2vw,14px) var(--body);letter-spacing:.24em;color:#355575;margin:10px 0 20px}
+#loading-progress{appearance:none;border:0;width:min(340px,76vw);height:5px;background:#55718a30;border-radius:4px;overflow:hidden}#loading-progress::-webkit-progress-bar{background:#55718a30}#loading-progress::-webkit-progress-value{background:#367d99;transition:width .2s}#loading-progress::-moz-progress-bar{background:#367d99}
+#loading-status{font:700 12px var(--body);letter-spacing:.16em;color:#355575}
