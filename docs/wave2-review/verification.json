@@ -1,0 +1,129 @@
+{
+  "newAssets": [
+    {
+      "id": "ledger",
+      "triangles": 45411,
+      "bytes": 867160,
+      "sha256": "ffc30477bb3772041d2f9a139ad0ad5399e71efc517d7901d1aa1eba0f39d7c6"
+    },
+    {
+      "id": "terra",
+      "triangles": 45438,
+      "bytes": 847768,
+      "sha256": "436c8e6d40629f23bb9ca3ade7ea58c0b35840722023111213c1023f00a833a1"
+    },
+    {
+      "id": "obsidian",
+      "triangles": 45448,
+      "bytes": 842468,
+      "sha256": "3672a1f9a7acffb1f4bfcc778227247d383fb930425dc1bfe8e31f763c306e8d"
+    },
+    {
+      "id": "civic",
+      "triangles": 45445,
+      "bytes": 840392,
+      "sha256": "72edd64dc11c9516f6fa374eca5b71924d88ecd763943e65ee0c7f6dd8fbb3b9"
+    },
+    {
+      "id": "cognara",
+      "triangles": 45448,
+      "bytes": 842100,
+      "sha256": "9c47282c5241d4fa1870f86fb81610766336f6613484625de9a837ab57cdcd79"
+    },
+    {
+      "id": "gaia",
+      "triangles": 45449,
+      "bytes": 837360,
+      "sha256": "1a67eb1909dfe4e95a4b839227b98b99a791d51d9e36960ee768ef65a7009329"
+    },
+    {
+      "id": "nomad",
+      "triangles": 45430,
+      "bytes": 927584,
+      "sha256": "ced2c9c037530b3b5825a97775febd9a49c72291aab564eee96555278aab8d58"
+    },
+    {
+      "id": "eon",
+      "triangles": 45424,
+      "bytes": 840316,
+      "sha256": "bceb7643c5d21b8162d393647906070816f97353ea5985275ae2c92e20dae317"
+    }
+  ],
+  "preservedOriginalAssets": [
+    {
+      "id": "aether",
+      "unchangedFromBase": true,
+      "gitBlob": "7677e7da5b6a1bab10934bc2aa47af5fa4bfd1e2"
+    },
+    {
+      "id": "animus",
+      "unchangedFromBase": true,
+      "gitBlob": "ce6067f0dd545da365c64de48f1384ede5e4ed74"
+    },
+    {
+      "id": "collective",
+      "unchangedFromBase": true,
+      "gitBlob": "b035731ec5993a86183c32a15c6bb1a6262ebf95"
+    },
+    {
+      "id": "helix",
+      "unchangedFromBase": true,
+      "gitBlob": "8c0eec3812b658237d0bb513d4a5b5b0738d15b1"
+    },
+    {
+      "id": "hybrid",
+      "unchangedFromBase": true,
+      "gitBlob": "d7d490d4e73562cdb4e57506253855eb8cd0a66c"
+    },
+    {
+      "id": "juris",
+      "unchangedFromBase": true,
+      "gitBlob": "2e47e9cc666021d171aa13df4ad080967039b5be"
+    },
+    {
+      "id": "kinetic",
+      "unchangedFromBase": true,
+      "gitBlob": "cdc9c31d7a7a8c54b749d5f6ff5c31971ca4987a"
+    },
+    {
+      "id": "loom",
+      "unchangedFromBase": true,
+      "gitBlob": "5099c7952689487b37638214ccc83ad258607773"
+    },
+    {
+      "id": "nexus",
+      "unchangedFromBase": true,
+      "gitBlob": "614101e305cd2684b0e384d404eba69ff4ed6670"
+    },
+    {
+      "id": "signal",
+      "unchangedFromBase": true,
+      "gitBlob": "1337519cb2ebc466012b09cbc6b0ffdbd75bbd06"
+    },
+    {
+      "id": "vector",
+      "unchangedFromBase": true,
+      "gitBlob": "ee89bc194eab42f0f9d7792612424f232c3bd936"
+    },
+    {
+      "id": "zenflow",
+      "unchangedFromBase": true,
+      "gitBlob": "caf6db252adba7a0783759b84081e97cbea8acbd"
+    }
+  ],
+  "validation": {
+    "actualGLTFLoader": true,
+    "rosterCount": 20,
+    "wheelRestPivots": true,
+    "allEightClipStates": true,
+    "dressedPilots": true,
+    "closedHeadSurface": true,
+    "independentFXMaterials": true,
+    "ghostClone": true,
+    "sharedGeometryDisposal": true,
+    "noImagesEmbedded": true,
+    "wave2Under50000Triangles": true
+  },
+  "visualEvidence": "Blender Cycles CPU; browser WebGL remains a separate check",
+  "exactFidelityAccepted": false
+}

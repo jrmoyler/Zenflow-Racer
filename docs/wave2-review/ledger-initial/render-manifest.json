@@ -1,0 +1,77 @@
+[
+  {
+    "id": "ledger",
+    "angle": "front",
+    "file": "ledger-front.png",
+    "source": "/workspace/scratch/6bd9695ad557/zenflow-racer/.tools/wave2-models/ledger.glb",
+    "sourceSha256": "4d21fd8ddb6b12cd1ffcd1ae9c01211dfe107df0c5970a14b5bb9ad1ac714e3e",
+    "seconds": 16.58,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null
+  },
+  {
+    "id": "ledger",
+    "angle": "side",
+    "file": "ledger-side.png",
+    "source": "/workspace/scratch/6bd9695ad557/zenflow-racer/.tools/wave2-models/ledger.glb",
+    "sourceSha256": "4d21fd8ddb6b12cd1ffcd1ae9c01211dfe107df0c5970a14b5bb9ad1ac714e3e",
+    "seconds": 16.58,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null
+  },
+  {
+    "id": "ledger",
+    "angle": "rear",
+    "file": "ledger-rear.png",
+    "source": "/workspace/scratch/6bd9695ad557/zenflow-racer/.tools/wave2-models/ledger.glb",
+    "sourceSha256": "4d21fd8ddb6b12cd1ffcd1ae9c01211dfe107df0c5970a14b5bb9ad1ac714e3e",
+    "seconds": 16.04,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null
+  }
+]

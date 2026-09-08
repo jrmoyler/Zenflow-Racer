@@ -1,0 +1,698 @@
+[
+  {
+    "id": "ledger",
+    "angle": "front",
+    "file": "ledger-front.png",
+    "source": "assets/models/ledger.glb",
+    "sourceSha256": "ffc30477bb3772041d2f9a139ad0ad5399e71efc517d7901d1aa1eba0f39d7c6",
+    "seconds": 28.85,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "ledger",
+    "angle": "side",
+    "file": "ledger-side.png",
+    "source": "assets/models/ledger.glb",
+    "sourceSha256": "ffc30477bb3772041d2f9a139ad0ad5399e71efc517d7901d1aa1eba0f39d7c6",
+    "seconds": 28.85,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "ledger",
+    "angle": "rear",
+    "file": "ledger-rear.png",
+    "source": "assets/models/ledger.glb",
+    "sourceSha256": "ffc30477bb3772041d2f9a139ad0ad5399e71efc517d7901d1aa1eba0f39d7c6",
+    "seconds": 28.55,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "terra",
+    "angle": "front",
+    "file": "terra-front.png",
+    "source": "assets/models/terra.glb",
+    "sourceSha256": "436c8e6d40629f23bb9ca3ade7ea58c0b35840722023111213c1023f00a833a1",
+    "seconds": 16.16,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "terra",
+    "angle": "side",
+    "file": "terra-side.png",
+    "source": "assets/models/terra.glb",
+    "sourceSha256": "436c8e6d40629f23bb9ca3ade7ea58c0b35840722023111213c1023f00a833a1",
+    "seconds": 16.49,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "terra",
+    "angle": "rear",
+    "file": "terra-rear.png",
+    "source": "assets/models/terra.glb",
+    "sourceSha256": "436c8e6d40629f23bb9ca3ade7ea58c0b35840722023111213c1023f00a833a1",
+    "seconds": 16.68,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "obsidian",
+    "angle": "front",
+    "file": "obsidian-front.png",
+    "source": "assets/models/obsidian.glb",
+    "sourceSha256": "3672a1f9a7acffb1f4bfcc778227247d383fb930425dc1bfe8e31f763c306e8d",
+    "seconds": 17.32,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "obsidian",
+    "angle": "side",
+    "file": "obsidian-side.png",
+    "source": "assets/models/obsidian.glb",
+    "sourceSha256": "3672a1f9a7acffb1f4bfcc778227247d383fb930425dc1bfe8e31f763c306e8d",
+    "seconds": 16.56,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "obsidian",
+    "angle": "rear",
+    "file": "obsidian-rear.png",
+    "source": "assets/models/obsidian.glb",
+    "sourceSha256": "3672a1f9a7acffb1f4bfcc778227247d383fb930425dc1bfe8e31f763c306e8d",
+    "seconds": 16.26,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "civic",
+    "angle": "front",
+    "file": "civic-front.png",
+    "source": "assets/models/civic.glb",
+    "sourceSha256": "72edd64dc11c9516f6fa374eca5b71924d88ecd763943e65ee0c7f6dd8fbb3b9",
+    "seconds": 18.22,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "civic",
+    "angle": "side",
+    "file": "civic-side.png",
+    "source": "assets/models/civic.glb",
+    "sourceSha256": "72edd64dc11c9516f6fa374eca5b71924d88ecd763943e65ee0c7f6dd8fbb3b9",
+    "seconds": 17.41,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "civic",
+    "angle": "rear",
+    "file": "civic-rear.png",
+    "source": "assets/models/civic.glb",
+    "sourceSha256": "72edd64dc11c9516f6fa374eca5b71924d88ecd763943e65ee0c7f6dd8fbb3b9",
+    "seconds": 16.77,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "cognara",
+    "angle": "front",
+    "file": "cognara-front.png",
+    "source": "assets/models/cognara.glb",
+    "sourceSha256": "9c47282c5241d4fa1870f86fb81610766336f6613484625de9a837ab57cdcd79",
+    "seconds": 16.34,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "cognara",
+    "angle": "side",
+    "file": "cognara-side.png",
+    "source": "assets/models/cognara.glb",
+    "sourceSha256": "9c47282c5241d4fa1870f86fb81610766336f6613484625de9a837ab57cdcd79",
+    "seconds": 17.69,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "cognara",
+    "angle": "rear",
+    "file": "cognara-rear.png",
+    "source": "assets/models/cognara.glb",
+    "sourceSha256": "9c47282c5241d4fa1870f86fb81610766336f6613484625de9a837ab57cdcd79",
+    "seconds": 16.62,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "gaia",
+    "angle": "front",
+    "file": "gaia-front.png",
+    "source": "assets/models/gaia.glb",
+    "sourceSha256": "1a67eb1909dfe4e95a4b839227b98b99a791d51d9e36960ee768ef65a7009329",
+    "seconds": 16.67,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "gaia",
+    "angle": "side",
+    "file": "gaia-side.png",
+    "source": "assets/models/gaia.glb",
+    "sourceSha256": "1a67eb1909dfe4e95a4b839227b98b99a791d51d9e36960ee768ef65a7009329",
+    "seconds": 16.66,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "gaia",
+    "angle": "rear",
+    "file": "gaia-rear.png",
+    "source": "assets/models/gaia.glb",
+    "sourceSha256": "1a67eb1909dfe4e95a4b839227b98b99a791d51d9e36960ee768ef65a7009329",
+    "seconds": 16.08,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "nomad",
+    "angle": "front",
+    "file": "nomad-front.png",
+    "source": "assets/models/nomad.glb",
+    "sourceSha256": "ced2c9c037530b3b5825a97775febd9a49c72291aab564eee96555278aab8d58",
+    "seconds": 15.99,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "nomad",
+    "angle": "side",
+    "file": "nomad-side.png",
+    "source": "assets/models/nomad.glb",
+    "sourceSha256": "ced2c9c037530b3b5825a97775febd9a49c72291aab564eee96555278aab8d58",
+    "seconds": 16.43,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "nomad",
+    "angle": "rear",
+    "file": "nomad-rear.png",
+    "source": "assets/models/nomad.glb",
+    "sourceSha256": "ced2c9c037530b3b5825a97775febd9a49c72291aab564eee96555278aab8d58",
+    "seconds": 15.4,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "eon",
+    "angle": "front",
+    "file": "eon-front.png",
+    "source": "assets/models/eon.glb",
+    "sourceSha256": "bceb7643c5d21b8162d393647906070816f97353ea5985275ae2c92e20dae317",
+    "seconds": 16.57,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "eon",
+    "angle": "side",
+    "file": "eon-side.png",
+    "source": "assets/models/eon.glb",
+    "sourceSha256": "bceb7643c5d21b8162d393647906070816f97353ea5985275ae2c92e20dae317",
+    "seconds": 17.26,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  },
+  {
+    "id": "eon",
+    "angle": "rear",
+    "file": "eon-rear.png",
+    "source": "assets/models/eon.glb",
+    "sourceSha256": "bceb7643c5d21b8162d393647906070816f97353ea5985275ae2c92e20dae317",
+    "seconds": 16.88,
+    "engine": "Blender Cycles CPU",
+    "samples": 16,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": false,
+    "materialOverride": null,
+    "resolution": [
+      720,
+      600
+    ]
+  }
+]

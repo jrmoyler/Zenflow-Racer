@@ -1,5 +1,7 @@
 # Wave 2 playable chassis
 
+![Eight actual Blender-exported Wave 2 karts](wave2-lineup.jpg)
+
 Eight new Blender-authored playable GLBs extend the roster to twenty. The original twelve
 binaries are preserved. `WAVE2_CHASSIS_SPEC.md` supplies the new identities, official colors,
 stat arrays, uniform, shared pivots and coachwork component inventories. Individual Wave 2
