@@ -1,5 +1,7 @@
 # Reconstruction review — PR 12
 
+Latest continuation: [driver surface and joint correction](anatomy-pass/README.md), including a new head-boundary regression and three-angle clay evidence. Current roster is 10.32 MiB. The sections below document the preceding 7cea5e9 pass.
+
 This PR continues from merged PR 11. It rebuilds the playable GLBs and authored scenery; no reference image is used as runtime geometry, material, background or billboard.
 
 ## Changes

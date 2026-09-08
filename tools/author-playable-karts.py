@@ -33,23 +33,28 @@ def continuous_torso(obj):
     bmesh.ops.delete(bm,geom=[v for v in bm.verts if v.co.z>.10],context='VERTS')
     bm.to_mesh(obj.data);bm.free()
     verts=[tuple(v.co) for v in obj.data.vertices];faces=[tuple(p.vertices) for p in obj.data.polygons]
-    offset=len(verts);around=48;levels=48
-    profile=[(0,.19,.17),(.12,.29,.22),(.33,.27,.19),(.52,.31,.20),(.75,.40,.235),(.9,.41,.22),(1,.33,.17),(1.065,.20,.145),(1.12,.115,.11),(1.27,.12,.11)]
+    offset=len(verts);around=64;levels=72
+    profile=[(-.08,.29,.23),(.12,.30,.23),(.33,.27,.19),(.52,.31,.20),(.75,.40,.235),(.9,.41,.22),(1,.33,.17),(1.065,.20,.145),(1.12,.115,.11),(1.27,.12,.11)]
     for j in range(levels+1):
-        z=j/levels*1.27
+        z=-.08+j/levels*1.35
         lo=next((k for k in range(len(profile)-1) if profile[k][0]<=z<=profile[k+1][0]),len(profile)-2)
         a,b=profile[lo],profile[lo+1];t=(z-a[0])/(b[0]-a[0]);t=t*t*(3-2*t)
         rx=a[1]+(b[1]-a[1])*t;ry=a[2]+(b[2]-a[2])*t
         for k in range(around):
             theta=k/around*math.tau;x=rx*math.sin(theta);front=max(0,math.cos(theta))**3
             # Smooth pectoral fan and shallow segmented abdominal relief, no intersecting shells.
-            pec=.055*sum(math.exp(-((x-side*.16)/.14)**2-((z-.78)/.14)**2) for side in [-1,1])
-            abdomen=.024*sum(math.exp(-((x-side*.10)/.085)**2-((z-height)/.052)**2) for side in [-1,1] for height in [.24,.38,.51])
+            pec=.074*sum(math.exp(-((x-side*.17)/.145)**2-((z-.79)/.12)**2) for side in [-1,1])
+            # Broad sloping collarbones and a shallow pectoral fold stay in one skin surface.
+            clavicle=.026*math.exp(-((z-(.965-.14*abs(x)))/.027)**2)*math.exp(-((abs(x)-.19)/.18)**4)
+            pec_fold=.014*math.exp(-((z-(.655+.10*abs(x)))/.020)**2)*math.exp(-((abs(x)-.17)/.15)**4)
+            oblique=.026*math.exp(-((abs(x)-(.17+.14*(z-.25)))/.055)**2)*math.exp(-((z-.43)/.24)**4)
+            abdomen=.034*sum(math.exp(-((x-side*.10)/.085)**2-((z-height)/.052)**2) for side in [-1,1] for height in [.24,.38,.51])
             sternum=.017*math.exp(-(x/.035)**2)*math.exp(-((z-.60)/.40)**4)
             back=max(0,-math.cos(theta))**4
-            scapula=.028*sum(math.exp(-((x-side*.20)/.12)**2-((z-.78)/.20)**2) for side in [-1,1])
+            scapula=.036*sum(math.exp(-((x-side*.20)/.12)**2-((z-.78)/.20)**2) for side in [-1,1])
             spine=.014*math.exp(-(x/.03)**2)*math.exp(-((z-.62)/.35)**4)
-            y=ry*math.cos(theta)+(pec+abdomen-sternum)*front-(scapula-spine)*back
+            lat=.022*math.exp(-((abs(x)-(.16+.20*(z-.30)))/.075)**2)*math.exp(-((z-.55)/.26)**4)
+            y=ry*math.cos(theta)+(pec+clavicle-pec_fold+abdomen+oblique-sternum)*front-(scapula+lat-spine)*back
             verts.append((x,y,z))
     for j in range(levels):
         for k in range(around):
@@ -58,18 +63,21 @@ def continuous_torso(obj):
     for mat in obj.data.materials:mesh.materials.append(mat)
     mesh.update();obj.data=mesh
 
-def reconstruct_skin(obj,voxel):
+def reconstruct_skin(obj,voxel,torso=False):
     # Union pectorals, abdominal lobes and limb envelopes into one connected surface.
     source_mesh=obj.data.copy()
     before=[max(v.co[i] for v in obj.data.vertices)-min(v.co[i] for v in obj.data.vertices) for i in range(3)]
     bm=bmesh.new();bm.from_mesh(obj.data)
+    if not torso:
+        # Close the articulated shoulder around its actual local pivot, without moving the rig.
+        bmesh.ops.create_uvsphere(bm,u_segments=24,v_segments=16,radius=.145)
     boundaries=[e for e in bm.edges if e.is_boundary]
     if boundaries:bmesh.ops.holes_fill(bm,edges=boundaries,sides=0)
     bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(obj.data);bm.free();obj.data.update()
     bpy.context.view_layer.objects.active=obj
     rem=obj.modifiers.new('Anatomical volume union','REMESH');rem.mode='VOXEL';rem.voxel_size=voxel;rem.use_smooth_shade=True;apply(obj,rem)
-    smooth=obj.modifiers.new('Controlled skin relaxation','SMOOTH');smooth.factor=.48;smooth.iterations=4;apply(obj,smooth)
-    dec=obj.modifiers.new('Mobile anatomical retopology','DECIMATE');dec.ratio=.16;apply(obj,dec)
+    smooth=obj.modifiers.new('Controlled skin relaxation','SMOOTH');smooth.factor=.48;smooth.iterations=2 if torso else 4;apply(obj,smooth)
+    dec=obj.modifiers.new('Mobile anatomical retopology','DECIMATE');dec.ratio=.22 if torso else .16;apply(obj,dec)
     after=[max(v.co[i] for v in obj.data.vertices)-min(v.co[i] for v in obj.data.vertices) for i in range(3)]
     if any(a < b*.9 for a,b in zip(after,before)):
         raise RuntimeError('Anatomical reconstruction lost body extent: '+obj.name+' '+str((before,after)))
@@ -178,9 +186,12 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
         if name in ('torso','arm-l-mesh','arm-r-mesh','head-mesh'):
             obj.data.materials.clear();obj.data.materials.append(skin)
             if name=='torso':
-                continuous_torso(obj);reconstruct_skin(obj,.016)
+                continuous_torso(obj);reconstruct_skin(obj,.014,torso=True)
             elif name in ('arm-l-mesh','arm-r-mesh'):reconstruct_skin(obj,.012)
             elif name=='head-mesh':
+                bm=bmesh.new();bm.from_mesh(obj.data)
+                bmesh.ops.holes_fill(bm,edges=[e for e in bm.edges if e.is_boundary],sides=0)
+                bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(obj.data);bm.free()
                 for v in obj.data.vertices:v.co.x*=.94;v.co.y*=.95;v.co.z*=.94
         if name=='coachwork-batch':
             dec=obj.modifiers.new('Mobile static coachwork LOD','DECIMATE');dec.ratio=.90;apply(obj,dec)
@@ -198,7 +209,7 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
     pearl=material(kart+'-fairing-pearl','F8FBFF',.24,.23)
     # Faceted split fairings are authored in vehicles.js and retained through Blender.
     root['zf_blender_authored']=True
-    root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union anatomical torso and arms','controlled smooth and decimated anatomy','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','parametric continuous pectoral, abdominal, scapular and spinal envelope','cambered blade panels, division-specific nose inserts and rear diffusers'])
+    root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union anatomical torso and arms','controlled smooth and decimated anatomy','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling','cambered blade panels, division-specific nose inserts and rear diffusers'])
     report.append({'id':kart,'operations':json.loads(root['zf_author_operations'])})
     print('AUTHORED',kart,flush=True)
 os.makedirs(os.path.dirname(target),exist_ok=True);bpy.ops.wm.save_as_mainfile(filepath=target,compress=True)

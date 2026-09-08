@@ -1,0 +1,77 @@
+[
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "4ed91da409aa88025de7b2cf9ea378ed5e9f5715ae3b0d03addf1bf85e452c8d",
+    "seconds": 10.87,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6000518798828125,
+      6.98721170425415,
+      6.063958168029785
+    ],
+    "cameraTarget": [
+      -5.218386650085449e-05,
+      -0.012788146734237671,
+      1.5639580488204956
+    ],
+    "orthographicScale": 3.0751430988311768,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": true,
+    "materialOverride": "clay diagnostic"
+  },
+  {
+    "id": "zenflow",
+    "angle": "side",
+    "file": "zenflow-side.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "4ed91da409aa88025de7b2cf9ea378ed5e9f5715ae3b0d03addf1bf85e452c8d",
+    "seconds": 10.47,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      7.999948024749756,
+      -0.012788146734237671,
+      5.063958168029785
+    ],
+    "cameraTarget": [
+      -5.218386650085449e-05,
+      -0.012788146734237671,
+      1.5639580488204956
+    ],
+    "orthographicScale": 3.0751430988311768,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": true,
+    "materialOverride": "clay diagnostic"
+  },
+  {
+    "id": "zenflow",
+    "angle": "rear",
+    "file": "zenflow-rear.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "4ed91da409aa88025de7b2cf9ea378ed5e9f5715ae3b0d03addf1bf85e452c8d",
+    "seconds": 10.26,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6000518798828125,
+      -7.01278829574585,
+      6.063958168029785
+    ],
+    "cameraTarget": [
+      -5.218386650085449e-05,
+      -0.012788146734237671,
+      1.5639580488204956
+    ],
+    "orthographicScale": 3.0751430988311768,
+    "unoccupied": false,
+    "referenceStudio": true,
+    "driverStudy": true,
+    "materialOverride": "clay diagnostic"
+  }
+]
