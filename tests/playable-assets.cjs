@@ -29,7 +29,10 @@ function assertClosedSkin(geometry,label){
   c.div=div;const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');
   assertClosedSkin(a.getObjectByName('head-mesh').geometry,div.id+' head');
   const skin=a.getObjectByName('head-mesh').material,templateSkin=run('KART_ASSETS.templates.get(div.id)').getObjectByName('head-mesh').material;
-  assert.notEqual(skin,templateSkin,'lighting never mutates cached model material');assert.equal(skin.emissiveIntensity,.16,div.id+': loaded driver receives energy-skin lighting');assert.equal(skin.metalness,.28);
+  assert.notEqual(skin,templateSkin,'lighting never mutates cached model material');assert.ok(skin.roughness>=.7&&skin.metalness<.05&&!(skin.clearcoat>0),div.id+': loaded suit remains matte fabric');
+  for(const name of ['helmet-shell','helmet-mirrored-visor','suit-raised-collar','harness-buckle','racing-glove','racing-boot','steering-hub','shift-paddle','wheel-center-marker'])assert.ok(a.getObjectByName(name),div.id+': finished equipment '+name);
+  assert.equal(a.getObjectByName('helmet-shell').parent,a.userData.head,'helmet follows articulated head');
+  assert.equal(a.getObjectByName('shift-paddle').parent,a.userData.steeringWheel,'paddles follow physical wheel');
   assert.notEqual(a.userData.body,b.userData.body);assert.notEqual(a.userData.exhaust[0].material,b.userData.exhaust[0].material);
   assert.equal(a.getObjectByName('torso').geometry,b.getObjectByName('torso').geometry,'immutable meshes shared');
   a.updateMatrixWorld(true);const torsoBox=new THREE.Box3().setFromObject(a.getObjectByName('torso')),headBox=new THREE.Box3().setFromObject(a.getObjectByName('head-mesh')),torsoSize=torsoBox.getSize(new THREE.Vector3());

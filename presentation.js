@@ -1,5 +1,16 @@
 /* DOM scene cuts. The simulation never advances under a transition curtain. */
 const sceneCut={busy:false,committing:false};
+// Anime.js keeps the wipe fully opaque while geometry is rebuilt. No blur pass.
+function animateCurtain(curtain,enter,done){
+  if(globalThis.anime?.animate){
+    globalThis.anime.animate(curtain,{
+      translateX:enter?['100%','0%']:['0%','-100%'],
+      duration:enter?180:240,ease:'inOutCubic',onComplete:done
+    });
+  }else if(curtain.animate){
+    curtain.animate([{transform:enter?'translateX(100%)':'translateX(0)'},{transform:enter?'translateX(0)':'translateX(-100%)'}],{duration:enter?180:240,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished.then(done,done);
+  }else done();
+}
 function transitionScene(label,commit){
   if(sceneCut.busy)return false;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -8,7 +19,7 @@ function transitionScene(label,commit){
   curtain.textContent=label;curtain.classList.remove('hidden');sceneCut.busy=true;
   if(typeof resetInput==='function')resetInput();
   document.body.classList.add('scene-changing');
-  const finish=()=>{curtain.classList.add('hidden');document.body.classList.remove('scene-changing');sceneCut.busy=false;};
+  const finish=()=>{curtain.classList.add('hidden');if(curtain.style)curtain.style.transform='';document.body.classList.remove('scene-changing');sceneCut.busy=false;};
   const swap=()=>{
     sceneCut.committing=true;
     try{commit();}
@@ -16,13 +27,13 @@ function transitionScene(label,commit){
     finally{sceneCut.committing=false;}
     // Leave two paints after expensive scene construction before uncovering it.
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      if(reduced||!curtain.animate){finish();return;}
-      curtain.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:'translateX(-12%)'}],{duration:300,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'}).finished.then(finish,finish);
+      if(reduced){finish();return;}
+      animateCurtain(curtain,false,finish);
     }));
   };
   curtain.getAnimations?.().forEach(a=>a.cancel());
-  if(reduced||!curtain.animate){swap();return true;}
-  curtain.animate([{opacity:0,transform:'translateX(12%)'},{opacity:1,transform:'translateX(0)'}],{duration:210,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished.then(swap,finish);
+  if(reduced){if(curtain.style)curtain.style.transform='none';swap();return true;}
+  animateCurtain(curtain,true,swap);
   return true;
 }
 // Prevent held keys and repeated clicks from scheduling a second scene change.

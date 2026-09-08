@@ -1,13 +1,13 @@
 {
   "name": "zenflow-racer",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "ZenFlow Racer \u2014 browser and installable arcade racing",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
-    "test": "node tests/game-regression.cjs && node tests/race-telemetry.cjs && node tests/immersion-regression.cjs && node tests/presentation.cjs && node tests/webgl-lighting.cjs && node tests/finish-ceremony.cjs",
+    "test": "node tests/game-regression.cjs && node tests/race-telemetry.cjs && node tests/immersion-regression.cjs && node tests/presentation.cjs && node tests/webgl-lighting.cjs && node tests/finish-ceremony.cjs && node tests/item-finish.cjs",
     "test:release": "node tests/build-shell.cjs",
     "verify": "npm test && npm run build && npm run test:release && npm run test:runtime && npm run test:assets",
     "test:runtime": "node tests/reference-runtime.cjs",

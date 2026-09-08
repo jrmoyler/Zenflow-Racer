@@ -141,7 +141,7 @@ const world=new THREE.Group();scene.add(world);
 function buildTrackMeshes(){
   const W=TRACK_W/2;
   // Lighting is balanced so the lavender road, grass and liveries keep their saturation after ACES.
-  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,map:TEX.roadDetail||null,roughnessMap:TEX.roadRoughness||null,bumpMap:TEX.roadDetail||null,bumpScale:.03,roughness:.58,metalness:.28,clearcoat:.92,clearcoatRoughness:.12,envMapIntensity:.85,side:THREE.DoubleSide});
+  const road=new THREE.MeshPhysicalMaterial({color:activeMap.road,map:TEX.roadDetail||null,roughnessMap:TEX.roadRoughness||null,bumpMap:TEX.roadDetail||null,bumpScale:.03,roughness:.83,metalness:.06,clearcoat:.18,clearcoatRoughness:.55,envMapIntensity:.85,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W,0],[-W*.5,.015],[0,.025],[W*.5,.015],[W,0]],road,null,12));
   const under=new THREE.MeshStandardMaterial({color:activeMap.id==='canopy'?0xd3dfd9:0x697087,roughness:.34,metalness:.5,side:THREE.DoubleSide});
   world.add(buildRibbon([[-W-.5,-.12],[-W-.3,-.85],[W+.3,-.85],[W+.5,-.12]],under));
@@ -152,7 +152,7 @@ function buildTrackMeshes(){
     world.add(buildRibbon([[side*2.1,.042],[side*2.27,.042]].sort((a,b)=>a[0]-b[0]),cyan));
     const glow=new THREE.MeshBasicMaterial({color:0x26e9ff,transparent:true,opacity:.1,depthWrite:false});
     world.add(buildRibbon([[side*1.8,.047],[side*2.6,.047]].sort((a,b)=>a[0]-b[0]),glow));
-    world.add(buildWall(side*(W+.32),.1,1.05,new THREE.MeshPhysicalMaterial({color:0x5fffea,transparent:true,opacity:.2,roughness:.08,metalness:.2,side:THREE.DoubleSide,depthWrite:false})));
+    world.add(buildWall(side*(W+.32),.1,1.05,new THREE.MeshStandardMaterial({color:activeMap.id==='cherry'?0xe9dce1:activeMap.id==='canopy'?0xd2dfc8:0x788496,roughness:.67,metalness:.24,side:THREE.DoubleSide})));
     world.add(buildRibbon([[side*(W+.22),1.05],[side*(W+.43),1.05]].sort((a,b)=>a[0]-b[0]),cyan));
   }
   const finish=new THREE.MeshStandardMaterial({map:TEX.finish,roughness:.5,emissive:0x8899cc,emissiveIntensity:.3});
@@ -312,6 +312,7 @@ function buildEnvironment(){
   world.updateMatrixWorld(true);const batches=new Map();
   world.traverse(mesh=>{if(!mesh.isMesh||mesh.userData.dynamic||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});
   for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);const originals=new Set(meshes.map(mesh=>mesh.geometry));meshes.forEach(mesh=>mesh.parent.remove(mesh));originals.forEach(g=>g.dispose());geometries.forEach(g=>g.dispose());world.add(merged);}
+  buildRaceVenue();
   if(typeof buildImmersion==='function')buildImmersion();
 
 }
@@ -478,4 +479,130 @@ function buildMapClouds(){
   // Owned texture is explicitly released alongside map scenery on a map switch.
   mat.userData.mapTexture=tex;
   const rnd=mulberry(270);for(let k=0;k<(MOBILEFX?42:76);k++){const sprite=new THREE.Sprite(mat);sprite.position.set((rnd()-.5)*850,-36-rnd()*65,-120+(rnd()-.5)*850);const s=60+rnd()*100;sprite.scale.set(s,s*.5,1);world.add(sprite);}
+}
+
+// A race venue is more than a ribbon in a landscape. Every repeated component is
+// instanced by geometry/material, with opaque surfaces and deterministic crowds.
+// All placements use the real transported track frame, including elevated bends.
+function buildRaceVenue(){
+  const root=new THREE.Group();root.name='race-venue';world.add(root);
+  const industrial=activeMap.id==='stormforge',garden=activeMap.id==='canopy';
+  const materials={
+    structure:new THREE.MeshStandardMaterial({color:industrial?0x657486:garden?0xd5dbc5:0xe6d9ce,roughness:.74,metalness:industrial?.55:.12}),
+    dark:new THREE.MeshStandardMaterial({color:0x26313b,roughness:.66,metalness:.32}),
+    paint:new THREE.MeshStandardMaterial({color:industrial?0xe9a33e:garden?0x3f735b:0xa94054,roughness:.63,metalness:.12}),
+    white:new THREE.MeshStandardMaterial({color:0xe9e8dc,roughness:.8}),
+    people:new THREE.MeshStandardMaterial({color:0xffffff,roughness:.93}),
+    light:new THREE.MeshStandardMaterial({color:0xffedc7,emissive:0xffda92,emissiveIntensity:.7,roughness:.38})
+  };
+  const geos={box:new THREE.BoxGeometry(1,1,1),head:new THREE.SphereGeometry(.5,7,5),post:new THREE.CylinderGeometry(.5,.5,1,7)};
+  const batches=new Map(),matrix=new THREE.Matrix4(),local=new THREE.Matrix4(),rotation=new THREE.Quaternion(),scale=new THREE.Vector3(),position=new THREE.Vector3();
+  const random=mulberry(991+activeMap.id.length),placements=[];
+  function frame(u,side=0){
+    const p=new THREE.Vector3(),r=new THREE.Vector3(),up=new THREE.Vector3(),t=new THREE.Vector3();
+    trackPoint(u,side,0,p);trackRight(u,r);trackUp(u,up);trackTan(u,t);
+    return new THREE.Matrix4().makeBasis(r,up,t.negate()).setPosition(p);
+  }
+  function part(base,type,mat,x,y,z,sx,sy,sz,rz=0,color=null){
+    rotation.setFromAxisAngle(new THREE.Vector3(0,0,1),rz);position.set(x,y,z);scale.set(sx,sy,sz);
+    local.compose(position,rotation,scale);matrix.multiplyMatrices(base,local);
+    const key=type+':'+mat,list=batches.get(key)||[];list.push({matrix:matrix.clone(),color});batches.set(key,list);
+  }
+  // Test the complete building envelope, not just its origin. A different sector
+  // can pass behind or above a candidate stand on these compact folded circuits.
+  function clearBuilding(base,halfX,halfZ,height){
+    const inv=base.clone().invert(),p=new THREE.Vector3();
+    for(let i=0;i<N_SAMP;i+=3){p.copy(track.pos[i]).applyMatrix4(inv);if(Math.abs(p.x)<halfX+TRACK_W/2+1.5&&Math.abs(p.z)<halfZ+TRACK_W/2+1.5&&p.y>-12&&p.y<height+3)return false;}
+    return true;
+  }
+  let stands=0,garages=0,spectators=0;
+  for(let k=0;k<30&&stands<6;k++){
+    const u=(k*.137+.035)%1;if(trackAG(u)>.1)continue;
+    const side=k%2?-1:1,base=frame(u,side*22);
+    if(!clearBuilding(base,6,13,10))continue;
+    placements.push({kind:'grandstand',u,side,matrix:base.elements.slice(),halfX:6,halfZ:13,height:10});stands++;
+    part(base,'box','dark',0,-1,0,12,1.8,26);
+    for(let row=0;row<5;row++){
+      const x=side*(-4.5+row*1.9),y=.3+row*1.15;
+      part(base,'box','structure',x,y-.25,0,1.9,.55,25);
+      part(base,'box','paint',x,y+.23,0,.8,.18,24);
+      for(let seat=0;seat<(MOBILEFX?14:22);seat++){
+        if(random()<.17)continue;
+        const z=-11.5+seat*(MOBILEFX?1.7:1.1),h=.8+random()*.28;
+        const palette=[0xc94849,0xebb657,0x498ab0,0xede5d0,0x46644c,0x9478ac];
+        const color=palette[Math.floor(random()*palette.length)];
+        part(base,'box','people',x,y+.65,z,.43,h,.38,0,color);
+        part(base,'head','people',x,y+1.27,z,.36,.43,.36,0,[0xd6a27c,0x956447,0x613d2d][seat%3]);spectators++;
+      }
+    }
+    for(const z of[-12,12])for(const x of[-5.6,5.6])part(base,'post','structure',x,4.2,z,.24,9,.24);
+    part(base,'box','paint',0,9,0,13,.3,27,side*.06);
+    part(base,'box','dark',side*5.9,7.7,0,.2,2.4,25);
+    for(const z of[-12,12])part(base,'box','structure',0,5.6,z,12,.2,.2);
+    // Cantilever piers and bracing make stands read as built skyway structures.
+    for(const z of[-9,9])for(const x of[-4,4])part(base,'post','dark',x,-5,z,.6,8,.6);
+  }
+  for(let k=0;k<16&&garages<3;k++){
+    const u=(.055+k*.063)%1;if(trackAG(u)>.1)continue;
+    const base=frame(u,-24);if(!clearBuilding(base,6,15,8))continue;
+    garages++;placements.push({kind:'pit-garage',u,matrix:base.elements.slice(),halfX:6,halfZ:15,height:8});
+    part(base,'box','structure',0,-.5,0,12,1,30);
+    part(base,'box','dark',-4,3,0,3,6,29);
+    part(base,'box','paint',0,6.3,0,12,.65,31);
+    part(base,'box','structure',0,7.3,0,10,1.4,28);
+    for(let bay=0;bay<5;bay++){
+      const z=-12+bay*6;
+      part(base,'box','structure',1,3,z-2.8,8,6,.28);
+      part(base,'box','light',4.9,5.7,z,.15,.22,4.8);
+      part(base,'box','paint',-1,.8,z,2,1.6,2.6);
+      for(let shelf=0;shelf<3;shelf++)part(base,'box','dark',-2,1.8+shelf*.52,z,1,.13,3.8);
+      // Physical stacked spare tyres and tool chests inside each open garage.
+      for(let tyre=0;tyre<3;tyre++)part(base,'post','dark',2,.28+tyre*.46,z+1.6,1.3,.4,1.3);
+    }
+  }
+  // Painted starting boxes sit flush with the road and describe a racing grid.
+  for(let row=0;row<6;row++)for(const lane of[-1,1]){
+    const base=frame(1-.004-row*.006-(lane===1?.002:0));
+    part(base,'box','white',lane*2.6,.058,0,2.2,.008,.11);
+    for(const edge of[-1,1])part(base,'box','white',lane*2.6+edge*1.05,.058,.5,.11,.008,1);
+  }
+  // Sector trusses: posts outside the barrier; lowest overhead point 7.4 m.
+  for(const u of[.23,.51,.79]){
+    const base=frame(u);if(trackAG(u)>.1)continue;
+    for(const side of[-1,1]){
+      part(base,'box','dark',side*9,4.2,0,.55,8.4,.7);
+      part(base,'box','paint',side*9,1.5,0,1.15,3,1.2);
+    }
+    for(const h of[7.7,9.1])part(base,'box','structure',0,h,0,18.5,.22,.5);
+    for(let j=0;j<12;j++)part(base,'box','structure',-8.4+j*1.5,8.4,0,.12,2.02,.2,j%2?.8:-.8);
+    part(base,'box','dark',0,8.3,.35,6,1.5,.25);
+    for(let j=0;j<5;j++)part(base,'head','light',-1.8+j*.9,8.3,.54,.42,.42,.16);
+  }
+  // Kerbs and rubber marks follow the complete spline; no new collision bodies.
+  const stripe=Math.max(2,Math.round(N_SAMP/(track.len/2.3)));
+  for(const side of[-1,1]){
+    const profile=[[side*6.45,.065],[side*6.92,.065]].sort((a,b)=>a[0]-b[0]);
+    const kerb=buildRibbon(profile,materials.white);kerb.name='race-kerb';root.add(kerb);
+    const red=buildRibbon(profile.map(([x,y])=>[x,y+.004]),materials.paint,i=>Math.floor(i/stripe)%2===0);root.add(red);
+    const wearMat=new THREE.MeshStandardMaterial({color:0x25282d,roughness:.97,transparent:true,opacity:.24,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
+    const wear=buildRibbon([[side*3.4,.059],[side*3.77,.059]].sort((a,b)=>a[0]-b[0]),wearMat,i=>Math.abs(track.curv[i])>.009);wear.name='racing-line-rubber';root.add(wear);
+  }
+  // Closely spaced physical chevrons on outer bends, readable at racing speed.
+  let markers=0;
+  for(let k=0;k<72;k++){
+    const u=k/72,c=trackCurv(u);if(Math.abs(c)<.011||trackAG(u)>.1)continue;
+    const side=c>0?-1:1,base=frame(u);
+    part(base,'post','structure',side*8.2,1.7,0,.15,3.4,.15);
+    part(base,'box','dark',side*8.2,2.7,0,1.8,1.5,.16);
+    for(const h of[-1,1])part(base,'box','white',side*8.2,2.7+h*.26,.1,.75,.17,.06,h*side*.68);
+    markers++;
+  }
+  for(const [key,instances] of batches){
+    const [type,mat]=key.split(':'),mesh=new THREE.InstancedMesh(geos[type],materials[mat],instances.length);
+    mesh.name='venue-'+key;instances.forEach((item,i)=>{mesh.setMatrixAt(i,item.matrix);if(mat==='people')mesh.setColorAt(i,new THREE.Color(item.color||0xffffff));});
+    mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=mat!=='people'&&!MOBILEFX;mesh.receiveShadow=true;root.add(mesh);
+  }
+  // Empty resources must also be released on unusual/custom circuits.
+  for(const [type,geo] of Object.entries(geos))if(![...batches.keys()].some(k=>k.startsWith(type+':')))geo.dispose();
+  root.userData={stands,garages,spectators,markers,placements,instanceBatches:batches.size};
 }

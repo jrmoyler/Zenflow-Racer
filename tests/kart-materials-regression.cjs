@@ -54,7 +54,8 @@ module.exports=function registerKartMaterialTests({test,assert}){
   assert.ok(first.tyre.map?.isTexture&&first.tyre.normalMap?.isTexture,'tyre colour + normal');
   assert.ok(first.metal.map?.isTexture&&first.metal.roughnessMap?.isTexture,'brushed metal colour + roughness');
   assert.ok(first.panel.map?.isTexture&&first.panel.emissiveMap?.isTexture,'panel pattern + emissive');
-  assert.ok(first.glow.emissiveMap?.isTexture&&first.skin.emissiveMap?.isTexture,'glow and skin emissive maps');
+  assert.ok(first.glow.emissiveMap?.isTexture,'effect glow emissive map');
+  assert.ok(first.skin.roughness>=.7&&first.skin.metalness<.05&&!first.skin.emissiveMap,'race suit is matte woven fabric, not glowing metal');
   assert.equal(first.white.map.encoding,THREE.sRGBEncoding);assert.equal(first.white.normalMap.encoding,THREE.LinearEncoding);assert.equal(first.white.roughnessMap.encoding,THREE.LinearEncoding);
   assert.equal(first.white.map.anisotropy,8);assert.equal(first.white.map.wrapS,THREE.RepeatWrapping);
   assert.equal(first.tyre.color.getHex(),0xffffff,'textured tyre lets the rubber map carry its colour');

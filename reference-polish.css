@@ -1,6 +1,6 @@
 /* Final art-direction layer: pearl surfaces, legible chrome, thumb-zone controls. */
 :root{--panel-ink:#091629;--panel-line:#a0eaff66}
-.glass{background:linear-gradient(145deg,#12263feF,#091629ec);border:1px solid var(--panel-line);box-shadow:0 16px 45px #08132938,inset 0 1px #ffffff12;backdrop-filter:blur(10px)}
+.race-panel{background:linear-gradient(145deg,#12263feF,#091629ec);border:1px solid var(--panel-line);box-shadow:0 16px 45px #08132938,inset 0 1px #ffffff12;backdrop-filter:none}
 #roster{background:linear-gradient(90deg,#0814276b,transparent 38%,transparent 65%,#0814274d)}
 #roster .head{filter:drop-shadow(0 2px 3px #172a4990)}
 .director-panel p{color:#d5e4f1;font-size:12px}.director-panel #selected-code{font-size:10px;color:#b8c9dc}

@@ -87,11 +87,7 @@ function kartGeos(){
     legs.push(limbSurface([[s*.19,.06,.01],[s*.22,-.05,-.2],[s*.27,-.10,-.43],[s*.28,-.12,-.57],[s*.27,-.35,-.75],[s*.24,-.53,-.91]],[.16,.17,.15,.14,.1,.075]));
     hands.push(limbSurface([[s*.28,.47,-.66],[s*.275,.49,-.71],[s*.255,.47,-.76]],[.065,.085,.035]));
   }
-  const chest=[];
-  for(const side of[-1,1]){
-    const pectoral=bodyLoft([[.55,.02,.01,0],[.61,.13,.055,0],[.75,.17,.09,0],[.88,.145,.06,0],[.94,.01,.01,0]],24);pectoral.translate(side*.16,0,-.15);chest.push(pectoral);
-    for(let j=0;j<3;j++){const abdominal=bodyLoft([[.15+j*.13,.01,.01,0],[.18+j*.13,.1,.045,0],[.25+j*.13,.09,.035,0],[.28+j*.13,.01,.01,0]],16);abdominal.translate(side*.105,0,-.17);chest.push(abdominal);}
-  }
+  const chest=[]; // Tailored suit has a continuous surface, no exposed muscle lobes.
   const torso=mergeKartGeometry([torsoLoft,...legs,...chest]);[torsoLoft,...legs,...chest].forEach(g=>g.dispose());
   const head=mergeKartGeometry([headLoft]).translate(-PILOT_NECK[0],-PILOT_NECK[1],-PILOT_NECK[2]);headLoft.dispose();
   const armL=mergeKartGeometry([arms[0],hands[0]]).translate(PILOT_SHOULDER[0],-PILOT_SHOULDER[1],-PILOT_SHOULDER[2]);
@@ -229,6 +225,41 @@ function buildDivisionCoachwork(div,root,add,m){
 //   steering-wheel > steering-wheel-rim, steering-column, exhaust-l, exhaust-r]; root > wheel-fl/fr/rl/rr > (spin > tyre/hub/band, wheel-light-ring);
 //   root > underbody-flow-ring, aegis-shield.
 const KART_WHEEL_REST=[[-1.23,.6,-1.25],[1.23,.6,-1.25],[-1.23,.6,1.28],[1.23,.6,1.28]];
+// Finished racing equipment follows the neck/shoulder rigs, including fallback builds.
+function dressRacePilot(div,pilot,head,arms,add,{white,dark,panel,metal}){
+  const index=ROSTER.findIndex(d=>d.id===div.id);
+  const visor=new THREE.MeshPhysicalMaterial({color:['#153544','#362c18','#192d44','#402712'][index%4],metalness:.72,roughness:.13,clearcoat:1,envMapIntensity:1.8});
+  const rubber=new THREE.MeshStandardMaterial({color:0x10151d,roughness:.82,metalness:.02});
+  const ell=(name,parent,mat,p,s)=>{const o=add(new THREE.SphereGeometry(1,24,16),mat,parent,name);o.position.set(...p);o.scale.set(...s);return o;};
+  const tube=(name,parent,mat,pts,r)=>add(limbSurface(pts,pts.map(()=>r)),mat,parent,name);
+  // A complete shell and curved reflective visor replace a featureless metallic face.
+  ell('helmet-shell',head,white,[0,.285,.005],[.246,.305,.243]);
+  ell('helmet-visor-gasket',head,rubber,[0,.295,-.175],[.226,.132,.102]);
+  ell('helmet-mirrored-visor',head,visor,[0,.308,-.215],[.207,.104,.07]);
+  ell('helmet-chin-guard',head,panel,[0,.11,-.143],[.214,.085,.145]);
+  tube('helmet-crown-stripe',head,panel,[[0,.57,.08],[0,.584,-.02],[0,.54,-.14],[0,.47,-.21]],.025+(index%3)*.008);
+  for(const s of[-1,1]){
+    ell('helmet-ear-lock',head,metal,[s*.241,.29,.005],[.019,.065,.062]);
+    tube('helmet-cheek-rail',head,panel,[[s*.2,.16,-.17],[s*.235,.22,-.035],[s*.21,.37,.12]],.022);
+    tube('shoulder-harness',pilot,rubber,[[s*.20,.99,-.145],[s*.23,.84,-.268],[s*.19,.60,-.243],[s*.12,.3,-.21]],.033);
+    tube('harness-stitched-edge',pilot,white,[[s*.22,.96,-.171],[s*.25,.82,-.272],[s*.21,.60,-.251]],.006);
+    const shoulder=arms[s<0?0:1];
+    ell('suit-shoulder-pad',shoulder,panel,[s*.035,-.015,0],[.165,.125,.166]);
+    ell('racing-glove',shoulder,rubber,[s*(-.065),-.425,-.715],[.087,.08,.099]);
+    ell('glove-knuckle-plate',shoulder,white,[s*(-.065),-.375,-.72],[.073,.025,.073]);
+    ell('racing-boot',pilot,rubber,[s*.245,-.48,-.92],[.115,.115,.205]);
+    tube('suit-side-piping',pilot,panel,[[s*.30,.77,.08],[s*.275,.47,.05],[s*.285,.17,0]],.013);
+  }
+  const collar=add(new THREE.TorusGeometry(.135,.032,8,28),rubber,pilot,'suit-raised-collar');collar.position.y=1.11;collar.rotation.x=Math.PI/2;
+  ell('harness-buckle',pilot,metal,[0,.32,-.237],[.064,.055,.02]);
+  tube('suit-front-zip',pilot,metal,[[0,.96,-.196],[0,.8,-.267],[0,.55,-.221],[0,.36,-.223]],.008);
+  // Division silhouettes: aero blades, sensor pods, crown vents and swept stabilizers.
+  if(index%4===0)for(const s of[-1,1])tube('helmet-aero-blade',head,panel,[[s*.15,.45,.1],[s*.17,.52,.23],[s*.17,.30,.28]],.03);
+  else if(index%4===1)for(const s of[-1,1])ell('helmet-comms-pod',head,panel,[s*.264,.30,.07],[.04,.09,.09]);
+  else if(index%4===2)for(const s of[-1,0,1])tube('helmet-top-vent',head,panel,[[s*.095,.555,-.01],[s*.095,.57,.12],[s*.095,.43,.23]],.018);
+  else {tube('helmet-rear-spoiler',head,panel,[[-.24,.44,.21],[0,.49,.27],[.24,.44,.21]],.035);}
+}
+
 function buildKart(div){
   if(typeof createLoadedKart==='function'){const model=createLoadedKart(div);if(model)return model;}
   const root=new THREE.Group();root.name=div.name+' Reference Chassis';
@@ -242,9 +273,18 @@ function buildKart(div){
   const head=new THREE.Group();head.name='head';head.position.set(...PILOT_NECK);pilot.add(head);add(KART_GEO.head,skin,head,'head-mesh');
   const arms=[-1,1].map(s=>{const arm=new THREE.Group();arm.name=s<0?'arm-l':'arm-r';arm.position.set(s*PILOT_SHOULDER[0],PILOT_SHOULDER[1],PILOT_SHOULDER[2]);pilot.add(arm);add(s<0?KART_GEO.armL:KART_GEO.armR,skin,arm,arm.name+'-mesh');return arm;});
   if(div.id==='kinetic'||div.id==='loom')pilot.scale.set(.9,1,.94);
+  dressRacePilot(div,pilot,head,arms,add,{white,dark,panel,metal});
   // Steering wheel is connected to the footwell, with hands meeting its upper grips; the group turns about its own tilted axis via rotation.z.
   const steeringWheel=new THREE.Group();steeringWheel.name='steering-wheel';steeringWheel.position.set(0,1.45,-.34);steeringWheel.rotation.x=-.7;body.add(steeringWheel);
-  add(new THREE.TorusGeometry(.25,.035,10,32),dark,steeringWheel,'steering-wheel-rim');
+  add(new THREE.TorusGeometry(.25,.041,12,40),dark,steeringWheel,'steering-wheel-rim');
+  const wheelHub=add(new THREE.BoxGeometry(.23,.10,.065),metal,steeringWheel,'steering-hub');wheelHub.position.z=.018;
+  for(const side of[-1,1]){
+    const spoke=add(new THREE.BoxGeometry(.14,.045,.04),metal,steeringWheel,'steering-spoke');spoke.position.set(side*.16,-.015,0);spoke.rotation.z=side*.22;
+    const paddle=add(new THREE.BoxGeometry(.065,.18,.018),metal,steeringWheel,'shift-paddle');paddle.position.set(side*.16,.015,-.055);
+    const button=add(new THREE.SphereGeometry(.021,10,8),panel,steeringWheel,'wheel-thumb-button');button.position.set(side*.083,.021,.061);
+  }
+  const display=add(new THREE.BoxGeometry(.095,.035,.008),panel,steeringWheel,'wheel-telemetry-display');display.position.set(0,.01,.056);
+  const marker=add(new THREE.BoxGeometry(.03,.042,.04),white,steeringWheel,'wheel-center-marker');marker.position.y=.25;
   add(limbSurface([[0,.64,-.58],[0,1.15,-.46],[0,1.44,-.34]],[.03,.03,.03]),dark,body,'steering-column');
   const wheels=[];
   KART_WHEEL_REST.forEach((p,i)=>{

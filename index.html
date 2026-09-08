@@ -18,7 +18,7 @@
   --sa-l:env(safe-area-inset-left,0px); --sa-r:env(safe-area-inset-right,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Orbitron',system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Rajdhani',system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
 #gl{position:fixed;inset:0;display:block}
 .mono{font-family:'Rajdhani',monospace}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;padding:calc(16px + var(--sa-t)) calc(16px + var(--sa-r)) calc(16px + var(--sa-b)) calc(16px + var(--sa-l))}
@@ -47,7 +47,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Orb
 #footer{width:100%;max-width:960px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px 0;border-top:1px solid var(--border);flex-shrink:0}
 #pick{font-family:'Rajdhani',monospace;font-size:12px;color:var(--silver)}
 #pick b{color:var(--gold);font-weight:700}
-.btn{font-family:'Orbitron';font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;padding:12px 22px;border-radius:4px;border:1px solid var(--gold);background:var(--gold);color:#120c02;cursor:pointer;transition:filter .12s,transform .1s}
+.btn{font-family:'Rajdhani';font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;padding:12px 22px;border-radius:4px;border:1px solid var(--gold);background:var(--gold);color:#120c02;cursor:pointer;transition:filter .12s,transform .1s}
 .btn:active{transform:scale(.97)}
 .btn[disabled]{opacity:.35;filter:grayscale(1);cursor:default}
 .btn.ghost{background:transparent;color:var(--white);border-color:var(--border)}
@@ -70,7 +70,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Orb
 #item .lbl{position:absolute;bottom:4px;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--silver);font-weight:700}
 #mini{position:absolute;right:calc(16px + var(--sa-r));bottom:calc(16px + var(--sa-b));width:150px;height:150px;opacity:.92;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
 #speedo{position:absolute;right:calc(20px + var(--sa-r));top:calc(112px + var(--sa-t));text-align:right;font-family:'Rajdhani';font-size:11px;color:var(--silver);letter-spacing:.1em;text-shadow:0 1px 0 #000}
-#speedo b{display:block;font-family:'Orbitron';font-weight:800;font-size:26px;color:var(--white);line-height:1;letter-spacing:-.03em}
+#speedo b{display:block;font-family:'Rajdhani';font-weight:800;font-size:26px;color:var(--white);line-height:1;letter-spacing:-.03em}
 #timer{position:absolute;left:50%;top:calc(12px + var(--sa-t));transform:translateX(-50%);font-family:'Rajdhani';font-size:13px;color:var(--white);letter-spacing:.12em;text-shadow:0 1px 0 #000;background:rgba(5,10,24,.45);padding:4px 12px;border-radius:3px;border:1px solid rgba(26,37,64,.8)}
 #toast{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(28px,7vw,64px);letter-spacing:-.02em;color:var(--white);text-shadow:0 4px 0 rgba(0,0,0,.6),0 0 40px rgba(168,248,255,.4);opacity:0;transition:opacity .15s,transform .25s}
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -103,7 +103,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Orb
 /* touch controls */
 #touch{position:fixed;inset:0;z-index:12;pointer-events:none;display:none}
 #touch.on{display:block}
-.tz{position:absolute;pointer-events:auto;bottom:calc(120px + var(--sa-b));width:76px;height:76px;border-radius:50%;border:1px solid rgba(139,155,174,.45);background:rgba(13,19,38,.45);display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:800;font-size:12px;letter-spacing:.08em;backdrop-filter:blur(2px)}
+.tz{position:absolute;pointer-events:auto;bottom:calc(120px + var(--sa-b));width:76px;height:76px;border-radius:50%;border:1px solid rgba(139,155,174,.45);background:rgba(13,19,38,.45);display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:800;font-size:12px;letter-spacing:.08em;backdrop-filter:none}
 .tz.act{background:rgba(168,248,255,.35);border-color:var(--gold)}
 #tL{left:calc(18px + var(--sa-l))}
 #tR{left:calc(104px + var(--sa-l))}
@@ -116,7 +116,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Orb
 html[data-touch="on"] #tS{display:none}
 
 /* ---------- Results / pause ---------- */
-#results{background:rgba(5,10,24,.86);backdrop-filter:blur(6px)}
+#results{background:rgba(5,10,24,.86);backdrop-filter:none}
 #results .panel,#pause .panel{width:min(94vw,520px);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px 18px}
 #results h2{font-weight:800;font-size:28px;letter-spacing:-.02em}
 #results h2 span{color:var(--gold)}
@@ -129,7 +129,7 @@ html[data-touch="on"] #tS{display:none}
 #board div em{font-style:normal;display:inline-block;width:10px;height:10px;transform:rotate(45deg);background:var(--c);margin-right:8px;vertical-align:middle;border-radius:1px}
 #board div i{font-family:'Rajdhani';font-style:normal;font-size:11px;color:var(--silver)}
 .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
-#pause{background:rgba(5,10,24,.7);backdrop-filter:blur(4px)}
+#pause{background:rgba(5,10,24,.7);backdrop-filter:none}
 #pause h2{font-weight:800;font-size:24px;letter-spacing:-.02em;margin-bottom:6px}
 #pause p{color:var(--silver);font-size:12px;line-height:1.6}
 #diff{display:flex;gap:6px;margin-top:10px}
@@ -148,11 +148,11 @@ html[data-touch="on"] #tS{display:none}
 <body>
 <canvas id="gl" aria-label="ZenFlow racing circuit"></canvas>
 
-<div id="loading" class="screen" aria-label="Loading ZenFlow Racer"><div class="loading-wordmark">ZENFLOW<span>RACER</span></div><div class="loading-caption">THE SKY IS YOUR STARTING LINE</div><progress id="loading-progress" max="12" value="0" aria-label="Racers loaded"></progress><div id="loading-status" role="status">PREPARING THE CIRCUIT</div></div>
+<div id="loading" class="screen" aria-label="Loading ZenFlow Racer"><div class="loading-wordmark">ZENFLOW<span>RACER</span></div><div class="loading-caption">SKY RACING CHAMPIONSHIP / RACE PREPARATION</div><progress id="loading-progress" max="12" value="0" aria-label="Racers loaded"></progress><div id="loading-status" role="status">PREPARING THE CIRCUIT</div></div>
 
 <section id="title-screen" aria-label="ZenFlow Racer main menu">
-  <div class="title-stage"><div class="title-copy"><p class="eyebrow">SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Find your flow. Race beyond the clouds.</p></div>
-    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start race" disabled><span>Start Race</span></button><button id="title-select" aria-label="Character select" disabled><span>Character Select</span></button><button id="title-settings" aria-label="Settings" disabled><span>Settings</span></button></nav>
+  <div class="title-stage"><div class="title-copy"><p class="eyebrow">SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Twelve rivals. Three circuits. One perfect line.</p></div>
+    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start race" disabled><span>Race now</span></button><button id="title-select" aria-label="Character select" disabled><span>Choose your racer</span></button><button id="title-settings" aria-label="Settings" disabled><span>Race settings</span></button></nav>
   </div><p class="title-status" role="status">Preparing the starting grid…</p>
 </section>
 <div id="roster" class="screen hidden">
@@ -160,17 +160,17 @@ html[data-touch="on"] #tS{display:none}
     <div>
       <div class="eyebrow">SKY RACING CHAMPIONSHIP</div>
       <h1>ZENFLOW <span>RACER</span></h1>
-      <div class="sub">Find your flow. Race beyond the clouds.</div>
+      <div class="sub">Twelve rivals. Three circuits. One perfect line.</div>
     </div>
     <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>12 RACERS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
   </div>
   <div class="showroom">
-    <section class="director-panel glass" aria-label="Selected racer">
+    <section class="director-panel race-panel" aria-label="Selected racer">
       <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
       <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div>
     </section>
     <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
-    <section class="track-panel glass" aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
+    <section class="track-panel race-panel" aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
       <button class="map-card selected" data-map="cherry" aria-pressed="true"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Cherry Blossom Skyway</span></button>
       <button class="map-card" data-map="stormforge" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Nexus Stormforge</span></button>
       <button class="map-card" data-map="canopy" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Vital Canopy Run</span></button>
@@ -207,7 +207,7 @@ html[data-touch="on"] #tS{display:none}
 </div>
 <div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate racer power">POWER</button></div>
 
-<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">SYNERGY GRAND PRIX</div><h2>Race paused.</h2><p>Take a breath. Your race is right where you left it.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
+<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">RACE CONTROL</div><h2>Race paused.</h2><p>Session on hold. Return to the track when you’re ready.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
 
 <div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="nextmap" class="btn ghost">Next Circuit</button><button id="rematch" class="btn">Rematch</button></div></div></div>
 

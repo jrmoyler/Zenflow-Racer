@@ -9,11 +9,11 @@
     {
       "id": "aether",
       "file": "aether.glb",
-      "bytes": 822504,
-      "triangles": 54350,
-      "meshes": 39,
-      "nodes": 56,
-      "sha256": "f6a51f67195f1b90cd5d9e2432e909cfd568d22a44daf2aab946ce553862955e",
+      "bytes": 942440,
+      "triangles": 72686,
+      "meshes": 76,
+      "nodes": 93,
+      "sha256": "f528d621d6bb46b897eb01bc37c8f36c3b602ae4a503c255e49039dec77520ca",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -24,7 +24,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -32,11 +32,11 @@
     {
       "id": "animus",
       "file": "animus.glb",
-      "bytes": 1037844,
-      "triangles": 65781,
-      "meshes": 40,
-      "nodes": 57,
-      "sha256": "bdfc505df0d575def4d8a01e38aa56ed76afc8c6daf1b37a8854dd5f2ea41d13",
+      "bytes": 1175588,
+      "triangles": 84261,
+      "meshes": 78,
+      "nodes": 95,
+      "sha256": "5ffdcfc032dbd92b9572db4ffa681892c6595d057d3e5b3a6b5c3e1b19004add",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -47,7 +47,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -55,11 +55,11 @@
     {
       "id": "collective",
       "file": "collective.glb",
-      "bytes": 940080,
-      "triangles": 60202,
-      "meshes": 39,
-      "nodes": 56,
-      "sha256": "1167b73756d2c2140172a5ae431bf7ba85066a835d3606b2ce1ced86051bb9ae",
+      "bytes": 1056476,
+      "triangles": 78538,
+      "meshes": 76,
+      "nodes": 93,
+      "sha256": "b4412805afa9d0f3ef6450e0db524ecece7295028eb81a5a93b80d121f5b5af9",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -70,7 +70,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -78,11 +78,11 @@
     {
       "id": "helix",
       "file": "helix.glb",
-      "bytes": 953520,
-      "triangles": 61042,
-      "meshes": 39,
-      "nodes": 56,
-      "sha256": "a2ba655a3e1ce6c8abac297f6e450c28daf8602b20c8c50e91ec7758163d399e",
+      "bytes": 1075804,
+      "triangles": 78466,
+      "meshes": 75,
+      "nodes": 92,
+      "sha256": "cae0e65d7790949c5624252a30dc3e2c1ca8b150821c7fc0f051a3e1544725c4",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -93,7 +93,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -101,11 +101,11 @@
     {
       "id": "hybrid",
       "file": "hybrid.glb",
-      "bytes": 905160,
-      "triangles": 58902,
-      "meshes": 41,
-      "nodes": 58,
-      "sha256": "b74880fab4d852bf85f58b7ee5a217df1f34b5689a301f3857317739919d43a5",
+      "bytes": 1039368,
+      "triangles": 77382,
+      "meshes": 79,
+      "nodes": 96,
+      "sha256": "c533a4fb598a7542c60654202a030c670505567a7eedd15fc526ad3a134da944",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -116,7 +116,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -124,11 +124,11 @@
     {
       "id": "juris",
       "file": "juris.glb",
-      "bytes": 924988,
-      "triangles": 59366,
-      "meshes": 39,
-      "nodes": 56,
-      "sha256": "d67f7b76af38c10a7ffe840747285fa1406532ceb90ce1b4b8f56f0df1b945c4",
+      "bytes": 1040920,
+      "triangles": 77702,
+      "meshes": 76,
+      "nodes": 93,
+      "sha256": "30ed8c7d8f33e2f8cbee748a5f0ac04d512d302968dcd12a8c2461cdacdee16f",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -139,7 +139,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -147,11 +147,11 @@
     {
       "id": "kinetic",
       "file": "kinetic.glb",
-      "bytes": 882472,
-      "triangles": 58154,
-      "meshes": 43,
-      "nodes": 60,
-      "sha256": "1fc5db91228d0cf32f31d78ade03d62e642fda9c6aa26010befdb7c46feed3c5",
+      "bytes": 1012348,
+      "triangles": 76106,
+      "meshes": 80,
+      "nodes": 97,
+      "sha256": "32369011875044cb0a2ab07eaafdc0f74918c4968014db6548cc3ea629ed317c",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -162,7 +162,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -170,11 +170,11 @@
     {
       "id": "loom",
       "file": "loom.glb",
-      "bytes": 915348,
-      "triangles": 59506,
-      "meshes": 41,
-      "nodes": 58,
-      "sha256": "4f80cf70cd7d1f2f6d7f34e2ed2c19a630e179780b8b3eaf13c21c09aa991bbc",
+      "bytes": 1037528,
+      "triangles": 76930,
+      "meshes": 77,
+      "nodes": 94,
+      "sha256": "fd43c85ce8fbbdaaf5bbcfb2e2d14b9240a1ff423513940d6142f3d6b8bb3a01",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -185,7 +185,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -193,11 +193,11 @@
     {
       "id": "nexus",
       "file": "nexus.glb",
-      "bytes": 1018068,
-      "triangles": 64214,
-      "meshes": 37,
-      "nodes": 54,
-      "sha256": "c8f407fc6a88d6ca8268e16117ac745c11f58873e91957b90cd3739beb3a078c",
+      "bytes": 1144280,
+      "triangles": 81638,
+      "meshes": 73,
+      "nodes": 90,
+      "sha256": "444723c7a727e8ee291c8c743d4a1826c7ec5be0469480d9dc8853d3ce06e750",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -208,7 +208,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -216,11 +216,11 @@
     {
       "id": "signal",
       "file": "signal.glb",
-      "bytes": 748584,
-      "triangles": 50296,
-      "meshes": 43,
-      "nodes": 60,
-      "sha256": "3ca3bd16a388966747f115a290ed1e50fb1de65d6154340184809d691895b7fb",
+      "bytes": 882388,
+      "triangles": 68776,
+      "meshes": 81,
+      "nodes": 98,
+      "sha256": "d4911382c9920c3f0c2c980127c52784bc78328227cd0981c012d57948fbcd93",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -231,7 +231,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -239,11 +239,11 @@
     {
       "id": "vector",
       "file": "vector.glb",
-      "bytes": 805324,
-      "triangles": 53944,
-      "meshes": 45,
-      "nodes": 62,
-      "sha256": "ef8ef9e2fea2ed58d36e819f8c62e5e43e7b43b81e531c4c0d2ca8a0fb79ea43",
+      "bytes": 935136,
+      "triangles": 71896,
+      "meshes": 82,
+      "nodes": 99,
+      "sha256": "5134a2bf4d6ea56bd0b33cedd40d9d0dd9548d41409c3a5a647c41c4bfc96909",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -254,7 +254,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
@@ -262,11 +262,11 @@
     {
       "id": "zenflow",
       "file": "zenflow.glb",
-      "bytes": 867552,
-      "triangles": 57366,
-      "meshes": 43,
-      "nodes": 60,
-      "sha256": "4ed91da409aa88025de7b2cf9ea378ed5e9f5715ae3b0d03addf1bf85e452c8d",
+      "bytes": 997444,
+      "triangles": 75318,
+      "meshes": 80,
+      "nodes": 97,
+      "sha256": "bcf01948259971386a17e89dac82c3d79477aa61313041e5087017bbe1e50a59",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -277,7 +277,7 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"

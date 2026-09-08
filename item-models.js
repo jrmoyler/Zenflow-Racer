@@ -1,6 +1,6 @@
 /* Actual world-space inventory models, using the approved icon silhouettes. */
 function itemModelMaterial(color,emissive=false){
-  return new THREE.MeshPhysicalMaterial({color,metalness:emissive?.35:.55,roughness:.2,clearcoat:1,emissive:emissive?color:0x000000,emissiveIntensity:emissive?.65:0});
+  return new THREE.MeshPhysicalMaterial({color,metalness:emissive?.35:.55,roughness:emissive?.28:.38,clearcoat:.55,emissive:emissive?color:0x000000,emissiveIntensity:emissive?.35:0});
 }
 function modelPart(group,geometry,material,x=0,y=0,z=0){const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;group.add(mesh);return mesh;}
 function buildReferenceMine(){
@@ -13,7 +13,7 @@ function buildReferenceMine(){
     const a=i*Math.PI/2,leg=new THREE.Mesh(coachwork([[-.2,.12,.32,.08],[.12,.19,.28,.12],[.55,.2,.13,.14],[.72,.12,-.05,.06]],16),pearl);leg.rotation.y=a;g.add(leg);
     const strip=modelPart(g,new THREE.BoxGeometry(.15,.045,.25),green,Math.sin(a)*.54,.27,Math.cos(a)*.54);strip.rotation.y=a;
   }
-  g.userData.core=dome;return g;
+  g.userData.core=dome;return finishItemDevice(g,'mine');
 }
 function buildReferenceMissile(){
   const g=new THREE.Group();g.name='Vector Missile';
@@ -25,7 +25,7 @@ function buildReferenceMissile(){
     const fin=modelPart(g,new THREE.ExtrudeGeometry(shape,{depth:.055,bevelEnabled:true,bevelThickness:.02,bevelSize:.02,bevelSegments:1}),dark);fin.rotation.x=Math.PI/2;fin.rotation.y=i*Math.PI*2/3;
   }
   modelPart(g,new THREE.TorusGeometry(.17,.045,8,24),blue,0,0,.8);
-  return g;
+  return finishItemDevice(g,'missile');
 }
 function buildReferenceCapsule(color){
  const g=new THREE.Group(),pearl=itemModelMaterial(0xeef4ff),dark=itemModelMaterial(0x15253f),energy=itemModelMaterial(color,true);
@@ -36,7 +36,7 @@ function buildReferenceCapsule(color){
   const a=j*Math.PI/2,strap=new THREE.Mesh(kartRibbon([[Math.cos(a)*.21,Math.sin(a)*.21,-.49],[Math.cos(a)*.37,Math.sin(a)*.37,-.27],[Math.cos(a)*.39,Math.sin(a)*.39,.25],[Math.cos(a)*.20,Math.sin(a)*.20,.49]],.07,.035),pearl);g.add(strap);
  }
  modelPart(g,new THREE.TorusGeometry(.28,.035,8,28),energy,0,0,-.4);
- return g;
+ return finishItemDevice(g,'capsule');
 }
 function buildInventoryModel(key){
  if(key==='mine')return buildReferenceMine();if(key==='missile')return buildReferenceMissile();
@@ -80,5 +80,41 @@ function buildInventoryModel(key){
    const fin=modelPart(g,sculptedPanel([[.19,0,.09],[.58,0,.70],[.36,0,.56],[.20,0,.40]],.045),accent);fin.rotation.z=i*Math.PI*2/3;
   }
  }
- return g;
+ const used=new Set();g.traverse(o=>{if(o.material)used.add(o.material);});for(const material of [pearl,dark,accent])if(!used.has(material))material.dispose();
+ return finishItemDevice(g,key);
+}
+
+// Machined structure is lit by the actual circuit lights. Repeated fasteners are
+// instanced per device; no textures, screenshots or emissive replacement shells.
+function finishItemDevice(group,kind){
+ const steel=new THREE.MeshStandardMaterial({color:0x798794,metalness:.88,roughness:.31});
+ const graphite=new THREE.MeshStandardMaterial({color:0x111b24,metalness:.55,roughness:.62});
+ const ceramic=new THREE.MeshStandardMaterial({color:0xd8dedf,metalness:.15,roughness:.48});
+ const boltGeo=new THREE.CylinderGeometry(.027,.027,.024,6);
+ const bolts=new THREE.InstancedMesh(boltGeo,steel,kind==='mine'?12:8),dummy=new THREE.Object3D();
+ bolts.name='captive-hex-fasteners';bolts.castShadow=true;
+ for(let i=0;i<bolts.count;i++){
+  const a=i/bolts.count*Math.PI*2;dummy.rotation.set(0,0,0);
+  if(kind==='mine')dummy.position.set(Math.sin(a)*.54,.17,Math.cos(a)*.54);
+  else {dummy.position.set(Math.sin(a)*.26,Math.cos(a)*.26,kind==='shield'?-.17:.43);dummy.rotation.x=Math.PI/2;}
+  dummy.updateMatrix();bolts.setMatrixAt(i,dummy.matrix);
+ }
+ group.add(bolts);
+ if(kind==='missile'||kind==='capsule'){
+  for(const z of [-.27,.22,.48]){const seam=modelPart(group,new THREE.TorusGeometry(kind==='missile'?.276:.32,.012,4,24),graphite,0,0,z);seam.name='recessed-assembly-seam';}
+  const nozzle=modelPart(group,new THREE.LatheGeometry([new THREE.Vector2(.12,0),new THREE.Vector2(.13,.08),new THREE.Vector2(.19,.12),new THREE.Vector2(.22,.2),new THREE.Vector2(.18,.22),new THREE.Vector2(.15,.13)],20),steel,0,0,kind==='missile'?.67:.48);nozzle.rotation.x=Math.PI/2;nozzle.name='bell-exhaust-nozzle';
+  const throat=modelPart(group,new THREE.CircleGeometry(.13,20),graphite,0,0,kind==='missile'?.8:.61);throat.name='recessed-nozzle-throat';
+  for(let i=0;i<4;i++){const a=i*Math.PI/2;const rail=modelPart(group,new THREE.BoxGeometry(.055,.045,.35),ceramic,Math.sin(a)*.27,Math.cos(a)*.27,.08);rail.rotation.z=-a;rail.name='ceramic-insulation-rail';}
+ }else if(kind==='mine'||kind==='pulse'){
+  const vents=new THREE.InstancedMesh(new THREE.BoxGeometry(.075,.055,.18),graphite,12);vents.name='radial-cooling-vents';
+  for(let i=0;i<12;i++){const a=i*Math.PI/6;dummy.rotation.set(0,a,0);dummy.position.set(Math.sin(a)*.48,kind==='mine'?.19:-.06,Math.cos(a)*.48);dummy.updateMatrix();vents.setMatrixAt(i,dummy.matrix);}group.add(vents);
+  const ring=modelPart(group,new THREE.TorusGeometry(.36,.018,6,32),steel,0,kind==='mine'?.26:.03);ring.rotation.x=Math.PI/2;ring.name='sensor-retaining-ring';
+ }else if(kind==='shield'){
+  for(const x of [-.23,.23]){const brace=modelPart(group,new THREE.BoxGeometry(.07,.69,.055),graphite,x,0,.25);brace.rotation.z=x>0?-.15:.15;brace.name='backplate-spine';}
+  const grip=modelPart(group,new THREE.TorusGeometry(.16,.045,6,16,Math.PI),graphite,0,0,.28);grip.rotation.x=Math.PI/2;grip.name='insulated-projector-grip';
+ }
+ // Some families need no ceramic parts; dispose the unreferenced local material.
+ if(kind!=='missile'&&kind!=='capsule')ceramic.dispose();
+ if(kind==='triple'||kind==='burst')graphite.dispose();
+ group.userData.itemFinish='machined-metal-ceramic';return group;
 }

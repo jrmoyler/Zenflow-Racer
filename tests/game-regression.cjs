@@ -152,7 +152,7 @@ test('HUD update runs headless with the new elements: gap readout, speed bar, wr
  run('r.specialCooldown=5;r.boost=1;r.roulette=.7;updateHUD(.05)');assert.equal(element('tP').textContent,'5s');assert.equal(element('speedbar').className,'boost');assert.equal(element('item').style['--spin'],'0.500');run('r.roulette=0;r.boost=0;updateHUD(.05)');assert.equal(element('item').style['--spin'],'0');});
 test('Analog steering clamps travel, ignores other fingers and releases on cancellation',()=>{
  racer();run('r.isPlayer=true;resetInput()');const el=element('tSteer'),ev=(pointerId,clientX)=>({pointerId,clientX,preventDefault:noop});
- el.events.pointerdown(ev(1,120));assert.ok(run('touchSteer')>.8);el.events.pointermove(ev(2,0));assert.ok(run('touchSteer')>.8);
+ el.events.pointerdown(ev(1,120));assert.ok(run('touchSteer')>.7);el.events.pointermove(ev(2,0));assert.ok(run('touchSteer')>.7);
  el.events.pointermove(ev(1,-100));assert.equal(run('touchSteer'),-1);el.events.pointercancel(ev(1,0));assert.equal(run('touchSteer'),0);
  el.events.pointerdown(ev(3,76));assert.equal(run('touchSteer'),0,'center dead zone');run('pause()');assert.equal(run('touchSteer'),0);assert.equal(run('steerPointer'),null);
 });
@@ -199,6 +199,25 @@ test('Controls probe: A yaws left (player-visible) while moving forward; D yaws 
  racer();run("r.isPlayer=true;r.speed=32;r.throttle=true;__controlsTest.setKeys(['KeyW']);yawBefore=__controlsTest.getYaw();__controlsTest.setKeys(['KeyW','KeyD']);for(let i=0;i<48;i++)stepRacer(r,1/120);dTurn=__controlsTest.getYaw()-yawBefore");
  const d=run('dTurn');assert.ok(d<-0.05,'D must decrease yaw (right), got '+d);
  run("__controlsTest.setKeys([])");
+});
+test('Analog deadzone is continuous, symmetric and retains full steering lock',()=>{
+ for(const value of [0,.05,.12])assert.equal(run(`analogAxis(${value})`),0);
+ assert.ok(run('analogAxis(.121)')<.002);assert.equal(run('analogAxis(1)'),1);assert.equal(run('analogAxis(-1)'),-1);
+ assert.equal(run('analogAxis(.6)'),-run('analogAxis(-.6)'));
+});
+test('High speed steering reduces lock and countersteering changes direction promptly',()=>{
+ racer();run('r.isPlayer=true;resetInput();r.lat=0;input.right=true;for(let i=0;i<30;i++){r.speed=12;stepRacer(r,1/120)}');const low=run('r.theta');
+ racer();run('r.isPlayer=true;resetInput();r.lat=0;input.right=true;for(let i=0;i<30;i++){r.speed=r.maxSpeedBase;stepRacer(r,1/120)}');assert.ok(run('r.theta')<low*.85);
+ run('input.right=false;input.left=true;for(let i=0;i<12;i++)stepRacer(r,1/120)');assert.ok(run('r.steer')<-.5);run('resetInput()');
+});
+test('Reversing across a previously completed lap cannot duplicate split records',()=>{
+ racer();run('r.distance=.999;r.u=.999;r.speed=50;game.raceTime=60;stepRacer(r,.1)');assert.equal(run('r.lapTimes.length'),1);
+ run('r.speed=-9;game.raceTime=61;stepRacer(r,1)');assert.equal(run('r.lap'),1);
+ run('r.speed=50;game.raceTime=62;stepRacer(r,.3)');assert.equal(run('r.lap'),2);assert.equal(run('r.lapTimes.length'),1);assert.equal(run('r.highestLap'),2);
+});
+test('Key released after focus enters a text input does not remain stuck',()=>{
+ racer();run('resetInput()');listeners.keydown({code:'KeyW',target:{tagName:'BODY'},preventDefault:noop});assert.equal(run('input.throttle'),true);
+ listeners.keyup({code:'KeyW',target:{tagName:'INPUT'}});assert.equal(run('input.throttle'),false);
 });
 require('./kart-materials-regression.cjs')({test,assert});
 require('./racefx-regression.cjs')({test,assert});

@@ -173,7 +173,7 @@ function kartMaterials(div){
   const dark=new THREE.MeshStandardMaterial({color:T.carbon?0xffffff:0x142943,map:T.carbon,normalMap:T.carbonNormal,normalScale:v2(.5),metalness:.15,roughness:.35,side});
   const panel=new THREE.MeshPhysicalMaterial({color:color.clone(),map:T.panel,emissive:color,emissiveMap:T.panelEm,emissiveIntensity:.08,roughness:.19,metalness:.38,envMapIntensity:1.2,clearcoat:1,side});
   const glow=new THREE.MeshStandardMaterial({color:light,emissive:light,emissiveMap:T.glowEm,emissiveIntensity:1.7,roughness:.2,side});
-  const skin=new THREE.MeshPhysicalMaterial({color,emissive:color,emissiveMap:T.skinEm,emissiveIntensity:.055,roughness:.12,metalness:.42,envMapIntensity:1.35,clearcoat:1,clearcoatRoughness:.08,transparent:false,opacity:1,side});
+  const skin=new THREE.MeshPhysicalMaterial({color:color.clone().lerp(new THREE.Color(0x17202b),.65),roughness:.78,metalness:.02,clearcoat:0,side});skin.name=div.id+'-woven-race-suit';
   const metal=new THREE.MeshPhysicalMaterial({color:metalTint,map:T.metal,roughnessMap:T.metalRough,metalness:.85,roughness:T.metalRough?1:.22,clearcoat:1});
   const tyre=new THREE.MeshStandardMaterial({color:T.tyre?0xffffff:0x1c1d20,map:T.tyre,normalMap:T.tyreNormal,normalScale:v2(.8),roughness:.85,metalness:0});
   return {white,dark,panel,glow,skin,metal,tyre,color,light};
