@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "status": "stopped",
+  "status": "active",
   "profile": "character",
-  "currentStep": "stopped",
+  "currentStep": "build-current-pass",
   "currentPass": "blockout",
   "checklist": [
     {
@@ -124,30 +124,24 @@
     {
       "id": "build-current-pass",
       "scope": "pass",
-      "status": "done",
-      "evidence": [
-        "tools/author-playable-karts.py"
-      ],
+      "status": "pending",
+      "evidence": [],
       "reason": "",
       "command": "python3 forge/stage3_build/generate_threejs_factory.py {spec} --out src/createObjectModel.ts --pass-id {pass_id}"
     },
     {
       "id": "render-capture",
       "scope": "pass",
-      "status": "done",
-      "evidence": [
-        ".img2threejs/evidence/correction-02-front.png"
-      ],
+      "status": "pending",
+      "evidence": [],
       "reason": "",
       "command": "Render {pass_id} and capture the fixed review view plus meaningful orbit views"
     },
     {
       "id": "review-contract-read",
       "scope": "pass",
-      "status": "done",
-      "evidence": [
-        "docs/3d-reconstruction/reference-contract.md"
-      ],
+      "status": "pending",
+      "evidence": [],
       "reason": "",
       "command": "Read grimoire/review/gates_reference.md and grimoire/review/self_correction.md completely"
     },
@@ -363,6 +357,239 @@
     }
   ],
   "reviewCursor": 3,
-  "iterationAction": "stop",
-  "stopReason": "review-stopped: third authored candidate remains below .95 reference-fidelity target; final stop review in spec.json; no additional corrections authorized within this bounded session"
+  "iterationAction": "refine-code",
+  "stopReason": "",
+  "continuationHistory": [
+    {
+      "timestamp": "2026-09-08T03:20:16.819102+00:00",
+      "strategy": "Cambered polygon panels and Blender anatomy, fixed-camera WebGL evidence",
+      "authorization": "Yes: user explicitly authorizes direct modeling continuation and skill update, 2026-09-08",
+      "evidence": "/workspace/scratch/670ef16eb001/zenflow-racer/docs/reconstruction-2026-09-08/correction-plan.md",
+      "planSha256": "f7cac67677a1b40eab1dbb7acd8fd9b6355cc22ff65709b700c22c707d9ebf92",
+      "priorStopReason": "review-stopped: third authored candidate remains below .95 reference-fidelity target; final stop review in spec.json; no additional corrections authorized within this bounded session",
+      "stopKind": "quality-review",
+      "priorLoops": {
+        "perPass": {
+          "blockout": 2
+        },
+        "total": 2,
+        "maxPerPass": 3,
+        "maxTotal": 6
+      },
+      "priorChecklist": [
+        {
+          "id": "image-analysis",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            "docs/3d-reconstruction/reference-contract.md"
+          ],
+          "reason": "",
+          "command": "Read grimoire/intake/image_analysis.md and analyze {reference}"
+        },
+        {
+          "id": "reference-suitability",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            "docs/3d-reconstruction/reference-contract.md"
+          ],
+          "reason": "",
+          "command": "Read grimoire/intake/validation_rubric.md and record a pass, conditional, or reject verdict for {reference}"
+        },
+        {
+          "id": "reference-admission",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/evidence/admission.json"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage1_intake/check_reference_admission.py {reference}"
+        },
+        {
+          "id": "character-contract-read",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            "docs/3d-reconstruction/reference-contract.md"
+          ],
+          "reason": "",
+          "command": "Read grimoire/character/reconstruction.md and grimoire/character/likeness_maximization.md completely"
+        },
+        {
+          "id": "character-landmarks",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/evidence/anatomy.json"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage1_intake/extract_landmarks.py {reference} --out anatomy.json --overlay landmarks.png"
+        },
+        {
+          "id": "local-spec-search",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/evidence/local-search.json"
+          ],
+          "reason": "",
+          "command": "Run the local evidence search before authoring the assessment"
+        },
+        {
+          "id": "pre-spec-assessment",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/assessment.json"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage2_spec/new_pre_spec_assessment.py \"<name>\" --image {reference} --out assessment.json"
+        },
+        {
+          "id": "detail-inventory",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/spec.json"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage1_intake/build_detail_inventory.py {reference} --mode grid-3x3 --out-dir detail-inventory --out di.json"
+        },
+        {
+          "id": "projection-route",
+          "scope": "setup",
+          "status": "skipped",
+          "evidence": [],
+          "reason": "Solid swatch-painted finish; projection/PBR pixel extraction inapplicable. Scalar independent channels and actual geometry relief; no exact texture inference claimed. See docs/3d-reconstruction/reference-contract.md",
+          "command": "Record whether projection is required; if required run solve_camera_pose.py, delight_albedo.py, and bake_projected_texture.py, otherwise skip with a reason"
+        },
+        {
+          "id": "spec-authoring",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/spec.json"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage2_spec/new_sculpt_spec.py \"<name>\" --image {reference} --assessment assessment.json --out object-sculpt-spec.json"
+        },
+        {
+          "id": "material-evidence",
+          "scope": "setup",
+          "status": "skipped",
+          "evidence": [],
+          "reason": "Solid swatch-painted finish; projection/PBR pixel extraction inapplicable. Scalar independent channels and actual geometry relief; no exact texture inference claimed. See docs/3d-reconstruction/reference-contract.md",
+          "command": "When material fidelity matters, run analyze_texture.py and extract_pbr_evidence.py per verified crop; otherwise skip with a reason"
+        },
+        {
+          "id": "strict-validation",
+          "scope": "setup",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/evidence/strict-validation.txt"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage2_spec/validate_sculpt_spec.py {spec} --strict-quality"
+        },
+        {
+          "id": "build-current-pass",
+          "scope": "pass",
+          "status": "done",
+          "evidence": [
+            "tools/author-playable-karts.py"
+          ],
+          "reason": "",
+          "command": "python3 forge/stage3_build/generate_threejs_factory.py {spec} --out src/createObjectModel.ts --pass-id {pass_id}"
+        },
+        {
+          "id": "render-capture",
+          "scope": "pass",
+          "status": "done",
+          "evidence": [
+            ".img2threejs/evidence/correction-02-front.png"
+          ],
+          "reason": "",
+          "command": "Render {pass_id} and capture the fixed review view plus meaningful orbit views"
+        },
+        {
+          "id": "review-contract-read",
+          "scope": "pass",
+          "status": "done",
+          "evidence": [
+            "docs/3d-reconstruction/reference-contract.md"
+          ],
+          "reason": "",
+          "command": "Read grimoire/review/gates_reference.md and grimoire/review/self_correction.md completely"
+        },
+        {
+          "id": "tier1-diagnostics",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage4_review/diagnose_render.py --reference {reference} --render <shot> --spec {spec} --pass-id {pass_id} --in-place"
+        },
+        {
+          "id": "multi-angle-review",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage4_review/diagnose_render_multi_angle.py --reference <fixed-shot> --orbit <orbit-shot> --orbit <orbit-shot>"
+        },
+        {
+          "id": "pass-gate-check",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage3_build/orchestrate_passes.py check {spec} --pass-id {pass_id}"
+        },
+        {
+          "id": "ai-review-recorded",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "Create the comparison sheet, inspect it with agent vision, and append exactly one review action"
+        },
+        {
+          "id": "pipeline-sync",
+          "scope": "pass",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage3_build/orchestrate_passes.py sync {spec} --in-place"
+        },
+        {
+          "id": "part-coverage",
+          "scope": "final",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "python3 forge/stage4_review/check_part_coverage.py --spec {spec} --manifest parts.json"
+        },
+        {
+          "id": "action-ready",
+          "scope": "final",
+          "status": "pending",
+          "evidence": [],
+          "reason": "",
+          "command": "Verify explodable/clickable hierarchy, pivots, sockets, and root.userData.sculptRuntime"
+        }
+      ],
+      "reviewCount": 3,
+      "reviewHistorySha256": "c2ebc8d26c8736713bf32158fbc62b465c966230a4aeb58b191d50409e74f8ff"
+    }
+  ],
+  "correctionCycleBaseline": {
+    "perPass": {
+      "blockout": 2
+    },
+    "total": 2,
+    "maxPerPass": 3,
+    "maxTotal": 6
+  }
 }

@@ -27,24 +27,57 @@ function buildReferenceMissile(){
   modelPart(g,new THREE.TorusGeometry(.17,.045,8,24),blue,0,0,.8);
   return g;
 }
+function buildReferenceCapsule(color){
+ const g=new THREE.Group(),pearl=itemModelMaterial(0xeef4ff),dark=itemModelMaterial(0x15253f),energy=itemModelMaterial(color,true);
+ // Transparent-looking energy vessel enclosed by four modeled pearl straps.
+ const core=modelPart(g,new THREE.SphereGeometry(.34,24,16),energy);core.scale.z=1.65;
+ for(const z of [-.37,.37])modelPart(g,new THREE.TorusGeometry(.30,.035,8,28),dark,0,0,z);
+ for(let j=0;j<4;j++){
+  const a=j*Math.PI/2,strap=new THREE.Mesh(kartRibbon([[Math.cos(a)*.21,Math.sin(a)*.21,-.49],[Math.cos(a)*.37,Math.sin(a)*.37,-.27],[Math.cos(a)*.39,Math.sin(a)*.39,.25],[Math.cos(a)*.20,Math.sin(a)*.20,.49]],.07,.035),pearl);g.add(strap);
+ }
+ modelPart(g,new THREE.TorusGeometry(.28,.035,8,28),energy,0,0,-.4);
+ return g;
+}
 function buildInventoryModel(key){
  if(key==='mine')return buildReferenceMine();if(key==='missile')return buildReferenceMissile();
  const g=new THREE.Group(),pearl=itemModelMaterial(0xeef4ff),dark=itemModelMaterial(0x15253f);
- const accent=itemModelMaterial(key==='shield'?0x42e4ed:key==='pulse'?0xba73fa:0xffad3d,true);
+ const palette={shield:0x42e4ed,pulse:0xffbc36,triple:0xa63dff,burst:0xff2258};
+ const accent=itemModelMaterial(palette[key]||palette.burst,true);
  if(key==='shield'){
+  g.name='Aegis Shield';
   const s=new THREE.Shape();s.moveTo(0,.7);s.lineTo(.6,.43);s.lineTo(.49,-.35);s.lineTo(0,-.78);s.lineTo(-.49,-.35);s.lineTo(-.6,.43);s.closePath();
   modelPart(g,new THREE.ExtrudeGeometry(s,{depth:.18,bevelEnabled:true,bevelThickness:.04,bevelSize:.05,bevelSegments:3}),pearl);
-  const face=modelPart(g,new THREE.ExtrudeGeometry(s,{depth:.06,bevelEnabled:false}),accent,0,0,-.07);face.scale.set(.8,.8,1);
+  const face=modelPart(g,new THREE.ExtrudeGeometry(s,{depth:.06,bevelEnabled:true,bevelThickness:.018,bevelSize:.018,bevelSegments:2}),accent,0,0,-.09);face.scale.set(.8,.8,1);
+  modelPart(g,new THREE.TorusGeometry(.22,.027,8,32),pearl,0,-.03,-.14);
+  const hub=modelPart(g,new THREE.SphereGeometry(.14,20,12),accent,0,-.03,-.16);hub.scale.z=.5;
+  // Actual hexagonal reinforcement, visible from orbit views as shallow surface ribs.
+  for(let row=-2;row<=2;row++)for(let col=-2;col<=2;col++){
+   const x=col*.145+(row%2)*.07,y=row*.126;
+   if(Math.abs(x)>.30-Math.max(0,-y)*.2||Math.hypot(x,y)<.22)continue;
+   modelPart(g,new THREE.TorusGeometry(.078,.006,3,6),pearl,x,y,-.125).rotation.z=Math.PI/6;
+  }
  }else if(key==='pulse'){
-  modelPart(g,new THREE.SphereGeometry(.32,20,12),accent);
-  for(let i=0;i<3;i++){const ring=modelPart(g,new THREE.TorusGeometry(.48+i*.16,.04,8,32),accent);ring.rotation.x=i*.8;ring.rotation.y=i*.6;}
+  g.name='Overseer Pulse';
+  modelPart(g,new THREE.CylinderGeometry(.49,.54,.20,32),dark,0,-.2);
+  modelPart(g,new THREE.TorusGeometry(.45,.095,8,32),pearl,0,-.09).rotation.x=Math.PI/2;
+  modelPart(g,new THREE.SphereGeometry(.29,24,16),accent,0,.25);
+  for(let i=0;i<6;i++){
+   const a=i*Math.PI/3,m=modelPart(g,new THREE.BoxGeometry(.13,.25,.17),pearl,Math.sin(a)*.43,-.16,Math.cos(a)*.43);m.rotation.y=a;
+  }
+  for(let i=0;i<3;i++){
+   const ring=modelPart(g,new THREE.TorusGeometry(.50+i*.15,.016,6,48,Math.PI*1.7),accent,0,-.38+i*.44);
+   ring.rotation.x=Math.PI/2;ring.rotation.z=i*1.7;
+  }
+ }else if(key==='triple'){
+  g.name='Node Cluster';
+  for(let i=0;i<3;i++){
+   const a=i*Math.PI*2/3,body=buildReferenceCapsule(palette.triple);body.scale.setScalar(.64);body.position.set(Math.sin(a)*.40,Math.cos(a)*.40,0);body.rotation.set(0,Math.sin(a)*.5,-a);g.add(body);
+  }
+  modelPart(g,new THREE.SphereGeometry(.13,16,12),accent,0,0,-.2);
  }else{
-  const count=key==='triple'?3:1;
-  for(let i=0;i<count;i++){const body=new THREE.Group();g.add(body);body.position.set(count===1?0:(i-1)*.55,i===1&&count===3?.24:0,0);body.scale.setScalar(count===1?1:.62);
-   modelPart(body,new THREE.CylinderGeometry(.34,.34,.8,24),pearl).rotation.x=Math.PI/2;
-   modelPart(body,new THREE.TorusGeometry(.26,.065,8,28),accent,0,0,-.44);
-   modelPart(body,new THREE.ConeGeometry(.25,.6,20),accent,0,0,.65).rotation.x=Math.PI/2;
-   modelPart(body,new THREE.TorusGeometry(.31,.035,8,24),dark,0,0,.34);
+  g.name='Signal Burst';g.add(buildReferenceCapsule(palette.burst));
+  for(let i=0;i<3;i++){
+   const fin=modelPart(g,sculptedPanel([[.19,0,.09],[.58,0,.70],[.36,0,.56],[.20,0,.40]],.045),accent);fin.rotation.z=i*Math.PI*2/3;
   }
  }
  return g;

@@ -499,6 +499,7 @@ function reportFrameMetrics(now){
 }
 function frame(now){
   requestAnimationFrame(frame);
+  if(typeof renderReconstructionReview==='function'&&renderReconstructionReview())return;
   if(document.hidden){last=now;return;}
   reportFrameMetrics(now);
   if(typeof raceTelemetry!=='undefined')raceTelemetry.frame(now,game.state,game.raceTime);

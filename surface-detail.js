@@ -60,7 +60,7 @@ function foliageGeometry(seed,tint){
     const a=random()*Math.PI*2,r=Math.sqrt(random())*3.3;
     const center=new THREE.Vector3(Math.cos(a)*r,1.7+random()*2.2+(1-r/3.3),Math.sin(a)*r*.8);
     q.setFromEuler(new THREE.Euler(random()*2.4-.8,a,random()*.8));
-    const length=.4+random()*.5,width=length*.36;
+    const length=.65+random()*.65,width=length*.36;
     const points=[[0,0,0],[-width,.08,length*.48],[0,.17,length],[width,.08,length*.48],[0,.2,length*.48]];
     for(const n of[0,1,4,1,2,4,2,3,4,3,0,4]){
       v.set(...points[n]).applyQuaternion(q).add(center);p.push(v.x,v.y,v.z);

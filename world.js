@@ -216,8 +216,10 @@ function buildEnvironment(){
     for(let j=0;j<=levels;j++)for(let k=0;k<=segments;k++){
       const t=j/levels,a=k/segments*Math.PI*2;
       const rim=.95+.035*Math.sin(a*7+seed)+.025*Math.sin(a*13+seed);
-      const taper=Math.pow(1-t,.64),flute=Math.sin(a*19+Math.sin(t*8+seed))*.045;
-      const rr=r*(.025+taper*(rim+flute*Math.sin(t*Math.PI)));
+      const taper=Math.pow(1-t,.64);
+      const flute=Math.sin(a*19+Math.sin(t*8+seed))*.055+Math.sin(a*31+seed)*.022;
+      const strata=(Math.sin(t*45+a*2+seed)*.017+Math.sin(t*83+a*5)*.009)*Math.sin(t*Math.PI);
+      const rr=r*(.025+taper*(rim+flute*Math.sin(t*Math.PI)+strata));
       p.push(Math.cos(a)*rr+Math.sin(t*4)*r*.08,-depth*t,Math.sin(a)*rr*.83);
       c.setHex(j<2?0x728c67:activeMap.id==='canopy'?0xb5b6a1:0xabb0c3).multiplyScalar(.8+.2*(1-t));colors.push(c.r,c.g,c.b);uv.push(k/segments*4,t*3);
       if(j<levels&&k<segments){const n=j*(segments+1)+k,m=n+segments+1;idx.push(n,n+1,m,n+1,m+1,m);}
@@ -233,7 +235,7 @@ function buildEnvironment(){
       const branch=i%6,a=branch*Math.PI/3,az=rnd()*Math.PI*2,rad=Math.pow(rnd(),.45);
       const center=new THREE.Vector3(Math.cos(a)*2.65+Math.cos(az)*rad*1.55,2.35+branch*.14+(rnd()-.5)*1.6,Math.sin(a)*2.05+Math.sin(az)*rad*1.3);
       const rotation=new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd()-.5)*2,az,(rnd()-.5)*2));
-      const radius=.095+rnd()*.085;color.setHex(palette[Math.floor(rnd()*palette.length)]);
+      const radius=.15+rnd()*.11;color.setHex(palette[Math.floor(rnd()*palette.length)]);
       for(let petal=0;petal<5;petal++){
         const angle=petal*Math.PI*.4,cs=Math.cos(angle),sn=Math.sin(angle),length=radius*(.85+rnd()*.35),width=length*.62;
         const base=[0,0,0],left=[cs*length*.58-sn*width,sn*length*.58+cs*width,.018],tip=[cs*length*1.5,sn*length*1.5,.045],right=[cs*length*.58+sn*width,sn*length*.58-cs*width,.018];
@@ -254,15 +256,30 @@ function buildEnvironment(){
   const trunk=mergeGeos(branchGeos);branchGeos.forEach(g=>g.dispose());
   const cherrySpots=[],bonsaiSpots=[];
   const pondMat=(typeof createImmersionWater==='function')?createImmersionWater(activeMap,'pond'):new THREE.MeshPhysicalMaterial({color:0x83d6e5,roughness:.09,metalness:.5,clearcoat:1,transparent:true,opacity:.85,side:THREE.DoubleSide});
-  const waterfallMat=new THREE.ShaderMaterial({side:THREE.DoubleSide,transparent:true,depthWrite:false,uniforms:{time:zenWorldTime},vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vUv;uniform float time;void main(){float strand=pow(.5+.5*sin(vUv.x*79.+sin(vUv.y*14.+time*2.)*.3),7.);float rush=.5+.5*sin(vUv.y*100.+time*7.+vUv.x*13.);vec3 c=mix(vec3(.26,.61,.89),vec3(.84,.96,1.),strand*.8+rush*.16);float edge=smoothstep(0.,.08,vUv.x)*smoothstep(0.,.08,1.-vUv.x);float fade=smoothstep(0.,.15,vUv.y);gl_FragColor=vec4(c,edge*fade*.82);}`});
+  const waterfallMat=new THREE.ShaderMaterial({side:THREE.DoubleSide,transparent:true,depthWrite:false,uniforms:{time:zenWorldTime},vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vUv;uniform float time;void main(){float strand=pow(.5+.5*sin(vUv.x*79.+sin(vUv.y*14.+time*2.)*.3),7.);float rush=.5+.5*sin(vUv.y*100.+time*7.+vUv.x*13.);vec3 c=mix(vec3(.26,.61,.89),vec3(.84,.96,1.),strand*.8+rush*.16);float edge=smoothstep(0.,.08,vUv.x)*smoothstep(0.,.08,1.-vUv.x);float fade=smoothstep(0.,.15,vUv.y);gl_FragColor=vec4(c,edge*fade*.82);
+#include <tonemapping_fragment>
+#include <encodings_fragment>
+}`});
   function waterfall(island,width,angle){
     const length=island.depth+40,seg=20,p=[],uv=[],idx=[];for(let j=0;j<=seg;j++){const t=j/seg;for(let k=0;k<=8;k++){const q=k/8,x=(q-.5)*width,z=island.r*.8+Math.sin(Math.min(t*5,Math.PI/2))*2.5;const ca=Math.cos(angle),sa=Math.sin(angle);p.push(island.x+x*ca-z*sa,island.y+.08-t*length,island.z+x*sa+z*ca);uv.push(q,1-t);if(j<seg&&k<8){const a=j*9+k;idx.push(a,a+9,a+1,a+1,a+9,a+10);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();world.add(new THREE.Mesh(g,waterfallMat));
   }
   const roofMat=new THREE.MeshStandardMaterial({color:0x38354e,roughness:.58,metalness:.15,side:THREE.DoubleSide});
-  const woodMat=new THREE.MeshStandardMaterial({color:0x725062,roughness:.8});
+  const woodMat=new THREE.MeshStandardMaterial({color:0x682d3e,roughness:.63});
   const plasterMat=new THREE.MeshStandardMaterial({color:0xe7d6df,roughness:.8});
   function roofGeometry(width,depth){const p=[],idx=[];for(let z=0;z<=16;z++){const zz=(z/16-.5)*2;for(let x=0;x<=16;x++){const xx=(x/16-.5)*2;const y=(1-Math.abs(zz))*2.5+Math.pow(Math.abs(xx),6)*1.5+Math.pow(Math.abs(zz),8)*.6;p.push(xx*width/2,y,zz*depth/2);if(x<16&&z<16){const a=z*17+x;idx.push(a,a+17,a+1,a+1,a+17,a+18);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setIndex(idx);g.computeVertexNormals();return g;}
-  function temple(island){const group=new THREE.Group();group.position.set(island.x-island.r*.12,island.y+.35,island.z-island.r*.16);const levels=3;for(let j=0;j<levels;j++){const scale=1-j*.2,y=j*5;const floor=new THREE.Mesh(new THREE.BoxGeometry(12*scale,3.7,8*scale),plasterMat);floor.position.y=y+2;group.add(floor);for(const x of[-1,1])for(const z of[-1,1]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,4.6,8),woodMat);post.position.set(x*6.2*scale,y+2,z*4.2*scale);group.add(post);}const roof=new THREE.Mesh(roofGeometry(18*scale,13*scale),roofMat);roof.position.y=y+3.7;roof.castShadow=true;group.add(roof);for(let k=-2;k<=2;k++){const window=new THREE.Mesh(new THREE.PlaneGeometry(.6,2),woodMat);window.position.set(k*1.5*scale,y+2,4*scale+.02);group.add(window);}const deck=new THREE.Mesh(new THREE.BoxGeometry(15*scale,.35,10.5*scale),stoneMat);deck.position.y=y+.2;group.add(deck);}world.add(group);}
+  function temple(island){const group=new THREE.Group();group.position.set(island.x-island.r*.12,island.y+.35,island.z-island.r*.16);const levels=3;for(let j=0;j<levels;j++){const scale=1-j*.2,y=j*5;const floor=new THREE.Mesh(new THREE.BoxGeometry(12*scale,3.7,8*scale),plasterMat);floor.position.y=y+2;group.add(floor);for(const x of[-1,1])for(const z of[-1,1]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,4.6,8),woodMat);post.position.set(x*6.2*scale,y+2,z*4.2*scale);group.add(post);}const roof=new THREE.Mesh(roofGeometry(18*scale,13*scale),roofMat);roof.position.y=y+3.7;roof.castShadow=true;group.add(roof);for(let k=-2;k<=2;k++){const window=new THREE.Mesh(new THREE.PlaneGeometry(.6,2),woodMat);window.position.set(k*1.5*scale,y+2,4*scale+.02);group.add(window);}const deck=new THREE.Mesh(new THREE.BoxGeometry(15*scale,.35,10.5*scale),stoneMat);deck.position.y=y+.2;group.add(deck);
+      // Balcony rails, tiled eave lines and warm recessed windows establish temple scale.
+      const light=new THREE.MeshStandardMaterial({color:0xffd28a,emissive:0xffa34e,emissiveIntensity:.7,roughness:.5});
+      for(const side of [-1,1]){
+        mapMesh(new THREE.BoxGeometry(14*scale,.12,.13),woodMat,group,0,y+1.05,side*5*scale);
+        for(let k=-5;k<=5;k++)mapMesh(new THREE.BoxGeometry(.10,.88,.10),woodMat,group,k*1.25*scale,y+.65,side*5*scale);
+        for(let k=-2;k<=2;k++)mapMesh(new THREE.PlaneGeometry(.42,1.4),light,group,k*1.5*scale,y+2,side*(4*scale+.04)).rotation.y=side<0?Math.PI:0;
+        for(let k=-7;k<=7;k++){
+          const x=k*1.1*scale;
+          mapTube([[x,y+6.22,0],[x,y+4.6,side*3*scale],[x,y+4.15+Math.pow(Math.abs(x)/(9*scale),6)*1.5,side*6.5*scale]],.055,roofMat,group,6);
+        }
+      }
+    }world.add(group);}
   islands.forEach((island,n)=>{
     const cliff=new THREE.Mesh(islandGeometry(island.r,island.depth,n+80),cliffMat);cliff.position.set(island.x,island.y,island.z);cliff.castShadow=true;cliff.receiveShadow=true;world.add(cliff);
     const shape=new THREE.Shape(),rimRandom=mulberry(n+80);for(let k=0;k<32;k++){const a=k/32*Math.PI*2,r=island.r*(.89+rimRandom()*.16)+.08;if(k===0)shape.moveTo(Math.cos(a)*r,-Math.sin(a)*r*.83);else shape.lineTo(Math.cos(a)*r,-Math.sin(a)*r*.83);}shape.closePath();const cap=new THREE.Mesh(new THREE.ShapeGeometry(shape),grassMat);cap.rotation.x=-Math.PI/2;cap.position.set(island.x,island.y+.02,island.z);cap.receiveShadow=true;world.add(cap);
@@ -271,11 +288,20 @@ function buildEnvironment(){
     const stream=new THREE.Mesh(new THREE.PlaneGeometry(island.r*.29,island.r*.53),pondMat);stream.rotation.x=-Math.PI/2;stream.position.set(island.x,island.y+.1,island.z+island.r*.55);world.add(stream);
     waterfall(island,island.r*.29,0);if(n%3===0)waterfall(island,island.r*.18,-.9);
     if(island.temple){if(activeMap.id==='cherry')temple(island);else if(!(activeMap.id==='canopy'&&n===0))buildMapLandmark(island,n);}
-    const count=Math.floor(island.r/4);for(let j=0;j<count;j++){const a=j/count*Math.PI*2+random()*.2,d=island.r*(.56+random()*.2),spot={x:island.x+Math.cos(a)*d,y:island.y+.06,z:island.z+Math.sin(a)*d*.78,s:1+random()*.6,rot:random()*6.3};(activeMap.id!=='cherry'||j%3===0?bonsaiSpots:cherrySpots).push(spot);}
+    const count=Math.floor(island.r/2.4);for(let j=0;j<count;j++){const a=j/count*Math.PI*2+random()*.2,d=island.r*(.56+random()*.2),spot={x:island.x+Math.cos(a)*d,y:island.y+.06,z:island.z+Math.sin(a)*d*.78,s:1+random()*.6,rot:random()*6.3};(activeMap.id!=='cherry'||j%3===0?bonsaiSpots:cherrySpots).push(spot);}
     // Irregular pale stepping stones on the moss, grouped around the pond.
     const stones=[];for(let k=0;k<8;k++){const g=rockGeo(n*19+k);g.scale(.8,.18,.65);g.translate(island.x+Math.cos(k*.4)*island.r*.5,island.y+.15,island.z+Math.sin(k*.4)*island.r*.38);stones.push(g);}const stoneGeo=mergeGeos(stones);stones.forEach(g=>g.dispose());world.add(new THREE.Mesh(stoneGeo,stoneMat));
   });
   function instanceTrees(spots,isBonsai){if(!spots.length)return;const can=new THREE.InstancedMesh(isBonsai?greenGeo:pinkGeo,isBonsai?pinkMat:blossomMat,spots.length),tr=new THREE.InstancedMesh(trunk,barkMat,spots.length),matrix=new THREE.Matrix4(),q=new THREE.Quaternion(),axis=new THREE.Vector3(0,1,0);spots.forEach((s,i)=>{q.setFromAxisAngle(axis,s.rot);matrix.compose(new THREE.Vector3(s.x,s.y,s.z),q,new THREE.Vector3(s.s,s.s*(isBonsai?.72:1),s.s));tr.setMatrixAt(i,matrix);matrix.compose(new THREE.Vector3(s.x,s.y+s.s*(isBonsai?2.6:3.6),s.z),q,new THREE.Vector3(s.s*(isBonsai?1.25:1),s.s*(isBonsai?.38:1),s.s));can.setMatrixAt(i,matrix);});can.castShadow=true;tr.castShadow=true;world.add(can,tr);}
+  // Planted terraces frame the road at driver height. No vegetation enters the lanes.
+  for(let k=0;k<50;k++){
+    const u=k/50+.009;if(trackAG(u)>.15)continue;
+    const side=k%2?1:-1,p=new THREE.Vector3();trackPoint(u,side*12.8,-.6,p);
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(3.7,2.6,1.8,12),stoneMat);base.position.copy(p);base.position.y-=.9;world.add(base);
+    const soil=new THREE.Mesh(new THREE.CircleGeometry(3.6,16),grassMat);soil.rotation.x=-Math.PI/2;soil.position.copy(p);soil.position.y+=.02;world.add(soil);
+    const spot={x:p.x,y:p.y+.03,z:p.z,s:.8+random()*.35,rot:random()*6.28};
+    (activeMap.id==='cherry'?cherrySpots:bonsaiSpots).push(spot);
+  }
   instanceTrees(cherrySpots,false);instanceTrees(bonsaiSpots,true);
   if(!cherrySpots.length){pinkGeo.dispose();blossomMat.dispose();}
   if(!bonsaiSpots.length){greenGeo.dispose();pinkMat.dispose();}
@@ -366,6 +392,18 @@ function buildCircuitArchitecture(){
       if(activeMap.id==='stormforge')mapTube([[side*6.5,-1,-3],[side*3,-6,0],[side*6.5,-1,3]],.22,dark,g,4);
     }
   }
+  for(let k=0;k<100;k++){
+    const u=k/100;if(trackAG(u)>.15)continue;const g=putAt(u);
+    for(const side of [-1,1]){
+      mapMesh(new THREE.BoxGeometry(.16,1.05,.16),metal,g,side*7.35,.53,0);
+      if(k%4===0){
+        mapMesh(new THREE.CylinderGeometry(.15,.30,1.7,8),metal,g,side*8.3,.85,0);
+        mapMesh(new THREE.BoxGeometry(.64,.62,.64),dark,g,side*8.3,1.96,0);
+        mapMesh(new THREE.BoxGeometry(.49,.46,.66),glow,g,side*8.3,1.96,0);
+        const cap=mapMesh(new THREE.ConeGeometry(.68,.35,4),metal,g,side*8.3,2.44,0);cap.rotation.y=Math.PI/4;
+      }
+    }
+  }
   // Start gate is a full-width traversable arch; the hanging banner clears racers.
   const gate=putAt(.007);
   if(activeMap.id==='cherry'){
@@ -381,6 +419,23 @@ function buildCircuitArchitecture(){
   const flagMat=new THREE.MeshStandardMaterial({map:TEX.finish,emissive:0x7ca2cd,emissiveIntensity:.25,side:THREE.DoubleSide});
   mapMesh(new THREE.PlaneGeometry(6,1.3),flagMat,gate,0,8.5,0);
   if(activeMap.id==='stormforge'){
+    const portal=new THREE.Group();portal.position.set(-100,32,-302);world.add(portal);
+    const archMat=new THREE.MeshStandardMaterial({color:0x778391,metalness:.68,roughness:.3});
+    const portalLight=new THREE.MeshStandardMaterial({color:0xffb64b,emissive:0xff8a20,emissiveIntensity:2.3,roughness:.3});
+    for(let ring=0;ring<4;ring++){
+      const z=-ring*6,r=37-ring*1.6;
+      mapMesh(new THREE.TorusGeometry(r,2.1,8,72),archMat,portal,0,0,z);
+      mapMesh(new THREE.TorusGeometry(r-2.2,.32,6,72),portalLight,portal,0,0,z+.8);
+      for(let j=0;j<24;j++){
+        const a=j*Math.PI/12,m=mapMesh(new THREE.BoxGeometry(2.8,4.8,3.2),dark,portal,Math.sin(a)*r,Math.cos(a)*r,z);m.rotation.z=-a;
+        if(j%2===0){const l=mapMesh(new THREE.BoxGeometry(1.3,3.6,.5),portalLight,portal,Math.sin(a)*(r-1),Math.cos(a)*(r-1),z+1.9);l.rotation.z=-a;}
+      }
+    }
+    for(const side of [-1,1]){
+      mapMesh(new THREE.BoxGeometry(9,82,17),dark,portal,side*43,3,-8);
+      mapMesh(new THREE.BoxGeometry(.7,66,17.1),portalLight,portal,side*43,3,-8);
+      mapMesh(new THREE.BoxGeometry(13,3,21),archMat,portal,side*43,43,-8);
+    }
     // Track passes through the illuminated ribbed hangar; all ribs clear its width.
     for(let k=0;k<9;k++){
       const g=putAt(.325+k*.008);const pts=[];for(let j=0;j<=24;j++){const a=j/24*Math.PI;pts.push([Math.cos(a)*10,Math.sin(a)*12,0]);}mapTube(pts,.65,metal,g,24);mapTube(pts,.13,glow,g,24).position.z=.7;

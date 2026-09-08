@@ -65,7 +65,14 @@ for(const mobile of [false,true]){
   }
   run(read('item-models.js'));
   for(const name of ['buildReferenceMine','buildReferenceMissile']){const item=run(name+'()'),check=geometryCheck(item);assert.ok(check.bounds.x<3&&check.bounds.z<3,'projectile fits its collision envelope');assert.ok(check.meshes>=6,'projectile uses authored parts');}
-  console.log('PASS reference mine and missile: finite authored geometry and collision bounds');
+  const itemHashes=new Set();
+  for(const [key,color] of Object.entries({burst:0xff2258,shield:0x42e4ed,mine:0xa3e635,missile:0x259eea,pulse:0xffbc36,triple:0xa63dff})){
+   const item=run(`buildInventoryModel('${key}')`),check=geometryCheck(item);itemHashes.add(check.hash);
+   assert.ok(Math.max(...check.bounds.toArray())<3,key+': bounded pickup model');
+   let accent=false;item.traverse(o=>{if(o.isMesh&&o.material.color.getHex()===color)accent=true;});assert.ok(accent,key+': reference energy color');
+  }
+  assert.equal(itemHashes.size,6,'all inventory models have distinct geometry');
+  console.log('PASS all six reference items: finite distinct geometry, energy colors and collision bounds');
   assert.equal(hashes.size,12,'all divisions have different actual geometry');assert.ok(sizes.size>=6,'division silhouettes have materially distinct bounds');
  }
 }

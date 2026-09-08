@@ -7,6 +7,19 @@ run(read('vendor/GLTFLoader.js'));
 const parseLoader=new THREE.GLTFLoader();
 THREE.GLTFLoader.prototype.loadAsync=async file=>{const buffer=fs.readFileSync(path.join(root,file));return new Promise((ok,fail)=>parseLoader.parse(buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.length),'',ok,fail));};
 run(read('core.js').split('function hexToRgb')[0]);run(read('kart-clips.js'));run(read('kart-materials.js'));run(read('vehicles.js').split('// ---------- Item / token pickups ----------')[0]);run(read('kart-assets.js'));
+// Weld positions conceptually so normal/UV splits do not look like open mesh edges.
+function assertClosedSkin(geometry,label){
+ const p=geometry.attributes.position,ids=[],vertices=new Map(),edges=new Map();
+ for(let i=0;i<p.count;i++){
+  const key=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>Math.round(v*1e5)).join(',');
+  if(!vertices.has(key))vertices.set(key,vertices.size);ids.push(vertices.get(key));
+ }
+ const idx=geometry.index,at=i=>ids[idx?idx.getX(i):i],n=idx?idx.count:p.count;
+ for(let i=0;i<n;i+=3){const face=[at(i),at(i+1),at(i+2)];if(new Set(face).size<3)continue;
+  for(let j=0;j<3;j++){const a=face[j],b=face[(j+1)%3],key=a<b?a+':'+b:b+':'+a;edges.set(key,(edges.get(key)||0)+1);}
+ }
+ assert.equal([...edges.values()].filter(n=>n===1).length,0,label+': no open skin boundary');
+}
 (async()=>{
  const progress=[];c.progress=(n,total)=>progress.push([n,total]);await run('loadKartAssets(progress)');assert.equal(progress.length,12);assert.equal(run('KART_ASSETS.templates.size'),12);
  let totalBytes=0,totalTriangles=0;
@@ -14,6 +27,7 @@ run(read('core.js').split('function hexToRgb')[0]);run(read('kart-clips.js'));ru
   const bytes=fs.readFileSync(path.join(root,'assets/models',div.id+'.glb'));totalBytes+=bytes.length;assert.equal(bytes.readUInt32LE(0),0x46546c67);assert.equal(bytes.readUInt32LE(4),2);assert.equal(bytes.readUInt32LE(8),bytes.length);
   const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString().trim());assert.equal(gltf.images?.length||0,0,'No reference images can enter playable meshes');assert.ok(bytes.length<4*1024*1024,'bounded uncompressed asset size');
   c.div=div;const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');
+  assertClosedSkin(a.getObjectByName('head-mesh').geometry,div.id+' head');
   const skin=a.getObjectByName('head-mesh').material,templateSkin=run('KART_ASSETS.templates.get(div.id)').getObjectByName('head-mesh').material;
   assert.notEqual(skin,templateSkin,'lighting never mutates cached model material');assert.equal(skin.emissiveIntensity,.16,div.id+': loaded driver receives energy-skin lighting');assert.equal(skin.metalness,.28);
   assert.notEqual(a.userData.body,b.userData.body);assert.notEqual(a.userData.exhaust[0].material,b.userData.exhaust[0].material);

@@ -1,0 +1,278 @@
+[
+  {
+    "id": "aether",
+    "angle": "front",
+    "file": "aether-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/aether.glb",
+    "sourceSha256": "f49b193b62ecbf3a27e9b1593c8dcebad8a87ffcc5d98dfa771207fce1130c3b",
+    "seconds": 15.03,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "animus",
+    "angle": "front",
+    "file": "animus-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/animus.glb",
+    "sourceSha256": "8a8d1bbeda2b705c606fec4810e408633d13ceb707c20995550434987530f624",
+    "seconds": 14.11,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "collective",
+    "angle": "front",
+    "file": "collective-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/collective.glb",
+    "sourceSha256": "c262390e4b1ff4578d05b59f304c46d874ffff14716965f7e301c468666a3bdc",
+    "seconds": 14.29,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "helix",
+    "angle": "front",
+    "file": "helix-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/helix.glb",
+    "sourceSha256": "8df3535c1b18875b945b4feceea08f72d5bb430a1e58e433cdfb7e894d0ed18e",
+    "seconds": 15.0,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "hybrid",
+    "angle": "front",
+    "file": "hybrid-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/hybrid.glb",
+    "sourceSha256": "9b9295051cd0e26f488095de534d1421ba145e2d7f995fcec693ea860b357609",
+    "seconds": 15.01,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "juris",
+    "angle": "front",
+    "file": "juris-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/juris.glb",
+    "sourceSha256": "d63dabb45a613863471822b73b668814f00435279cc79bc96d7f825f1029531e",
+    "seconds": 14.53,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "kinetic",
+    "angle": "front",
+    "file": "kinetic-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/kinetic.glb",
+    "sourceSha256": "0f166c79e000f43f8c72c12851c107f2075530eebae14f1f6b94f4b55dd60e6b",
+    "seconds": 13.65,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "loom",
+    "angle": "front",
+    "file": "loom-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/loom.glb",
+    "sourceSha256": "6b9c416d9e5c5d35fcc2fbecb8e222668cacbf44e8afdfecc4082c1b09ea74fa",
+    "seconds": 15.12,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "nexus",
+    "angle": "front",
+    "file": "nexus-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/nexus.glb",
+    "sourceSha256": "54bbd3208320199db5ef5432390e5d9076e0116b1676db827013ba904a081c24",
+    "seconds": 16.29,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "signal",
+    "angle": "front",
+    "file": "signal-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/signal.glb",
+    "sourceSha256": "641fbabf81a00935298b5288005479b96c95d7f4db2df304d8c999a17ec5128b",
+    "seconds": 15.34,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "vector",
+    "angle": "front",
+    "file": "vector-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/vector.glb",
+    "sourceSha256": "06207885ad5147a17d4a821af57f971509bebea15d461948c9590d28fe572348",
+    "seconds": 15.53,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "47cbd18d8c3a5f03bce67b46d7daedd31020c44984ed630d7aa45807a34fb504",
+    "seconds": 14.66,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  }
+]

@@ -9,11 +9,11 @@
     {
       "id": "aether",
       "file": "aether.glb",
-      "bytes": 615832,
-      "triangles": 42652,
-      "meshes": 37,
-      "nodes": 54,
-      "sha256": "cd30e2d5b84ebb9cd5ed8c96cc32cb29d002033147d70cf3fbcdf7780d876eaa",
+      "bytes": 822504,
+      "triangles": 54350,
+      "meshes": 39,
+      "nodes": 56,
+      "sha256": "f6a51f67195f1b90cd5d9e2432e909cfd568d22a44daf2aab946ce553862955e",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -24,18 +24,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "animus",
       "file": "animus.glb",
-      "bytes": 755760,
-      "triangles": 49692,
-      "meshes": 38,
-      "nodes": 55,
-      "sha256": "bd30a8c7f797dd2906af624fcfc18974a00917d88b027afc197457d252c526c2",
+      "bytes": 1037844,
+      "triangles": 65781,
+      "meshes": 40,
+      "nodes": 57,
+      "sha256": "bdfc505df0d575def4d8a01e38aa56ed76afc8c6daf1b37a8854dd5f2ea41d13",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -46,18 +47,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "collective",
       "file": "collective.glb",
-      "bytes": 716880,
-      "triangles": 47262,
-      "meshes": 37,
-      "nodes": 54,
-      "sha256": "8f8c8549717d7d80af8c1efe62e402a4147d7350016cd5a40ce7288d929be363",
+      "bytes": 940080,
+      "triangles": 60202,
+      "meshes": 39,
+      "nodes": 56,
+      "sha256": "1167b73756d2c2140172a5ae431bf7ba85066a835d3606b2ce1ced86051bb9ae",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -68,18 +70,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "helix",
       "file": "helix.glb",
-      "bytes": 706584,
-      "triangles": 46821,
-      "meshes": 37,
-      "nodes": 54,
-      "sha256": "7f21099f6760920dba94e17abd764210387fee599fb742ffcc780ebd5bda894d",
+      "bytes": 953520,
+      "triangles": 61042,
+      "meshes": 39,
+      "nodes": 56,
+      "sha256": "a2ba655a3e1ce6c8abac297f6e450c28daf8602b20c8c50e91ec7758163d399e",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -90,18 +93,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "hybrid",
       "file": "hybrid.glb",
-      "bytes": 720208,
-      "triangles": 47391,
-      "meshes": 40,
-      "nodes": 57,
-      "sha256": "241630c0c14207244ce0b81e1c3aa6f8dc4b6d3bd1e0d4573fcfb5b572394822",
+      "bytes": 905160,
+      "triangles": 58902,
+      "meshes": 41,
+      "nodes": 58,
+      "sha256": "b74880fab4d852bf85f58b7ee5a217df1f34b5689a301f3857317739919d43a5",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -112,18 +116,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "juris",
       "file": "juris.glb",
-      "bytes": 708152,
-      "triangles": 46822,
-      "meshes": 37,
-      "nodes": 54,
-      "sha256": "f624a53bb73fbf0f71075bf16812a91b095880737decca8225b727103a81becd",
+      "bytes": 924988,
+      "triangles": 59366,
+      "meshes": 39,
+      "nodes": 56,
+      "sha256": "d67f7b76af38c10a7ffe840747285fa1406532ceb90ce1b4b8f56f0df1b945c4",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -134,18 +139,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "kinetic",
       "file": "kinetic.glb",
-      "bytes": 685964,
-      "triangles": 46696,
-      "meshes": 41,
-      "nodes": 58,
-      "sha256": "f2d7e668195b08e972f49d1e93a26b3db8f777585f4bae0bae535b819c28d9b9",
+      "bytes": 882472,
+      "triangles": 58154,
+      "meshes": 43,
+      "nodes": 60,
+      "sha256": "1fc5db91228d0cf32f31d78ade03d62e642fda9c6aa26010befdb7c46feed3c5",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -156,18 +162,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "loom",
       "file": "loom.glb",
-      "bytes": 682528,
-      "triangles": 45517,
-      "meshes": 37,
-      "nodes": 54,
-      "sha256": "7a3bf8a9623c209a37cf3f1342df5b7ec272fb37a4bc546d2fb2bb2afd1a4581",
+      "bytes": 915348,
+      "triangles": 59506,
+      "meshes": 41,
+      "nodes": 58,
+      "sha256": "4f80cf70cd7d1f2f6d7f34e2ed2c19a630e179780b8b3eaf13c21c09aa991bbc",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -178,18 +185,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "nexus",
       "file": "nexus.glb",
-      "bytes": 762108,
-      "triangles": 49792,
-      "meshes": 35,
-      "nodes": 52,
-      "sha256": "cc6882199d9ece56e69a0ed9a43a1d302894b37454b77f6f35cac867dfb90be6",
+      "bytes": 1018068,
+      "triangles": 64214,
+      "meshes": 37,
+      "nodes": 54,
+      "sha256": "c8f407fc6a88d6ca8268e16117ac745c11f58873e91957b90cd3739beb3a078c",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -200,18 +208,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "signal",
       "file": "signal.glb",
-      "bytes": 655680,
-      "triangles": 44565,
-      "meshes": 39,
-      "nodes": 56,
-      "sha256": "0cd3f0d626383e99dabab383cf6cc9810a33a09be1e630fd330ca99da580966a",
+      "bytes": 748584,
+      "triangles": 50296,
+      "meshes": 43,
+      "nodes": 60,
+      "sha256": "3ca3bd16a388966747f115a290ed1e50fb1de65d6154340184809d691895b7fb",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -222,18 +231,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "vector",
       "file": "vector.glb",
-      "bytes": 704848,
-      "triangles": 47790,
-      "meshes": 41,
-      "nodes": 58,
-      "sha256": "875057cf91973c9ffd7aa960dbe58205ad86c2964de6a7a079d41f390fc2f011",
+      "bytes": 805324,
+      "triangles": 53944,
+      "meshes": 45,
+      "nodes": 62,
+      "sha256": "ef8ef9e2fea2ed58d36e819f8c62e5e43e7b43b81e531c4c0d2ca8a0fb79ea43",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -244,18 +254,19 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     },
     {
       "id": "zenflow",
       "file": "zenflow.glb",
-      "bytes": 696708,
-      "triangles": 46087,
-      "meshes": 40,
-      "nodes": 57,
-      "sha256": "e685961626d986e56c51658cdc195f33f473d7a5a62af461cb1c8362fa66c562",
+      "bytes": 867552,
+      "triangles": 57366,
+      "meshes": 43,
+      "nodes": 60,
+      "sha256": "4ed91da409aa88025de7b2cf9ea378ed5e9f5715ae3b0d03addf1bf85e452c8d",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -266,7 +277,8 @@
         "machined spoke and rim bevels",
         "concave dark wheel dishes and saturated light rims",
         "variant-specific enclosed front fairings",
-        "parametric continuous pectoral and abdominal envelope"
+        "continuous pectoral, clavicular, abdominal, oblique, scapular and latissimus relief; 64x72 torso sampling",
+        "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
     }

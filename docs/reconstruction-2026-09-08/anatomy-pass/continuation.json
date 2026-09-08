@@ -1,0 +1,20 @@
+{
+  "baseCommit": "7cea5e9e720275fb84e1b046df5dc0d1d0cb8504",
+  "authorization": "Stream cache expired. Please continue where you left off",
+  "route": "authorized direct Blender correction",
+  "stateStatus": "active",
+  "originalSpecSha256": "99f830307f440c881f0a4720e92804a67da91a9d2c0f5beab1bbd812f54cd420",
+  "preservedStateSha256": "19562813974d944bcb9b3a3bd46350d3485f6a26afc8ae1a9611e59c01d062fb",
+  "modelManifestSha256": "acce2025bbe1a34e3ddd21fe0c11177235930a66f3755aac3135d54086d3e26d",
+  "buildEvidence": "tools/author-playable-karts.py",
+  "renderEvidence": "joint-final/render-manifest.json",
+  "structuralVerification": "verification.txt",
+  "visualAccepted": false,
+  "gpuVerified": false,
+  "remaining": [
+    "reference hands and feet",
+    "finer anatomical segmentation",
+    "exact optical response",
+    "matched-camera WebGL gameplay comparison"
+  ]
+}
