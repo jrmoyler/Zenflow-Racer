@@ -67,7 +67,7 @@ button,.btn,.mono,kbd,.eyebrow{font-family:var(--body)}
 }
 
 /* The ceremony reserves a clear view of the three real karts beside the standings. */
-#results{justify-content:flex-end;align-items:center;padding:24px 3vw;background:linear-gradient(90deg,transparent 30%,#23385265);backdrop-filter:none}
+#results{flex-direction:row;justify-content:flex-end;align-items:center;padding:24px 3vw;background:linear-gradient(90deg,transparent 30%,#23385265);backdrop-filter:none}
 #results .panel{width:min(590px,46vw);max-height:calc(100dvh - 48px);overflow:auto;background:linear-gradient(145deg,#294961ed,#192d47f5);border-radius:16px;padding:24px;box-shadow:0 18px 60px #14263c55}
 #results h2{font-size:clamp(20px,2.2vw,32px);line-height:1.3;margin-bottom:12px}
 #results .sub{line-height:1.5;font-size:14px}#results #board{max-height:48dvh;overflow:auto}
@@ -86,3 +86,4 @@ button,.btn,.mono,kbd,.eyebrow{font-family:var(--body)}
 .loading-wordmark span{display:block;color:#f0f3ff;letter-spacing:.08em}.loading-caption{font:700 clamp(10px,2vw,14px) var(--body);letter-spacing:.24em;color:#355575;margin:10px 0 20px}
 #loading-progress{appearance:none;border:0;width:min(340px,76vw);height:5px;background:#55718a30;border-radius:4px;overflow:hidden}#loading-progress::-webkit-progress-bar{background:#55718a30}#loading-progress::-webkit-progress-value{background:#367d99;transition:width .2s}#loading-progress::-moz-progress-bar{background:#367d99}
 #loading-status{font:700 12px var(--body);letter-spacing:.16em;color:#355575}
+#game-update{position:fixed;right:16px;top:16px;z-index:1001;max-width:calc(100vw - 32px);padding:12px 16px;border:1px solid #baffff;border-radius:8px;background:#25485f;color:#e5ffff;font:700 14px var(--body);box-shadow:0 4px 18px #17334b55;cursor:pointer}

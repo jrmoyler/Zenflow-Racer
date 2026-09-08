@@ -68,7 +68,7 @@ function tickFinishCeremony(dt){
  finishCeremony.time+=step;
  for(const kart of finishCeremony.karts)animateShowroomKart(kart,finishCeremony.time,step,0);
  const root=finishCeremony.root,portrait=innerWidth<700||(innerWidth<900&&innerHeight>560),phase=Math.sin(finishCeremony.time*.12);
- const eye=root.localToWorld(new THREE.Vector3(portrait?2:1.5+phase,portrait?8:6.5,portrait?-23:-18));
+ const eye=root.localToWorld(new THREE.Vector3(portrait?2:1.5+phase,portrait?8:7.5,portrait?-23:-23));
  const target=root.localToWorld(new THREE.Vector3(portrait?0:-5.5,portrait?-3:1.3,0));
  camera.position.copy(eye);camera.up.set(0,1,0).transformDirection(root.matrixWorld);camera.lookAt(target);camera.fov=portrait?53:48;camera.updateProjectionMatrix();
  const center=root.getWorldPosition(new THREE.Vector3());sun.target.position.copy(center);sun.position.copy(center).add(new THREE.Vector3(-90,140,-60));

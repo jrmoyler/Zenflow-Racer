@@ -28,6 +28,7 @@ const cache='zenflow-racer-'+hash.digest('hex').slice(0,14);
 const shell=['./',...assets.filter(f=>/\.(js|css|html|webmanifest|png|jpg|jpeg|webp|glb|ttf|woff2)$/.test(f)).map(f=>'./'+f)];
 await writeFile(path.join(out,'sw.js'),`const CACHE=${JSON.stringify(cache)};const SHELL=${JSON.stringify(shell)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
+self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE_UPDATE')self.skipWaiting();});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('zenflow-racer-')&&k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.open(CACHE).then(cache=>cache.match(e.request)).then(c=>c||fetch(e.request)));});\n`);
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.open(CACHE).then(cache=>cache.match(e.request,{ignoreSearch:e.request.mode==='navigate'})).then(c=>c||fetch(e.request)));});\n`);
 console.log('Static game built in dist/');
