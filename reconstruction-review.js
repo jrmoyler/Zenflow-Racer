@@ -3,7 +3,7 @@
    Every view uses the real loader/materials/world. No reference imagery is loaded. */
 const reconstructionReview=(()=>{
  const q=new URLSearchParams(location.search),mode=q.get('review');
- if(!['kart','item','map'].includes(mode))return null;
+ if(!['kart','item','map','podium'].includes(mode))return null;
  return {mode,asset:q.get('asset')||(mode==='map'?'cherry':mode==='item'?'burst':'zenflow'),view:q.get('view')||'front',ready:false,scene:null,object:null};
 })();
 function renderReconstructionReview(){
@@ -14,7 +14,11 @@ function renderReconstructionReview(){
   for(const id of ['roster','hud','title-screen','pause','results'])document.getElementById(id)?.classList.add('hidden');
   const info=document.createElement('output');info.id='reconstruction-evidence';info.style.cssText='position:fixed;left:16px;top:16px;z-index:9999;background:#172b3e;color:white;padding:12px 16px;font:13px monospace;white-space:pre-line;max-width:90vw';document.body.append(info);
   game.state='paused';r.ready=true;
-  if(r.mode==='map'){
+  if(r.mode==='podium'){
+   // Explicit inspection fixture: never write records or claim a completed race.
+   game.racers=ROSTER.slice(0,3).map((d,i)=>{const racer=new Racer(d,i===0,i);racer.rank=i+1;racer.finished=true;racer.finishTime=90+i*2;racer.bestLap=30;racer.lap=3;return racer;});
+   game.player=game.racers[0];game.newBest=false;game.pbDelta=null;showResults();r.scene=scene;
+  }else if(r.mode==='map'){
    if(!MAPS.some(m=>m.id===r.asset))r.asset='cherry';selectMap(r.asset);buildPickups();
    const u=r.view==='rear'?.55:r.view==='side'?.32:.045;
    trackPoint(u,0,4,camera.position);const target=trackPoint(u+.025,0,2,new THREE.Vector3());camera.lookAt(target);camera.fov=65;camera.updateProjectionMatrix();
@@ -34,7 +38,8 @@ function renderReconstructionReview(){
   r.info=info;
  }
  renderer.setViewport?.(0,0,innerWidth,innerHeight);renderer.setScissorTest?.(false);
+ if(r.mode==='podium')tickFinishCeremony(0);
  renderer.render(r.scene,camera);
- r.info.textContent=`ACTUAL ${r.mode.toUpperCase()} · ${r.asset} · ${r.view}\n${r.renderer}\n${renderer.info?.render?.triangles||0} triangles · ${renderer.info?.render?.calls||0} draws\nCamera: ${camera.position.toArray().map(n=>n.toFixed(2)).join(', ')} · FOV ${camera.fov}`;
+ r.info.textContent=`${r.mode==='podium'?'STAGED INSPECTION · SAMPLE STANDINGS\n':''}ACTUAL ${r.mode.toUpperCase()} · ${r.asset} · ${r.view}\n${r.renderer}\n${renderer.info?.render?.triangles||0} triangles · ${renderer.info?.render?.calls||0} draws\nCamera: ${camera.position.toArray().map(n=>n.toFixed(2)).join(', ')} · FOV ${camera.fov}`;
  return true;
 }
