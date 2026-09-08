@@ -152,7 +152,7 @@ html[data-touch="on"] #tS{display:none}
 
 <section id="title-screen" aria-label="ZenFlow Racer main menu">
   <div class="title-stage"><div class="title-copy"><p class="eyebrow">SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Twelve rivals. Three circuits. One perfect line.</p></div>
-    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start race" disabled><span>Race now</span></button><button id="title-select" aria-label="Character select" disabled><span>Choose your racer</span></button><button id="title-settings" aria-label="Settings" disabled><span>Race settings</span></button></nav>
+    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start" disabled><span>Start</span></button><button id="title-settings" aria-label="Settings" disabled><span>Race settings</span></button></nav><details class="title-instructions"><summary>How to play</summary><p><b>Race three laps.</b> Collect items, drift through corners and use your racer’s unique power to take the lead.</p><p><b>Keyboard</b> · W / ↑ accelerate · A D / ← → steer · S / ↓ brake · Shift / Space drift, release for boost · E item · Q power · Esc pause.</p><p><b>Touch</b> · Auto throttle is on. Drag the steering wheel and use DRIFT, ITEM and POWER.</p><p><b>Gamepad</b> · Triggers drive and brake · stick steers · shoulder drifts · X item · Y power.</p></details>
   </div><p class="title-status" role="status">Preparing the starting grid…</p>
 </section>
 <div id="roster" class="screen hidden">
@@ -164,17 +164,18 @@ html[data-touch="on"] #tS{display:none}
     </div>
     <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>12 RACERS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
   </div>
+  <div class="setup-progress" aria-live="polite"><span id="setup-step">01 / CHARACTER</span><span>02 / CIRCUIT</span><span>03 / RACE</span></div>
   <div class="showroom">
     <section class="director-panel race-panel" aria-label="Selected racer">
       <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
-      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div>
+      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div><button id="confirm-racer" class="btn" disabled>Confirm racer →</button>
     </section>
     <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
-    <section class="track-panel race-panel" aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
-      <button class="map-card selected" data-map="cherry" aria-pressed="true"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Cherry Blossom Skyway</span></button>
+    <section class="track-panel race-panel" hidden aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
+      <button class="map-card" data-map="cherry" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Cherry Blossom Skyway</span></button>
       <button class="map-card" data-map="stormforge" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Nexus Stormforge</span></button>
       <button class="map-card" data-map="canopy" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Vital Canopy Run</span></button>
-    </div><p id="map-description">Floating gardens, cascading waterfalls, and sweeping sky bridges.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><button id="go" class="btn" disabled>Start Race</button></section>
+    </div><p id="map-description">Floating gardens, cascading waterfalls, and sweeping sky bridges.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><p id="map-prompt" role="status">Select a circuit to continue.</p><button id="go" class="btn" disabled>Enter race →</button><button id="back-racer" type="button">← Change racer</button></section>
   </div>
   <div class="selector-heading"><span>CHOOSE YOUR RACER</span><span>← → ARROWS OR SWIPE TO EXPLORE</span></div>
   <div id="grid" aria-label="Select a racer"></div>

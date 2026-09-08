@@ -19,6 +19,8 @@ for(const id of ['cherry','stormforge','canopy']){
   const world=run('world');
   const venue=world.getObjectByName('race-venue');
   assert.ok(venue,id+': authored race venue');
+  assert.ok(venue.userData.districts>=16,id+': inhabited outer districts');
+  assert.ok(venue.userData.lamps>=40,id+': promenade and trackside lighting');
   assert.ok(venue.userData.stands>=3,id+': grandstands distributed around circuit');
   assert.ok(venue.userData.garages>=1,id+': open pit garage');
   assert.ok(venue.userData.spectators>=200,id+': populated spectator terraces');
