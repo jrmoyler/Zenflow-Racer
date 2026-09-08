@@ -16,4 +16,6 @@ Validation: full `npm run verify`; subsequent updated `npm test`, production bui
 
 Removed unused cypress, trunk, lamp and pillar generators and the title's direct-race shortcut. Preserved reconstruction references, review history and export tools.
 
-Browser visual review was blocked: the browser could not access localhost, and Vercel preview authentication required access that automatic approval review rejected without explicit user authorization. No browser or physical-mobile visual/performance pass is claimed. Vercel reported a successful deployment for the initial PR commit.
+Browser review resumed with explicit preview-access authorization. Checked the deployed title, desktop racer confirmation, disabled race entry before circuit selection, Stormforge selection and race entry, pause, return to roster, phone portrait (390 × 844), landscape (844 × 390), Canopy selection and change-racer reset. Screenshots showed readable menus and actual rendered geometry. Review found a legacy phone rule hiding the map prompt; the follow-up restores it and compacts landscape map cards.
+
+The cloud browser reports Software 3D (Canvas), with throttled frames. These observations do not certify hardware WebGL rendering or physical-phone performance. No application errors appeared in the browser error log; unrelated browser-extension errors were present.

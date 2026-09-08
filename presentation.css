@@ -98,3 +98,12 @@ button:disabled{cursor:not-allowed;opacity:.5}button:not(:disabled):active{trans
 @media(max-width:440px){#roster[data-step="character"] .showroom{grid-template-columns:1fr}#roster[data-step="character"] #kart-preview{min-height:210px;grid-row:1}}
 
 @media(max-width:600px) and (orientation:portrait){#roster[data-step="character"] .director-panel{grid-column:1/-1;height:auto}}
+/* Legacy combined-menu rules must not hide the required circuit prompt. */
+#roster[data-step="map"] #map-prompt{display:block}
+@media(max-height:560px) and (orientation:landscape){
+ #roster[data-step="map"] .track-panel{padding:14px}
+ #roster[data-step="map"] .map-card{min-height:100px;padding:8px;gap:4px}
+ #roster[data-step="map"] .track-outline{height:54px}
+ #roster[data-step="map"] .track-meta{margin:8px 0}
+ #roster[data-step="map"] #map-prompt{margin:6px 0}
+}
