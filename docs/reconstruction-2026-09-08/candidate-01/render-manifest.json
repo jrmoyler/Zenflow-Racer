@@ -1,0 +1,22 @@
+[
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "47cbd18d8c3a5f03bce67b46d7daedd31020c44984ed630d7aa45807a34fb504",
+    "seconds": 14.97,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  },
+  {
+    "id": "signal",
+    "angle": "front",
+    "file": "signal-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/signal.glb",
+    "sourceSha256": "641fbabf81a00935298b5288005479b96c95d7f4db2df304d8c999a17ec5128b",
+    "seconds": 14.3,
+    "engine": "Blender Cycles CPU",
+    "samples": 32
+  }
+]

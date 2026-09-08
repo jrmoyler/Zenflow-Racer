@@ -1,0 +1,497 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.3.0 verify
+> npm test && npm run build && npm run test:release && npm run test:runtime && npm run test:assets
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.3.0 test
+> node tests/game-regression.cjs && node tests/race-telemetry.cjs && node tests/immersion-regression.cjs && node tests/presentation.cjs && node tests/webgl-lighting.cjs
+
+PASS Initial grid / idle update does not award a checkpoint or lap
+PASS Forward driving awards exactly three complete laps
+PASS Reverse looping cannot award laps or finish
+PASS Reverse shortcut then forward start crossing cannot award a lap
+PASS Brake has priority over a held accelerator
+PASS Pause clears held input and restores countdown
+PASS Pause/resume preserves race time
+PASS Finished racers rank by time ahead of unfinished racers
+PASS Paused animation frames freeze physics and race clock
+PASS Paused circuit redraws once, then sleeps while controls remain responsive
+PASS Hidden tabs perform no rendering or simulation work
+PASS Window blur pauses active races and releases controls
+PASS Results distinguish unfinished racers from recorded finish times
+PASS Every division has a separately named, documented power
+PASS All twelve powers activate once and reject cooldown spam
+PASS Power activation is rejected outside racing and after finishing
+PASS Powers recover cooldown only with simulation time and reset in fresh races
+PASS Time Dilation slows nearby rivals but preserves owner and distant rivals
+PASS Shared Fortune transfers tokens and respects the reserve cap
+PASS Phase Walk blocks direct attacks until its duration expires
+PASS Hologram Decoy intercepts a hostile missile then expires
+PASS Impact Drive spins a rival on contact
+PASS Verdict Mirror reflects one attack to the attacker
+PASS Sonic Lance hits the nearest forward rival in its lane
+PASS Thread Snare slows a crossing rival and expires
+PASS Side Step changes lane without advancing race distance
+PASS Orbital Magnet collects across lanes but respects range and cap
+PASS Sentinel Drone slows forward rivals
+PASS Sentinel Drone respects shields, reflection, phase, and regeneration
+PASS Regenesis cleanses spin and slow, recovers loss once, and caps tokens
+PASS Race cleanup removes all lingering ability zones
+PASS Projectile expiry disposes GPU resources once, including shared child resources
+PASS Race projectile cleanup releases mines and missiles
+PASS Records remain separate across circuits and selection rejects mid-race changes
+PASS Kart rig animation keeps transforms finite through drift, spin, hit, boost, wheelspin and finish states
+PASS Suspension follows the road at speed and settles back to the wheel rest height at zero speed
+PASS Blender clips layer additively onto the procedural pose and reset once their state fades
+PASS Boosts ramp in as a surge rather than an instant multiplier
+PASS Drift needs a hop, a speed floor and a steering commitment inside the hop window; counter-steer holds the charge
+PASS Slipstream engages after 0.8 s in a rival's draft, tows, then releases into a boost when pulling out
+PASS Wall impacts scrub speed in proportion to the impact angle
+PASS Lap splits record per-lap times, best lap and a delta toast against the previous lap
+PASS AI directors fire powers only on sensible conditions and respect cooldowns
+PASS AI items wait for a purpose: missiles need a target, mines a chaser, and missiles re-arm after 3 s
+PASS Rubber band is absent in SIMULATION and capped at +8% / +14% of the player top speed on STANDARD / OVERSEER
+PASS Grid slots stagger the start reaction so the front rows launch first
+PASS Item weighting keeps Overseer Pulse from the leader and arms the tail with missiles and clusters
+PASS Live mines are capped at six per race, retiring the oldest first
+PASS Node Cluster bursts are spaced by a short cooldown and each burst is a surge
+PASS Results board lists finish time, best lap and gap to the leader, and the sub-line carries the PB delta
+PASS Next Circuit cycles the map list only from the results screen and restarts with the same director
+PASS Key handlers ignore events typed into form fields and map Escape / R / M
+PASS Position-change toasts are pooled, throttled and yield to higher-priority messages
+PASS HUD update runs headless with the new elements: gap readout, speed bar, wrong-way delay, power button readiness
+PASS Analog steering clamps travel, ignores other fingers and releases on cancellation
+PASS Two fingers on the same action do not release one another
+PASS Touch steering assist is optional and does not override deliberate steering
+PASS Touch drift holds charge a rocket start during the final countdown
+PASS All twelve power effects produce finite geometry and transforms
+PASS Power effects enforce a live cap and dispose evicted materials
+PASS Expired power effects detach themselves and release materials
+PASS Disabling touch mode releases simultaneous steering, drift, item and power
+PASS Resize releases the old steering coordinate and held actions
+PASS Resume requests audio recovery in the button gesture
+PASS Backgrounding immediately mutes audio before hidden frames stop
+PASS Controls probe: A yaws left (player-visible) while moving forward; D yaws right
+PASS Stub canvas contexts yield plain materials for all twelve divisions without retrying textures
+PASS Fake 2D canvas produces livery, carbon, tyre and detail maps shared through TEX
+PASS Twelve divisions get twelve distinct livery and tyre textures at a shared detail set
+PASS Kart disposal releases materials but never the shared livery textures
+PASS Race FX init adds a bounded set of pooled meshes with finite geometry
+PASS Race FX hooks fired 200 times keep geometry finite, object count constant and post hints normalised
+PASS Race FX skid ring buffer wraps without growth and continuity survives teleports
+PASS Race FX clear removes every object and disposes each resource exactly once; re-init works
+PASS Race FX hooks are silent no-ops before init and under the stub Three context
+PASS Race FX mobile profile halves pool budgets and keeps the same draw-call bound
+PASS kart-clips.js is generated plain script under 60 KB with version 1 at 30 fps
+PASS Blender clip set covers every kart state
+PASS Every clip track targets a rig contract node with sorted finite additive keys
+PASS One-shot clips start and end at rest so state crossfades stay seamless
+PASS Signature poses exist: victory fist pump, spinout flail, hit whiplash
+{
+  "passed": 81,
+  "total": 81,
+  "cases": [
+    {
+      "name": "Initial grid / idle update does not award a checkpoint or lap",
+      "pass": true
+    },
+    {
+      "name": "Forward driving awards exactly three complete laps",
+      "pass": true
+    },
+    {
+      "name": "Reverse looping cannot award laps or finish",
+      "pass": true
+    },
+    {
+      "name": "Reverse shortcut then forward start crossing cannot award a lap",
+      "pass": true
+    },
+    {
+      "name": "Brake has priority over a held accelerator",
+      "pass": true
+    },
+    {
+      "name": "Pause clears held input and restores countdown",
+      "pass": true
+    },
+    {
+      "name": "Pause/resume preserves race time",
+      "pass": true
+    },
+    {
+      "name": "Finished racers rank by time ahead of unfinished racers",
+      "pass": true
+    },
+    {
+      "name": "Paused animation frames freeze physics and race clock",
+      "pass": true
+    },
+    {
+      "name": "Paused circuit redraws once, then sleeps while controls remain responsive",
+      "pass": true
+    },
+    {
+      "name": "Hidden tabs perform no rendering or simulation work",
+      "pass": true
+    },
+    {
+      "name": "Window blur pauses active races and releases controls",
+      "pass": true
+    },
+    {
+      "name": "Results distinguish unfinished racers from recorded finish times",
+      "pass": true
+    },
+    {
+      "name": "Every division has a separately named, documented power",
+      "pass": true
+    },
+    {
+      "name": "All twelve powers activate once and reject cooldown spam",
+      "pass": true
+    },
+    {
+      "name": "Power activation is rejected outside racing and after finishing",
+      "pass": true
+    },
+    {
+      "name": "Powers recover cooldown only with simulation time and reset in fresh races",
+      "pass": true
+    },
+    {
+      "name": "Time Dilation slows nearby rivals but preserves owner and distant rivals",
+      "pass": true
+    },
+    {
+      "name": "Shared Fortune transfers tokens and respects the reserve cap",
+      "pass": true
+    },
+    {
+      "name": "Phase Walk blocks direct attacks until its duration expires",
+      "pass": true
+    },
+    {
+      "name": "Hologram Decoy intercepts a hostile missile then expires",
+      "pass": true
+    },
+    {
+      "name": "Impact Drive spins a rival on contact",
+      "pass": true
+    },
+    {
+      "name": "Verdict Mirror reflects one attack to the attacker",
+      "pass": true
+    },
+    {
+      "name": "Sonic Lance hits the nearest forward rival in its lane",
+      "pass": true
+    },
+    {
+      "name": "Thread Snare slows a crossing rival and expires",
+      "pass": true
+    },
+    {
+      "name": "Side Step changes lane without advancing race distance",
+      "pass": true
+    },
+    {
+      "name": "Orbital Magnet collects across lanes but respects range and cap",
+      "pass": true
+    },
+    {
+      "name": "Sentinel Drone slows forward rivals",
+      "pass": true
+    },
+    {
+      "name": "Sentinel Drone respects shields, reflection, phase, and regeneration",
+      "pass": true
+    },
+    {
+      "name": "Regenesis cleanses spin and slow, recovers loss once, and caps tokens",
+      "pass": true
+    },
+    {
+      "name": "Race cleanup removes all lingering ability zones",
+      "pass": true
+    },
+    {
+      "name": "Projectile expiry disposes GPU resources once, including shared child resources",
+      "pass": true
+    },
+    {
+      "name": "Race projectile cleanup releases mines and missiles",
+      "pass": true
+    },
+    {
+      "name": "Records remain separate across circuits and selection rejects mid-race changes",
+      "pass": true
+    },
+    {
+      "name": "Kart rig animation keeps transforms finite through drift, spin, hit, boost, wheelspin and finish states",
+      "pass": true
+    },
+    {
+      "name": "Suspension follows the road at speed and settles back to the wheel rest height at zero speed",
+      "pass": true
+    },
+    {
+      "name": "Blender clips layer additively onto the procedural pose and reset once their state fades",
+      "pass": true
+    },
+    {
+      "name": "Boosts ramp in as a surge rather than an instant multiplier",
+      "pass": true
+    },
+    {
+      "name": "Drift needs a hop, a speed floor and a steering commitment inside the hop window; counter-steer holds the charge",
+      "pass": true
+    },
+    {
+      "name": "Slipstream engages after 0.8 s in a rival's draft, tows, then releases into a boost when pulling out",
+      "pass": true
+    },
+    {
+      "name": "Wall impacts scrub speed in proportion to the impact angle",
+      "pass": true
+    },
+    {
+      "name": "Lap splits record per-lap times, best lap and a delta toast against the previous lap",
+      "pass": true
+    },
+    {
+      "name": "AI directors fire powers only on sensible conditions and respect cooldowns",
+      "pass": true
+    },
+    {
+      "name": "AI items wait for a purpose: missiles need a target, mines a chaser, and missiles re-arm after 3 s",
+      "pass": true
+    },
+    {
+      "name": "Rubber band is absent in SIMULATION and capped at +8% / +14% of the player top speed on STANDARD / OVERSEER",
+      "pass": true
+    },
+    {
+      "name": "Grid slots stagger the start reaction so the front rows launch first",
+      "pass": true
+    },
+    {
+      "name": "Item weighting keeps Overseer Pulse from the leader and arms the tail with missiles and clusters",
+      "pass": true
+    },
+    {
+      "name": "Live mines are capped at six per race, retiring the oldest first",
+      "pass": true
+    },
+    {
+      "name": "Node Cluster bursts are spaced by a short cooldown and each burst is a surge",
+      "pass": true
+    },
+    {
+      "name": "Results board lists finish time, best lap and gap to the leader, and the sub-line carries the PB delta",
+      "pass": true
+    },
+    {
+      "name": "Next Circuit cycles the map list only from the results screen and restarts with the same director",
+      "pass": true
+    },
+    {
+      "name": "Key handlers ignore events typed into form fields and map Escape / R / M",
+      "pass": true
+    },
+    {
+      "name": "Position-change toasts are pooled, throttled and yield to higher-priority messages",
+      "pass": true
+    },
+    {
+      "name": "HUD update runs headless with the new elements: gap readout, speed bar, wrong-way delay, power button readiness",
+      "pass": true
+    },
+    {
+      "name": "Analog steering clamps travel, ignores other fingers and releases on cancellation",
+      "pass": true
+    },
+    {
+      "name": "Two fingers on the same action do not release one another",
+      "pass": true
+    },
+    {
+      "name": "Touch steering assist is optional and does not override deliberate steering",
+      "pass": true
+    },
+    {
+      "name": "Touch drift holds charge a rocket start during the final countdown",
+      "pass": true
+    },
+    {
+      "name": "All twelve power effects produce finite geometry and transforms",
+      "pass": true
+    },
+    {
+      "name": "Power effects enforce a live cap and dispose evicted materials",
+      "pass": true
+    },
+    {
+      "name": "Expired power effects detach themselves and release materials",
+      "pass": true
+    },
+    {
+      "name": "Disabling touch mode releases simultaneous steering, drift, item and power",
+      "pass": true
+    },
+    {
+      "name": "Resize releases the old steering coordinate and held actions",
+      "pass": true
+    },
+    {
+      "name": "Resume requests audio recovery in the button gesture",
+      "pass": true
+    },
+    {
+      "name": "Backgrounding immediately mutes audio before hidden frames stop",
+      "pass": true
+    },
+    {
+      "name": "Controls probe: A yaws left (player-visible) while moving forward; D yaws right",
+      "pass": true
+    },
+    {
+      "name": "Stub canvas contexts yield plain materials for all twelve divisions without retrying textures",
+      "pass": true
+    },
+    {
+      "name": "Fake 2D canvas produces livery, carbon, tyre and detail maps shared through TEX",
+      "pass": true
+    },
+    {
+      "name": "Twelve divisions get twelve distinct livery and tyre textures at a shared detail set",
+      "pass": true
+    },
+    {
+      "name": "Kart disposal releases materials but never the shared livery textures",
+      "pass": true
+    },
+    {
+      "name": "Race FX init adds a bounded set of pooled meshes with finite geometry",
+      "pass": true
+    },
+    {
+      "name": "Race FX hooks fired 200 times keep geometry finite, object count constant and post hints normalised",
+      "pass": true
+    },
+    {
+      "name": "Race FX skid ring buffer wraps without growth and continuity survives teleports",
+      "pass": true
+    },
+    {
+      "name": "Race FX clear removes every object and disposes each resource exactly once; re-init works",
+      "pass": true
+    },
+    {
+      "name": "Race FX hooks are silent no-ops before init and under the stub Three context",
+      "pass": true
+    },
+    {
+      "name": "Race FX mobile profile halves pool budgets and keeps the same draw-call bound",
+      "pass": true
+    },
+    {
+      "name": "kart-clips.js is generated plain script under 60 KB with version 1 at 30 fps",
+      "pass": true
+    },
+    {
+      "name": "Blender clip set covers every kart state",
+      "pass": true
+    },
+    {
+      "name": "Every clip track targets a rig contract node with sorted finite additive keys",
+      "pass": true
+    },
+    {
+      "name": "One-shot clips start and end at rest so state crossfades stay seamless",
+      "pass": true
+    },
+    {
+      "name": "Signature poses exist: victory fist pump, spinout flail, hit whiplash",
+      "pass": true
+    }
+  ]
+}
+PASS telemetry: percentiles, sustained windows, stalls, lifecycle, bounds and quality reset
+PASS recovery: environment rebake, still-frame invalidation and interrupted audio
+PASS immersion cherry hero parts 8 particles 520
+PASS immersion stormforge hero parts 22 particles 360
+PASS immersion canopy hero parts 28 particles 420
+PASS immersion layer: weather, heroes, rails, finite updates, map-switch disposal
+PASS scene cuts: commit under cover, duplicate/input gating, release and reduced motion
+PASS HDR target chain, capability fallback, single display transform, exposure, failure restoration and water view response
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.3.0 build
+> node scripts/build.mjs
+
+Static game built in dist/
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.3.0 test:release
+> node tests/build-shell.cjs
+
+PASS release shell: 40 entrypoint resources load offline; script dependency order, manifest launch, icons and 59 cached assets verified.
+PASS software 3D: topology, rotation, instances, occlusion, near clipping, bounded pixels; actual GLB median 23.1 ms, 26217 vertices, 43300 raster triangles, one Canvas blit.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.3.0 test:runtime
+> node tests/reference-runtime.cjs
+
+PASS desktop cherry: 206 meshes, 1299m closed circuit
+PASS desktop stormforge: 257 meshes, 1318m closed circuit
+PASS desktop canopy: 331 meshes, 1196m closed circuit
+PASS desktop cherry: 206 meshes, 1299m closed circuit
+PASS kart zenflow: 41 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart collective: 38 meshes; 3.03 × 2.75 × 4.03; rig 25 nodes
+PASS kart hybrid: 39 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart nexus: 36 meshes; 3.03 × 2.75 × 4.16; rig 25 nodes
+PASS kart kinetic: 41 meshes; 3.04 × 2.75 × 4.17; rig 25 nodes
+PASS kart juris: 37 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart signal: 42 meshes; 3.03 × 2.75 × 4.59; rig 25 nodes
+PASS kart loom: 39 meshes; 3.03 × 2.75 × 4.13; rig 25 nodes
+PASS kart vector: 44 meshes; 3.03 × 2.75 × 4.59; rig 25 nodes
+PASS kart aether: 38 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart animus: 38 meshes; 3.03 × 2.75 × 4.02; rig 25 nodes
+PASS kart helix: 37 meshes; 3.03 × 2.75 × 4.13; rig 25 nodes
+PASS reference mine and missile: finite authored geometry and collision bounds
+PASS mobile cherry: 206 meshes, 1299m closed circuit
+PASS mobile stormforge: 257 meshes, 1318m closed circuit
+PASS mobile canopy: 331 meshes, 1196m closed circuit
+PASS mobile cherry: 206 meshes, 1299m closed circuit
+PASS UI resource resolution and runtime script order
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.3.0 test:assets
+> node tests/playable-assets.cjs
+
+PASS playable assets: 12 actual GLBs, independent live rigs/materials, shared geometry, animation, ghost cloning and disposal; 9.05 MiB, 628411 triangles.
+PASS desktop cherry: 206 meshes, 1299m closed circuit
+PASS desktop stormforge: 257 meshes, 1318m closed circuit
+PASS desktop canopy: 331 meshes, 1196m closed circuit
+PASS desktop cherry: 206 meshes, 1299m closed circuit
+PASS kart zenflow: 41 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart collective: 38 meshes; 3.03 × 2.75 × 4.03; rig 25 nodes
+PASS kart hybrid: 39 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart nexus: 36 meshes; 3.03 × 2.75 × 4.16; rig 25 nodes
+PASS kart kinetic: 41 meshes; 3.04 × 2.75 × 4.17; rig 25 nodes
+PASS kart juris: 37 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart signal: 42 meshes; 3.03 × 2.75 × 4.59; rig 25 nodes
+PASS kart loom: 39 meshes; 3.03 × 2.75 × 4.13; rig 25 nodes
+PASS kart vector: 44 meshes; 3.03 × 2.75 × 4.59; rig 25 nodes
+PASS kart aether: 38 meshes; 3.03 × 2.75 × 4.14; rig 25 nodes
+PASS kart animus: 38 meshes; 3.03 × 2.75 × 4.02; rig 25 nodes
+PASS kart helix: 37 meshes; 3.03 × 2.75 × 4.13; rig 25 nodes
+PASS all six reference items: finite distinct geometry, energy colors and collision bounds
+PASS mobile cherry: 206 meshes, 1299m closed circuit
+PASS mobile stormforge: 257 meshes, 1318m closed circuit
+PASS mobile canopy: 331 meshes, 1196m closed circuit
+PASS mobile cherry: 206 meshes, 1299m closed circuit
+PASS UI resource resolution and runtime script order

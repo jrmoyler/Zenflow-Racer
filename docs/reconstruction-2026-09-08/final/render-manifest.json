@@ -1,0 +1,140 @@
+[
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "3651df5ea36df78a7287e4de36463b7aa49bfd0b486d37987fbf54c6aa2cb9a8",
+    "seconds": 15.55,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "zenflow",
+    "angle": "side",
+    "file": "zenflow-side.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "3651df5ea36df78a7287e4de36463b7aa49bfd0b486d37987fbf54c6aa2cb9a8",
+    "seconds": 15.9,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      8,
+      0,
+      3.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "zenflow",
+    "angle": "rear",
+    "file": "zenflow-rear.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/zenflow.glb",
+    "sourceSha256": "3651df5ea36df78a7287e4de36463b7aa49bfd0b486d37987fbf54c6aa2cb9a8",
+    "seconds": 15.2,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      -7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "signal",
+    "angle": "front",
+    "file": "signal-front.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/signal.glb",
+    "sourceSha256": "1a792888d4ddf61a3ddc9b878d36a55b043c0592f65d79b3ddc607310ba0286f",
+    "seconds": 14.83,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "signal",
+    "angle": "side",
+    "file": "signal-side.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/signal.glb",
+    "sourceSha256": "1a792888d4ddf61a3ddc9b878d36a55b043c0592f65d79b3ddc607310ba0286f",
+    "seconds": 16.29,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      8,
+      0,
+      3.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  },
+  {
+    "id": "signal",
+    "angle": "rear",
+    "file": "signal-rear.png",
+    "source": "/workspace/scratch/670ef16eb001/zenflow-racer/assets/models/signal.glb",
+    "sourceSha256": "1a792888d4ddf61a3ddc9b878d36a55b043c0592f65d79b3ddc607310ba0286f",
+    "seconds": 15.1,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.6,
+      -7,
+      4.5
+    ],
+    "cameraTarget": [
+      0,
+      0,
+      1.1
+    ],
+    "orthographicScale": 5.900000095367432,
+    "unoccupied": false,
+    "referenceStudio": true
+  }
+]

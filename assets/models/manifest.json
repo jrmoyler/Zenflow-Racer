@@ -13,7 +13,7 @@
       "triangles": 48124,
       "meshes": 39,
       "nodes": 56,
-      "sha256": "f49b193b62ecbf3a27e9b1593c8dcebad8a87ffcc5d98dfa771207fce1130c3b",
+      "sha256": "78e577829354bb17abbe4739daa2c0b52a6e0f4b9ab156ad0e3499b729138022",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -36,7 +36,7 @@
       "triangles": 59555,
       "meshes": 40,
       "nodes": 57,
-      "sha256": "8a8d1bbeda2b705c606fec4810e408633d13ceb707c20995550434987530f624",
+      "sha256": "ceeb91a6355ac34ec2431cbf6aee496983f940c73cb6c5afc85a5f031bde471c",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -55,11 +55,11 @@
     {
       "id": "collective",
       "file": "collective.glb",
-      "bytes": 828796,
+      "bytes": 828792,
       "triangles": 53976,
       "meshes": 39,
       "nodes": 56,
-      "sha256": "c262390e4b1ff4578d05b59f304c46d874ffff14716965f7e301c468666a3bdc",
+      "sha256": "f2fd2964cecb3b9b4c94a7313ccea486d2fb33ca34298979ce5a2b591f4a9df3",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -82,7 +82,7 @@
       "triangles": 54816,
       "meshes": 39,
       "nodes": 56,
-      "sha256": "8df3535c1b18875b945b4feceea08f72d5bb430a1e58e433cdfb7e894d0ed18e",
+      "sha256": "2e0d6475fb903ff1ebcb9c1cf43acebf614d835a03023401eacd4c16a418783b",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -101,11 +101,11 @@
     {
       "id": "hybrid",
       "file": "hybrid.glb",
-      "bytes": 831100,
-      "triangles": 54728,
+      "bytes": 793872,
+      "triangles": 52676,
       "meshes": 41,
       "nodes": 58,
-      "sha256": "9b9295051cd0e26f488095de534d1421ba145e2d7f995fcec693ea860b357609",
+      "sha256": "a8305c73b3f4333fce34bfd7a4bb87d1c9efa44dae30651cc0eb3a11af50a0d2",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -128,7 +128,7 @@
       "triangles": 53140,
       "meshes": 39,
       "nodes": 56,
-      "sha256": "d63dabb45a613863471822b73b668814f00435279cc79bc96d7f825f1029531e",
+      "sha256": "d0c2c6c6228f0fff9e12f80a893ac2e1329a73d89b2eb2e4fe979501d77a7920",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -174,7 +174,7 @@
       "triangles": 53280,
       "meshes": 41,
       "nodes": 58,
-      "sha256": "6b9c416d9e5c5d35fcc2fbecb8e222668cacbf44e8afdfecc4082c1b09ea74fa",
+      "sha256": "447749435380f301b9390b22beb489c850d6fedbbecbca28262cb73b049ccfbf",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -193,11 +193,11 @@
     {
       "id": "nexus",
       "file": "nexus.glb",
-      "bytes": 906760,
+      "bytes": 906784,
       "triangles": 57988,
       "meshes": 37,
       "nodes": 54,
-      "sha256": "54bbd3208320199db5ef5432390e5d9076e0116b1676db827013ba904a081c24",
+      "sha256": "1ba8f05a3e71e91cdca33ec0c5b1d75b35540f599453fa3b632a37dde440abc4",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -216,11 +216,11 @@
     {
       "id": "signal",
       "file": "signal.glb",
-      "bytes": 663304,
-      "triangles": 45452,
+      "bytes": 637296,
+      "triangles": 44070,
       "meshes": 43,
       "nodes": 60,
-      "sha256": "641fbabf81a00935298b5288005479b96c95d7f4db2df304d8c999a17ec5128b",
+      "sha256": "1a792888d4ddf61a3ddc9b878d36a55b043c0592f65d79b3ddc607310ba0286f",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -239,11 +239,11 @@
     {
       "id": "vector",
       "file": "vector.glb",
-      "bytes": 720068,
-      "triangles": 49100,
+      "bytes": 694040,
+      "triangles": 47718,
       "meshes": 45,
       "nodes": 62,
-      "sha256": "06207885ad5147a17d4a821af57f971509bebea15d461948c9590d28fe572348",
+      "sha256": "f1263f8edbd7009902bf2494107240255d46806566f9f56fa49657150f7305c5",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",
@@ -262,11 +262,11 @@
     {
       "id": "zenflow",
       "file": "zenflow.glb",
-      "bytes": 793492,
-      "triangles": 53192,
+      "bytes": 756264,
+      "triangles": 51140,
       "meshes": 43,
       "nodes": 60,
-      "sha256": "47cbd18d8c3a5f03bce67b46d7daedd31020c44984ed630d7aa45807a34fb504",
+      "sha256": "3651df5ea36df78a7287e4de36463b7aa49bfd0b486d37987fbf54c6aa2cb9a8",
       "authored": true,
       "operations": [
         "welded coachwork and corrected normals",

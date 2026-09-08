@@ -144,7 +144,7 @@ function buildDivisionCoachwork(div,root,add,m){
   hull([[.55,.35,.63,.04],[.7,.46,.92,.27],[.95,.44,1.18,.38],[1.12,.28,1.16,.35],[1.2,.05,1.03,.1]],dark).name='contoured-seat';
   // Functional crossarms visibly connect the four independent wheel assemblies.
   for(const s of [-1,1])for(const z of [-1.25,1.28])for(const y of [.35,.66])pipe([[s*.45,y,z+.18],[s*.87,y-.03,z],[s*1.23,.6,z]],metal,.035);
-  const fenders=(broad=false)=>{for(const s of [-1,1])for(const z of [-1.25,1.28])ribbon([[s*1.23,.56,z-.64],[s*1.23,1.04,z-.47],[s*1.23,1.2,z],[s*1.23,1.04,z+.47],[s*1.23,.6,z+.62]],white,broad?.3:.16,.065,'wheel-arch');};
+  const fenders=(broad=false)=>{for(const s of [-1,1])for(const z of [-1.25,1.28])ribbon([[s*1.04,.56,z-.64],[s*1.04,1.04,z-.47],[s*1.04,1.2,z],[s*1.04,1.04,z+.47],[s*1.04,.6,z+.62]],white,broad?.15:.075,.045,'wheel-arch');};
   if(id==='collective'){
     hull([[-2,.05,.64,.08],[-1.92,.55,.75,.35],[-1.55,.65,.88,.36],[-.65,.51,1.03,.15],[-.48,.4,1,.03]],panel);fenders(true);
     const grille=ring(.46,.065,metal,0,.72,-1.97,'bronze-tourer-grille');grille.scale.set(.88,1.15,1);
@@ -180,7 +180,7 @@ function buildDivisionCoachwork(div,root,add,m){
   }else{
     const sharp=id==='signal'||id==='vector';nose(sharp?2.55:2.15, id==='juris'?.73:.57,1.02);
     for(const s of [-1,1]){
-      hull([[-2.05,.015,.35,.015],[-1.45,.3,.5,.18],[-.5,.25,.75,.21],[.6,.24,.72,.19],[1.6,.03,.63,.04]],white,s*.77);
+      if(!sharp)hull([[-2.05,.015,.35,.015],[-1.45,.22,.5,.13],[-.5,.22,.75,.17],[.6,.19,.72,.15],[1.6,.03,.63,.04]],white,s*.77);
       ribbon([[s*.06,.53,sharp?-2.48:-2.07],[s*.52,.68,-1.56],[s*.83,.84,-.75],[s*.85,.61,.45]],glow,.025,.023,'headlight-signature');
       if(sharp){
         plate([[s*.65,.62,.4],[s*1.28,1.48,1.97],[s*.97,1.50,1.70],[s*.54,.87,.75]],white,'swept-tail-fin');
@@ -193,13 +193,17 @@ function buildDivisionCoachwork(div,root,add,m){
     }
     if(id==='zenflow'||id==='hybrid'){
       for(const s of [-1,1]){
-        plate([[s*.10,.43,-2.17],[s*.82,.52,-1.83],[s*1.03,.76,-1.24],[s*.91,1.07,-.52],[s*.58,1.15,-.33],[s*.47,.93,-1.05]],white,'split-fairing');
+        const rows=smoothKartSections([[-2.12,.14,.025,.45,.025],[-1.76,.50,.17,.66,.08],[-1.19,.73,.22,.83,.14],[-.61,.72,.19,1.0,.11],[-.31,.58,.035,1.01,.035]],5);
+        const verts=[],indices=[],seg=20;
+        for(const [z,c,w,y,h] of rows)for(let k=0;k<=seg;k++){const a=k/seg*Math.PI*2;verts.push(s*(c+Math.sin(a)*w),y+Math.cos(a)*h,z);}
+        for(let j=0;j<rows.length-1;j++)for(let k=0;k<seg;k++){const a=j*(seg+1)+k,b=a+seg+1;if(s>0)indices.push(a,b,a+1,a+1,b,b+1);else indices.push(a,a+1,b,a+1,b+1,b);}
+        const fairing=new THREE.BufferGeometry();fairing.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));fairing.setIndex(indices);fairing.computeVertexNormals();add(fairing,white,root,'sculpted-split-fairing');
         plate([[s*.19,.49,-2.02],[s*.77,.585,-1.74],[s*.91,.76,-1.25],[s*.80,.89,-.88],[s*.62,.75,-1.37]],dark,'recessed-headlamp-well');
         ribbon([[s*.23,.52,-1.96],[s*.72,.61,-1.73],[s*.88,.77,-1.24],[s*.8,.88,-.91]],glow,.037,.027,'swept-headlamp');
         ribbon([[s*.52,1.11,-.42],[s*.94,.86,-.9],[s*1.06,.67,-1.46]],id==='hybrid'?metal:panel,.029,.02,'fender-crown-inlay');
       }
     }
-    if(!sharp)fenders(id==='juris');if(id==='vector')wing(1.36,1.42,1.32);
+    if(!sharp&&id!=='zenflow'&&id!=='hybrid')fenders(id==='juris');if(id==='vector')wing(1.36,1.42,1.32);
   }
   if(id==='juris'){
     const shield=new THREE.Shape();shield.moveTo(0,-.25);shield.lineTo(-.17,-.04);shield.lineTo(-.19,.20);shield.lineTo(.19,.20);shield.lineTo(.17,-.04);shield.closePath();
