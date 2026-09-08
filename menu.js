@@ -72,7 +72,7 @@
  document.querySelectorAll('[data-map]').forEach(button=>{
    const map=MAPS.find(m=>m.id===button.dataset.map),canvas=button.querySelector('canvas');if(!map||!canvas)return;
    const points=(map.control||CHERRY_CONTROL).map(p=>new THREE.Vector3(...p));
-   const curve=new THREE.CatmullRomCurve3(points,true,'catmullrom',.5),samples=curve.getPoints(180),ctx=canvas.getContext('2d');
+   const curve=new THREE.CatmullRomCurve3(points,true,'centripetal',.5),samples=curve.getPoints(180),ctx=canvas.getContext('2d');
    const xs=samples.map(p=>p.x),zs=samples.map(p=>p.z),minX=Math.min(...xs),minZ=Math.min(...zs);
    const scale=Math.min(156/(Math.max(...xs)-minX),76/(Math.max(...zs)-minZ));
    const cx=(180-(Math.max(...xs)-minX)*scale)/2,cy=(100-(Math.max(...zs)-minZ)*scale)/2;
