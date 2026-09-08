@@ -43,10 +43,13 @@ def continuous_torso(obj):
         for k in range(around):
             theta=k/around*math.tau;x=rx*math.sin(theta);front=max(0,math.cos(theta))**3
             # Smooth pectoral fan and shallow segmented abdominal relief, no intersecting shells.
-            pec=.036*sum(math.exp(-((x-side*.16)/.14)**2-((z-.78)/.14)**2) for side in [-1,1])
-            abdomen=.012*sum(math.exp(-((x-side*.10)/.085)**2-((z-height)/.052)**2) for side in [-1,1] for height in [.24,.38,.51])
-            sternum=.010*math.exp(-(x/.035)**2)*math.exp(-((z-.60)/.40)**4)
-            y=ry*math.cos(theta)+(pec+abdomen-sternum)*front
+            pec=.055*sum(math.exp(-((x-side*.16)/.14)**2-((z-.78)/.14)**2) for side in [-1,1])
+            abdomen=.024*sum(math.exp(-((x-side*.10)/.085)**2-((z-height)/.052)**2) for side in [-1,1] for height in [.24,.38,.51])
+            sternum=.017*math.exp(-(x/.035)**2)*math.exp(-((z-.60)/.40)**4)
+            back=max(0,-math.cos(theta))**4
+            scapula=.028*sum(math.exp(-((x-side*.20)/.12)**2-((z-.78)/.20)**2) for side in [-1,1])
+            spine=.014*math.exp(-(x/.03)**2)*math.exp(-((z-.62)/.35)**4)
+            y=ry*math.cos(theta)+(pec+abdomen-sternum)*front-(scapula-spine)*back
             verts.append((x,y,z))
     for j in range(levels):
         for k in range(around):
@@ -99,7 +102,7 @@ def smooth_rows(rows,steps=4):
     out.append(rows[-1]);return out
 
 def bonnet(body,kart,mat):
-    if kart in ('collective','nexus','aether'):return # Their grille / turbine / dish occupies this region.
+    if kart in ('collective','nexus','aether','signal','vector'):return # Their grille / turbine / dish occupies this region.
     sharp=kart in ('signal','vector');length=2.55 if sharp else 1.92 if kart=='animus' else 2.05 if kart in ('loom','helix') else 2.18 if kart=='kinetic' else 2.15
     width=.34 if kart=='kinetic' else .43 if kart=='animus' else .46 if kart in ('loom','helix') else .73 if kart=='juris' else .57
     height=.88 if kart=='kinetic' else .99 if kart=='animus' else .85 if kart in ('loom','helix') else 1.02
@@ -180,7 +183,7 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
             elif name=='head-mesh':
                 for v in obj.data.vertices:v.co.x*=.94;v.co.y*=.95;v.co.z*=.94
         if name=='coachwork-batch':
-            dec=obj.modifiers.new('Mobile static coachwork LOD','DECIMATE');dec.ratio=.68;apply(obj,dec)
+            dec=obj.modifiers.new('Mobile static coachwork LOD','DECIMATE');dec.ratio=.90;apply(obj,dec)
         if name=='recessed-colored-hub':wheel_dish(obj,dish)
         if name in ('wheel-light-ring','translucent-tire-band'):
             obj.data.materials.clear();obj.data.materials.append(ring)
@@ -193,9 +196,9 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
             bevel=obj.modifiers.new('Machined spoke bevel','BEVEL');bevel.width=.018;bevel.segments=2;bevel.limit_method='ANGLE';apply(obj,bevel)
     body=next(o for o in objects if o.get('zf_node')=='body');bonnet(body,kart,enamel)
     pearl=material(kart+'-fairing-pearl','F8FBFF',.24,.23)
-    front_fairings(body,kart,pearl,dish)
+    # Faceted split fairings are authored in vehicles.js and retained through Blender.
     root['zf_blender_authored']=True
-    root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union anatomical torso and arms','controlled smooth and decimated anatomy','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','parametric continuous pectoral and abdominal envelope'])
+    root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union anatomical torso and arms','controlled smooth and decimated anatomy','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','parametric continuous pectoral, abdominal, scapular and spinal envelope','cambered blade panels, division-specific nose inserts and rear diffusers'])
     report.append({'id':kart,'operations':json.loads(root['zf_author_operations'])})
     print('AUTHORED',kart,flush=True)
 os.makedirs(os.path.dirname(target),exist_ok=True);bpy.ops.wm.save_as_mainfile(filepath=target,compress=True)

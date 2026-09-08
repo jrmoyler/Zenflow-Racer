@@ -114,13 +114,30 @@ function kartRibbon(points,width=.16,thickness=.045){
   for(let i=0;i<=40;i++){const c=curve.getPointAt(i/40);for(let j=0;j<=12;j++){const a=j/12*Math.PI*2,v=c.clone().addScaledVector(frames.normals[i],Math.cos(a)*width).addScaledVector(frames.binormals[i],Math.sin(a)*thickness);p.push(v.x,v.y,v.z);uv.push(j/12,i/40);}}
   for(let i=0;i<40;i++)for(let j=0;j<12;j++){const a=i*13+j,b=a+13;ix.push(a,b,a+1,b,b+1,a+1);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();return g;
 }
+// A cambered polygon with actual thickness for sharply swept automotive panels.
+// Unlike a tubular loft, this retains the designed leading edge and planar facets.
+function sculptedPanel(points,thickness=.055){
+  const contour=points.map(p=>new THREE.Vector2(p[0],p[2]));
+  const triangles=THREE.ShapeUtils.triangulateShape(contour,[]),v=[],idx=[],n=points.length;
+  for(const sign of [1,-1])for(const p of points)v.push(p[0],p[1]+sign*thickness/2,p[2]);
+  for(const [a,b,c] of triangles){idx.push(a,c,b,a+n,b+n,c+n);}
+  for(let i=0;i<n;i++){const j=(i+1)%n;idx.push(i,j,i+n,j,j+n,i+n);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();return g;
+}
 function buildDivisionCoachwork(div,root,add,m){
   const {white,dark,panel,glow,metal}=m,id=div.id;
   const hull=(rows,mat=white,x=0,name='sculpted-coachwork')=>{const o=add(coachwork(rows),mat,root,name);o.position.x=x;return o;};
   const ribbon=(points,mat=white,w=.14,t=.055,name='swept-ribbon')=>add(kartRibbon(points,w,t),mat,root,name);
   const pipe=(points,mat=dark,r=.04)=>add(limbSurface(points,[r,r,r]),mat,root,'suspension-link');
   const ring=(r,t,mat,x,y,z,name='intake-ring')=>{const o=add(new THREE.TorusGeometry(r,t,10,32),mat,root,name);o.position.set(x,y,z);return o;};
-  const nose=(length=2.15,width=.65,height=.92)=>hull([[-length,.015,.5,.025],[-length+.28,width*.5,.58,.13],[-1.3,width,.73,.23],[-.7,width*.77,height,.22],[-.4,.43,.91,.07]],white);
+  const plate=(points,mat=white,name='cambered-body-panel',thickness=.055)=>add(sculptedPanel(points,thickness),mat,root,name);
+  const nose=(length=2.15,width=.65,height=.92)=>{
+    if(id==='signal'||id==='vector'){
+      const o=plate([[0,.30,-length],[width,.67,-1.27],[width*.76,height,-.45],[0,height+.07,-.62],[-width*.76,height,-.45],[-width,.67,-1.27]],white,'wedge-bonnet');
+      plate([[0,.34,-length+.13],[width*.72,.72,-1.2],[.29,height+.065,-.61],[0,height+.10,-.73],[-.29,height+.065,-.61],[-width*.72,.72,-1.2]],panel,'arrow-bonnet-inlay',.026);return o;
+    }
+    return hull([[-length,.015,.5,.025],[-length+.28,width*.5,.58,.13],[-1.3,width,.73,.23],[-.7,width*.77,height,.22],[-.4,.43,.91,.07]],white);
+  };
   const wing=(z,y,span=1.35)=>{for(const s of [-1,1]){ribbon([[s*.1,y,z],[s*.65,y+.03,z-.08],[s*span,y+.06,z]],white,.21,.055,'aerofoil');ribbon([[s*span,y,z+.13],[s*span,y+.3,z],[s*span,y+.36,z-.23]],panel,.14,.045,'wing-endplate');}};
   const cockpit=hull([[-.8,.5,.63,.13],[-.4,.69,.62,.2],[.7,.71,.62,.22],[1.5,.65,.61,.2],[1.8,.08,.58,.06]],dark);cockpit.name='open-cockpit-monocoque';
   for(const s of [-1,1])ribbon([[s*.43,.88,-.65],[s*.72,1.02,-.12],[s*.76,1.08,.7],[s*.6,1.13,1.3],[0,1.1,1.48]],white,.13,.075,'cockpit-shoulder');
@@ -165,11 +182,40 @@ function buildDivisionCoachwork(div,root,add,m){
     for(const s of [-1,1]){
       hull([[-2.05,.015,.35,.015],[-1.45,.3,.5,.18],[-.5,.25,.75,.21],[.6,.24,.72,.19],[1.6,.03,.63,.04]],white,s*.77);
       ribbon([[s*.06,.53,sharp?-2.48:-2.07],[s*.52,.68,-1.56],[s*.83,.84,-.75],[s*.85,.61,.45]],glow,.025,.023,'headlight-signature');
-      if(sharp){ribbon([[s*.76,.73,.43],[s*1.05,1.3,1.45],[s*1.18,1.65,1.81]],white,.22,.06,'swept-tail-fin');ribbon([[s*.31,.4,-2.1],[s*1.25,.3,-1.66],[s*1.44,.42,-1.38]],panel,.17,.035,'split-front-canard');}
+      if(sharp){
+        plate([[s*.65,.62,.4],[s*1.28,1.48,1.97],[s*.97,1.50,1.70],[s*.54,.87,.75]],white,'swept-tail-fin');
+        plate([[s*.02,.3,-2.6],[s*1.48,.39,-1.46],[s*1.1,.62,-.74],[s*.50,.60,-1.27]],white,'split-front-canard');
+        plate([[s*.12,.335,-2.38],[s*1.33,.425,-1.45],[s*.91,.62,-.96],[s*.57,.635,-1.30]],panel,'canard-inset',.018);
+        ribbon([[s*.03,.32,-2.57],[s*1.43,.425,-1.45],[s*1.05,.65,-.77]],glow,.017,.014,'canard-edge-light');
+      }
       if(id==='juris'){hull([[-1.8,.1,.38,.1],[-1.3,.35,.78,.37],[-.75,.29,.92,.3],[-.45,.03,.7,.04]],dark,s*.92);ribbon([[s*.94,.38,-1.75],[s*1.18,.85,-1.27],[s*.98,1.18,-.7]],metal,.055,.04,'armor-gold-seam');hull([[.85,.06,.7,.05],[1.1,.25,1.06,.37],[1.65,.2,.99,.3],[1.8,.03,.7,.04]],dark,s*.68);}
       if(id==='hybrid')ribbon([[s*1.23,.5,-1.9],[s*1.23,1.16,-1.3],[s*1.23,1.1,-.9]],metal,.045,.025,'orange-outrigger');
     }
+    if(id==='zenflow'||id==='hybrid'){
+      for(const s of [-1,1]){
+        plate([[s*.10,.43,-2.17],[s*.82,.52,-1.83],[s*1.03,.76,-1.24],[s*.91,1.07,-.52],[s*.58,1.15,-.33],[s*.47,.93,-1.05]],white,'split-fairing');
+        plate([[s*.19,.49,-2.02],[s*.77,.585,-1.74],[s*.91,.76,-1.25],[s*.80,.89,-.88],[s*.62,.75,-1.37]],dark,'recessed-headlamp-well');
+        ribbon([[s*.23,.52,-1.96],[s*.72,.61,-1.73],[s*.88,.77,-1.24],[s*.8,.88,-.91]],glow,.037,.027,'swept-headlamp');
+        ribbon([[s*.52,1.11,-.42],[s*.94,.86,-.9],[s*1.06,.67,-1.46]],id==='hybrid'?metal:panel,.029,.02,'fender-crown-inlay');
+      }
+    }
     if(!sharp)fenders(id==='juris');if(id==='vector')wing(1.36,1.42,1.32);
+  }
+  if(id==='juris'){
+    const shield=new THREE.Shape();shield.moveTo(0,-.25);shield.lineTo(-.17,-.04);shield.lineTo(-.19,.20);shield.lineTo(.19,.20);shield.lineTo(.17,-.04);shield.closePath();
+    const badge=add(new THREE.ExtrudeGeometry(shield,{depth:.04,bevelEnabled:true,bevelThickness:.015,bevelSize:.015,bevelSegments:2}),metal,root,'juris-nose-shield');badge.position.set(0,.66,-2.13);
+  }
+  if(id==='animus'){
+    for(const s of [-1,1])for(let j=0;j<3;j++)pipe([[s*.66,.45+j*.09,-.40],[s*.97,.47+j*.09,-.12],[s*.98,.48+j*.09,.58]],metal,.023);
+    for(const s of [-1,1])plate([[s*.02,.27,-2.03],[s*.48,.32,-1.82],[s*.81,.43,-1.3],[s*.37,.55,-1.46]],white,'armored-front-jaw');
+  }
+  if(id==='loom'||id==='helix'){
+    for(const s of [-1,1])ribbon([[s*.88,.52,-1.67],[-s*.2,.31,-2.1],[-s*.88,.69,-1.57],[-s*.55,1.1,-.7]],id==='loom'?panel:metal,.10,.04,'crossed-nose-ribbon');
+  }
+  // Inferred rear surfaces follow each division's visible front design language.
+  for(const side of [-1,1]){
+    ribbon([[side*.12,.70,1.77],[side*.53,.82,1.66],[side*.85,.76,1.37]],glow,.023,.018,'rear-light-signature');
+    for(let j=0;j<3;j++)plate([[side*(.12+j*.18),.2,1.41],[side*(.12+j*.18),.2,1.99],[side*(.16+j*.18),.36,1.84],[side*(.16+j*.18),.37,1.5]],dark,'diffuser-fin',.027);
   }
   return {hull,ribbon};
 }
