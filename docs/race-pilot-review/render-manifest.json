@@ -1,0 +1,77 @@
+[
+  {
+    "id": "zenflow",
+    "angle": "front",
+    "file": "zenflow-front.png",
+    "source": "/workspace/scratch/3fa3187e3124/Zenflow-Racer/assets/models/zenflow.glb",
+    "sourceSha256": "bcf01948259971386a17e89dac82c3d79477aa61313041e5087017bbe1e50a59",
+    "seconds": 14.95,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.599999904632568,
+      7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 6.599999904632568,
+    "unoccupied": false,
+    "referenceStudio": false,
+    "driverStudy": false,
+    "materialOverride": null
+  },
+  {
+    "id": "zenflow",
+    "angle": "side",
+    "file": "zenflow-side.png",
+    "source": "/workspace/scratch/3fa3187e3124/Zenflow-Racer/assets/models/zenflow.glb",
+    "sourceSha256": "bcf01948259971386a17e89dac82c3d79477aa61313041e5087017bbe1e50a59",
+    "seconds": 16.2,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      8.0,
+      0.0,
+      3.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 6.599999904632568,
+    "unoccupied": false,
+    "referenceStudio": false,
+    "driverStudy": false,
+    "materialOverride": null
+  },
+  {
+    "id": "zenflow",
+    "angle": "rear",
+    "file": "zenflow-rear.png",
+    "source": "/workspace/scratch/3fa3187e3124/Zenflow-Racer/assets/models/zenflow.glb",
+    "sourceSha256": "bcf01948259971386a17e89dac82c3d79477aa61313041e5087017bbe1e50a59",
+    "seconds": 18.3,
+    "engine": "Blender Cycles CPU",
+    "samples": 32,
+    "cameraPosition": [
+      -5.599999904632568,
+      -7.0,
+      4.5
+    ],
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.100000023841858
+    ],
+    "orthographicScale": 6.599999904632568,
+    "unoccupied": false,
+    "referenceStudio": false,
+    "driverStudy": false,
+    "materialOverride": null
+  }
+]

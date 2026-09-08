@@ -67,7 +67,7 @@
  document.getElementById('settings-close').onclick=()=>transitionScene(document.body.classList.contains('title-open')?'ZENFLOW RACER':'CHARACTER SELECT',()=>{settings.classList.add('hidden');title.inert=false;roster.inert=document.body.classList.contains('title-open');document.getElementById(roster.inert?'title-settings':'menu-settings').focus();});
  settings.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.getElementById('settings-close').click();}});
  document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');roster.inert=true;document.getElementById('title-start').focus();});
- const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: race-panel gardens, spore-light and a rolling turquoise sea.'};
+ const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: botanical gardens, spore-light and a rolling turquoise sea.'};
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
    document.querySelectorAll('[data-map]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});

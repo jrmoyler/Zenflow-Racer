@@ -1,0 +1,20 @@
+{
+  "referenceAreaFraction": 0.43798148148148147,
+  "angles": [
+    {
+      "path": "docs/race-pilot-review/zenflow-side.png",
+      "areaFraction": 0.5313703703703704,
+      "ratio": 1.2132256564204473,
+      "degenerate": false
+    },
+    {
+      "path": "docs/race-pilot-review/zenflow-rear.png",
+      "areaFraction": 0.4268402777777778,
+      "ratio": 0.9745623863684411,
+      "degenerate": false
+    }
+  ],
+  "degenerate": false,
+  "collapseRatio": 0.15,
+  "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+}

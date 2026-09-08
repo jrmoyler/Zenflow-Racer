@@ -1,0 +1,11 @@
+{
+  "authorization": "User requests finished racing characters instead of Blender figures, using Blender and Three.js in a new PR.",
+  "prior": {
+    ".img2threejs/state.json": "19562813974d944bcb9b3a3bd46350d3485f6a26afc8ae1a9611e59c01d062fb",
+    ".img2threejs/spec.json": "99f830307f440c881f0a4720e92804a67da91a9d2c0f5beab1bbd812f54cd420"
+  },
+  "priorRejection": "Reference fidelity .95 remains unaccepted; metallic anatomical pilot and simplified face were specifically rejected.",
+  "changedMethod": "Retain articulated scaffold. Replace muscle relief with tailored fabric envelope, add modeled protective equipment and division helmet profiles. New user direction is finished stylized racing pilots rather than bare metallic anatomical bodies.",
+  "acceptance": "No numeric likeness claim. Review optimized GLBs at three views; all twelve must preserve rigs, no projected artwork.",
+  "remaining": "Legacy exact reference likeness remains unaccepted; new visual direction does not erase rejection."
+}
