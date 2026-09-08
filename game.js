@@ -643,17 +643,18 @@ addEventListener('resize',()=>{resetInput();staticFrameDirty=true;camera.aspect=
 
 // ---------- Roster screen ----------
 let selected=null;
+const raceSetup={step:"title",racerConfirmed:false,mapConfirmed:false};
 function buildRosterUI(){
   const grid=document.getElementById('grid');
   grid.innerHTML=ROSTER.map((d,i)=>`<div class="card" role="button" tabindex="0" aria-pressed="false" aria-label="Select ${d.name}" data-i="${i}" style="--acc:${d.acc}"><div class="bar"></div><div class="nm">${d.name}</div><div class="rl">${d.code} · ${d.role}</div>
     <div class="st">${STAT_NAMES.map((s,k)=>`<span>${s}</span><i><b style="--w:${d.stats[k]*20}%"></b></i>`).join('')}</div></div>`).join('');
   grid.querySelectorAll('.card').forEach(c=>{const d=ROSTER[+c.dataset.i];const cv=texMark(d.mark,d.acc,d.acc2,96);cv.className='mark';c.appendChild(cv);
-    c.onclick=()=>{if(game.state!=='boot'){audioInit();SFX.ui();}grid.querySelectorAll('.card').forEach(x=>{x.classList.remove('sel');x.setAttribute('aria-pressed','false');});c.classList.add('sel');c.setAttribute('aria-pressed','true');selected=d;document.getElementById('pick').innerHTML=`Selected: <b>${d.name}</b> · Racer`;document.getElementById('go').disabled=false;saved.selected=d.id;persist();updateBestTime();updateSelectedPreview(d);};c.onkeydown=e=>{if(e.code==='Enter'||e.code==='Space'){e.preventDefault();c.click();}};});
+    c.onclick=()=>{if(game.state!=='boot'){audioInit();SFX.ui();}grid.querySelectorAll('.card').forEach(x=>{x.classList.remove('sel');x.setAttribute('aria-pressed','false');});c.classList.add('sel');c.setAttribute('aria-pressed','true');selected=d;document.getElementById('pick').innerHTML=`Selected: <b>${d.name}</b> · Racer`;document.getElementById('confirm-racer').disabled=false;saved.selected=d.id;persist();updateBestTime();updateSelectedPreview(d);};c.onkeydown=e=>{if(e.code==='Enter'||e.code==='Space'){e.preventDefault();c.click();}};});
   const initial=ROSTER.findIndex(d=>d.id===saved.selected);grid.querySelectorAll('.card')[Math.max(0,initial)]?.click();
-  document.getElementById('go').onclick=()=>{if(!selected)return;audioInit();SFX.go();startRace();};
+  document.getElementById('go').onclick=()=>{if(!selected||!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map')return;audioInit();SFX.go();startRace();};
 }
-function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
-function startRace(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace);if(typeof clearFinishCeremony==='function')clearFinishCeremony();if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
+function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';if(typeof window.resetRaceSetup==='function')window.resetRaceSetup();if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
+function startRace(){if(!selected)return false;if(['boot','roster','title'].includes(game.state)&&(!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map'))return false;if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace);if(typeof clearFinishCeremony==='function')clearFinishCeremony();if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------
 async function boot(){
@@ -666,7 +667,7 @@ async function boot(){
   requestAnimationFrame(frame);
  }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}
 }
-if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('800 20px "Orbitron"'),document.fonts.load('500 12px "Rajdhani"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
+if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('700 20px "Rajdhani"'),document.fonts.load('500 12px "Rajdhani"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
 
 // Isolated selection showroom: the same kart geometry used in the race, presented
 // on a holographic turntable that completes full 360° turns and can be spun by hand.

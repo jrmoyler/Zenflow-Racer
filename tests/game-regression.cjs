@@ -219,6 +219,15 @@ test('Key released after focus enters a text input does not remain stuck',()=>{
  racer();run('resetInput()');listeners.keydown({code:'KeyW',target:{tagName:'BODY'},preventDefault:noop});assert.equal(run('input.throttle'),true);
  listeners.keyup({code:'KeyW',target:{tagName:'INPUT'}});assert.equal(run('input.throttle'),false);
 });
+test('Fresh setup cannot start with only a saved racer or an unconfirmed map',()=>{
+ run("selected=ROSTER[0];game.state='roster';raceSetup.step='title';raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false");
+ assert.equal(run('startRace()'),false);
+ run("raceSetup.step='character'");assert.equal(run('startRace()'),false);
+ run("raceSetup.racerConfirmed=true;raceSetup.step='map'");assert.equal(run('startRace()'),false);
+ run("raceSetup.mapConfirmed=true;raceSetup.step='character'");assert.equal(run('startRace()'),false);
+ run("raceSetup.step='map';startRace()");assert.equal(run('game.state'),'countdown');
+ run("openRoster();raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false");assert.equal(run('startRace()'),false);
+});
 require('./kart-materials-regression.cjs')({test,assert});
 require('./racefx-regression.cjs')({test,assert});
 require('./kart-clips-regression.cjs')({test,assert});

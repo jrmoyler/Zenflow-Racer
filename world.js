@@ -187,13 +187,7 @@ function treeCanopyGeo(seed,tint){
   for(let i=0;i<p.count;i++){const key=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>Math.round(v*10000)).join(',');keys.push(key);const sum=buckets.get(key)||new THREE.Vector3();sum.x+=normals.getX(i);sum.y+=normals.getY(i);sum.z+=normals.getZ(i);buckets.set(key,sum);}
   buckets.forEach(v=>v.normalize());for(let i=0;i<p.count;i++){const v=buckets.get(keys[i]);normals.setXYZ(i,v.x,v.y,v.z);}return m;
 }
-function cypressGeo(seed){const prof=[];const r=mulberry(seed);for(let i=0;i<=22;i++){const t=i/22;const w=Math.sin(t*Math.PI)*1.6*(1-t*.35)+Math.sin(t*19)*.18+.05;prof.push(new THREE.Vector2(w,t*9.5+.3));}prof.push(new THREE.Vector2(0,10));
-  const g=new THREE.LatheGeometry(prof,14);displace(g,.5,1.4,seed);const p=g.attributes.position,col=new Float32Array(p.count*3);const c1=new THREE.Color(0x14301f),c2=new THREE.Color(0x3d7a3a),c=new THREE.Color();
-  for(let i=0;i<p.count;i++){const t=clamp(p.getY(i)/10,0,1);c.copy(c1).lerp(c2,t*.7+fbm(p.getX(i),p.getZ(i),2)*.4);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));return g;}
-function treeTrunkGeo(){const prof=[];for(let i=0;i<=10;i++){const t=i/10;prof.push(new THREE.Vector2(0.55*(1-t*.55)+Math.sin(t*9)*.04,t*3.4-.4));}return new THREE.LatheGeometry(prof,9);}
 function rockGeo(seed){const g=new THREE.IcosahedronGeometry(1.6,1);return displace(g,.7,.9,seed);}
-function lampGeo(){const prof=[new THREE.Vector2(.5,0),new THREE.Vector2(.42,.4),new THREE.Vector2(.16,.6),new THREE.Vector2(.14,6.6),new THREE.Vector2(.3,6.9),new THREE.Vector2(.3,7.2),new THREE.Vector2(.1,7.3),new THREE.Vector2(0,7.35)];return new THREE.LatheGeometry(prof,10);}
-function pillarGeo(){const prof=[new THREE.Vector2(2.4,0),new THREE.Vector2(2.0,.6),new THREE.Vector2(1.3,1.2),new THREE.Vector2(1.15,8),new THREE.Vector2(1.6,9.2),new THREE.Vector2(1.6,10)];return new THREE.LatheGeometry(prof,12);}
 function starGeo(size=1,depth=.25){ // Collective 4-point diamond star
   const s=new THREE.Shape();s.moveTo(0,size);s.lineTo(size*.28,size*.28);s.lineTo(size,0);s.lineTo(size*.28,-size*.28);s.lineTo(0,-size);s.lineTo(-size*.28,-size*.28);s.lineTo(-size,0);s.lineTo(-size*.28,size*.28);s.closePath();
   const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:true,bevelThickness:.05,bevelSize:.04,bevelSegments:2});g.center();return g;}
@@ -597,6 +591,77 @@ function buildRaceVenue(){
     for(const h of[-1,1])part(base,'box','white',side*8.2,2.7+h*.26,.1,.75,.17,.06,h*side*.68);
     markers++;
   }
+  // Inhabited outer promenades connect the otherwise isolated race buildings.
+  // The entire footprint is tested against every section of the folded road.
+  let districts=0,lamps=0;
+  const occupied=placements.map(p=>({center:new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().fromArray(p.matrix)),radius:Math.hypot(p.halfX,p.halfZ)}));
+  for(let k=0;k<100&&districts<(MOBILEFX?16:24);k++){
+    const u=(.018+k*.0618)%1,side=k%2?1:-1;
+    if(trackAG(u)>.08)continue;
+    const base=frame(u,side*(36+(k%3)*9)),center=new THREE.Vector3().setFromMatrixPosition(base);
+    if(!clearBuilding(base,8,10,13)||occupied.some(p=>p.center.distanceTo(center)<p.radius+14))continue;
+    occupied.push({center,radius:13});districts++;
+    placements.push({kind:industrial?'service-foundry':garden?'botanical-promenade':'festival-court',u,matrix:base.elements.slice(),halfX:8,halfZ:10,height:13});
+    // Cantilever deck, perimeter balustrade, piers and underside cross braces.
+    part(base,'box','structure',0,-.7,0,16,1.4,20);
+    part(base,'box','dark',0,-1.5,0,14,.3,18);
+    for(const x of[-7.5,7.5]){
+      part(base,'box','paint',x,1.8,0,.16,.18,19);
+      for(let z=-9;z<=9;z+=3)part(base,'post','structure',x,.9,z,.12,1.8,.12);
+      for(const z of[-7,7]){part(base,'post','dark',x,-5,z,.5,9,.5);part(base,'box','structure',x*.55,-3.6,z,.22,7,.3,x>0?-.8:.8);}
+    }
+    // Inlaid promenade paving and edge lights give the deck a human scale.
+    for(let z=-8;z<=8;z+=2){part(base,'box','white',0,.018,z,3,.018,.12);for(const x of[-6.8,6.8])part(base,'box','light',x,.04,z,.22,.08,.55);}
+    if(industrial){
+      // Service plant: vessels with collars, pipe manifolds, stairs and vents.
+      for(const z of[-5,0,5]){
+        part(base,'post','structure',-3.8,3,z,3.2,6,3.2);
+        for(const y of[.4,2.3,4.5,5.8])part(base,'post','dark',-3.8,y,z,3.4,.16,3.4);
+        part(base,'head','people',-3.8,6,z,3.2,1,3.2,0,0x657486);
+        part(base,'box','paint',-3.8,3.2,z+1.62,.6,2,.08);
+        part(base,'post','dark',-1.9,2,z,.35,4,.35);
+        part(base,'box','structure',-1,4,z,2.1,.3,.3);
+        part(base,'box','dark',4,1.4,z,3,2.8,3.5);
+        for(let vent=0;vent<6;vent++)part(base,'box','structure',4,1.5,z-1.4+vent*.5,3.06,.13,.18);
+      }
+      for(let stair=0;stair<6;stair++)part(base,'box','paint',3,stair*.3,7+stair*.35,3,.18,.38);
+    }else{
+      // Open tea stalls or conservatory pergolas, with counters and roof slats.
+      for(const z of[-5,5]){
+        for(const x of[-5.8,-2.2])for(const dz of[-2,2])part(base,'post','structure',x,2.4,z+dz,.17,4.8,.17);
+        part(base,'box','paint',-4,1,z,3.8,2,3.8);
+        part(base,'box','white',-4,2.1,z,4.2,.2,4.2);
+        for(let slat=0;slat<8;slat++)part(base,'box',garden?'structure':'paint',-4,4.8+Math.sin(slat/7*Math.PI)*.5,z-2.5+slat*.7,5.2,.18,.48);
+        for(let shelf=0;shelf<3;shelf++)part(base,'box','people',-4.8+shelf*.8,2.4,z,.35,.5,.35,0,garden?0x6c9461:0xb37559);
+        part(base,'box','structure',4,.5,z,4,1,3);
+        // Layered shrubs in raised planters; vertex silhouette remains 3D.
+        for(let leaf=0;leaf<7;leaf++)part(base,'head','people',4+Math.sin(leaf*2.4)*1.3,1.4+(leaf%3)*.36,z+Math.cos(leaf*2.4)*.8,1.9,1.6,1.6,0,garden?[0x527f50,0x80a65e,0xacc485][leaf%3]:[0xe7a9ba,0xf2ccd4,0xba748e][leaf%3]);
+      }
+      for(const z of[-1.5,1.5]){part(base,'box','paint',4,.65,z,3,.18,.6);for(const x of[2.8,5.2])part(base,'box','dark',x,.3,z,.16,.6,.4);}
+    }
+    // Warm lantern posts and visitors keep the peripheral world inhabited.
+    for(const z of[-8,8]){
+      part(base,'post','dark',-6,3,z,.14,6,.14);
+      part(base,'box','paint',-6,6.2,z,1,.18,1);
+      part(base,'box','light',-6,5.6,z,.6,.9,.6);lamps++;
+    }
+    for(let visitor=0;visitor<5;visitor++){
+      const z=-7+visitor*3.1,x=.8+random();
+      part(base,'box','people',x,.95,z,.48,.9,.36,0,[0xc96a55,0x567795,0xe1ba72][visitor%3]);
+      part(base,'head','people',x,1.6,z,.38,.44,.38,0,0xb78464);
+      for(const leg of[-1,1])part(base,'post','dark',x+leg*.13,.32,z,.15,.65,.15);
+      spectators++;
+    }
+  }
+  // Repeated trackside light standards stitch long empty straights together.
+  for(let k=0;k<96;k++){
+    const u=k/96;if(trackAG(u)>.1)continue;
+    const side=k%2?1:-1,base=frame(u,side*9.1);
+    if(!clearBuilding(base,.5,.5,5))continue;
+    part(base,'post','dark',0,2.3,0,.12,4.6,.12);
+    part(base,'box','structure',0,4.7,0,.8,.16,.8);
+    part(base,'box','light',0,4.45,0,.46,.38,.46);lamps++;
+  }
   for(const [key,instances] of batches){
     const [type,mat]=key.split(':'),mesh=new THREE.InstancedMesh(geos[type],materials[mat],instances.length);
     mesh.name='venue-'+key;instances.forEach((item,i)=>{mesh.setMatrixAt(i,item.matrix);if(mat==='people')mesh.setColorAt(i,new THREE.Color(item.color||0xffffff));});
@@ -604,5 +669,5 @@ function buildRaceVenue(){
   }
   // Empty resources must also be released on unusual/custom circuits.
   for(const [type,geo] of Object.entries(geos))if(![...batches.keys()].some(k=>k.startsWith(type+':')))geo.dispose();
-  root.userData={stands,garages,spectators,markers,placements,instanceBatches:batches.size};
+  root.userData={stands,garages,spectators,markers,districts,lamps,placements,instanceBatches:batches.size};
 }
