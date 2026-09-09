@@ -12,10 +12,20 @@ class CanvasRaceRenderer {
   // Keep authored topology and split normals intact. No positional clustering:
   // welding nearby surfaces corrupts fingers, rims and overlapping body panels.
   meshData(g){
-    let data=this.geometryCache.get(g);if(data)return data;
+    let data=this.geometryCache.get(g);
     const p=g.attributes.position;if(!p)return null;
     if(!g.attributes.normal)g.computeVertexNormals();
-    const n=g.attributes.normal,count=p.count,positions=new Float32Array(count*3),normals=new Float32Array(count*3);
+    const n=g.attributes.normal,count=p.count;
+    if(data&&data.positions.length===count*3){
+      // IK sleeves deform attributes in place. Refresh CPU buffers only when
+      // their source revision changes, retaining topology and projection storage.
+      const pv=p.isInterleavedBufferAttribute?p.data.version:p.version;
+      const nv=n.isInterleavedBufferAttribute?n.data.version:n.version;
+      if(data.positionAttribute!==p||data.positionVersion!==pv){for(let i=0;i<count;i++){const j=i*3;data.positions[j]=p.getX(i);data.positions[j+1]=p.getY(i);data.positions[j+2]=p.getZ(i);}data.positionAttribute=p;data.positionVersion=pv;}
+      if(data.normalAttribute!==n||data.normalVersion!==nv){for(let i=0;i<count;i++){const j=i*3;data.normals[j]=n.getX(i);data.normals[j+1]=n.getY(i);data.normals[j+2]=n.getZ(i);}data.normalAttribute=n;data.normalVersion=nv;}
+      return data;
+    }
+    const positions=new Float32Array(count*3),normals=new Float32Array(count*3);
     for(let i=0;i<count;i++){positions.set([p.getX(i),p.getY(i),p.getZ(i)],i*3);normals.set([n.getX(i),n.getY(i),n.getZ(i)],i*3);}
     const indices=g.index?Uint32Array.from(g.index.array):Uint32Array.from({length:count},(_,i)=>i);
     const groups=g.groups.length?g.groups:[{start:0,count:indices.length,materialIndex:0}];
@@ -23,8 +33,9 @@ class CanvasRaceRenderer {
     if(color)for(let i=0;i<count;i++)colors.set([color.getX(i),color.getY(i),color.getZ(i)],i*3);
     const uv=g.attributes.uv,uvs=uv?new Float32Array(count*2):null;
     if(uv)for(let i=0;i<count;i++){uvs[i*2]=uv.getX(i);uvs[i*2+1]=uv.getY(i);}
-    data={positions,normals,indices,groups,colors,uvs,projected:new Float32Array(count*12+72)};
-    g.computeBoundingSphere();this.geometryCache.set(g,data);return data;
+    data={positions,normals,indices,groups,colors,uvs,positionAttribute:p,normalAttribute:n,positionVersion:p.isInterleavedBufferAttribute?p.data.version:p.version,normalVersion:n.isInterleavedBufferAttribute?n.data.version:n.version,projected:new Float32Array(count*12+72)};
+    // Authored IK bounds cover every pose, not just the current sleeve position.
+    if(!g.boundingSphere)g.computeBoundingSphere();this.geometryCache.set(g,data);return data;
   }
   // Read authored textures once per revision, with a bounded thumbnail cache.
   // Tainted/unloaded sources retain material color until a readable revision arrives.
@@ -49,12 +60,52 @@ class CanvasRaceRenderer {
     }
     const t=this.target;t.image.data.fill(0);t.depth.fill(Infinity);return t;
   }
+  drawSky(map,cam,rect){
+    const ctx=this.ctx,{width:w,height:h}=rect,x=rect.x||0,y=rect.y||0;
+    const gradient=ctx.createLinearGradient(0,y,0,y+h);
+    gradient.addColorStop(0,'#'+new THREE.Color(map.skyTop).getHexString());gradient.addColorStop(1,'#'+new THREE.Color(map.skyHorizon).getHexString());ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h);
+    // Analytic sky only: no scenery images. Cloud positions are directions in
+    // world space, so turning/banking the camera moves them with the horizon.
+    cam.updateMatrixWorld(true);
+    const inverse=new THREE.Quaternion();cam.getWorldQuaternion(inverse).invert();
+    const time=typeof zenWorldTime!=='undefined'?zenWorldTime.value:0;
+    const storm=map.id==='stormforge',garden=map.id==='canopy';
+    const count=typeof MOBILEFX!=='undefined'&&MOBILEFX?22:34;
+    const point=new THREE.Vector3(),projected=new THREE.Vector3();
+    const project=(azimuth,elevation)=>{
+      point.set(Math.cos(azimuth)*Math.cos(elevation),Math.sin(elevation),Math.sin(azimuth)*Math.cos(elevation)).applyQuaternion(inverse);
+      if(point.z>-.12)return false;
+      projected.copy(point).applyMatrix4(cam.projectionMatrix);
+      return Number.isFinite(projected.x)&&Number.isFinite(projected.y);
+    };
+    for(let i=0;i<count;i++){
+      const angle=i*2.39996+time*.0009,elevation=.13+(i%5)*.078;
+      if(!project(angle,elevation))continue;
+      const cx=x+(projected.x+1)*w*.5,cy=y+(1-projected.y)*h*.5;
+      const radius=Math.min(w*.42,h*(.06+(i%4)*.016)/-point.z);
+      if(cx+radius*2<x||cx-radius*2>x+w||cy+radius<y||cy-radius>y+h)continue;
+      // Five overlapping lobes share a vertical light gradient. Layered banks
+      // cost at most 170 ellipses, with no blur, pixel loops or cached bitmaps.
+      const shade=ctx.createLinearGradient(0,cy-radius,0,cy+radius*.4);
+      shade.addColorStop(0,storm?'rgba(214,219,228,.85)':garden?'rgba(255,255,250,.92)':'rgba(255,235,239,.90)');
+      shade.addColorStop(.55,storm?'rgba(121,137,157,.88)':'rgba(218,220,239,.84)');
+      shade.addColorStop(1,storm?'rgba(83,99,124,.60)':'rgba(163,179,208,.25)');
+      ctx.fillStyle=shade;ctx.beginPath();
+      for(let j=0;j<5;j++){
+        const rx=radius*(.52+(j%3)*.11),ry=radius*(.27+(j%2)*.20),px=cx+(j-2)*radius*.51,py=cy-Math.sin(j*1.8+i)*radius*.14;
+        ctx.moveTo(px+rx,py);ctx.ellipse(px,py,rx,ry,0,0,Math.PI*2);
+      }
+      ctx.fill();
+    }
+    // The actual three ridge meshes are rasterized over this sky, retaining
+    // the same geometry, horizon depth and occlusion as the WebGL path.
+  }
   drawScene(stage,cam,rect,clear=true){
     const {min,max,ceil,floor,abs,hypot}=Math,isFiniteNumber=Number.isFinite;
     const ctx=this.ctx,w=rect.width,h=rect.height,x=rect.x||0,y=rect.y||0;if(w<=0||h<=0)return;
     ctx.save();ctx.setTransform(this.ratio,0,0,this.ratio,0,0);ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
     const map=typeof activeMap!=='undefined'?activeMap:{skyTop:0x798bad,skyHorizon:0xdceafa};
-    if(clear){const gradient=ctx.createLinearGradient(0,y,0,y+h);gradient.addColorStop(0,'#'+new THREE.Color(map.skyTop).getHexString());gradient.addColorStop(1,'#'+new THREE.Color(map.skyHorizon).getHexString());ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h);}
+    if(clear)this.drawSky(map,cam,rect);
     const t=this.rasterTarget(w,h),rw=t.w,rh=t.h,pixels=t.image.data,depth=t.depth;
     stage.updateMatrixWorld(true);cam.updateMatrixWorld(true);cam.matrixWorldInverse.copy(cam.matrixWorld).invert();
     const vp=new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse),frustum=new THREE.Frustum().setFromProjectionMatrix(vp);
