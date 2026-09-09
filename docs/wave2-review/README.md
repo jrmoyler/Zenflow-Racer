@@ -49,3 +49,7 @@ Cycles CPU under the same fixed studio rig. `render-manifest.json` records each 
 render size, sample count and timing. These images are model review evidence, not browser WebGL
 screenshots. Exact reference fidelity is not established. Existing img2threejs state, rejected
 reviews, thresholds and correction history remain intact; see `continuation-ledger.md`.
+
+Deployed UI/race smoke-test screenshots, keyboard checks and the landscape footer correction
+are recorded separately in [browser-playtest.md](browser-playtest.md). That cloud browser used
+the Canvas fallback; those captures do not establish WebGL shader or physical-phone performance.
