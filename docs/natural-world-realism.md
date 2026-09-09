@@ -16,7 +16,7 @@ This follow-up starts from merged PR #18. It preserves racer rigs, powers, contr
 
 `npm run blender:stones` executed on Blender 4.5.0 and exported the actual runtime stone meshes. A Cycles stone-kit image and a Cherry overview of actual exported geometry were rendered and inspected. Offline renders approximate browser materials; they do not validate the GLSL shader appearance.
 
-`npm run verify` passed locally. `tests/natural-world.cjs` checks all three maps at desktop and mobile settings: finite geometry, exact cap-edge alignment, upward normals, three stone batches, instance counts, a single ocean, fog, depth behavior and shared solar/time uniforms. Existing release, racer, power and asset tests remain included.
+`npm run verify` passed locally and in the Vercel deployment for b3efb1f. The deployed Canopy side view was inspected in Canvas software mode: terrain, modeled mountains and water load; no application error was observed in the captured browser log (one unrelated browser-extension metadata error was present). The actual water factory also passes a software visibility regression test. `tests/natural-world.cjs` checks all three maps at desktop and mobile settings: finite geometry, exact cap-edge alignment, upward normals, three stone batches, instance counts, a single ocean, fog, depth behavior and shared solar/time uniforms. Existing release, racer, power and asset tests remain included.
 
 Reproduce geometry export using `node scripts/render-world-export.cjs cherry /tmp/natural-cherry.json`. The exporter now loads the new terrain modules and the immersion layer, so the export contains the actual new terrain, rocks and water meshes.
 
