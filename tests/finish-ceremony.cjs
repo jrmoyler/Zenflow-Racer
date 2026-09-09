@@ -7,6 +7,7 @@ const c={THREE,scene,game:{state:'results',racers},camera:new THREE.PerspectiveC
  document:{createElement:()=>({getContext:()=>({fillRect(){},fillText(){}})})},matchMedia:()=>({matches:reduced}),raceOrder:(a,b)=>a.rank-b.rank,
  orientOnTrack:o=>o.position.set(20,4,0),buildKart:d=>{const k=new THREE.Group();k.name=d.id;return k;},disposeKart:k=>{disposed++;k.parent?.remove(k);},animateShowroomKart:()=>animated++,updateMapScenery(){}};
 vm.createContext(c);vm.runInContext(fs.readFileSync(require.resolve('../title-attract.js'),'utf8'),c);
+c.SOLAR_DIRECTION=new THREE.Vector3(-90,140,-60).normalize();
 const run=s=>vm.runInContext(s,c),before=racers.map(r=>r.mesh.position.toArray());
 assert.equal(run('tickFinishCeremony(.016)'),true);
 assert.equal(run('finishCeremony.karts.map(k=>k.name).join()'),'1,2,3');

@@ -389,7 +389,7 @@ function updateCamera(dt){
   camera.up.copy(camState.up);camera.lookAt(camState.look);camera.rotateZ(Math.sin(t*.9)*sh*.05+camState.roll);
   camState.fov=lerp(camState.fov,fovT,1-Math.exp(-dt*5));camera.fov=camState.fov;camera.updateProjectionMatrix();
   // shadows follow the player
-  sun.target.position.copy(_p);sun.position.copy(_p).add(new THREE.Vector3(-90,140,-60));
+  sun.target.position.copy(_p);sun.position.copy(_p).addScaledVector(SOLAR_DIRECTION,180);
   hud.vig.className=p.boost>0?'boost':(hud.vig.className==='hit'?'hit':p.slipOn?'slip':'');
 }
 

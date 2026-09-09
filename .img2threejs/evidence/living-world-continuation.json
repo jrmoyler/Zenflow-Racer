@@ -1,0 +1,23 @@
+{
+  "scope": "Environmental continuation; existing driver reconstruction gate is unchanged",
+  "authorization": "User requests a new PR with Blender, Tripo 3D, image2threejs and Anime.js for realistic sun and living scenery",
+  "priorStateHashes": {
+    ".img2threejs/state.json": "19562813974d944bcb9b3a3bd46350d3485f6a26afc8ae1a9611e59c01d062fb",
+    ".img2threejs/spec.json": "99f830307f440c881f0a4720e92804a67da91a9d2c0f5beab1bbd812f54cd420"
+  },
+  "observedReference": "Floating cherry islands, high track ribbon, sculptural branch crowns, waterfall curtains, warm pastel atmospheric depth. Preserve authored geometry; no image planes substitute for scenery.",
+  "implementation": [
+    "Shared world-space solar direction for disc, clouds, shadows and software renderer",
+    "Blender 4.5 authored four-second hinge clip and 96-triangle pennant",
+    "Fixed mast seam and suspension hinge; rigid architecture remains grounded",
+    "Shared crown geometry wind deformation; existing turbines, weather, water and birds retain their motion",
+    "Anime.js paused gust envelope stepped by simulation time"
+  ],
+  "acceptance": "No change to existing character acceptance scores; no claim of exact image likeness or passing the character reconstruction gate",
+  "evidence": [
+    "tools/author-world-motion.py",
+    "world-motion-data.js",
+    "tests/living-world.cjs",
+    "docs/living-world-solar.md"
+  ]
+}

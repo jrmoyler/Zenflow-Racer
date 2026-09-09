@@ -2,7 +2,7 @@
 import bpy,json,math,os,sys
 from mathutils import Matrix,Vector
 root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-with open(os.path.join(root,'docs/world-review/world-geometry.json')) as f:data=json.load(f)
+with open(os.environ.get('ZENFLOW_WORLD_INPUT',os.path.join(root,'docs/world-review/world-geometry.json'))) as f:data=json.load(f)
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 C=Matrix(((1,0,0,0),(0,0,-1,0),(0,1,0,0),(0,0,0,1)))
 materials={}
@@ -31,13 +31,14 @@ for i,o in enumerate(data['objects']):
     mesh=meshes[o['geometry']];obj=bpy.data.objects.new('world-'+str(i),mesh);bpy.context.collection.objects.link(obj)
     if not mesh.materials:mesh.materials.append(materials[o['material']])
     a=o['matrix'];M=Matrix(tuple(tuple(a[c*4+r] for c in range(4)) for r in range(4)));obj.matrix_world=C@M@C.inverted()
-scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.device='CPU';scene.cycles.samples=24;scene.cycles.use_denoising=True
+scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.device='CPU';scene.cycles.samples=int(os.environ.get('ZENFLOW_WORLD_SAMPLES','24'));scene.cycles.use_denoising=True
 scene.render.resolution_x=960;scene.render.resolution_y=540;scene.render.resolution_percentage=100
 scene.world.use_nodes=True;scene.world.node_tree.nodes['Background'].inputs[0].default_value=(.61,.67,.88,1);scene.world.node_tree.nodes['Background'].inputs[1].default_value=.8
 wn=scene.world.node_tree.nodes;wl=scene.world.node_tree.links;tex=wn.new('ShaderNodeTexCoord');separate=wn.new('ShaderNodeSeparateXYZ');ramp=wn.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].position=0;ramp.color_ramp.elements[0].color=(.83,.53,.68,1);ramp.color_ramp.elements[1].position=.8;ramp.color_ramp.elements[1].color=(.38,.55,.88,1);wl.new(tex.outputs['Normal'],separate.inputs[0]);wl.new(separate.outputs['Z'],ramp.inputs[0]);wl.new(ramp.outputs['Color'],wn['Background'].inputs[0])
-sun=bpy.data.lights.new('pastel sun','SUN');sun.energy=2.3;sun.angle=.2;sun.color=(1,.85,.91);obj=bpy.data.objects.new('pastel sun',sun);bpy.context.collection.objects.link(obj);obj.rotation_euler=(.5,-.4,-.7)
+sun=bpy.data.lights.new('pastel sun','SUN');sun.energy=2.3;sun.angle=math.radians(1.1);sun.color=(1,.88,.68);obj=bpy.data.objects.new('pastel sun',sun);bpy.context.collection.objects.link(obj);obj.rotation_euler=Vector((90,-60,-140)).to_track_quat('-Z','Y').to_euler()
 scene.view_settings.view_transform='AgX';scene.render.image_settings.file_format='PNG'
 scene.use_nodes=True;tree=scene.node_tree;tree.nodes.clear();layers=tree.nodes.new('CompositorNodeRLayers');glare=tree.nodes.new('CompositorNodeGlare');glare.glare_type='FOG_GLOW';glare.quality='MEDIUM';glare.threshold=1.8;output=tree.nodes.new('CompositorNodeComposite');tree.links.new(layers.outputs['Image'],glare.inputs['Image']);tree.links.new(glare.outputs['Image'],output.inputs['Image'])
 for v in data['cameras']:
+    if os.environ.get('ZENFLOW_WORLD_CAMERA') and v['name']!=os.environ['ZENFLOW_WORLD_CAMERA']:continue
     camera=bpy.data.cameras.new(v['name']);obj=bpy.data.objects.new(v['name'],camera);bpy.context.collection.objects.link(obj);obj.location=(C@Vector((*v['position'],1))).to_3d();target=C@Vector((*v['target'],1));obj.rotation_euler=(Vector(target[:3])-obj.location).to_track_quat('-Z','Y').to_euler();camera.angle=math.radians(v['fov']);camera.clip_end=2000;scene.camera=obj
-    scene.render.filepath=os.path.join(root,'docs/world-review',v['name']+'.png');bpy.ops.render.render(write_still=True)
+    scene.render.filepath=os.path.join(os.environ.get('ZENFLOW_WORLD_OUTPUT',os.path.join(root,'docs/world-review')),v['name']+'.png');bpy.ops.render.render(write_still=True)

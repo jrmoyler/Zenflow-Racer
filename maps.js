@@ -1,4 +1,5 @@
 // Reference-led circuits. Keep this registry before world.js in script order.
+const SOLAR_DIRECTION=new THREE.Vector3(-90,140,-60).normalize();
 const MAPS = [
   {id:'cherry',name:'Cherry Blossom Skyway',theme:'Sanctuary in the clouds',difficulty:'Flowing',road:0x6b60b8,edge:0x70f4ff,trim:0xe4b7ef,skyTop:0x6f86d6,skyHorizon:0xf4bcd6,fog:0xb9b3e2,sun:0xffe5df},
   {id:'stormforge',name:'Nexus Stormforge',theme:'Race the turbine foundry',difficulty:'Technical',road:0x525f78,edge:0x58efff,trim:0xffbb54,skyTop:0x667694,skyHorizon:0xffc99a,fog:0xadb6d1,sun:0xffce9a,
@@ -39,4 +40,5 @@ function updateMapScenery(dt){
   if(typeof zenWorldTime!=='undefined')zenWorldTime.value=(zenWorldTime.value||0)+dt;
   for(const rotor of mapSceneryAnimations)rotor.rotation.z+=dt*(rotor.userData.spinRate||.2);
   if(typeof updateImmersion==='function')updateImmersion(dt);
+  if(typeof updateLivingWorld==='function')updateLivingWorld(dt);
 }

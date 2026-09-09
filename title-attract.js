@@ -21,7 +21,7 @@ function tickTitleAttract(dt){
  const eye=p.clone().addScaledVector(forward,portrait?9:8.2+orbit).addScaledVector(right,portrait?6:10).addScaledVector(up,portrait?5.8:4.1);
  const target=p.clone().addScaledVector(right,portrait?0:6).addScaledVector(up,portrait?-2.1:.6);
  const blend=titleAttract.started?1-Math.exp(-dt*3):1;camera.position.lerp(eye,blend);camera.up.lerp(up,blend).normalize();camera.lookAt(target);camera.fov=portrait?58:50;camera.updateProjectionMatrix();titleAttract.started=true;
- sun.target.position.copy(p);sun.position.copy(p).addScaledVector(up,140).addScaledVector(right,-90).addScaledVector(forward,60);
+ sun.target.position.copy(p);sun.position.copy(p).addScaledVector(SOLAR_DIRECTION,180);
  game.time+=step;updateMapScenery(step);return true;
 }
 
@@ -71,7 +71,7 @@ function tickFinishCeremony(dt){
  const eye=root.localToWorld(new THREE.Vector3(portrait?2:1.5+phase,portrait?8:7.5,portrait?-23:-23));
  const target=root.localToWorld(new THREE.Vector3(portrait?0:-5.5,portrait?-3:1.3,0));
  camera.position.copy(eye);camera.up.set(0,1,0).transformDirection(root.matrixWorld);camera.lookAt(target);camera.fov=portrait?53:48;camera.updateProjectionMatrix();
- const center=root.getWorldPosition(new THREE.Vector3());sun.target.position.copy(center);sun.position.copy(center).add(new THREE.Vector3(-90,140,-60));
+ const center=root.getWorldPosition(new THREE.Vector3());sun.target.position.copy(center);sun.position.copy(center).addScaledVector(SOLAR_DIRECTION,180);
  updateMapScenery(step);return true;
 }
 
@@ -83,5 +83,5 @@ function frameRosterCircuit(dt){
  const p=trackPoint(u,0,0,new THREE.Vector3()),f=trackTan(u,new THREE.Vector3()),up=trackUp(u,new THREE.Vector3()),right=trackRight(u,new THREE.Vector3());
  camera.position.copy(p).addScaledVector(f,-24).addScaledVector(right,17).addScaledVector(up,10);
  camera.up.copy(up);camera.lookAt(p.clone().addScaledVector(f,30).addScaledVector(up,5));camera.fov=57;camera.updateProjectionMatrix();
- sun.target.position.copy(p);sun.position.copy(p).add(new THREE.Vector3(-90,140,-60));
+ sun.target.position.copy(p);sun.position.copy(p).addScaledVector(SOLAR_DIRECTION,180);
 }

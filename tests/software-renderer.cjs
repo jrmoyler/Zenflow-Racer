@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const THREE=require('../vendor/three.min.js');
 let uploads=0,blits=0,skyLobes=0;
-const makeCanvas=()=>{const canvas={style:{},dataset:{},setAttribute(){}};canvas.ctx={canvas,save(){},restore(){},setTransform(){},beginPath(){},moveTo(){},ellipse(){skyLobes++;},fill(){},rect(){},clip(){},createLinearGradient(){return {addColorStop(){}};},fillRect(){},createImageData(w,h){return {data:new Uint8ClampedArray(w*h*4),width:w,height:h};},putImageData(){uploads++;},drawImage(){blits++;}};canvas.getContext=()=>canvas.ctx;return canvas;};
+const makeCanvas=()=>{const canvas={style:{},dataset:{},setAttribute(){}};canvas.ctx={canvas,save(){},restore(){},setTransform(){},beginPath(){},moveTo(){},ellipse(){skyLobes++;},fill(){},rect(){},clip(){},arc(){},createRadialGradient(){return {addColorStop(){}};},createLinearGradient(){return {addColorStop(){}};},fillRect(){},createImageData(w,h){return {data:new Uint8ClampedArray(w*h*4),width:w,height:h};},putImageData(){uploads++;},drawImage(){blits++;}};canvas.getContext=()=>canvas.ctx;return canvas;};
 const source=fs.readFileSync(path.join(__dirname,'../fallback-renderer.js'),'utf8');
 const context={THREE,innerWidth:320,innerHeight:240,document:{createElement:makeCanvas},console};vm.createContext(context);vm.runInContext(source+';globalThis.Renderer=CanvasRaceRenderer',context);
 const renderer=new context.Renderer({canvas:makeCanvas()}),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,320/240,.1,100);
