@@ -5,12 +5,12 @@ Use Q, gamepad Y, or the on-screen SPECIAL button. Each ability starts ready; co
 | Division ID | Power | Cooldown | Gameplay |
 |---|---|---:|---|
 | zenflow | TIME DILATION | 19s | A 4-second field slows nearby rivals while you keep your momentum. |
-| collective | SHARED FORTUNE | 17s | Siphon one token from the nearest three eligible rivals within 35 metres, up to ten tokens. |
+| collective | SHARED FORTUNE | 17s | Siphon one token from the nearest three eligible rivals within 35 metres, up to ten tokens. With nothing to take the siphon vents as thrust. |
 | hybrid | PHASE WALK | 20s | Become intangible for 3.5 seconds. Pass through karts, mines and missiles; phased racers cannot collect pickups. |
 | nexus | HOLOGRAM DECOY | 17s | Leave an 8-second hologram that intercepts hostile missiles in its lane. |
 | kinetic | IMPACT DRIVE | 20s | Charge your chassis for 4 seconds. Contact spins rivals out. |
 | juris | VERDICT MIRROR | 18s | For 4 seconds, reflect the next hostile hit back to its owner. |
-| signal | SONIC LANCE | 16s | Fire a narrow sonic strike at the closest rival ahead, within 70 metres. |
+| signal | SONIC LANCE | 16s | Fire a narrow sonic strike at the closest rival ahead, within 70 metres. With no rival in the lane the cast stays committed and vents as thrust. |
 | loom | THREAD SNARE | 18s | Lay a 5-second ribbon behind you that slows rivals crossing its lane. |
 | vector | SIDE STEP | 12s | Blink four metres toward the emptier adjacent lane with half a second of collision immunity. |
 | aether | ORBITAL MAGNET | 20s | Pull available tokens from across the track within 24 metres for 5 seconds. |
@@ -24,6 +24,14 @@ Use Q, gamepad Y, or the on-screen SPECIAL button. Each ability starts ready; co
 | gaia | ROOT NET | 18s | Lay a 5-second root ribbon that slows crossings and reduces your edge speed penalty by 65%. |
 | nomad | WAYPOINT HOP | 13s | Blink six metres forward with 0.6 seconds of collision immunity. Distance and lap crossings remain accurate. |
 | eon | SECOND WIND | 18s | Cleanse spin and slow, resist slows for 5 seconds, and surge. Lost tokens stay lost. |
+
+## What a slow actually costs
+
+Slowing is the most common effect in the game — most division powers and most add-ons apply one — so it is a real handicap rather than a lower ceiling. While `slow` is running a racer keeps 60% of its top speed, accelerates at 55% of its normal rate, loses about 16% of its steering authority, and bleeds any speed it is already carrying down toward the cap even while coasting, braking or drifting. Boosts taken inside a snare arrive at half strength, so a mini-turbo cannot simply cancel a field. Slow resistance (Regenesis, Second Wind, Magic Boost) removes the damping, and every cleansing power clears the slow before it boosts, so its own surge always lands at full strength.
+
+## Reading a cast
+
+An activation is only useful if the driver can see it land. Powers report what they did in the toast subtitle, the effect rail above the HUD lists every live buff and debuff on the player with the time remaining, and the running order flags rivals your powers are currently holding (SLOW, SPUN, LOCK, PHASE). Committed casts that find no target still spend themselves on thrust rather than doing nothing.
 
 Phase blocks kart contact and damage without consuming projectiles. Ordinary Aegis shields block one hostile hit, slow or token theft. Hard Perimeter reserves its shield for hits; its shove lasts even after the shield is consumed. Verdict reflects one hit and consumes itself; reflected hits cannot recursively reflect. Slows, Vault Lock and token theft never consume or trigger Verdict. Vault Lock bypasses shields because it applies neither a hit nor a slow. Regenesis and Second Wind block slowing but do not prevent direct damage after their one-second recovery protection expires. Finished racers cannot activate powers or receive attacks. All temporary zones reset on rematch/menu. Effects are capped at 24 desktop / 12 mobile emitters. Shared immutable geometry, analytic ribbon shaders, and capped instanced particles keep lifetimes bounded; expired materials are disposed without destroying shared vehicle or effect geometry.
 

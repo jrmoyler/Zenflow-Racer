@@ -150,6 +150,20 @@ test('HUD update runs headless with the new elements: gap readout, speed bar, wr
  racer();opponent('zenflow',.01);run('r.isPlayer=true;r.speed=30;o.progress=r.progress+.01;game.rankTick=0;updateRanks(true);updateHUD(.05)');assert.match(element('ranks').innerHTML,/class="gap">▲ \+\d+\.\ds/);assert.equal(element('speedbar').className,'');assert.equal(element('tP').textContent,'POWER');
  run('r.speed=-5;r.wrongT=.5;updateHUD(.05)');assert.equal(element('wrong').style.display,'none','no warning inside the first second');run('r.wrongT=1.2;updateHUD(.05)');assert.equal(element('wrong').style.display,'block');
  run('r.specialCooldown=5;r.boost=1;r.roulette=.7;updateHUD(.05)');assert.equal(element('tP').textContent,'5s');assert.equal(element('speedbar').className,'boost');assert.equal(element('item').style['--spin'],'0.500');run('r.roulette=0;r.boost=0;updateHUD(.05)');assert.equal(element('item').style['--spin'],'0');});
+test('The effect rail reports every live buff and debuff, and the order flags held rivals',()=>{
+ racer('zenflow');run("r.isPlayer=true;game.state='race';updateStatusHUD(r)");
+ assert.equal(element('statusHUD').innerHTML,'','an unaffected racer shows nothing');
+ run('r.slow=2.44;r.phase=1;r.specialActive=3.5;updateStatusHUD(r)');
+ const rail=element('statusHUD').innerHTML;
+ assert.match(rail,/data-tone="power"><b>TIME DILATION<\/b><i>3.5</,'the running power leads the rail');
+ assert.match(rail,/data-tone="bad"><b>SNARED<\/b><i>2.4</,'debuffs are tinted and counted down');
+ assert.match(rail,/data-tone="good"><b>PHASED<\/b>/);
+ run("game.state='roster';updateStatusHUD(r)");assert.equal(element('statusHUD').innerHTML,'','the rail is race-only');
+ racer();opponent('zenflow',.01);run('r.isPlayer=true;o.slow=2;game.rankTick=0;updateRanks(true)');
+ assert.match(element('ranks').innerHTML,/<s>SLOW<\/s>/,'a snared rival is flagged in the running order');
+ run('o.slow=0;o.spin=1;game.rankTick=0;updateRanks(true)');assert.match(element('ranks').innerHTML,/<s>SPUN<\/s>/);
+ run('o.spin=0;o.finished=true;game.rankTick=0;updateRanks(true)');assert.match(element('ranks').innerHTML,/ ✓/,'a finished rival still reads as finished');
+});
 test('Analog steering clamps travel, ignores other fingers and releases on cancellation',()=>{
  racer();run('r.isPlayer=true;resetInput()');const el=element('tSteer'),ev=(pointerId,clientX)=>({pointerId,clientX,preventDefault:noop});
  el.events.pointerdown(ev(1,120));assert.ok(run('touchSteer')>.7);el.events.pointermove(ev(2,0));assert.ok(run('touchSteer')>.7);

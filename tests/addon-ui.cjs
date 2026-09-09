@@ -15,7 +15,7 @@ function fixture(raw='{}'){
  const window=element(),context={console,window,document:{getElementById:el,createElement:element},localStorage:{getItem:()=>stored,setItem:(k,v)=>{stored=v;writes++;}},
   ROSTER:[{id:'zenflow',name:'ZenFlow'},{id:'eon',name:'Eon Core'}],MAPS:[{id:'cherry'}],selected:{id:'zenflow',name:'ZenFlow'},raceSetup:{step:'character'},SFX:{ui(){}},requestAnimationFrame:fn=>fn()};
  vm.createContext(context);const run=src=>vm.runInContext(src,context);
- const game=read('game.js');run(game.slice(0,game.indexOf('const input=')));run("game.state='roster'");run(read('addons.js'));run(read('addon-ui.js'));
+ const game=read('game.js');run(game.slice(0,game.indexOf('const input=')));run("game.state='roster'");run(read('power-icons.js'));run(read('addons.js'));run(read('addon-ui.js'));
  const open=()=>el('open-loadout').fire('click'),rows=()=>el('addon-list').querySelectorAll('button');
  const equip=id=>{const row=rows().find(n=>n.dataset.addon===id);assert.ok(row,'available choice '+id);row.fire('click');};
  return {el,run,open,rows,equip,window,context,stored:()=>stored,writes:()=>writes};
@@ -55,6 +55,28 @@ console.log('PASS malformed saved state: invalid JSON, primitives, arrays, unkno
  for(const blocked of [{vault:1},{spin:1},{finished:true}]){Object.assign(f.context.r,{vault:0,spin:0,finished:false},blocked);f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').disabled,true,'racer status gates HUD');assert.equal(f.el('tA').disabled,true);}
  f.context.r.addonId='missing';f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').hidden,true);assert.equal(f.el('tA').hidden,true);
  console.log('PASS add-on HUD: cooldown rounding, ready state, incapacitation and empty slot');
+}
+
+{
+ const f=fixture();f.open();
+ const row=id=>f.rows().find(n=>n.dataset.addon===id);
+ const find=(node,cls)=>node.className===cls?node:node.children.reduce((hit,child)=>hit||find(child,cls),null);
+ const chip=(id,cls)=>find(row(id),cls);
+ // Every catalog entry carries its own visible call to action and a behaviour
+ // glyph, and the row stays a single button so keyboard activation still works.
+ for(const node of f.rows())assert.equal(node.children.filter(n=>n.tagName==='BUTTON').length,0,'no control nested inside a row button');
+ assert.equal(chip('fire','addon-action').textContent,'ADD ON');
+ assert.equal(chip('','addon-action').textContent,'EQUIPPED ✓','an empty slot is the equipped choice until a power is added');
+ assert.match(row('fire').children[0].innerHTML,/^<svg viewBox="0 0 24 24"/,'each row leads with its behaviour glyph');
+ f.equip('fire');
+ assert.equal(chip('fire','addon-action').textContent,'EQUIPPED ✓','the equipped row reports its own state');
+ assert.equal(chip('','addon-action').textContent,'CLEAR SLOT','the empty slot reads as a clear once a power is equipped');
+ assert.equal(chip('ward','addon-action').textContent,'ADD ON','every other row returns to the equip call');
+ assert.match(chip('ward','addon-cooldown').textContent,/^21s COOLDOWN$/);
+ f.equip('ward');
+ assert.equal(chip('fire','addon-action').textContent,'ADD ON','swapping releases the previous row');
+ assert.equal(chip('ward','addon-action').textContent,'EQUIPPED ✓');
+ console.log('PASS catalog rows: per-power equip button, behaviour glyph and live equipped state');
 }
 
 {

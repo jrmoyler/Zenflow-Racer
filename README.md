@@ -78,6 +78,8 @@ Blender 4.5.0 ran successfully headless in this implementation environment (see 
 
 Select any of **20 divisions** for a twelve-kart race. Quantum Ledger, Terra Axis, Obsidian Arc, Civic Core, Cognara Mind, Gaia Synthesis, Nomad Nexus and Eon Core each have a distinct chassis, dressed pilot and signature power.
 
-On character select, open **ADD-ON LOADOUT** and equip one of **24 powers**, or keep the slot empty. Your loadout is saved separately for each division. Confirm the racer, choose a circuit, then enter the race. Use **F**, **left-stick press**, or the touch **ADD-ON** button; **Q / Y / POWER** remains the division power and **E / X / ITEM** uses track pickups. Every add-on has its own cooldown.
+On character select, open **ADD-ON LOADOUT** and equip one of **24 powers** with its **ADD ON** button, or keep the slot empty. Your loadout is saved separately for each division. Confirm the racer, choose a circuit, then enter the race. Use **F**, **left-stick press**, or the touch **ADD-ON** button; **Q / Y / POWER** remains the division power and **E / X / ITEM** uses track pickups. Every add-on has its own cooldown.
+
+In the race the signature power and the equipped add-on share one dock: each shows its behaviour glyph, its name, its live state, its key and a cooldown bar. An effect rail above the HUD lists every buff and debuff currently on you with the time left, and the running order flags rivals your powers are holding.
 
 See [divisional rules](docs/abilities.md), [add-on catalog and source mapping](docs/addon-powers.md), and the [supplied specs](references/specs/). Reference artwork guides geometry and effects; it is excluded from the playable release. Both upstream projects are credited in `references/upstream/`.

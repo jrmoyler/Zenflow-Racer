@@ -28,47 +28,74 @@ function initAbility(r){
 }
 function clearAbilities(){abilityZones.length=0;if(typeof clearPowerEffects==='function')clearPowerEffects();}
 function abilityFX(r,kind=r.div.id){if(typeof spawnPowerEffect==='function')spawnPowerEffect(kind,r.u,r.lat,r.div.acc,r);if(typeof raceFX!=='undefined')raceFX.onSpecial(r,kind);}
+// Every activation reports what it actually did. A power the driver cannot read
+// is a power the driver believes is broken, so the outcome rides the toast
+// subtitle and the caster's status rail rather than staying in the simulation.
+function powerOutcome(r,text){if(r.isPlayer)powerOutcome.last=text||'';return text||'';}
+function powerLanded(count,singular,plural=singular+'S'){return count?count+' '+(count===1?singular:plural):'';}
 function powerProtected(r,attacker,reflectable=true){
  if(r.finished||r.phase>0)return true;
  if(r.reflect>0&&reflectable){r.reflect=0;abilityFX(r,'juris');if(typeof spawnAddonContact==='function')spawnAddonContact('juris',r.u,r.lat,r);if(attacker&&attacker!==r)hitRacer(attacker,'reflection',null);return true;}
  return false;
 }
 // Mirrors answer hits only. A perimeter's shield is also reserved for hits.
-function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,false))return false;if(r.shield>0&&!(r.perimeter>0)){r.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);return false;}r.slow=Math.max(r.slow||0,duration);return true;}
+function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,false))return false;if(r.shield>0&&!(r.perimeter>0)){r.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);return false;}
+ const fresh=!(r.slow>0);r.slow=Math.max(r.slow||0,duration);
+ // Being snared is a race-changing event; the driver hears about it once per
+ // effect rather than on every step of a sustained field.
+ if(fresh&&r.isPlayer&&typeof setToast==='function')setToast('SNARED','',(attacker&&attacker!==r&&attacker.div?attacker.div.name.toUpperCase()+' FIELD':'HOSTILE FIELD'),2);
+ return true;}
 function useSpecial(r){
  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.spin>0&&!['helix','eon'].includes(r.div.id))return false;
  const power=ABILITIES[r.div.id];if(!power)return false;
- r.specialCooldown=power.cooldown;abilityFX(r);
- if(r.isPlayer){setToast(power.name,'teal');SFX.ui();}
+ r.specialCooldown=power.cooldown;abilityFX(r);powerOutcome.last='';
  switch(r.div.id){
  case 'zenflow':r.specialActive=4;r.specialSeen.clear();break;
  case 'collective':{
   const nearby=game.racers.filter(o=>o!==r&&!o.finished&&o.tokens>0&&!(o.vault>0)&&Math.abs(du_dist(r.u,o.u))<35).sort((a,b)=>Math.abs(du_dist(r.u,a.u))-Math.abs(du_dist(r.u,b.u)));
-  let taken=0;for(const o of nearby){if(r.tokens>=10||r.vault>0||taken>=3)break;if(powerProtected(o,r,false))continue;if(o.shield>0&&!(o.perimeter>0)){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}break;}
+  let taken=0;for(const o of nearby){if(r.tokens>=10||r.vault>0||taken>=3)break;if(powerProtected(o,r,false))continue;if(o.shield>0&&!(o.perimeter>0)){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}
+  // A siphon that finds nothing to take still converts the reserve into speed:
+  // the cooldown is committed either way, so the activation must never be inert.
+  if(taken)powerOutcome(r,'+'+taken+' TOKEN'+(taken===1?'':'S'));
+  else {applyBoost(r,1,1.12,.4);powerOutcome(r,'NO RESERVES · SIPHON VENTED');}
+  break;}
  case 'hybrid':r.phase=3.5;r.specialActive=3.5;break;
  case 'nexus':abilityZones.push({kind:'decoy',owner:r,u:r.u,lat:r.lat,life:8});r.specialActive=8;break;
  case 'kinetic':r.ram=4;r.specialActive=4;break;
  case 'juris':r.reflect=4;r.specialActive=4;break;
- case 'signal':{let target=null,best=70;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best&&Math.abs(r.lat-o.lat)<3){target=o;best=d;}}if(target){hitRacer(target,'sonic',r);abilityFX(target,'signal');}break;}
+ case 'signal':{let target=null,best=70;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best&&Math.abs(r.lat-o.lat)<3){target=o;best=d;}}
+  // The cast stays committed on a miss, but the lance is never wasted: with no
+  // rival in the lane the charge vents backwards as thrust.
+  if(target){hitRacer(target,'sonic',r);abilityFX(target,'signal');powerOutcome(r,'DIRECT HIT · '+Math.round(best)+'M');}
+  else {applyBoost(r,1.1,1.14,.5);powerOutcome(r,'NO TARGET · CHARGE VENTED');}
+  break;}
  case 'loom':abilityZones.push({kind:'snare',owner:r,u:wrap01(r.u-5/track.len),lat:r.lat,life:5});r.specialActive=5;break;
  case 'vector':{
+  powerOutcome(r,'LANE BLINK');
   const bound=TRACK_W/2-1,preferred=r.lat<=0?1:-1;
   const occupancy=side=>{const landing=clamp(r.lat+side*4,-bound,bound);let count=0;for(const o of game.racers)if(o!==r&&!o.finished&&!(o.phase>0)&&Math.abs(du_dist(r.u,o.u))<8&&Math.abs(o.lat-landing)<2)count++;return count;};
   const side=occupancy(preferred)>occupancy(-preferred)?-preferred:preferred;
   r.lat=clamp(r.lat+side*4,-bound,bound);r.phase=.5;r.specialActive=.5;r.theta=0;r.steer=0;break;}
  case 'aether':r.specialActive=5;break;
  case 'animus':r.specialActive=4;r.specialElapsed=0;r.specialPulses=0;r.specialPulse=0;break;
- case 'helix':r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;if(!(r.vault>0))r.tokens=Math.min(10,r.tokens+(r.lastLostTokens||0));r.lastLostTokens=0;break;
+ case 'helix':{const recovered=r.vault>0?0:Math.min(10-r.tokens,r.lastLostTokens||0);r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;if(!(r.vault>0))r.tokens=Math.min(10,r.tokens+(r.lastLostTokens||0));r.lastLostTokens=0;powerOutcome(r,recovered?'CLEANSED · +'+recovered+' RECOVERED':'CLEANSED');break;}
  case 'ledger':r.specialActive=4;break;
  case 'terra':r.anchor=3.5;r.anchorSpeed=r.speed;r.specialActive=3.5;break;
- case 'obsidian':r.shield=Math.max(r.shield,4);r.perimeter=4;r.specialActive=4;break;
+ case 'obsidian':r.shield=Math.max(r.shield,4);r.perimeter=4;r.specialActive=4;powerOutcome(r,'PERIMETER UP');break;
  case 'civic':r.specialActive=5;break;
  case 'cognara':r.predict=4;r.specialActive=4;break;
  case 'gaia':r.specialActive=5;abilityZones.push({kind:'roots',owner:r,u:wrap01(r.u-4/track.len),lat:r.lat,life:5});break;
  case 'nomad':r.phase=.6;r.specialActive=.6;r.theta=0;r.steer=0;advanceRaceDistance(r,6/track.len,0);break;
- case 'eon':r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;applyBoost(r,1.2,1.18,.8);break;
+ case 'eon':r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;applyBoost(r,1.2,1.18,.8);powerOutcome(r,'CLEANSED · SURGE');break;
  }
+ if(r.isPlayer){setToast(power.name,'teal',powerOutcome.last||power.description,2);SFX.ui();}
  return true;
+}
+// Sustained fields fire every step; the driver only needs to be told when the
+// tally actually changes, so repeats within an activation stay silent.
+function powerReport(r,title,detail){
+ const key=title+'|'+detail;if(powerReport.key===key&&game.raceTime<(powerReport.until||0))return;
+ powerReport.key=key;powerReport.until=game.raceTime+1.2;if(typeof setToast==='function')setToast(title,'teal',detail,2);
 }
 function stepAbilities(dt){
  if(game.state!=='race'||!(dt>0))return;
@@ -79,8 +106,10 @@ function stepAbilities(dt){
   if(r.finished){r.specialActive=0;continue;}
   if(!(r.specialActive>0))continue;
   const activeDt=Math.min(dt,r.specialActive);r.specialActive=Math.max(0,r.specialActive-dt);
-  if(r.div.id==='zenflow')for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<18){const first=!r.specialSeen.has(o);powerSlow(o,first?1.2:.6,r);r.specialSeen.add(o);}}
-  if(r.div.id==='ledger')for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<16&&!powerProtected(o,r,false))o.vault=Math.max(o.vault,r.specialActive);}
+  if(r.div.id==='zenflow'){let caught=0;for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<18){const first=!r.specialSeen.has(o);if(powerSlow(o,first?1.2:.6,r))caught++;r.specialSeen.add(o);}}
+   if(caught&&r.isPlayer)powerReport(r,'DILATION FIELD',powerLanded(r.specialSeen.size,'RIVAL')+' CAUGHT');}
+  if(r.div.id==='ledger'){let locked=0;for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<16&&!powerProtected(o,r,false)){o.vault=Math.max(o.vault,r.specialActive);locked++;}}
+   if(locked&&r.isPlayer)powerReport(r,'VAULT LOCK',powerLanded(locked,'RIVAL')+' LOCKED');}
   if(r.div.id==='civic'){let target=null,best=14;for(const o of game.racers){const d=Math.abs(du_dist(r.u,o.u));if(o!==r&&!o.finished&&!(o.phase>0)&&d<best&&Math.abs(r.lat-o.lat)<4){target=o;best=d;}}if(target)target.civicDraft=Math.max(target.civicDraft,.4);}
   if(r.div.id==='aether'&&r.spin<=0&&!(r.phase>0)&&!(r.vault>0))for(const t of tokens){if(t.t<=0&&r.tokens<10&&Math.abs(du_dist(r.u,t.u))<24){t.t=9;t.mesh.visible=false;r.tokens++;if(r.isPlayer)SFX.token(r.tokens);}}
   if(r.div.id==='animus'){

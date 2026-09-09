@@ -69,11 +69,18 @@ function spawnRace(playerDiv){
 // ---------- Physics step ----------
 const DRIFT_TIERS=[0.9,1.9,3.0],DRIFT_BOOST=[0,.55,1.05,1.7],DRIFT_MULT=[1,1.24,1.31,1.38];
 const SLIP_MIN=3,SLIP_MAX=14,SLIP_LAT=3.45,SLIP_ENGAGE=.8,MAX_MINES=6;
+// A slow has to be felt from the driver's seat, not just measured in a test: it
+// lowers the ceiling, blunts the throttle, loosens the front end and stops a
+// racer from simply boosting straight back out of it. Cleansing powers
+// (Regenesis, Second Wind, Magic Boost, Tidewrought Ring) clear r.slow first,
+// so they still deliver their full surge.
+const SLOW_TOP=.6,SLOW_ACCEL=.55,SLOW_GRIP=.84,SLOW_BOOST=.5,SLOW_BLEED=2.4;
 // Haptics: gamepad dual-rumble and touch vibration, both optional and guarded.
 function rumble(strong=.6,weak=.4,ms=180){try{const pad=navigator.getGamepads?.()[0];const act=pad&&pad.vibrationActuator;if(act&&typeof act.playEffect==='function'){const p=act.playEffect('dual-rumble',{duration:ms,strongMagnitude:clamp(strong,0,1),weakMagnitude:clamp(weak,0,1)});if(p&&typeof p.catch==='function')p.catch(()=>{});}}catch{}}
 function haptic(ms=40){try{if(game.touch&&typeof navigator.vibrate==='function')navigator.vibrate(ms);}catch{}}
 // Every boost source goes through here: the multiplier ramps in over ~0.2 s and an accel surge gives the launch its punch.
 function applyBoost(r,duration,mult,strength=1){
+  if(r.slow>0&&!(r.regen>0)){mult=1+(mult-1)*SLOW_BOOST;strength*=SLOW_BOOST;}
   r.boostTarget=Math.max(r.boost>0?r.boostTarget:1,mult);r.boost=Math.max(r.boost,duration);r.surge=Math.max(r.surge,strength);
   if(typeof raceFX!=='undefined')raceFX.onBoost(r,strength);if(r.isPlayer)rumble(.25+strength*.45,.5,140+strength*120);
 }
@@ -127,22 +134,26 @@ function stepRacer(r,dt){
   }
   // heading relative to track tangent
   let targetTheta;
-  if(r.drifting){targetTheta=r.driftDir*.085+r.steer*(r.handling+.06);}
-  else targetTheta=r.steer*r.handling*steeringGain(r.speed,r.maxSpeedBase);
+  const slowed=r.slow>0&&r.spin<=0,slowGrip=slowed?SLOW_GRIP:1;
+  if(r.drifting){targetTheta=r.driftDir*.085+r.steer*(r.handling+.06)*slowGrip;}
+  else targetTheta=r.steer*r.handling*slowGrip*steeringGain(r.speed,r.maxSpeedBase);
   if(r.spin>0)targetTheta=0;
   r.theta=lerp(r.theta,targetTheta,1-Math.exp(-dt*9));
   // --- slipstream (needs the other racers; safe with a single-racer field)
   stepSlipstream(r,dt);if(r.civicDraft>0&&r.spin<=0&&!r.finished)r.slipBonus=Math.max(r.slipBonus,.12);
   // --- longitudinal
-  const max=r.maxSpeed*(r.slow>0?.68:1);
+  const max=r.maxSpeed*(slowed?SLOW_TOP:1);
   if(r.boost>0){r.boost-=dt;r.boostMult=lerp(r.boostMult,r.boostTarget,1-Math.exp(-dt*9));if(r.boost<=0){r.boost=0;r.boostTarget=1;}}
   else{r.boostTarget=1;r.boostMult=lerp(r.boostMult,1,1-Math.exp(-dt*4));}
   if(r.surge>0){if(r.spin<=0&&r.wheelspin<=0&&r.speed<max*1.08)r.speed+=r.surge*r.accel*dt*1.6;r.surge*=Math.exp(-dt*6);if(r.surge<.02)r.surge=0;}
   if(r.wheelspin>0){r.wheelspin-=dt;r.speed=lerp(r.speed,0,dt*3);}
   else if(r.spin>0){r.speed=lerp(r.speed,4,1-Math.exp(-dt*2.5));}
   else if(r.brake){r.speed=Math.max(-9,r.speed-(r.speed>0?42:8)*dt);}
-  else if(r.throttle){const target=max;r.speed+= (target-r.speed)*(r.speed<target?1:3.5)*dt*(r.accel/14)*(r.speed<target?1:1)+ (r.speed<target?r.accel*dt*.25:0);if(r.speed>target)r.speed=lerp(r.speed,target,dt*3);}
+  else if(r.throttle){const target=max,accel=r.accel*(slowed?SLOW_ACCEL:1);r.speed+= (target-r.speed)*(r.speed<target?1:3.5)*dt*(accel/14)*(r.speed<target?1:1)+ (r.speed<target?accel*dt*.25:0);if(r.speed>target)r.speed=lerp(r.speed,target,dt*3);}
   else r.speed=lerp(r.speed,0,1-Math.exp(-dt*.9));
+  // Coasting, braking and drifting bleed toward the capped speed too, so a snare
+  // bites the instant it lands instead of waiting for the next throttle input.
+  if(slowed&&r.speed>max&&r.wheelspin<=0)r.speed=Math.max(max,r.speed-(r.speed-max)*SLOW_BLEED*dt);
   // corner scrub (turning bleeds speed unless drifting)
   if(!r.drifting&&r.spin<=0)r.speed*=1-Math.abs(r.theta)*1.6*dt*(r.predict>0?.7:1);
   // --- lateral
@@ -419,7 +430,9 @@ function updateRanks(force){
   const sorted=game.racers.slice().sort(raceOrder);sorted.forEach((r,i)=>r.rank=i+1);
   if(!force&&game.rankTick>0)return;
   const gap=game.player?gapText(sorted,game.player):'';
-  hud.ranks.innerHTML=sorted.map((r,i)=>`<div class="${r.isPlayer?'me':''}" style="--c:${r.div.acc}"><i></i>${String(i+1).padStart(2,' ')} ${r.div.name.toUpperCase()}${r.finished?' ✓':''}</div>`).join('')+(gap?`<div class="gap">${gap}</div>`:'');
+  // A rival held by one of your powers is flagged in the order: proof the cast landed.
+  const mark=r=>r.finished?' ✓':r.spin>0?' <s>SPUN</s>':r.vault>0?' <s>LOCK</s>':r.slow>0?' <s>SLOW</s>':r.phase>0?' <s>PHASE</s>':'';
+  hud.ranks.innerHTML=sorted.map((r,i)=>`<div class="${r.isPlayer?'me':''}" style="--c:${r.div.acc}"><i></i>${String(i+1).padStart(2,' ')} ${r.div.name.toUpperCase()}${mark(r)}</div>`).join('')+(gap?`<div class="gap">${gap}</div>`:'');
 }
 function drawMini(){
   if(!track.pos||!track.pos.length)return;const c=miniCtx,W=hud.mini.width;c.clearRect(0,0,W,W);
@@ -433,6 +446,38 @@ function drawMini(){
   const [sx,sy]=map(track.pos[0]);c.fillStyle='#F5F5F5';c.fillRect(sx-4,sy-4,8,8);
   game.racers.forEach(r=>{if(r.isPlayer)return;const [x,y]=map(r.mesh.position);c.fillStyle=r.div.acc;c.save();c.translate(x,y);c.rotate(Math.PI/4);c.fillRect(-5,-5,10,10);c.restore();});
   const p=game.player;const [x,y]=map(p.mesh.position);c.save();c.translate(x,y);c.rotate(Math.PI/4);c.fillStyle='#0A0F1E';c.fillRect(-9,-9,18,18);c.fillStyle='#a8f8ff';c.fillRect(-6.5,-6.5,13,13);c.restore();
+}
+// Active-effect rail. Powers that only exist as a number on a racer read as
+// "nothing happened"; this puts every live buff and debuff on screen with the
+// time it has left, so a landed power is visible from the driver's seat.
+const STATUS_EFFECTS=[
+ {key:'spin',label:'SPUN',tone:'bad'},
+ {key:'slow',label:'SNARED',tone:'bad'},
+ {key:'vault',label:'VAULT LOCKED',tone:'bad'},
+ {key:'phase',label:'PHASED',tone:'good'},
+ {key:'ram',label:'IMPACT DRIVE',tone:'good'},
+ {key:'reflect',label:'MIRROR',tone:'good'},
+ {key:'regen',label:'SLOW RESIST',tone:'good'},
+ {key:'anchor',label:'ANCHORED',tone:'good'},
+ {key:'perimeter',label:'PERIMETER',tone:'good'},
+ {key:'predict',label:'PREDICTIVE LINE',tone:'good'},
+ {key:'civicDraft',label:'SHARED LANE',tone:'good'},
+ {key:'shield',label:'AEGIS',tone:'good'},
+];
+function statusEntries(p){
+ const out=[];
+ for(const e of STATUS_EFFECTS){const t=p[e.key]||0;if(t>0)out.push({label:e.label,tone:e.tone,time:t});}
+ if(p.specialActive>0&&typeof ABILITIES!=='undefined'&&ABILITIES[p.div.id])out.unshift({label:ABILITIES[p.div.id].name,tone:'power',time:p.specialActive});
+ if(p.addonActive>0&&typeof addonDefinition==='function'){const a=addonDefinition(p.addonId);if(a)out.unshift({label:a.name.toUpperCase(),tone:'addon',time:p.addonActive});}
+ return out.slice(0,5);
+}
+function updateStatusHUD(p){
+ const rail=document.getElementById('statusHUD');if(!rail)return;
+ const entries=['race','finish'].includes(game.state)?statusEntries(p):[];
+ // One tenth of a second is the finest step the readout shows, so the markup is
+ // rebuilt at most ten times a second for at most five short pips.
+ const markup=entries.map(e=>`<span class="status-pip" data-tone="${e.tone}"><b>${e.label}</b><i>${e.time.toFixed(1)}</i></span>`).join('');
+ if(markup!==updateStatusHUD.markup){updateStatusHUD.markup=markup;rail.innerHTML=markup;rail.className=entries.length?'on':'';}
 }
 let lastItemKey=null;
 const DRIFT_LABELS=['DRIFT · HOLD TO CHARGE','BLUE BOOST · RELEASE','GOLD BOOST · RELEASE','ULTRA BOOST · RELEASE'];
@@ -456,7 +501,11 @@ function updateHUD(dt){
     else if(lastItemKey!==null){ic.innerHTML='';lbl.textContent='NO ITEM';lastItemKey=null;}}
   const drift=document.getElementById('driftmeter');if(drift){drift.hidden=!p.drifting;drift.style.setProperty('--charge',Math.min(100,p.driftTime/3*100)+'%');drift.dataset.tier=p.driftTier;drift.textContent=DRIFT_LABELS[p.driftTier];}
   if(typeof updateAddonHUD==='function')updateAddonHUD(p);
-  const special=document.getElementById('specialHUD');if(special&&typeof ABILITIES!=='undefined'){const ability=ABILITIES[p.div.id];const ready=!(p.specialCooldown>0);const specialLabel=document.getElementById('specialLabel');if(specialLabel)specialLabel.textContent=ability.name+' · '+(ready?(game.touch?'READY':'Q / Y · READY'):Math.ceil(p.specialCooldown)+'s');special.dataset.ready=ready?'true':'false';special.style.setProperty('--ready',Math.max(0,1-p.specialCooldown/ability.cooldown));
+  updateStatusHUD(p);
+  const special=document.getElementById('specialHUD');if(special&&typeof ABILITIES!=='undefined'){const ability=ABILITIES[p.div.id];const ready=!(p.specialCooldown>0);const specialLabel=document.getElementById('specialLabel');if(specialLabel)specialLabel.textContent=ability.name+' · '+(ready?'READY':Math.ceil(p.specialCooldown)+'s');special.dataset.ready=ready?'true':'false';special.style.setProperty('--ready',Math.max(0,1-p.specialCooldown/ability.cooldown));special.dataset.active=p.specialActive>0?'true':'false';
+    const specialIcon=document.getElementById('specialIcon');
+    if(specialIcon&&specialIcon.dataset.division!==p.div.id){specialIcon.dataset.division=p.div.id;if(typeof abilityIconSVG==='function')specialIcon.innerHTML=abilityIconSVG(p.div.id);}
+    if(special.style)special.style.setProperty('--power-color',p.div.acc);
     if(hud.tP){if(ready!==updateHUD.powerReady){updateHUD.powerReady=ready;if(ready)hud.tP.classList.add('ready');else hud.tP.classList.remove('ready');}hud.tP.textContent=ready?'POWER':Math.ceil(p.specialCooldown)+'s';}}
   drawMini();
 }
@@ -716,6 +765,10 @@ function buildPreviewStage(){
 function updateSelectedPreview(d){
  const power=typeof ABILITIES!=='undefined'?ABILITIES[d.id]:null;
  for(const [id,value] of Object.entries({'selected-power':power?.name||'','selected-description':power?.description||''})){const el=document.getElementById(id);if(el)el.textContent=value;}
+ // The roster card carries the same glyph the in-race dock will show, so the
+ // signature power is recognisable before the lights go out.
+ const powerMark=document.getElementById('selected-power-icon');
+ if(powerMark){powerMark.innerHTML=typeof abilityIconSVG==='function'?abilityIconSVG(d.id):'';if(powerMark.style)powerMark.style.setProperty('--power-color',d.acc);}
 
  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('racerselect',{detail:{division:d,ability:power}}));
  if(typeof THREE.Scene!=='function'||renderer.renderRosterPreview)return;
