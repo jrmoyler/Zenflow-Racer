@@ -33,7 +33,7 @@ low.renderer.extensions.has=()=>true;assert.equal(low.run('supportsRaceHDR()'),t
 // Evaluate the actual water material, and the angular term independently of rasterization.
 c.zenWorldTime={value:0};vm.runInContext(read('immersion.js'),c);
 const water=run("createImmersionWater({id:'cherry'},'sea')");
-assert.ok(water.vertexShader.includes('normalMatrix*normal'));assert.ok(water.fragmentShader.includes('dot(normalize(vNormal),normalize(vView))'));
+assert.ok(water.vertexShader.includes('waterPosition=worldPosition.xyz'));assert.ok(water.fragmentShader.includes('dot(N,V)'));
 for(const source of [water.fragmentShader,read('world.js'),read('immersion.js')]){assert.ok(source.includes('#include <tonemapping_fragment>'));assert.ok(source.includes('#include <encodings_fragment>'));}
 const fresnel=angle=>Math.pow(1-Math.abs(Math.cos(angle)),5);
 assert.equal(fresnel(0),0);assert.ok(fresnel(Math.PI*.49)>.8,'grazing view receives stronger water sheen');

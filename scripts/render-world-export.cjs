@@ -13,6 +13,7 @@ vm.runInContext(core.slice(core.indexOf('const clamp='),core.indexOf('function h
 vm.runInContext(fs.readFileSync(path.join(root,'maps.js'),'utf8'),context);
 vm.runInContext(fs.readFileSync(path.join(root,'world-motion-data.js'),'utf8'),context);
 vm.runInContext(fs.readFileSync(path.join(root,'living-world.js'),'utf8'),context);
+for(const file of ['natural-stone-data.js','natural-world.js','immersion.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 vm.runInContext(worldSource.slice(worldSource.indexOf('const CTRL=')),context);
 vm.runInContext(`
 selectMap(exportMapId);world.updateMatrixWorld(true);

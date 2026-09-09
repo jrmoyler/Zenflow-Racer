@@ -124,7 +124,7 @@ class CanvasRaceRenderer {
     const eye=new THREE.Vector3().setFromMatrixPosition(cam.matrixWorld),light=typeof SOLAR_DIRECTION!=='undefined'?SOLAR_DIRECTION:new THREE.Vector3(-90,140,-60).normalize(),world=new THREE.Matrix4(),mvp=new THREE.Matrix4(),instance=new THREE.Matrix4(),sphere=new THREE.Sphere(),normalMatrix=new THREE.Matrix3(),skinPoint=new THREE.Vector3(),instanceTint=new THREE.Color();
     const opaque=[],transparent=[];
     stage.traverseVisible(o=>{
-      if(!o.isMesh||!o.geometry?.attributes.position||o.material?.isShaderMaterial)return;
+      if(!o.isMesh||!o.geometry?.attributes.position||(o.material?.isShaderMaterial&&!o.material.userData.softwareSurface))return;
       if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();
       sphere.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);
       if(!o.isInstancedMesh&&!frustum.intersectsSphere(sphere))return;
@@ -199,7 +199,7 @@ class CanvasRaceRenderer {
         const fogAmount=stage.fog?min(.9,stage.fog.isFog?max(0,(distance-stage.fog.near)/(stage.fog.far-stage.fog.near)):1-Math.exp(-Math.pow(distance*stage.fog.density,2))):0;
         const fog={amount:fogAmount,r:(stage.fog?.color.r||0)*fogAmount,g:(stage.fog?.color.g||0)*fogAmount,b:(stage.fog?.color.b||0)*fogAmount};
         const idx=data.indices;
-        for(const group of data.groups){const mat=Array.isArray(o.material)?o.material[group.materialIndex]:o.material;if(!mat||mat.visible===false||mat.opacity<.025||mat.isShaderMaterial)continue;
+        for(const group of data.groups){const mat=Array.isArray(o.material)?o.material[group.materialIndex]:o.material;if(!mat||mat.visible===false||mat.opacity<.025||(mat.isShaderMaterial&&!mat.userData.softwareSurface))continue;
           const base=mat.color||{r:.5,g:.7,b:.8},color={r:base.r*instanceTint.r,g:base.g*instanceTint.g,b:base.b*instanceTint.b},intensity=min(.6,mat.emissiveIntensity||0),emission={r:(mat.emissive?.r||0)*intensity,g:(mat.emissive?.g||0)*intensity,b:(mat.emissive?.b||0)*intensity};
           if(mat.map?.matrixAutoUpdate)mat.map.updateMatrix();texture=data.uvs?this.textureData(mat.map):null;
           const colors=data.colors;
