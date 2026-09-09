@@ -56,3 +56,7 @@ The demo's permanently lit gates are deliberately time-limited to seven seconds 
 ## Verification
 
 `node tests/addon-powers.cjs` runs 31 gameplay checks against the real protection and hit functions: all 24 powers have an observable result; additional checks cover guard states, collateral blast, piercing, delayed strike timing, ring safe center, chained range, crossing-only buffs, no portal progress changes, phase/shield/reflection behavior, lap-seam swept collision, pause, owner finish cleanup and the entity ceiling. These checks establish simulation behavior; browser visual verification remains a separate integration task.
+
+## Equipping and casting
+
+Every catalog row in the loadout is a single button carrying the add-on's behaviour glyph, its name, its behaviour badge, its cooldown and an explicit **ADD ON** action chip; the equipped row reads **EQUIPPED ✓** and the empty slot reads **CLEAR SLOT**. The equipped add-on then appears in the race on its own dock button beside the signature power — glyph, slot name, power name, live state and the **F** key hint — with a cooldown bar along its bottom edge. Touch races keep the separate **ADD-ON** button in the thumb cluster. Both dock buttons share one glyph vocabulary with the roster card, so the mark you chose in the menu is the mark you look for at speed.

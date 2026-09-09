@@ -16,3 +16,121 @@
 @media(max-width:600px){.loadout-dock{margin-bottom:8px}.loadout-dock .loadout-launch{min-height:58px;padding:10px 12px}.loadout-dock .loadout-launch strong{font-size:14px}}
 
 html:has(#loadout-dialog[open]),body:has(#loadout-dialog[open]){touch-action:pan-y}
+
+/* ============================================================================
+   Powers & items — presentation pass.
+   Everything below reads the same design language as the rest of the pit-wall
+   equipment: opaque ink surfaces, one accent rail per element, a single
+   glyph vocabulary shared by the roster card, the catalog and the race dock.
+   ========================================================================= */
+
+/* --- Shared glyph frame ------------------------------------------------- */
+.power-glyph,.addon-number,.pd-glyph{display:flex;align-items:center;justify-content:center;flex:none;color:var(--power-color,var(--addon-color,var(--cyan)))}
+.power-glyph svg,.addon-number svg,.pd-glyph svg{width:100%;height:100%;display:block}
+
+/* --- Roster card: signature power --------------------------------------- */
+.power-head{display:flex;align-items:center;gap:10px;margin:5px 0}
+.power-head h3{margin:0}
+.power-glyph{width:34px;height:34px;padding:6px;background:var(--ink-raised);border:1px solid var(--border);border-left:3px solid var(--power-color,var(--cyan));border-radius:2px}
+@media(max-width:600px){.power-glyph{width:28px;height:28px;padding:4px}}
+
+/* --- Loadout catalog ----------------------------------------------------- */
+.addon-choice{align-items:stretch;gap:12px;min-height:92px;padding:12px 12px 12px 0;background:#e8e5de;border-color:#c0bdb8;border-left:5px solid var(--addon-color);position:relative;transition:background .14s,border-color .14s,box-shadow .14s}
+.addon-choice:hover{background:#efece4;border-color:#8b8782;box-shadow:3px 3px 0 #00000018}
+.addon-choice[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink);border-left-color:var(--addon-color);box-shadow:none}
+.addon-choice[aria-pressed=true]:hover{background:#242c39}
+.addon-number{width:44px;min-width:44px;align-self:center;height:44px;padding:8px;margin-left:12px;border:0;border-radius:2px}
+.addon-copy{gap:3px;justify-content:center;min-width:0}
+.addon-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.addon-copy strong{font-size:17px;line-height:1.15;letter-spacing:-.01em}
+.addon-type{font:800 9px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;padding:4px 6px;border:1px solid currentColor;border-radius:2px;color:#6b6660;white-space:nowrap}
+.addon-choice[aria-pressed=true] .addon-type{color:var(--addon-color)}
+.addon-desc{font-size:13px;line-height:1.35;font-weight:500;opacity:.82}
+.addon-cooldown{font:700 10px/1 var(--body);letter-spacing:.12em;opacity:.7;font-variant-numeric:tabular-nums}
+.addon-choice[aria-pressed=true] .addon-cooldown{color:var(--muted);opacity:1}
+/* The call to action is a chip, not a nested control: the whole row is the button. */
+.addon-action{align-self:center;flex:none;display:flex;align-items:center;justify-content:center;min-width:92px;min-height:36px;padding:0 12px;margin-right:12px;
+ font:800 11px/1 var(--body);letter-spacing:.12em;text-align:center;white-space:nowrap;
+ background:var(--ink);color:var(--paper);border:1px solid var(--ink);border-radius:2px}
+.addon-choice:hover .addon-action{background:var(--coral);border-color:var(--coral);color:var(--ink)}
+.addon-choice[aria-pressed=true] .addon-action{background:var(--addon-color);border-color:var(--addon-color);color:#12171f}
+@media(max-width:520px){
+ .addon-choice{min-height:0;flex-wrap:wrap;padding:10px 10px 10px 0}
+ .addon-number{width:36px;min-width:36px;height:36px;padding:6px;margin-left:9px}
+ .addon-copy strong{font-size:15px}.addon-desc{font-size:12px}
+ .addon-action{width:100%;margin:2px 0 0 9px;min-width:0}
+}
+
+/* --- In-race dock: signature power + equipped add-on -------------------- */
+/* The two controls are absolutely positioned against the HUD by the existing
+   layout rules, so the wrapper stays static and only supplies shared styling. */
+#powerdock{display:contents}
+#specialHUD #tS,#addonHUD{display:flex;align-items:center;gap:9px;text-align:left}
+.pd-glyph{width:30px;height:30px;padding:5px;border-radius:2px;background:#ffffff14}
+.pd-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pd-copy em{font:800 8px/1 var(--body);letter-spacing:.18em;font-style:normal;opacity:.6;white-space:nowrap}
+.pd-copy>span{font:700 11px/1.2 var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#specialHUD #tS kbd,#addonHUD kbd{margin-left:auto;flex:none;align-self:center;font:700 10px/1 var(--body);padding:4px 5px;border:1px solid currentColor;border-radius:2px;opacity:.65}
+/* A glyph, a two-line label and a key hint need more room than the old
+   text-only buttons; both controls share one width so they read as a pair. */
+#specialHUD #tS,#addonHUD{position:absolute;overflow:hidden;width:210px;max-width:210px;min-height:50px;padding:7px 9px}
+@media(max-width:899px){#specialHUD #tS,#addonHUD{width:176px;max-width:176px;min-height:46px;gap:7px}.pd-glyph{width:26px;height:26px;padding:4px}}
+/* Short landscape stacks the pair in one column instead of letting the add-on
+   sit on top of the signature power. */
+@media(max-height:560px) and (orientation:landscape){
+ #specialHUD #tS,#addonHUD{width:168px;max-width:168px;min-height:42px}
+ #specialHUD #tS kbd,#addonHUD kbd{display:none}
+ #addonHUD{top:calc(184px + var(--sa-t));right:calc(90px + var(--sa-r))}
+ html[data-touch='on'] #addonHUD{top:calc(166px + var(--sa-t));right:calc(15px + var(--sa-r))}
+}
+/* A cooldown reads as a bar filling along the bottom edge; ready reads as a
+   solid accent rail down the left. */
+#specialHUD #tS::after,#addonHUD::after{content:'';position:absolute;left:0;bottom:0;height:3px;background:var(--power-color,var(--addon-color,var(--cyan)));width:100%;transform-origin:left}
+#specialHUD[data-ready=false] #tS::after{width:calc(var(--ready,0) * 100%)}
+#addonHUD[data-ready=false]::after{width:var(--addon-charge,0%)}
+#specialHUD[data-ready=true] #tS,#addonHUD[data-ready=true]{border-left-color:var(--power-color,var(--addon-color,var(--cyan)))}
+#addonHUD{border-left:4px solid var(--addon-color,var(--cyan))}
+@media(prefers-reduced-motion:no-preference){
+ #specialHUD[data-ready=true] #tS .pd-glyph,#addonHUD[data-ready=true] .pd-glyph{animation:pd-ready 2.4s ease-in-out infinite}
+}
+@keyframes pd-ready{0%,100%{opacity:.72}50%{opacity:1}}
+
+/* --- Active effect rail -------------------------------------------------- */
+/* Powers that exist only as a number on a racer read as "nothing happened".
+   This is the on-screen proof that a cast landed, and what is landing on you. */
+#statusHUD{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(112px + var(--sa-b));display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:min(560px,64vw);pointer-events:none;z-index:3}
+html[data-touch='on'] #statusHUD{bottom:calc(178px + var(--sa-b))}
+#statusHUD:empty{display:none}
+.status-pip{display:inline-flex;align-items:center;gap:7px;padding:5px 9px;background:var(--ink);border:1px solid var(--border);border-left:3px solid var(--muted);border-radius:2px;color:var(--paper);font:700 10px/1 var(--body);letter-spacing:.1em;white-space:nowrap}
+.status-pip i{font-style:normal;font-variant-numeric:tabular-nums;opacity:.65;font-size:9px}
+.status-pip[data-tone=bad]{border-left-color:var(--coral);color:#ffd9d0}
+.status-pip[data-tone=good]{border-left-color:var(--cyan)}
+.status-pip[data-tone=power]{border-left-color:var(--lavender);background:#242c39}
+.status-pip[data-tone=addon]{border-left-color:var(--coral);background:#242c39}
+@media(max-width:899px){#statusHUD{bottom:calc(96px + var(--sa-b));max-width:72vw;gap:4px}.status-pip{padding:4px 7px;font-size:9px;gap:5px}}
+@media(max-height:560px) and (orientation:landscape){#statusHUD{bottom:calc(72px + var(--sa-b))}html[data-touch='on'] #statusHUD{bottom:calc(74px + var(--sa-b))}}
+
+/* --- Rival status flags in the running order ---------------------------- */
+#ranks div s{text-decoration:none;font-weight:800;font-size:.86em;letter-spacing:.08em;padding:1px 4px;margin-left:5px;border-radius:2px;background:var(--coral);color:var(--ink)}
+
+/* --- Item slot ---------------------------------------------------------- */
+/* The slot keeps its existing box; the polish is a corner notch that marks an
+   armed item and a tighter, tabular label under the manufactured portrait. */
+#item{border-top:3px solid var(--lavender)}
+#item .lbl{letter-spacing:.06em;font-variant-numeric:tabular-nums}
+#item::after{content:'';position:absolute;top:0;right:0;width:12px;height:12px;background:linear-gradient(225deg,var(--lavender) 0 50%,transparent 50%);opacity:.55;pointer-events:none}
+#item.spin::after{opacity:1;background:linear-gradient(225deg,var(--coral) 0 50%,transparent 50%)}
+
+/* --- Fallbacks ----------------------------------------------------------- */
+/* color-mix is progressive enhancement: the flat tint below is what a browser
+   without it keeps, and the glyph stays legible either way. */
+.addon-number{background:#00000012}
+.addon-choice[aria-pressed=true] .addon-number{background:#ffffff14}
+@supports(background:color-mix(in srgb,red 20%,transparent)){
+ .addon-number{background:color-mix(in srgb,var(--addon-color) 20%,transparent)}
+ .addon-choice[aria-pressed=true] .addon-number{background:color-mix(in srgb,var(--addon-color) 26%,transparent)}
+ #specialHUD[data-active=true] #tS .pd-glyph{background:color-mix(in srgb,var(--power-color,var(--cyan)) 45%,transparent)}
+}
+/* The dock now shows its cooldown as a single bar, so the older full-button
+   gradient would double the same signal. */
+#addonHUD[data-ready=false]{background:var(--ink)}

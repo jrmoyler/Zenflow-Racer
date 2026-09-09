@@ -22,5 +22,30 @@ module.exports=({test,assert,run,racer,opponent,context})=>{
  test('Waypoint Hop advances six metres and shares lap, finish, and reverse-exploit bookkeeping',()=>{reset('nomad');run('r.lat=2;useSpecial(r)');assert.ok(Math.abs(run('r.distance')-.206)<1e-9);assert.ok(Math.abs(run('r.u')-.206)<1e-9);assert.equal(run('r.lat'),2);assert.equal(run('r.specialCooldown'),13);assert.equal(run('r.phase'),.6);reset('nomad');run('r.distance=.997;r.u=.997;useSpecial(r)');assert.equal(run('r.lap'),2);assert.equal(run('r.lapTimes.length'),1);assert.ok(run('r.u')<.01);reset('nomad');run('r.distance=2.997;r.u=.997;r.lap=3;r.highestLap=3;useSpecial(r)');assert.equal(run('r.finished'),true);assert.equal(run('r.finishTime'),10);reset('nomad');run('r.distance=-.003;r.u=.997;useSpecial(r)');assert.equal(run('r.lap'),1);assert.equal(run('r.lapTimes.length'),0);});
  test('Second Wind fires through spin, cleanses and surges without recovering tokens',()=>{reset('eon');run('r.spin=1;r.slow=2;r.wheelspin=1;r.tokens=4;r.lastLostTokens=3;useSpecial(r)');assert.equal(run('r.spin+r.slow+r.wheelspin'),0);assert.equal(run('r.tokens'),4);assert.equal(run('r.lastLostTokens'),3);assert.equal(run('r.regen'),5);assert.equal(run('r.hitCd'),1);assert.ok(run('r.boost>0&&r.surge>0'));run('r.hitCd=0');assert.equal(run('powerSlow(r,2,null)'),false);run("hitRacer(r,'test')");assert.ok(run('r.spin')>0);});
  test('New power AI evaluates actual nearby threats and economy',()=>{for(const id of ['ledger','terra','obsidian','civic','cognara','gaia','nomad']){reset(id);assert.equal(run('aiWantsSpecial(r)'),false,id+' idle');opponent('zenflow',id==='gaia'?-.008:id==='nomad'?.008:.001);run('o.tokens=3');assert.equal(run('aiWantsSpecial(r)'),true,id+' opportunity');}reset('eon');assert.equal(run('aiWantsSpecial(r)'),true);run('r.speed=r.maxSpeed');assert.equal(run('aiWantsSpecial(r)'),false);});
+ test('A slow is a felt handicap: lower ceiling, blunted throttle and a damped boost',()=>{
+  const drive=setup=>{reset('zenflow');run(`r.throttle=true;r.speed=20;${setup};for(let i=0;i<120;i++)stepRacer(r,1/120)`);return run('r.speed');};
+  const clear=drive(''),snared=drive('r.slow=3');
+  assert.ok(snared<clear*.8,`a snared racer loses real speed: ${snared} vs ${clear}`);
+  // A racer already at pace is dragged down instead of merely capped.
+  reset('zenflow');run('r.throttle=false;r.speed=40;r.slow=3;for(let i=0;i<30;i++)stepRacer(r,1/120)');
+  assert.ok(run('r.speed')<34,'carried speed bleeds toward the cap while coasting');
+  // Boosting out of a snare is damped, and every cleansing power clears the slow
+  // before it boosts, so its own surge arrives at full strength.
+  reset('zenflow');run('applyBoost(r,2,1.4,1)');const full=run('r.boostTarget'),fullSurge=run('r.surge');
+  reset('zenflow');run('r.slow=3;applyBoost(r,2,1.4,1)');
+  assert.ok(run('r.boostTarget')<full&&run('r.boostTarget')>1,'a damped boost still helps');
+  assert.ok(run('r.surge')<fullSurge);
+  reset('zenflow');run('r.slow=3;r.regen=2;applyBoost(r,2,1.4,1)');assert.equal(run('r.boostTarget'),full,'slow resistance restores the full boost');
+  reset('eon');run('r.slow=4;useSpecial(r)');assert.equal(run('r.boostTarget'),1.18,'Second Wind cleanses before it surges');
+ });
+ test('A committed cast is never inert: an unanswered lance and an empty siphon vent into thrust',()=>{
+  reset('signal');run('useSpecial(r)');
+  assert.equal(run('r.specialCooldown'),16,'the miss stays committed');assert.ok(run('r.boost')>0&&run('r.surge')>0,'and is spent as thrust');
+  reset('signal');opponent('zenflow',.002);run('useSpecial(r)');
+  assert.equal(run('r.boost'),0,'a lance that connects is not also a boost');assert.ok(run('o.spin')>0);
+  reset('collective');run('useSpecial(r)');assert.ok(run('r.boost')>0,'no reserves within reach vents the siphon');
+  reset('collective');opponent('zenflow',.002);run('o.tokens=3;useSpecial(r)');
+  assert.equal(run('r.tokens'),1);assert.equal(run('r.boost'),0,'a siphon that takes a token does not also boost');
+ });
  test('All duration and cooldown timers freeze outside live simulation and reset on initialization',()=>{reset('terra');run('useSpecial(r);r.vault=3;r.perimeter=3;r.civicDraft=3;r.predict=3');for(const state of ['paused','roster','countdown','results']){run(`game.state='${state}';stepAbilities(2)`);assert.equal(run('r.specialCooldown'),19);assert.equal(run('r.anchor'),3.5);assert.equal(run('r.vault+r.perimeter+r.civicDraft+r.predict'),12);}run('initAbility(r)');assert.equal(run('r.vault+r.anchor+r.perimeter+r.civicDraft+r.predict+r.specialCooldown'),0);});
 };
