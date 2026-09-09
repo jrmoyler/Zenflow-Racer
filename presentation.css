@@ -109,7 +109,7 @@ button:disabled{cursor:not-allowed;opacity:.5}button:not(:disabled):active{trans
 }
 
 /* Commissioned circuit artwork: selection cards only; gameplay remains real 3D. */
-#roster[data-step="map"] .showroom{width:min(100%,1240px)}
+#roster[data-step="map"] .showroom{width:min(100%,1240px);flex:0 0 auto;height:auto}
 #roster[data-step="map"] .track-panel{padding:24px;background:var(--ink)}
 #roster[data-step="map"] .map-card{display:block;position:relative;padding:0;overflow:hidden;text-align:left;min-height:0;border:2px solid #59616d;background:#222c38;transition:border-color .18s,transform .18s}
 #roster[data-step="map"] .map-card span{padding:0;min-height:0;font-size:inherit;line-height:inherit}
