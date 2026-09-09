@@ -88,7 +88,9 @@ vec3 lit=mix(vec3(1.,.94,.89),vec3(.72,.75,.80),storm);
 vec3 clouds=mix(shadow,lit,illumination);
 float lining=pow(max(0.,1.-abs(density-.42)*2.),3.)*pow(mu,5.);
 clouds+=vec3(1.,.82,.60)*lining*.48*(1.-storm*.7);
-sky=mix(sky,clouds,max(density,high)*mask*(.88+storm*.1));
+float opticalDepth=(density*3.2+high*1.4)*mask*(1.+storm);
+float transmission=exp(-opticalDepth);
+sky=sky*transmission+clouds*(1.-transmission);
 // Atmospheric scattering unifies the cloud banks and modeled horizon.
 sky=mix(sky,skyHorizon,(1.-smoothstep(-.08,.15,d.y))*.38);
 gl_FragColor=vec4(sky,1.);
@@ -241,11 +243,11 @@ function starGeo(size=1,depth=.25){ // Collective 4-point diamond star
   const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:true,bevelThickness:.05,bevelSize:.04,bevelSegments:2});g.center();return g;}
 
 function buildEnvironment(){
-  const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.cliffColor||null,bumpMap:TEX.cliffHeight||null,bumpScale:.8,roughness:.93,metalness:.03,flatShading:false});
-  const grassMat=new THREE.MeshStandardMaterial({color:0xc8e2ac,map:TEX.mossColor||null,roughness:.88});
+  const random=mulberry(7943),cliffMat=new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.cliffColor||null,bumpMap:TEX.cliffHeight||null,bumpScale:.26,roughness:.93,metalness:0,flatShading:false});
+  const grassMat=new THREE.MeshStandardMaterial({color:0xc8e2ac,map:TEX.mossColor||null,bumpMap:TEX.groundHeight||null,bumpScale:.07,vertexColors:true,roughness:.94});
   const barkMat=new THREE.MeshStandardMaterial({color:0xbba59b,map:TEX.barkColor||null,bumpMap:TEX.barkColor||null,bumpScale:.12,roughness:.86});
   const pinkMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,side:THREE.DoubleSide});
-  const stoneMat=new THREE.MeshStandardMaterial({color:0xbfc0d6,roughness:.78});
+  const stoneMat=new THREE.MeshStandardMaterial({color:0xc5bdad,map:TEX.cliffColor||null,bumpMap:TEX.cliffHeight||null,bumpScale:.08,roughness:.9});
   const islands=[];
   function clearance(x,z){let d=Infinity;for(let i=0;i<N_SAMP;i+=3)d=Math.min(d,Math.hypot(x-track.pos[i].x,z-track.pos[i].z));return d;}
   islands.push({x:-102,y:-5,z:-126,r:36,depth:58,temple:true});
@@ -260,7 +262,7 @@ function buildEnvironment(){
       const rim=.95+.035*Math.sin(a*7+seed)+.025*Math.sin(a*13+seed);
       const taper=Math.pow(1-t,.64);
       const flute=Math.sin(a*19+Math.sin(t*8+seed))*.055+Math.sin(a*31+seed)*.022;
-      const strata=(Math.sin(t*45+a*2+seed)*.017+Math.sin(t*83+a*5)*.009)*Math.sin(t*Math.PI);
+      const strata=(Math.sin(t*45+a*2+seed)*.028+Math.sin(t*83+a*5)*.012+Math.sin(t*17+seed)*.055)*Math.sin(t*Math.PI);
       const rr=r*(.025+taper*(rim+flute*Math.sin(t*Math.PI)+strata));
       p.push(Math.cos(a)*rr+Math.sin(t*4)*r*.08,-depth*t,Math.sin(a)*rr*.83);
       c.setHex(j<2?0x728c67:activeMap.id==='canopy'?0xb5b6a1:0xabb0c3).multiplyScalar(.8+.2*(1-t));colors.push(c.r,c.g,c.b);uv.push(k/segments*4,t*3);
@@ -298,16 +300,17 @@ function buildEnvironment(){
   const trunk=mergeGeos(branchGeos);branchGeos.forEach(g=>g.dispose());
   const cherrySpots=[],bonsaiSpots=[];
   const pondMat=(typeof createImmersionWater==='function')?createImmersionWater(activeMap,'pond'):new THREE.MeshPhysicalMaterial({color:0x83d6e5,roughness:.09,metalness:.5,clearcoat:1,transparent:true,opacity:.85,side:THREE.DoubleSide});
-  const waterfallMat=new THREE.ShaderMaterial({side:THREE.DoubleSide,transparent:true,depthWrite:false,uniforms:{time:zenWorldTime},vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vUv;uniform float time;void main(){float strand=pow(.5+.5*sin(vUv.x*79.+sin(vUv.y*14.+time*2.)*.3),7.);float rush=.5+.5*sin(vUv.y*100.+time*7.+vUv.x*13.);vec3 c=mix(vec3(.26,.61,.89),vec3(.84,.96,1.),strand*.8+rush*.16);float edge=smoothstep(0.,.08,vUv.x)*smoothstep(0.,.08,1.-vUv.x);float fade=smoothstep(0.,.15,vUv.y);gl_FragColor=vec4(c,edge*fade*.82);
+  const waterfallMat=new THREE.ShaderMaterial({side:THREE.DoubleSide,transparent:true,depthWrite:false,uniforms:{time:zenWorldTime},vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vUv;uniform float time;void main(){float strand=pow(.5+.5*sin(vUv.x*79.+sin(vUv.y*14.+time*2.)*.3),7.);float rush=.5+.5*sin(vUv.y*100.+time*7.+vUv.x*13.);float broken=smoothstep(.15,.8,.5+.5*sin(vUv.x*143.+sin(vUv.y*21.+time*3.)));vec3 c=mix(vec3(.22,.43,.48),vec3(.84,.91,.91),strand*.56+rush*.12);float edge=smoothstep(0.,.08,vUv.x)*smoothstep(0.,.08,1.-vUv.x);float fade=smoothstep(0.,.15,vUv.y);gl_FragColor=vec4(c,edge*fade*(.28+strand*.33+broken*.21));
 #include <tonemapping_fragment>
 #include <encodings_fragment>
 }`});
+  waterfallMat.userData.softwareSurface=true;waterfallMat.color=new THREE.Color(0x85afb4);waterfallMat.opacity=.55;waterfallMat.roughness=.24;waterfallMat.metalness=0;
   function waterfall(island,width,angle){
     const length=island.depth+40,seg=20,p=[],uv=[],idx=[];for(let j=0;j<=seg;j++){const t=j/seg;for(let k=0;k<=8;k++){const q=k/8,x=(q-.5)*width,z=island.r*.8+Math.sin(Math.min(t*5,Math.PI/2))*2.5;const ca=Math.cos(angle),sa=Math.sin(angle);p.push(island.x+x*ca-z*sa,island.y+.08-t*length,island.z+x*sa+z*ca);uv.push(q,1-t);if(j<seg&&k<8){const a=j*9+k;idx.push(a,a+9,a+1,a+1,a+9,a+10);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();world.add(new THREE.Mesh(g,waterfallMat));
   }
   const roofMat=new THREE.MeshStandardMaterial({color:0x38354e,roughness:.58,metalness:.15,side:THREE.DoubleSide});
-  const woodMat=new THREE.MeshStandardMaterial({color:0x682d3e,roughness:.63});
-  const plasterMat=new THREE.MeshStandardMaterial({color:0xe7d6df,roughness:.8});
+  const woodMat=new THREE.MeshStandardMaterial({color:0x86594b,map:TEX.barkColor||null,bumpMap:TEX.barkColor||null,bumpScale:.045,roughness:.79});
+  const plasterMat=new THREE.MeshStandardMaterial({color:0xe7ded2,map:TEX.plasterColor||null,bumpMap:TEX.groundHeight||null,bumpScale:.018,roughness:.88});
   function roofGeometry(width,depth){const p=[],idx=[];for(let z=0;z<=16;z++){const zz=(z/16-.5)*2;for(let x=0;x<=16;x++){const xx=(x/16-.5)*2;const y=(1-Math.abs(zz))*2.5+Math.pow(Math.abs(xx),6)*1.5+Math.pow(Math.abs(zz),8)*.6;p.push(xx*width/2,y,zz*depth/2);if(x<16&&z<16){const a=z*17+x;idx.push(a,a+17,a+1,a+1,a+17,a+18);}}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setIndex(idx);g.computeVertexNormals();return g;}
   function temple(island){const group=new THREE.Group();group.position.set(island.x-island.r*.12,island.y+.35,island.z-island.r*.16);const levels=3;for(let j=0;j<levels;j++){const scale=1-j*.2,y=j*5;const floor=new THREE.Mesh(new THREE.BoxGeometry(12*scale,3.7,8*scale),plasterMat);floor.position.y=y+2;group.add(floor);for(const x of[-1,1])for(const z of[-1,1]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,4.6,8),woodMat);post.position.set(x*6.2*scale,y+2,z*4.2*scale);group.add(post);}const roof=new THREE.Mesh(roofGeometry(18*scale,13*scale),roofMat);roof.position.y=y+3.7;roof.castShadow=true;group.add(roof);for(let k=-2;k<=2;k++){const window=new THREE.Mesh(new THREE.PlaneGeometry(.6,2),woodMat);window.position.set(k*1.5*scale,y+2,4*scale+.02);group.add(window);}const deck=new THREE.Mesh(new THREE.BoxGeometry(15*scale,.35,10.5*scale),stoneMat);deck.position.y=y+.2;group.add(deck);
       // Balcony rails, tiled eave lines and warm recessed windows establish temple scale.
@@ -324,7 +327,7 @@ function buildEnvironment(){
     }world.add(group);}
   islands.forEach((island,n)=>{
     const cliff=new THREE.Mesh(islandGeometry(island.r,island.depth,n+80),cliffMat);cliff.position.set(island.x,island.y,island.z);cliff.castShadow=true;cliff.receiveShadow=true;world.add(cliff);
-    const shape=new THREE.Shape(),rimRandom=mulberry(n+80);for(let k=0;k<32;k++){const a=k/32*Math.PI*2,r=island.r*(.89+rimRandom()*.16)+.08;if(k===0)shape.moveTo(Math.cos(a)*r,-Math.sin(a)*r*.83);else shape.lineTo(Math.cos(a)*r,-Math.sin(a)*r*.83);}shape.closePath();const cap=new THREE.Mesh(new THREE.ShapeGeometry(shape),grassMat);cap.rotation.x=-Math.PI/2;cap.position.set(island.x,island.y+.02,island.z);cap.receiveShadow=true;world.add(cap);
+    const cap=new THREE.Mesh(typeof islandCapGeometry==='function'?islandCapGeometry(island.r,n+80):new THREE.CircleGeometry(island.r,48).rotateX(-Math.PI/2),grassMat);cap.name='continuous-island-cap';cap.position.set(island.x,island.y,island.z);cap.receiveShadow=true;world.add(cap);
     const pond=new THREE.Mesh(new THREE.CircleGeometry(island.r*.36,40),pondMat);pond.rotation.x=-Math.PI/2;pond.scale.y=.68;pond.position.set(island.x+island.r*.12,island.y+.09,island.z+island.r*.23);world.add(pond);
     // A continuous stream bridges the pond to the visible waterfall lip.
     const stream=new THREE.Mesh(new THREE.PlaneGeometry(island.r*.29,island.r*.53),pondMat);stream.rotation.x=-Math.PI/2;stream.position.set(island.x,island.y+.1,island.z+island.r*.55);world.add(stream);
@@ -357,6 +360,7 @@ function buildEnvironment(){
   buildRaceVenue();
   if(typeof buildImmersion==='function')buildImmersion();
   if(typeof buildLivingWorld==='function')buildLivingWorld();
+  if(typeof buildNaturalStonework==='function')buildNaturalStonework();
 
 }
 
@@ -509,29 +513,30 @@ function buildCircuitArchitecture(){
     }
     for(const y of[26,39,52]){mapMesh(new THREE.CylinderGeometry(11.5,7.5,2.2,40),metal,tree,0,y,0);const rail=mapMesh(new THREE.TorusGeometry(11.4,.15,6,48),cyan,tree,0,y+1.8,0);rail.rotation.x=Math.PI/2;}
     // Far below the circuit: a rippled turquoise sea instead of an empty void.
-    const sea=new THREE.MeshPhysicalMaterial({color:0x26b7c2,bumpMap:TEX.cliffHeight||null,bumpScale:.08,roughness:.2,metalness:.38,transparent:true,opacity:.9});
-    const ocean=mapMesh(new THREE.CircleGeometry(850,64),sea,world,-20,-100,-120);ocean.rotation.x=-Math.PI/2;ocean.receiveShadow=false;
+
   }
   buildHorizonLandscape();
   buildMapClouds();
 }
-// Three concentric silhouettes have actual depth and parallax. One mesh per
+// Three concentric mountain ranges have sloping faces and light response. One mesh per
 // layer, no alpha overdraw, no shadows and no runtime geometry allocation.
 function buildHorizonLandscape(){
   const garden=activeMap.id==='canopy',industrial=activeMap.id==='stormforge';
   const group=new THREE.Group();group.name='horizon-landscape';
   for(let layer=0;layer<3;layer++){
-    const radius=440+layer*165,segments=MOBILEFX?96:144,positions=[],indices=[];
-    for(let i=0;i<=segments;i++){
-      const a=i/segments*Math.PI*2;
+    const radius=490+layer*170,segments=MOBILEFX?72:120,rows=6,positions=[],indices=[];
+    for(let row=0;row<=rows;row++)for(let i=0;i<=segments;i++){
+      const a=i/segments*Math.PI*2,t=row/rows;
       const ridge=Math.sin(a*5+layer)*.5+Math.sin(a*11+1.2)*.26+Math.sin(a*23+layer*2)*.12;
       const top=(garden?20:industrial?44:12)+layer*15+Math.pow(Math.abs(ridge),1.3)*(garden?115:industrial?100:145);
-      positions.push(-20+Math.cos(a)*radius,top,-120+Math.sin(a)*radius,-20+Math.cos(a)*radius,-125,-120+Math.sin(a)*radius);
-      if(i<segments){const k=i*2;indices.push(k,k+1,k+2,k+2,k+1,k+3);}
+      const r=radius+(t-.5)*140,profile=Math.pow(Math.sin(t*Math.PI),1.7);
+      const y=-125+(top+125)*profile+Math.sin(a*37+row)*profile*(1-profile)*12;
+      positions.push(-20+Math.cos(a)*r,y,-120+Math.sin(a)*r);
+      if(row<rows&&i<segments){const k=row*(segments+1)+i,m=k+segments+1;indices.push(k,k+1,m,k+1,m+1,m);}
     }
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
     const color=new THREE.Color(garden?0x527b78:industrial?0x59677c:0x7d7799).lerp(new THREE.Color(activeMap.fog),layer*.24);
-    const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,fog:true}));mesh.name='horizon-ridge-'+layer;group.add(mesh);
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,roughness:1,metalness:0,side:THREE.DoubleSide,fog:true}));mesh.name='horizon-ridge-'+layer;group.add(mesh);
   }
   world.add(group);
 }

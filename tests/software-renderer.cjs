@@ -62,3 +62,9 @@ const actual=new THREE.Scene();actual.add(gltf.scene);gltf.scene.traverse(o=>{if
 renderer.drawScene(actual,camera,{width:480,height:320},false);assert.ok(pixelCount()>500,'actual exported driver/kart has rasterized silhouette');const durations=[];for(let i=0;i<5;i++){gltf.scene.rotation.y=i*.15;const start=performance.now();renderer.drawScene(actual,camera,{width:480,height:320},false);durations.push(performance.now()-start);}durations.sort((a,b)=>a-b);assert.ok(durations[2]<500,'actual GLB bounded CPU smoke budget (not a mobile FPS certification)');
 console.log(`PASS software 3D: topology, rotation, instances, occlusion, UV textures, alpha cutouts, material highlights, near clipping, bounded pixels; actual GLB median ${durations[2].toFixed(1)} ms, ${renderer.info.render.vertices} vertices, ${renderer.info.render.triangles} raster triangles, one Canvas blit.`);
 })().catch(error=>{console.error(error);process.exitCode=1;});
+// Actual water factory must remain visible when GLSL execution is unavailable.
+context.zenWorldTime={value:0};vm.runInContext(fs.readFileSync(path.join(__dirname,'../immersion.js'),'utf8'),context);
+const waterMaterial=vm.runInContext("createImmersionWater({id:'canopy'},'sea')",context);
+const waterStage=new THREE.Scene();waterStage.add(new THREE.Mesh(new THREE.BoxGeometry(2,.3,3),waterMaterial));
+renderer.render(waterStage,camera);assert.ok(pixelCount()>0,'actual shader-backed water has a software surface');
+console.log('PASS software water remains visible using the actual water factory');

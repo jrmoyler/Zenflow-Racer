@@ -3,21 +3,58 @@
 const IMMERSION={weather:null,hero:null,flash:0,sea:null,birds:null,lanterns:null,mist:null};
 const _imM=new THREE.Matrix4(),_imE=new THREE.Euler(),_imQ=new THREE.Quaternion(),_imP=new THREE.Vector3(),_imS=new THREE.Vector3(1,1,1);
 function createImmersionWater(map,kind){
-  const tint=new THREE.Color(kind==='sea'?(map.id==='canopy'?0x1aa8b8:0x3a6e9a):(map.id==='stormforge'?0x4a6a88:map.id==='canopy'?0x5ec4c8:0x83d6e5));
-  return new THREE.ShaderMaterial({
-    side:THREE.DoubleSide,transparent:true,depthWrite:false,
-    uniforms:{time:zenWorldTime,tint:{value:tint},gain:{value:kind==='sea'?1.15:.85}},
-    vertexShader:`varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;void main(){vUv=uv;vec4 viewPosition=modelViewMatrix*vec4(position,1.);vNormal=normalize(normalMatrix*normal);vView=-viewPosition.xyz;gl_Position=projectionMatrix*viewPosition;}`,
-    fragmentShader:`varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float time;uniform vec3 tint;uniform float gain;
-void main(){vec2 uv=vUv*mix(6.,14.,gain);float w=sin(uv.x*2.8+time*1.35)*cos(uv.y*2.1-time*1.05);
-float w2=sin((uv.x+uv.y)*4.6+time*1.8)*.45;float foam=pow(max(0.,w+w2),3.);
-vec3 col=tint+vec3(.16,.22,.28)*(w+w2)*.4+vec3(.85,.95,1.)*foam*.18;
-float fres=pow(1.-clamp(abs(dot(normalize(vNormal),normalize(vView))),0.,1.),5.);
-gl_FragColor=vec4(mix(col,vec3(.9,.96,1.),fres*.28),clamp(mix(.78,.9,gain),0.,1.));
+  const sea=kind==='sea',storm=map.id==='stormforge';
+  const tint=new THREE.Color(sea?(map.id==='canopy'?0x17505b:storm?0x263b4a:0x31576a):(storm?0x486773:0x427e78));
+  const material=new THREE.ShaderMaterial({
+    name:'natural-water-'+kind,side:THREE.DoubleSide,transparent:!sea,depthWrite:sea,fog:true,
+    uniforms:{...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),time:zenWorldTime,tint:{value:tint},gain:{value:sea?1:.25},
+      skyTop:{value:new THREE.Color(map.skyTop||0x6f86d6)},skyHorizon:{value:new THREE.Color(map.skyHorizon||0xf4bcd6)},
+      solarDirection:{value:typeof SOLAR_DIRECTION!=='undefined'?SOLAR_DIRECTION:new THREE.Vector3(-90,140,-60).normalize()},sunTint:{value:new THREE.Color(map.sun||0xffe5df)},storm:{value:storm?1:0}},
+    vertexShader:`varying vec3 waterPosition;
+#include <fog_pars_vertex>
+void main(){vec4 worldPosition=modelMatrix*vec4(position,1.);waterPosition=worldPosition.xyz;
+vec4 viewPosition=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*viewPosition;
+vec4 mvPosition=viewPosition;
+#include <fog_vertex>
+}`,
+    fragmentShader:`varying vec3 waterPosition;
+uniform float time;uniform vec3 tint;uniform float gain;uniform vec3 skyTop;uniform vec3 skyHorizon;uniform vec3 solarDirection;uniform vec3 sunTint;uniform float storm;
+#include <fog_pars_fragment>
+void main(){
+// World-space wave gradients: adjacent pond/stream meshes share one phase.
+vec2 p=waterPosition.xz;float t=time;
+vec2 slope=vec2(0.);
+float a=dot(p,vec2(.32,.18))-t*1.1;
+float b=dot(p,vec2(-.22,.41))-t*.8;
+float c=dot(p,vec2(.91,-.68))-t*1.9;
+slope+=cos(a)*vec2(.32,.18)*.19;
+slope+=cos(b)*vec2(-.22,.41)*.12;
+slope+=cos(c)*vec2(.91,-.68)*.025;
+slope*=mix(.55,1.3,gain)*(1.+storm*.5);
+vec3 N=normalize(vec3(-slope.x,1.,-slope.y));
+vec3 V=normalize(cameraPosition-waterPosition),L=normalize(solarDirection),H=normalize(V+L);
+float nv=max(.001,abs(dot(N,V))),nl=max(.001,dot(N,L)),nh=max(0.,dot(N,H));
+float fres=.0204+.9796*pow(1.-nv,5.);
+vec3 R=reflect(-V,N);vec3 reflection=mix(skyHorizon,skyTop,smoothstep(0.,.85,R.y));
+// GGX microfacet highlight. Roughness broadens the reflected solar path in wind.
+float rough=mix(.09,.19,storm),alpha=rough*rough,a2=alpha*alpha;
+float denom=nh*nh*(a2-1.)+1.;float D=a2/(3.14159265*denom*denom);
+float k=(rough+1.)*(rough+1.)/8.;float G=(nv/(nv*(1.-k)+k))*(nl/(nl*(1.-k)+k));
+float F=.0204+.9796*pow(1.-max(0.,dot(H,V)),5.);
+vec3 specular=sunTint*min(18.,D*G*F/max(.004,4.*nv*nl))*nl*(1.-storm*.65);
+float shallow=.5+.5*sin(a)*sin(b);vec3 body=tint*mix(.68,1.12,shallow);
+float crest=smoothstep(.91,1.,sin(a)*.6+sin(b)*.4)*gain*.10;
+vec3 col=mix(body,reflection,fres)+specular+crest*vec3(.70,.79,.77);
+gl_FragColor=vec4(col,mix(.86,1.,gain));
 #include <tonemapping_fragment>
 #include <encodings_fragment>
+#include <fog_fragment>
 }`
   });
+  // The software renderer cannot execute GLSL. Keep the same real water mesh
+  // visible using its explicitly provided diffuse/specular material parameters.
+  material.userData.softwareSurface=true;material.color=tint;material.roughness=.16;material.metalness=0;material.opacity=sea?1:.86;
+  return material;
 }
 function immersionBudget(n){return (typeof MOBILEFX!=='undefined'&&MOBILEFX)?Math.max(8,n>>1):n;}
 function immersionAlongTrack(u,lat,h,out){if(typeof trackPoint==='function')return trackPoint(u,lat,h,out);out.set(0,h,0);return out;}
@@ -172,9 +209,8 @@ function buildCanopyHero(){
   world.add(g);IMMERSION.hero=g;
 }
 function buildImmersionSeaOverlay(){
-  if(activeMap.id!=='canopy')return;
   const mat=createImmersionWater(activeMap,'sea');
-  const sea=new THREE.Mesh(new THREE.CircleGeometry(820,48),mat);sea.rotation.x=-Math.PI/2;sea.position.set(-20,-99.6,-120);
+  const sea=new THREE.Mesh(new THREE.CircleGeometry(1200,64),mat);sea.rotation.x=-Math.PI/2;sea.position.set(-20,-99.6,-120);
   sea.name='immersion-sea';sea.userData.dynamic=true;world.add(sea);IMMERSION.sea=sea;
 }
 function buildImmersion(){

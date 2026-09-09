@@ -20,12 +20,14 @@ function buildSurfaceTextures(){
     const vein=Math.pow(.5+.5*Math.sin(u*tau*31+noise(u,v)*2),7);
     const stratum=Math.sin(v*tau*17+Math.sin(u*tau*3)*.9),grain=hash2(x,y)*18;
     const k=110+noise(u,v)*28+stratum*12-vein*38+grain;
-    return [k*.89,k*.97,k*1.06];
+    return [k*1.12,k*1.08,k];
   });
   surfaceTexture('cliffHeight',(u,v)=>{const k=125+noise(u,v)*28+Math.sin(v*tau*17+Math.sin(u*tau*3))*22;return [k,k,k];},false);
   surfaceTexture('barkColor',(u,v)=>{const groove=Math.pow(.5+.5*Math.sin(u*tau*29+noise(u,v)*1.4),4);const k=80+noise(u,v)*18-groove*35;return [k*1.13,k*.89,k*.61];});
   surfaceTexture('roadDetail',(u,v,x,y)=>{const seam=(v<.004||u<.002)?145:0;const k=244-seam-hash2(x,y)*9;return [k,k,k];});
   surfaceTexture('roadRoughness',(u,v,x,y)=>{const wear=Math.exp(-Math.pow((u-.28)*17,2))+Math.exp(-Math.pow((u-.72)*17,2));const k=140-wear*30+hash2(x,y)*15;return [k,k,k];},false);
+  surfaceTexture('groundHeight',(u,v,x,y)=>{const k=128+noise(u,v)*30+hash2(x,y)*26;return [k,k,k];},false);
+  surfaceTexture('plasterColor',(u,v,x,y)=>{const k=235+noise(u,v)*5-hash2(x,y)*10;return [k,k*.99,k*.97];});
   surfaceTexture('mossColor',(u,v,x,y)=>{const n=noise(u,v)*.5+.5,g=hash2(x,y);return [41+n*40+g*12,66+n*66+g*18,23+n*27];});
   surfaceTexture('fabricWeave',(u,v,x,y)=>{const k=225+((x%4<2)===(y%4<2)?12:-12);return [k,k,k];});
   surfaceTexture('metalGrain',(u,v,x,y)=>{const k=120+hash2(x,y)*20+Math.sin(v*600)*8;return [k,k,k];},false);
