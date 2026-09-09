@@ -12,6 +12,8 @@ let oldTimeline;
 for(const id of ['cherry','stormforge','canopy']){
  run(`selectMap('${id}')`);const s=run('LIVING_WORLD');
  assert.ok(s.rigs.length>=10,id+' near and distant island rigs');assert.ok(s.leaves.length>0,id+' foliage deforms');
+ assert.equal(s.batches.length,5,'repeated parts use five batches');
+ assert.ok(s.batches.every(b=>b.mesh.isInstancedMesh),'rig parts use instanced geometry');
  assert.ok(s.timeline,'real Anime.js timeline created');if(oldTimeline)assert.notEqual(oldTimeline,s.timeline);
  oldTimeline=s.timeline;
  const rig=s.rigs[0],base=rig.base.slice(),leaf=s.leaves[0],leafBase=leaf.base.slice();
@@ -25,4 +27,4 @@ for(const id of ['cherry','stormforge','canopy']){
  assert.ok(Math.abs(run('SOLAR_DIRECTION.length()')-1)<1e-6);
  console.log('PASS',id,s.rigs.length,'anchored rigs;',s.leaves.length,'shared foliage geometries');
 }
-run('LIVING_WORLD.timeline.cancel()');
+c.matchMedia=()=>({matches:true});run("selectMap('cherry')");assert.equal(run('LIVING_WORLD.reduced'),true);run('LIVING_WORLD.timeline.cancel()');

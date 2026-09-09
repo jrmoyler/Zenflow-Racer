@@ -88,10 +88,10 @@ class CanvasRaceRenderer {
       const halo=ctx.createRadialGradient(sx,sy,0,sx,sy,radius*18);
       halo.addColorStop(0,'rgba(255,239,199,.85)');halo.addColorStop(.12,'rgba(255,222,164,.35)');halo.addColorStop(1,'rgba(255,212,157,0)');
       ctx.fillStyle=halo;ctx.fillRect(sx-radius*18,sy-radius*18,radius*36,radius*36);
-      ctx.fillStyle=storm?'#ffe3bd':'#fff9e7';ctx.beginPath();ctx.arc(sx,sy,radius,0,Math.PI*2);ctx.fill();
+      const disc=ctx.createRadialGradient(sx,sy,0,sx,sy,radius);disc.addColorStop(0,'#fffef5');disc.addColorStop(.7,'#fff9df');disc.addColorStop(1,storm?'#e8bd85':'#ffe7b5');ctx.fillStyle=disc;ctx.beginPath();ctx.arc(sx,sy,radius,0,Math.PI*2);ctx.fill();
     }
     for(let i=0;i<count;i++){
-      const angle=i*2.39996+time*.0009,elevation=.13+(i%5)*.078;
+      const angle=i*2.39996+time*.0009,elevation=i<Math.floor(count*.7)?.13+(i%5)*.078:.7+(i%5)*.07;
       if(!project(angle,elevation))continue;
       const cx=x+(projected.x+1)*w*.5,cy=y+(1-projected.y)*h*.5;
       const radius=Math.min(w*.42,h*(.06+(i%4)*.016)/-point.z);
@@ -121,7 +121,7 @@ class CanvasRaceRenderer {
     const t=this.rasterTarget(w,h),rw=t.w,rh=t.h,pixels=t.image.data,depth=t.depth;
     stage.updateMatrixWorld(true);cam.updateMatrixWorld(true);cam.matrixWorldInverse.copy(cam.matrixWorld).invert();
     const vp=new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse),frustum=new THREE.Frustum().setFromProjectionMatrix(vp);
-    const eye=new THREE.Vector3().setFromMatrixPosition(cam.matrixWorld),light=new THREE.Vector3(-.4,.85,-.35).normalize(),world=new THREE.Matrix4(),mvp=new THREE.Matrix4(),instance=new THREE.Matrix4(),sphere=new THREE.Sphere(),normalMatrix=new THREE.Matrix3(),skinPoint=new THREE.Vector3(),instanceTint=new THREE.Color();
+    const eye=new THREE.Vector3().setFromMatrixPosition(cam.matrixWorld),light=typeof SOLAR_DIRECTION!=='undefined'?SOLAR_DIRECTION:new THREE.Vector3(-90,140,-60).normalize(),world=new THREE.Matrix4(),mvp=new THREE.Matrix4(),instance=new THREE.Matrix4(),sphere=new THREE.Sphere(),normalMatrix=new THREE.Matrix3(),skinPoint=new THREE.Vector3(),instanceTint=new THREE.Color();
     const opaque=[],transparent=[];
     stage.traverseVisible(o=>{
       if(!o.isMesh||!o.geometry?.attributes.position||o.material?.isShaderMaterial)return;
