@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>ZenFlow Racer</title>
-<meta name="description" content="Twelve racers. Three laps. One Synergy Circuit. Race the ZenFlow championship with drift boosts, tactical items and responsive touch controls.">
+<meta name="description" content="Twenty selectable racers. Three laps. One Synergy Circuit. Race the ZenFlow championship with drift boosts, tactical items and responsive touch controls.">
 <meta name="theme-color" content="#182942">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -144,15 +144,16 @@ html[data-touch="on"] #tS{display:none}
 <link rel="stylesheet" href="polish.css">
 <link rel="stylesheet" href="reference-polish.css">
 <link rel="stylesheet" href="presentation.css">
+<link rel="stylesheet" href="addon-ui.css">
 </head>
 <body>
 <canvas id="gl" aria-label="ZenFlow racing circuit"></canvas>
 
-<div id="loading" class="screen" aria-label="Loading ZenFlow Racer"><div class="loading-wordmark">ZENFLOW<span>RACER</span></div><div class="loading-caption">SKY RACING CHAMPIONSHIP / RACE PREPARATION</div><progress id="loading-progress" max="12" value="0" aria-label="Racers loaded"></progress><div id="loading-status" role="status">PREPARING THE CIRCUIT</div></div>
+<div id="loading" class="screen" aria-label="Loading ZenFlow Racer"><div class="loading-wordmark">ZENFLOW<span>RACER</span></div><div class="loading-caption">SKY RACING CHAMPIONSHIP / RACE PREPARATION</div><progress id="loading-progress" max="20" value="0" aria-label="Racers loaded"></progress><div id="loading-status" role="status">PREPARING THE CIRCUIT</div></div>
 
 <section id="title-screen" aria-label="ZenFlow Racer main menu">
-  <div class="title-stage"><div class="title-copy"><p class="eyebrow">SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Twelve rivals. Three circuits. One perfect line.</p></div>
-    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start" disabled><span>Start</span></button><button id="title-settings" aria-label="Settings" disabled><span>Race settings</span></button></nav><details class="title-instructions"><summary>How to play</summary><p><b>Race three laps.</b> Collect items, drift through corners and use your racer’s unique power to take the lead.</p><p><b>Keyboard</b> · W / ↑ accelerate · A D / ← → steer · S / ↓ brake · Shift / Space drift, release for boost · E item · Q power · Esc pause.</p><p><b>Touch</b> · Auto throttle is on. Drag the steering wheel and use DRIFT, ITEM and POWER.</p><p><b>Gamepad</b> · Triggers drive and brake · stick steers · shoulder drifts · X item · Y power.</p></details>
+  <div class="title-stage"><div class="title-copy"><p class="eyebrow">SKY RACING CHAMPIONSHIP</p><h1>ZENFLOW<br><span>RACER</span></h1><p>Twenty divisions. Three circuits. Your racing line.</p></div>
+    <nav class="title-actions" aria-label="Main menu"><button id="title-start" aria-label="Start" disabled><span>Start</span></button><button id="title-settings" aria-label="Settings" disabled><span>Race settings</span></button></nav><details class="title-instructions"><summary>How to play</summary><p><b>Race three laps.</b> Collect items, drift through corners and use your racer’s unique power to take the lead.</p><p><b>Keyboard</b> · W / ↑ accelerate · A D / ← → steer · S / ↓ brake · Shift / Space drift, release for boost · E item · Q power · F add-on · Esc pause.</p><p><b>Touch</b> · Auto throttle is on. Drag the steering wheel and use DRIFT, ITEM, POWER and ADD-ON.</p><p><b>Gamepad</b> · Triggers drive and brake · stick steers · shoulder drifts · X item · Y power · left-stick press add-on.</p></details>
   </div><p class="title-status" role="status">Preparing the starting grid…</p>
 </section>
 <div id="roster" class="screen hidden">
@@ -160,15 +161,15 @@ html[data-touch="on"] #tS{display:none}
     <div>
       <div class="eyebrow">SKY RACING CHAMPIONSHIP</div>
       <h1>ZENFLOW <span>RACER</span></h1>
-      <div class="sub">Twelve rivals. Three circuits. One perfect line.</div>
+      <div class="sub">Twenty divisions. Three circuits. Your racing line.</div>
     </div>
-    <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>12 RACERS / 03 LAPS</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
+    <div class="tag"><span id="map-tag">CHERRY BLOSSOM SKYWAY</span><b>20 DIVISIONS / 12 ON THE GRID</b><button id="installapp" class="install" hidden>INSTALL GAME ↗</button></div>
   </div>
   <div class="setup-progress" aria-live="polite"><span id="setup-step">01 / CHARACTER</span><span>02 / CIRCUIT</span><span>03 / RACE</span></div>
   <div class="showroom">
     <section class="director-panel race-panel" aria-label="Selected racer">
       <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
-      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div><button id="confirm-racer" class="btn" disabled>Confirm racer →</button>
+      <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><h3 id="selected-power">Flow Stream</h3><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div><button id="open-loadout" type="button" class="loadout-launch"><span>ADD-ON LOADOUT</span><strong id="equipped-addon">None equipped</strong><span aria-hidden="true">↗</span></button><button id="confirm-racer" class="btn" disabled>Confirm racer →</button>
     </section>
     <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
     <section class="track-panel race-panel" hidden aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
@@ -186,7 +187,7 @@ html[data-touch="on"] #tS{display:none}
   </div>
 </div>
 
-<section id="settings-panel" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race settings"><div class="panel"><div class="panel-kicker">ZENFLOW RACER</div><h2>RACE SETTINGS</h2><p class="settings-label">CONTROLS</p><div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div><p class="settings-label">RACE DIFFICULTY</p><div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div><details><summary>How to race</summary><div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle; hold DRIFT on “1” for a rocket start; POWER button · Gamepad: triggers drive, shoulder drift, X item, Y power, rumble.</div></details><button id="settings-close" class="btn">Done</button></div></section>
+<section id="settings-panel" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race settings"><div class="panel"><div class="panel-kicker">ZENFLOW RACER</div><h2>RACE SETTINGS</h2><p class="settings-label">CONTROLS</p><div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div><p class="settings-label">RACE DIFFICULTY</p><div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div><details><summary>How to race</summary><div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>F</kbd> add-on · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle; hold DRIFT on “1” for a rocket start; POWER button · Gamepad: triggers drive, shoulder drift, X item, Y power, rumble.</div></details><button id="settings-close" class="btn">Done</button></div></section>
 
 <div id="hud" class="hidden">
   <div class="race-brand">ZENFLOW<span>RACER</span><small id="race-map-name">Cherry Blossom Skyway</small></div>
@@ -196,6 +197,7 @@ html[data-touch="on"] #tS{display:none}
   <button id="mutebtn">SOUND ON</button>
   <div id="item"><div class="ic"></div><div class="lbl"></div></div>
   <div id="specialHUD"><button id="tS" aria-label="Activate racer power"><span id="specialLabel">ZEN POWER</span> <kbd>Q</kbd></button></div>
+  <button id="addonHUD" type="button" aria-label="Activate equipped add-on" hidden><span id="addonLabel">ADD-ON</span><kbd>F</kbd></button>
   <div id="speedo">KM/H<b>0</b><i id="speedbar" aria-hidden="true"></i></div>
   <canvas id="mini" width="300" height="300"></canvas>
   <div id="pos"><div class="n">12</div><div class="o">th</div></div>
@@ -206,13 +208,14 @@ html[data-touch="on"] #tS{display:none}
   <div id="count"></div><div id="countmap" class="mono" aria-hidden="true"></div>
   <div id="wrong">WRONG WAY</div>
 </div>
-<div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tP" aria-label="Activate racer power">POWER</button></div>
+<div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tA" aria-label="Activate equipped add-on" hidden>ADD-ON</button><button class="tz" id="tP" aria-label="Activate racer power">POWER</button></div>
 
 <div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">RACE CONTROL</div><h2>Race paused.</h2><p>Session on hold. Return to the track when you’re ready.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
 
 <div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="nextmap" class="btn ghost">Next Circuit</button><button id="rematch" class="btn">Rematch</button></div></div></div>
 
 
+<dialog id="loadout-dialog" aria-labelledby="loadout-title"><header><div><p class="panel-kicker">RACER EQUIPMENT / <span id="loadout-racer"></span></p><h2 id="loadout-title">Choose your add-on</h2></div><button id="close-loadout" type="button" aria-label="Close loadout">✕</button></header><p class="loadout-intro">One extra power, its own cooldown. Your division’s signature power stays equipped.</p><label class="loadout-search">Find a power<input id="addon-search" type="search" placeholder="Search powers or effects" autocomplete="off"></label><div id="addon-list" aria-label="Available add-on powers"></div><footer><span id="loadout-status" role="status">Choose an add-on.</span><button id="done-loadout" type="button" class="btn">Done</button></footer></dialog>
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script src="vendor/postprocessing/CopyShader.js"></script>
@@ -237,6 +240,8 @@ html[data-touch="on"] #tS{display:none}
 <script src="racefx.js"></script>
 <script src="effects.js"></script>
 <script src="abilities.js"></script>
+<script src="addons.js"></script>
+<script src="addon-effects.js"></script>
 <script src="kart-assets.js"></script>
 <script src="race-telemetry.js"></script>
 <script src="presentation.js"></script>
@@ -245,6 +250,7 @@ html[data-touch="on"] #tS{display:none}
 <script src="title-attract.js"></script>
 <script src="vendor/anime.umd.min.js"></script>
 <script src="menu.js"></script>
+<script src="addon-ui.js"></script>
 <script src="pwa.js" defer></script>
 </body>
 </html>

@@ -4,8 +4,8 @@
 
 Run `node tools/export-kart-rig.cjs` first. Every runtime Group becomes an Empty and every
 runtime Mesh a mesh object, with parenting, local transforms, smooth shading and Principled
-BSDF materials (emission strength for glow parts, alpha for the translucent pilot). The twelve
-karts are laid out in a 4x3 grid, one named collection each. Every object carries custom
+BSDF materials (emission strength for glow parts, alpha for the translucent pilot). The selected
+karts are laid out in a four-column grid, one named collection each. Every object carries custom
 properties (zf_kart, zf_node, zf_kind, zf_rest_*) so tools/author-kart-clips.py and
 tools/export-kart-clips.py address rig nodes by runtime name, never by Blender object name.
 
@@ -174,7 +174,7 @@ for i, entry in enumerate(manifest['karts']):
     report.append((kart_id, count, placeholders))
     print(f"built {kart_id}: {count} nodes; placeholders: {', '.join(placeholders) or 'none'}")
 
-missing = [n for n in CONTRACT_NODES if n not in ('spin', 'hair', 'coachwork-batch', 'wheel-light-ring') and find_node(bpy, 'zenflow', n) is None]
+missing = [n for n in CONTRACT_NODES if n not in ('spin', 'hair', 'coachwork-batch', 'wheel-light-ring') and find_node(bpy, manifest['karts'][0]['id'], n) is None]
 assert not missing, f"contract nodes still missing on the reference rig: {missing}"
 os.makedirs(os.path.dirname(target), exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=target, compress=True)

@@ -7,7 +7,7 @@ await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 // Only ship runtime assets. New documentation, exports and local files stay private.
 const runtime=['reconstruction-review.js','responsive-review.html','race-telemetry.js','index.html','core.js','surface-detail.js','kart-materials.js','kart-clips.js','racefx.js','fallback-renderer.js','maps.js','world.js','immersion.js','vehicles.js',
- 'kart-assets.js','item-art.js','item-models.js','effects.js','abilities.js','postfx.js','game.js','title-attract.js','menu.js','pwa.js','polish.css','reference-polish.css',
+ 'addons.js','addon-effects.js','addon-ui.js','addon-ui.css','kart-assets.js','item-art.js','item-models.js','effects.js','abilities.js','postfx.js','game.js','title-attract.js','menu.js','pwa.js','polish.css','reference-polish.css',
  'presentation.js','presentation.css','fonts.css','manifest.webmanifest','vendor','icons','assets'];
 for(const file of runtime){
  await mkdir(path.dirname(path.join(out,file)),{recursive:true});

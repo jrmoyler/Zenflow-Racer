@@ -1,0 +1,186 @@
+{
+  "terra": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.2847337962962963,
+      "angles": [
+        {
+          "path": "docs/wave2-review/terra-side.png",
+          "areaFraction": 0.3689074074074074,
+          "ratio": 1.2956221291817405,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/terra-rear.png",
+          "areaFraction": 0.23626851851851852,
+          "ratio": 0.829787407015975,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "obsidian": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.23176388888888888,
+      "angles": [
+        {
+          "path": "docs/wave2-review/obsidian-side.png",
+          "areaFraction": 0.3358287037037037,
+          "ratio": 1.4490122051097662,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/obsidian-rear.png",
+          "areaFraction": 0.1849560185185185,
+          "ratio": 0.7980363955973712,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "civic": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.23882638888888888,
+      "angles": [
+        {
+          "path": "docs/wave2-review/civic-side.png",
+          "areaFraction": 0.31447916666666664,
+          "ratio": 1.3167689221017127,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/civic-rear.png",
+          "areaFraction": 0.1878425925925926,
+          "ratio": 0.7865236059821853,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "cognara": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.22639351851851852,
+      "angles": [
+        {
+          "path": "docs/wave2-review/cognara-side.png",
+          "areaFraction": 0.32239814814814816,
+          "ratio": 1.4240608576511729,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/cognara-rear.png",
+          "areaFraction": 0.18184953703703705,
+          "ratio": 0.8032453324062903,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "gaia": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.24846527777777777,
+      "angles": [
+        {
+          "path": "docs/wave2-review/gaia-side.png",
+          "areaFraction": 0.3427615740740741,
+          "ratio": 1.3795149855129174,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/gaia-rear.png",
+          "areaFraction": 0.19011574074074075,
+          "ratio": 0.7651601963908066,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "nomad": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.24450462962962963,
+      "angles": [
+        {
+          "path": "docs/wave2-review/nomad-side.png",
+          "areaFraction": 0.33867824074074077,
+          "ratio": 1.3851608505481605,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/nomad-rear.png",
+          "areaFraction": 0.21508564814814815,
+          "ratio": 0.879679245640278,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "eon": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.24993055555555554,
+      "angles": [
+        {
+          "path": "docs/wave2-review/eon-side.png",
+          "areaFraction": 0.3372800925925926,
+          "ratio": 1.349495230156525,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/eon-rear.png",
+          "areaFraction": 0.19771527777777778,
+          "ratio": 0.7910808557932759,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  },
+  "ledger": {
+    "exitCode": 0,
+    "diagnostic": {
+      "referenceAreaFraction": 0.2606412037037037,
+      "angles": [
+        {
+          "path": "docs/wave2-review/ledger-side.png",
+          "areaFraction": 0.3315,
+          "ratio": 1.2718633711377747,
+          "degenerate": false
+        },
+        {
+          "path": "docs/wave2-review/ledger-rear.png",
+          "areaFraction": 0.2108912037037037,
+          "ratio": 0.8091245770313596,
+          "degenerate": false
+        }
+      ],
+      "degenerate": false,
+      "collapseRatio": 0.15,
+      "note": "deterministic; zero token; a flat-plane-faking-a-volume collapses in silhouette area when orbited"
+    }
+  }
+}

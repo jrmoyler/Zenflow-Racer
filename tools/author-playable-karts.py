@@ -10,7 +10,7 @@ No reference screenshots, billboards or image-projected surfaces are embedded.
 import bpy,bmesh,sys,os,math,json
 from mathutils import Vector
 args=sys.argv[sys.argv.index('--')+1:];target=os.path.abspath(args[0])
-PALETTE={'zenflow':'20CFF5','collective':'065F46','hybrid':'0EA5E9','nexus':'FF9E32','kinetic':'16A34A','juris':'C9A84C','signal':'F43F5E','loom':'B869F3','vector':'309DFF','aether':'B5451B','animus':'22D3EE','helix':'14B8A6'}
+PALETTE={'zenflow':'20CFF5','collective':'065F46','hybrid':'0EA5E9','nexus':'FF9E32','kinetic':'16A34A','juris':'C9A84C','signal':'F43F5E','loom':'B869F3','vector':'309DFF','aether':'B5451B','animus':'22D3EE','helix':'14B8A6','ledger':'8B5CF6','terra':'2563EB','obsidian':'EA580C','civic':'7DD3FC','cognara':'E0267E','gaia':'22C55E','nomad':'FBBF24','eon':'06B6D4'}
 TRIM={'zenflow':'00B4FF','collective':'B87333','hybrid':'FF8A00','nexus':'FF7800','kinetic':'1F2937','juris':'1E3A8A','signal':'F43F5E','loom':'B869F3','vector':'24354A','aether':'B87333','animus':'00B4FF','helix':'FF7800'}
 def lin(c):return c/12.92 if c<=.04045 else ((c+.055)/1.055)**2.4
 def color(h):return tuple(lin(int(h[i:i+2],16)/255) for i in [0,2,4])+(1,)
@@ -100,7 +100,7 @@ def smooth_rows(rows,steps=4):
     out.append(rows[-1]);return out
 
 def bonnet(body,kart,mat):
-    if kart in ('collective','nexus','aether','signal','vector'):return # Their grille / turbine / dish occupies this region.
+    if kart in ('collective','nexus','aether','signal','vector','ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'):return # Their grille / turbine / dish occupies this region.
     sharp=kart in ('signal','vector');length=2.55 if sharp else 1.92 if kart=='animus' else 2.05 if kart in ('loom','helix') else 2.18 if kart=='kinetic' else 2.15
     width=.34 if kart=='kinetic' else .43 if kart=='animus' else .46 if kart in ('loom','helix') else .73 if kart=='juris' else .57
     height=.88 if kart=='kinetic' else .99 if kart=='animus' else .85 if kart in ('loom','helix') else 1.02
@@ -198,8 +198,35 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
     body=next(o for o in objects if o.get('zf_node')=='body');bonnet(body,kart,enamel)
     pearl=material(kart+'-fairing-pearl','F8FBFF',.24,.23)
     # Faceted split fairings are authored in vehicles.js and retained through Blender.
+    # Wave 2 includes dense coils/hexwork. Reduce only static decorative coachwork;
+    # every animated pilot/wheel pivot and material boundary survives this budget pass.
+    if kart in ('ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'):
+        for obj in objects:
+            if obj.type=='MESH' and obj.get('zf_runtime_name')=='coachwork-batch':
+                lod=obj.modifiers.new('Wave2 coachwork budget','DECIMATE');lod.ratio=.68;apply(obj,lod)
+    if kart in ('ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'):
+        # Bevels and garment remeshing add triangles after the procedural scaffold.
+        # Budget the final evaluated meshes, preserving Object transforms and extras.
+        meshes=[o for o in bpy.data.objects if o.get('zf_kart')==kart and o.type=='MESH']
+        def triangles(o):
+            o.data.calc_loop_triangles();return len(o.data.loop_triangles)
+        counts={o:triangles(o) for o in meshes};total=sum(counts.values())
+        eligible=[o for o in meshes if counts[o]>300]
+        fixed=sum(counts[o] for o in meshes if o not in eligible)
+        if total>47000:
+            ratio=max(.2,min(1,(45500-fixed)/max(1,total-fixed)))
+            for obj in eligible:
+                lod=obj.modifiers.new('Wave2 final 47k mesh budget','DECIMATE');lod.ratio=ratio;apply(obj,lod)
+            total=sum(triangles(o) for o in meshes)
+        if total>=50000:raise RuntimeError(kart+' exceeds final 50k triangle budget: '+str(total))
+        print('WAVE2 TRIANGLES',kart,total,flush=True)
     root['zf_blender_authored']=True
     root['zf_author_operations']=json.dumps(['welded coachwork and corrected normals','voxel union fitted torso and sleeves','controlled smooth and decimated garment surfaces','reference sRGB-to-linear enamel palette','conformal curved bonnet insert','machined spoke and rim bevels','concave dark wheel dishes and saturated light rims','variant-specific enclosed front fairings','tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls','cambered blade panels, division-specific nose inserts and rear diffusers'])
+    if kart in ('ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'):
+        operations=json.loads(root['zf_author_operations'])
+        operations=[x for x in operations if x not in ('conformal curved bonnet insert','variant-specific enclosed front fairings')]
+        operations+=['Wave2 component inventory coachwork retained from live Three.js mesh scaffold','final measured triangle budget below 50000, preserving all named rig pivots']
+        root['zf_author_operations']=json.dumps(operations)
     report.append({'id':kart,'operations':json.loads(root['zf_author_operations'])})
     print('AUTHORED',kart,flush=True)
 os.makedirs(os.path.dirname(target),exist_ok=True);bpy.ops.wm.save_as_mainfile(filepath=target,compress=True)

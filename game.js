@@ -18,7 +18,7 @@ for(const d of ROSTER)for(let diff=0;diff<=2;diff++){
   if(Number.isFinite(saved[old])&&!Number.isFinite(saved[key]))saved[key]=saved[old];
 }
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(saved));}catch{}}
-const input={throttle:false,brake:false,left:false,right:false,drift:false,item:false,itemEdge:false,special:false,specialEdge:false};
+const input={throttle:false,brake:false,left:false,right:false,drift:false,item:false,itemEdge:false,special:false,specialEdge:false,addon:false,addonEdge:false};
 
 class Racer{
   constructor(div,isPlayer,gridIdx){
@@ -38,6 +38,7 @@ class Racer{
     this.lapStart=0;this.lapTimes=[];this.bestLap=0;this.lastLap=0;
     this.slipT=0;this.slipOn=false;this.slipBonus=0;this.slipOut=0;this.slipToast=false;this.slipTarget=null;this.rankShown=gridIdx+1;this.rankDelta=0;this.rankToastT=0;
     if(typeof initAbility==='function')initAbility(this);
+    if(typeof initAddons==='function')initAddons(this,isPlayer?(saved.addons?.[div.id]||null):(typeof ADDONS!=='undefined'?ADDONS[(gridIdx+ROSTER.indexOf(div))%ADDONS.length]?.id:null));
     orientOnTrack(this.mesh,this.u,this.lat,0,0);
   }
   get maxSpeed(){return this.maxSpeedBase*(1+this.tokens*.014)*this.boostMult*(1+(this.slipBonus||0)*.07);}
@@ -47,7 +48,7 @@ function disposeProjectile(mesh){scene.remove(mesh);if(mesh.userData?.projectile
 function clearProjectiles(){mines.forEach(m=>disposeProjectile(m.mesh));missiles.forEach(m=>disposeProjectile(m.mesh));mines=[];missiles=[];}
 function spawnRace(playerDiv){
   const sceneBuildStarted=performance.now();
-  disposePreview();if(typeof clearAbilities==='function')clearAbilities();
+  disposePreview();if(typeof clearAbilities==='function')clearAbilities();if(typeof clearAddons==='function')clearAddons();
   game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];[sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx].forEach(pool=>pool.clear?.());if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined'&&!(typeof FALLBACK_GRAPHICS!=='undefined'&&FALLBACK_GRAPHICS))raceFX.init();
   if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;
   itemBoxes.forEach(b=>{b.t=0;b.mesh.visible=true;orientOnTrack(b.mesh,b.u,b.lat,1.6);});
@@ -108,7 +109,7 @@ function stepRacer(r,dt){
   if(r.spin>0){steerIn=0;r.throttle=false;}
   // Return and countersteer respond faster than turn-in, while high-speed lock is reduced.
   const counter=r.steer*steerIn<0,release=Math.abs(steerIn)<Math.abs(r.steer);
-  r.steer=lerp(r.steer,steerIn,1-Math.exp(-dt*(counter?18:release?14:r.drifting?9:11)));
+  r.steer=lerp(r.steer,steerIn,1-Math.exp(-dt*(counter?18:release?14:r.drifting?9:11)*(r.predict>0?1.35:1)));
   // --- drift state machine: hop first, then commit to a direction inside the hop window
   const wantDrift=r.isPlayer&&!r.finished?input.drift:r.ai.drift;
   if(!r.drifting&&wantDrift&&!r.driftKey&&r.speed>r.maxSpeedBase*.42&&r.spin<=0&&r.hopWindow<=0){r.hop=.28;r.hopWindow=.32;if(r.isPlayer)noiseHit(.08,.2,1200);}
@@ -131,7 +132,7 @@ function stepRacer(r,dt){
   if(r.spin>0)targetTheta=0;
   r.theta=lerp(r.theta,targetTheta,1-Math.exp(-dt*9));
   // --- slipstream (needs the other racers; safe with a single-racer field)
-  stepSlipstream(r,dt);
+  stepSlipstream(r,dt);if(r.civicDraft>0&&r.spin<=0&&!r.finished)r.slipBonus=Math.max(r.slipBonus,.12);
   // --- longitudinal
   const max=r.maxSpeed*(r.slow>0?.68:1);
   if(r.boost>0){r.boost-=dt;r.boostMult=lerp(r.boostMult,r.boostTarget,1-Math.exp(-dt*9));if(r.boost<=0){r.boost=0;r.boostTarget=1;}}
@@ -143,39 +144,24 @@ function stepRacer(r,dt){
   else if(r.throttle){const target=max;r.speed+= (target-r.speed)*(r.speed<target?1:3.5)*dt*(r.accel/14)*(r.speed<target?1:1)+ (r.speed<target?r.accel*dt*.25:0);if(r.speed>target)r.speed=lerp(r.speed,target,dt*3);}
   else r.speed=lerp(r.speed,0,1-Math.exp(-dt*.9));
   // corner scrub (turning bleeds speed unless drifting)
-  if(!r.drifting&&r.spin<=0)r.speed*=1-Math.abs(r.theta)*1.6*dt;
+  if(!r.drifting&&r.spin<=0)r.speed*=1-Math.abs(r.theta)*1.6*dt*(r.predict>0?.7:1);
   // --- lateral
   const curv=trackCurv(r.u);
   let latVel=r.speed*Math.sin(r.theta) - curv*r.speed*r.speed*.05*(r.drifting?.55:1);
   r.lat+=latVel*dt;
-  const W=TRACK_W/2-0.9;
+  const W=TRACK_W/2-0.9,edgeGrip=r.div.id==='gaia'&&r.specialActive>0?.35:1;
   if(Math.abs(r.lat)>W){const side=Math.sign(r.lat);r.lat=side*W;
     if(r.wallCd<=0&&r.speed>8){
       // Scrub scales with the impact angle: a graze keeps most of the speed, a square hit loses up to 55%.
-      const angle=Math.atan2(Math.max(0,side*latVel),Math.max(1,Math.abs(r.speed)));const scrub=clamp(.06+angle*1.4,.06,.55);
+      const angle=Math.atan2(Math.max(0,side*latVel),Math.max(1,Math.abs(r.speed)));const scrub=clamp(.06+angle*1.4,.06,.55)*edgeGrip;
       r.speed*=1-scrub;r.wallCd=.35;r.theta=-side*(.05+angle*.35);r.wallScrub=scrub;if(typeof raceFX!=='undefined')raceFX.onWall(r,side);
       if(r.isPlayer){SFX.wall();game.trauma=Math.min(1,game.trauma+.1+scrub*.5);rumble(.2+scrub,.3,90+scrub*160);haptic(20);}
       trackPoint(r.u,r.lat,.4,_p);trackTan(r.u,_v1);for(let i=0;i<10;i++){_v2.set(-_v1.x*8+(rng()-.5)*6,4+rng()*5,-_v1.z*8+(rng()-.5)*6);sparksOrange.emit(_p,_v2,.35+rng()*.3,.4);}}
-    else{r.speed*=1-.9*dt;if(r.spin<=0)r.theta-=side*.6*dt;}}  // scraping: mild drag and a nudge back onto the road
+    else{r.speed*=1-.9*dt*edgeGrip;if(r.spin<=0)r.theta-=side*.6*dt;}}  // scraping: mild drag and a nudge back onto the road
   r.wallCd-=dt;
+  if(r.anchor>0&&r.spin<=0)r.speed=clamp(r.speed,r.anchorSpeed-2,r.anchorSpeed+2);
   // --- advance along track
-  const du=r.speed*dt/track.len;r.lastU=r.u;
-  const before=r.distance;r.distance+=du;r.u=wrap01(r.distance);
-  const nextLap=Math.min(game.laps+1,Math.max(1,Math.floor(r.distance)+1));
-  if(nextLap>r.highestLap){
-    r.highestLap=nextLap;
-    // Split bookkeeping: interpolate the crossing inside this step so lap times are exact to the sub-step.
-    const t=game.raceTime-dt+dt*clamp((Math.floor(r.distance)-before)/Math.max(du,1e-9),0,1);const lapTime=t-r.lapStart;r.lapStart=t;
-    if(lapTime>1){r.lastLap=lapTime;r.lapTimes.push(lapTime);if(!r.bestLap||lapTime<r.bestLap)r.bestLap=lapTime;}
-    if(nextLap<=game.laps&&typeof raceFX!=='undefined')raceFX.onLap(r,nextLap);
-    if(r.isPlayer&&nextLap<=game.laps){SFX.lap();const n=r.lapTimes.length,prev=n>=2?r.lapTimes[n-2]:0;
-      setToast(nextLap===game.laps?'FINAL LAP':'LAP '+nextLap,'gold',r.lastLap?fmtTime(r.lastLap)+(prev?' ('+fmtDelta(r.lastLap-prev)+')':''):'',3);}
-  }
-  r.lap=nextLap;r.checkpoint=r.u>.5;r.wrongWay=r.speed<-2;r.wrongT=r.wrongWay?r.wrongT+dt:0;r.progress=r.distance;
-  if(!r.finished&&before<game.laps&&r.distance>=game.laps){
-    r.finished=true;r.finishTime=game.raceTime-dt+dt*clamp((game.laps-before)/Math.max(du,1e-9),0,1);if(typeof raceFX!=='undefined')raceFX.onFinish(r);
-    r.throttle=true;r.brake=false;r.ai.drift=false;if(r.slipOn){r.slipOn=false;r.slipT=0;}
-  }
+  advanceRaceDistance(r,r.speed*dt/track.len,dt);
   // --- timers
   if(r.spin>0)r.spin-=dt;if(r.shield>0)r.shield-=dt;if(r.hitCd>0)r.hitCd-=dt;if(r.tripleCd>0)r.tripleCd-=dt;
   // --- roulette
@@ -192,13 +178,35 @@ function stepRacer(r,dt){
   if(r.wheelspin>0){ud.wheels[2].pivot.getWorldPosition(_p);smokeFx.emit(_p,new THREE.Vector3((rng()-.5)*3,1.5,(rng()-.5)*3),.8,.6);}
 }
 
+// Distance is measured in laps, not metres. Physical travel and forward hops share every crossing gate.
+function advanceRaceDistance(r,du,dt){
+  r.lastU=r.u;
+  const before=r.distance;r.distance+=du;r.u=wrap01(r.distance);
+  const nextLap=Math.min(game.laps+1,Math.max(1,Math.floor(r.distance)+1));
+  if(nextLap>r.highestLap){
+    r.highestLap=nextLap;
+    // Split bookkeeping: interpolate the crossing inside this step so lap times are exact to the sub-step.
+    const t=game.raceTime-dt+dt*clamp((Math.floor(r.distance)-before)/Math.max(du,1e-9),0,1);const lapTime=t-r.lapStart;r.lapStart=t;
+    if(lapTime>1){r.lastLap=lapTime;r.lapTimes.push(lapTime);if(!r.bestLap||lapTime<r.bestLap)r.bestLap=lapTime;}
+    if(nextLap<=game.laps&&typeof raceFX!=='undefined')raceFX.onLap(r,nextLap);
+    if(r.isPlayer&&nextLap<=game.laps){SFX.lap();const n=r.lapTimes.length,prev=n>=2?r.lapTimes[n-2]:0;
+      setToast(nextLap===game.laps?'FINAL LAP':'LAP '+nextLap,'gold',r.lastLap?fmtTime(r.lastLap)+(prev?' ('+fmtDelta(r.lastLap-prev)+')':''):'',3);}
+  }
+  r.lap=nextLap;r.checkpoint=r.u>.5;r.wrongWay=r.speed<-2;r.wrongT=r.wrongWay?r.wrongT+dt:0;r.progress=r.distance;
+  if(!r.finished&&before<game.laps&&r.distance>=game.laps){
+    r.finished=true;r.finishTime=game.raceTime-dt+dt*clamp((game.laps-before)/Math.max(du,1e-9),0,1);if(typeof raceFX!=='undefined')raceFX.onFinish(r);
+    r.throttle=true;r.brake=false;r.ai.drift=false;if(r.slipOn){r.slipOn=false;r.slipT=0;}
+  }
+}
+
 // ---------- Collisions & pickups ----------
 function du_dist(a,b){let d=b-a;if(d>.5)d-=1;if(d<-.5)d+=1;return d*track.len;}
 function hitRacer(r,source,attacker=null){
   if(typeof powerProtected==='function'&&powerProtected(r,attacker,source!=='reflection'))return;
   if(r.hitCd>0||r.finished)return;
-  if(r.shield>0){r.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS BLOCK','teal');}return;}
+  if(r.shield>0){r.shield=0;if(typeof spawnAddonContact==='function'&&!String(source).startsWith('addon-'))spawnAddonContact(r.perimeter>0?'obsidian':'shield',r.u,r.lat,r);if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS BLOCK','teal');}return;}
   r.spin=1.1;r.hitCd=1.6;r.drifting=false;r.driftTier=0;r.boost=0;r.boostMult=1;r.boostTarget=1;r.surge=0;r.hopWindow=0;if(r.slipOn){r.slipOn=false;r.slipT=0;r.slipBonus=0;}if(typeof raceFX!=='undefined')raceFX.onHit(r,source);
+  if(typeof spawnAddonContact==='function'&&!String(source).startsWith('addon-'))spawnAddonContact(['ram','sonic','reflection'].includes(source)?(attacker?.div?.id||source):source,r.u,r.lat,attacker||r);
   const lost=Math.min(3,r.tokens);r.tokens-=lost;r.lastLostTokens=lost;trackPoint(r.u,r.lat,1,_p);
   for(let i=0;i<14+lost*4;i++){_v1.set((rng()-.5)*14,6+rng()*8,(rng()-.5)*14);(i<lost*4?goldFx:hitFx).emit(_p,_v1,.5+rng()*.5,.6);}
   if(r.isPlayer){SFX.hit();game.trauma=Math.min(1,game.trauma+.6);hud.vig.className='hit';setTimeout(()=>hud.vig.className='',350);rumble(1,.7,340);haptic(70);}
@@ -206,16 +214,18 @@ function hitRacer(r,source,attacker=null){
 function stepWorld(dt){
   const R=game.racers;
   // kart vs kart
-  for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
-    if(Math.abs(ds)<2.6&&Math.abs(dl)<1.9){if(a.ram>0)hitRacer(b,'ram',a);if(b.ram>0)hitRacer(a,'ram',b);const push=(1.9-Math.abs(dl))*.5,sgn=dl>=0?1:-1;const wa=a.weight,wb=b.weight;a.lat-=sgn*push*wb/(wa+wb);b.lat+=sgn*push*wa/(wa+wb);
-      if(Math.abs(ds)<1.2){const front=ds>0?b:a,back=ds>0?a:b;back.speed*=.94;front.speed=Math.min(front.speed+1.5,front.maxSpeed*1.1);}
+  for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0||a.finished||b.finished)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
+    if(Math.abs(ds)<2.6&&Math.abs(dl)<1.9){if(a.ram>0)hitRacer(b,'ram',a);if(b.ram>0)hitRacer(a,'ram',b);const push=(1.9-Math.abs(dl))*.5,sgn=dl>=0?1:-1;const wa=a.weight,wb=b.weight;if(!(a.anchor>0))a.lat-=sgn*push*wb/(wa+wb);if(!(b.anchor>0))b.lat+=sgn*push*wa/(wa+wb);
+      if(a.perimeter>0){if(!(b.anchor>0))b.lat=clamp(b.lat+sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(b,.5,a);}
+      if(b.perimeter>0){if(!(a.anchor>0))a.lat=clamp(a.lat-sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(a,.5,b);}
+      if(Math.abs(ds)<1.2){const front=ds>0?b:a,back=ds>0?a:b;if(!(back.anchor>0))back.speed*=.94;if(!(front.anchor>0))front.speed=Math.min(front.speed+1.5,front.maxSpeed*1.1);}
       if(a.isPlayer||b.isPlayer){if(Math.abs(dl)<1.2&&game.trauma<.2)game.trauma+=.08;}}}
   // item boxes / tokens
   itemBoxes.forEach(b=>{if(b.t>0){b.t-=dt;if(b.t<=0)b.mesh.visible=true;return;}
     b.star.rotation.y+=dt*1.6;b.star.rotation.x=Math.sin(game.time*1.3+b.lat)*.35;b.core.rotation.x+=dt*3;const bob=Math.sin(game.time*2.2+b.lat)*.25;orientOnTrack(b.mesh,b.u,b.lat,1.6+bob,0);b.mesh.rotateY(b.star.rotation.y);
-    for(const r of R){if(r.finished||r.item||r.roulette>0)continue;if(Math.abs(du_dist(r.u,b.u))<2&&Math.abs(r.lat-b.lat)<1.6){b.t=4.5;b.mesh.visible=false;r.roulette=1.4;r.rouletteTick=0;trackPoint(b.u,b.lat,1.6,_p);if(typeof raceFX!=='undefined')raceFX.onItemBox(_p);for(let i=0;i<18;i++){_v1.set((rng()-.5)*10,3+rng()*7,(rng()-.5)*10);goldFx.emit(_p,_v1,.5+rng()*.4,.5);}if(r.isPlayer)SFX.ui();break;}}});
+    for(const r of R){if(r.finished||r.phase>0||r.vault>0||r.item||r.roulette>0)continue;if(Math.abs(du_dist(r.u,b.u))<2&&Math.abs(r.lat-b.lat)<1.6){b.t=4.5;b.mesh.visible=false;r.roulette=1.4;r.rouletteTick=0;trackPoint(b.u,b.lat,1.6,_p);if(typeof raceFX!=='undefined')raceFX.onItemBox(_p);for(let i=0;i<18;i++){_v1.set((rng()-.5)*10,3+rng()*7,(rng()-.5)*10);goldFx.emit(_p,_v1,.5+rng()*.4,.5);}if(r.isPlayer)SFX.ui();break;}}});
   tokens.forEach(t=>{if(t.t>0){t.t-=dt;if(t.t<=0)t.mesh.visible=true;return;}orientOnTrack(t.mesh,t.u,t.lat,.9,0);t.mesh.rotateY(game.time*3+t.lat);
-    for(const r of R){if(!r.finished&&Math.abs(du_dist(r.u,t.u))<1.7&&Math.abs(r.lat-t.lat)<1.3&&r.tokens<10&&r.spin<=0){t.t=9;t.mesh.visible=false;r.tokens++;r.speed=Math.min(r.speed+1.2,r.maxSpeed*1.05);trackPoint(t.u,t.lat,1,_p);if(typeof raceFX!=='undefined')raceFX.onToken(_p,r.tokens);for(let i=0;i<8;i++){_v1.set((rng()-.5)*6,3+rng()*4,(rng()-.5)*6);goldFx.emit(_p,_v1,.4,.3);}if(r.isPlayer)SFX.token(r.tokens);break;}}});
+    for(const r of R){if(!r.finished&&!(r.phase>0)&&!(r.vault>0)&&Math.abs(du_dist(r.u,t.u))<1.7&&Math.abs(r.lat-t.lat)<1.3&&r.tokens<10&&r.spin<=0){t.t=9;t.mesh.visible=false;r.tokens++;r.speed=Math.min(r.speed+1.2,r.maxSpeed*1.05);trackPoint(t.u,t.lat,1,_p);if(typeof raceFX!=='undefined')raceFX.onToken(_p,r.tokens);for(let i=0;i<8;i++){_v1.set((rng()-.5)*6,3+rng()*4,(rng()-.5)*6);goldFx.emit(_p,_v1,.4,.3);}if(r.isPlayer)SFX.token(r.tokens);break;}}});
   // mines
   for(let i=mines.length-1;i>=0;i--){const m=mines[i];m.life-=dt;if(m.mesh.rotation)m.mesh.rotation.y+=dt*2;if(m.core&&m.core.material)m.core.material.emissiveIntensity=2+Math.sin(game.time*12)*1.5;
     let hit=false;for(const r of R){if(r.phase>0||r.finished||r===m.owner&&m.life>29.4)continue;if(Math.abs(du_dist(r.u,m.u))<1.8&&Math.abs(r.lat-m.lat)<1.5){hitRacer(r,'mine',m.owner);hit=true;break;}}
@@ -240,7 +250,7 @@ function pickItem(r){
 function buildMineMesh(){if(typeof buildReferenceMine==='function')return buildReferenceMine();const g=new THREE.Group();const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,1),new THREE.MeshStandardMaterial({color:0x000,emissive:0xa3e635,emissiveIntensity:2}));g.add(core);const shell=new THREE.Mesh(starGeo(.9,.3),new THREE.MeshStandardMaterial({color:0x2a2f18,metalness:.7,roughness:.3}));shell.rotation.x=Math.PI/2;g.add(shell);g.userData.core=core;return g;}
 function buildMissileMesh(){if(typeof buildReferenceMissile==='function')return buildReferenceMissile();const g=new THREE.Group();const body=new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(0,-.9),new THREE.Vector2(.28,-.8),new THREE.Vector2(.3,.3),new THREE.Vector2(0,.95)],12),new THREE.MeshStandardMaterial({color:0xcbd5e1,metalness:.85,roughness:.3}));body.rotation.x=Math.PI/2;g.add(body);const fin=new THREE.Mesh(starGeo(.7,.08),new THREE.MeshStandardMaterial({color:0x0a1628,emissive:0xcbd5e1,emissiveIntensity:1}));fin.position.z=-.7;g.add(fin);return g;}
 function useItem(r){
-  if(!r.item||r.spin>0||r.finished)return false;const k=r.item;
+  if(game.state!=='race'||!r.item||r.vault>0||r.spin>0||r.finished)return false;const k=r.item;
   if(k==='triple'){if(r.tripleCd>0)return false;if(!r.tripleLeft)r.tripleLeft=3;r.tripleLeft--;r.tripleCd=.28;applyBoost(r,1.0,1.34,.7);if(r.isPlayer)SFX.boost(2);if(r.tripleLeft>0)return true;}
   else if(k==='burst'){applyBoost(r,1.35,1.4,1);if(r.isPlayer){SFX.boost(3);setToast('SIGNAL BURST','teal','',2);}}
   else if(k==='shield'){r.shield=7;if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS SHIELD','teal','',2);}}
@@ -265,11 +275,11 @@ function aiThreatened(r){if(aiIncomingMissile(r,50))return true;if(aiMineAhead(r
 function aiTokenNear(r,range){for(let i=0;i<tokens.length;i++){const t=tokens[i];if(t.t<=0&&Math.abs(du_dist(r.u,t.u))<range)return true;}return false;}
 // Director powers: defensive kinds fire when threatened, offensive kinds when a rival is in their envelope.
 function aiWantsSpecial(r){
-  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.isPlayer)return false;
+  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.isPlayer||r.spin>0&&!['helix','eon'].includes(r.div.id))return false;
   let want=false;
   switch(r.div.id){
     case 'zenflow':want=!!(aiRivalAhead(r,18,9)||aiRivalBehind(r,18,9));break;
-    case 'collective':{if(r.tokens<10){const R=game.racers;for(let i=0;i<R.length;i++){const o=R[i];if(o!==r&&o.tokens>0&&Math.abs(du_dist(r.u,o.u))<35){want=true;break;}}}break;}
+    case 'collective':{if(r.tokens<10){const R=game.racers;for(let i=0;i<R.length;i++){const o=R[i];if(o!==r&&!o.finished&&!(o.phase>0)&&!(o.vault>0)&&o.tokens>0&&Math.abs(du_dist(r.u,o.u))<35){want=true;break;}}}break;}
     case 'hybrid':want=aiThreatened(r);break;
     case 'nexus':{const b=aiRivalBehind(r,16,9);want=!!aiIncomingMissile(r,60)||!!(b&&b.item==='missile');break;}
     case 'kinetic':want=!!(aiRivalAhead(r,8,3)||aiRivalBehind(r,5,3));break;
@@ -280,6 +290,14 @@ function aiWantsSpecial(r){
     case 'aether':want=r.tokens<10&&aiTokenNear(r,24);break;
     case 'animus':want=!!aiRivalAhead(r,32,9);break;
     case 'helix':want=r.spin>0||r.slow>0||(r.lastLostTokens||0)>0;break;
+    case 'ledger':want=game.racers.some(o=>o!==r&&!o.finished&&!(o.phase>0)&&Math.abs(du_dist(r.u,o.u))<16&&(o.item||o.tokens>=3));break;
+    case 'terra':want=aiThreatened(r)||!!(aiRivalAhead(r,4,2)||aiRivalBehind(r,4,2));break;
+    case 'obsidian':want=!!aiIncomingMissile(r,50)||!!(aiRivalAhead(r,8,3)||aiRivalBehind(r,8,3));break;
+    case 'civic':want=!!(aiRivalAhead(r,14,4)||aiRivalBehind(r,14,4));break;
+    case 'cognara':want=Math.abs(trackCurv(r.u))>.012||!!aiRivalAhead(r,20,4);break;
+    case 'gaia':want=!!aiRivalBehind(r,12,3)||Math.abs(r.lat)>TRACK_W/2-1.1;break;
+    case 'nomad':{const ahead=aiRivalAhead(r,10,2);want=!!aiIncomingMissile(r,30,2.2)||!!aiMineAhead(r,15,2.2)||!!(ahead&&du_dist(r.u,ahead.u)>=6);break;}
+    case 'eon':want=r.spin>0||r.slow>0||r.speed<r.maxSpeed*.55;break;
   }
   // A power left unused for a long stretch is still worth spending when anyone is nearby.
   if(!want&&r.ai.specialIdle>14&&(aiRivalAhead(r,40,9)||aiRivalBehind(r,40,9)))want=true;
@@ -437,6 +455,7 @@ function updateHUD(dt){
     if(p.item){const key=p.item+(p.tripleLeft||'');if(key!==lastItemKey){ic.innerHTML=itemIconSVG(p.item);lbl.textContent=ITEMS[p.item].name+(p.tripleLeft?` ×${p.tripleLeft}`:'');lastItemKey=key;}}
     else if(lastItemKey!==null){ic.innerHTML='';lbl.textContent='NO ITEM';lastItemKey=null;}}
   const drift=document.getElementById('driftmeter');if(drift){drift.hidden=!p.drifting;drift.style.setProperty('--charge',Math.min(100,p.driftTime/3*100)+'%');drift.dataset.tier=p.driftTier;drift.textContent=DRIFT_LABELS[p.driftTier];}
+  if(typeof updateAddonHUD==='function')updateAddonHUD(p);
   const special=document.getElementById('specialHUD');if(special&&typeof ABILITIES!=='undefined'){const ability=ABILITIES[p.div.id];const ready=!(p.specialCooldown>0);const specialLabel=document.getElementById('specialLabel');if(specialLabel)specialLabel.textContent=ability.name+' · '+(ready?(game.touch?'READY':'Q / Y · READY'):Math.ceil(p.specialCooldown)+'s');special.dataset.ready=ready?'true':'false';special.style.setProperty('--ready',Math.max(0,1-p.specialCooldown/ability.cooldown));
     if(hud.tP){if(ready!==updateHUD.powerReady){updateHUD.powerReady=ready;if(ready)hud.tP.classList.add('ready');else hud.tP.classList.remove('ready');}hud.tP.textContent=ready?'POWER':Math.ceil(p.specialCooldown)+'s';}}
   drawMini();
@@ -444,6 +463,7 @@ function updateHUD(dt){
 
 // ---------- Race flow ----------
 function onPlayerFinish(){
+  if(typeof clearAddons==='function')clearAddons();if(typeof clearAbilities==='function')clearAbilities();
   if(typeof raceTelemetry!=='undefined')raceTelemetry.finish(game.player.finishTime);
   updateRanks(true);const p=game.player,key=raceRecordKey(p.div.id,game.diff);const old=saved[key];
   game.newBest=!Number.isFinite(old)||p.finishTime<old;game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
@@ -547,6 +567,8 @@ function simStep(dt){
   if(p.finished){p.throttle=true;p.brake=false;stepAI(p,dt);}
   if(input.specialEdge){input.specialEdge=false;if(typeof useSpecial==='function')useSpecial(p);}
   if(typeof stepAbilities==='function')stepAbilities(dt);
+  if(input.addonEdge){input.addonEdge=false;if(typeof useAddon==='function')useAddon(p);}
+  if(game.state==='race'){if(typeof stepAddons==='function')stepAddons(dt);if(typeof stepAddonEffects==='function')stepAddonEffects(dt);}
   if(input.itemEdge){input.itemEdge=false;useItem(p);}
   game.racers.forEach(r=>{if(!r.isPlayer){stepAI(r,dt);}});
   game.racers.forEach(r=>{const save=r.maxSpeedBase;if(!r.isPlayer)r.maxSpeedBase*=r.rubber||1;stepRacer(r,dt);r.maxSpeedBase=save;});
@@ -562,11 +584,11 @@ function rosterOrbit(dt){if(matchMedia('(prefers-reduced-motion: reduce)').match
   itemBoxes.forEach(b=>{b.star.rotation.y+=dt*1.6;orientOnTrack(b.mesh,b.u,b.lat,1.6,0);b.mesh.rotateY(b.star.rotation.y);});world.traverse(o=>{if(o.userData.spin)o.rotation.y+=o.userData.spin*dt;});}
 
 // ---------- Input ----------
-const KEYS={KeyW:'throttle',ArrowUp:'throttle',KeyS:'brake',ArrowDown:'brake',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',ShiftLeft:'drift',ShiftRight:'drift',Space:'drift',KeyE:'item',ControlLeft:'item',ControlRight:'item',KeyQ:'special'};
+const KEYS={KeyW:'throttle',ArrowUp:'throttle',KeyS:'brake',ArrowDown:'brake',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',ShiftLeft:'drift',ShiftRight:'drift',Space:'drift',KeyE:'item',ControlLeft:'item',ControlRight:'item',KeyQ:'special',KeyF:'addon'};
 const heldKeys=new Set(),touchHeld=new Set(),padHeld=new Set();let padSteer=0,padPause=false,touchSteer=0;
 const activeTouchPointers=new Map();
 game.analogSteering=saved.analogSteering!==false;game.steeringAssist=saved.steeringAssist!==false;
-function syncInput(){for(const key of ['throttle','brake','left','right','drift','item','special']){const on=touchHeld.has(key)||padHeld.has(key)||[...heldKeys].some(code=>KEYS[code]===key);if(key==='item'&&on&&!input.item)input.itemEdge=true;if(key==='special'&&on&&!input.special)input.specialEdge=true;input[key]=on;}}
+function syncInput(){for(const key of ['throttle','brake','left','right','drift','item','special','addon']){const on=touchHeld.has(key)||padHeld.has(key)||[...heldKeys].some(code=>KEYS[code]===key);if(key==='item'&&on&&!input.item)input.itemEdge=true;if(key==='special'&&on&&!input.special)input.specialEdge=true;if(key==='addon'&&on&&!input.addon)input.addonEdge=true;input[key]=on;}}
 function bindControlsProbe(){
   const probe={
     getYaw(){return game.player?-game.player.theta:0;},
@@ -594,7 +616,7 @@ function analogAxis(value,deadzone=.12){const magnitude=Math.abs(value);if(!Numb
 function steeringGain(speed,maxSpeed){return lerp(1.24,.78,clamp(Math.abs(speed)/Math.max(1,maxSpeed),0,1));}
 function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(p=>p&&p.connected!==false);if(!pad){padHeld.clear();padSteer=0;padPause=false;syncInput();return;}
   const down=i=>!!pad.buttons[i]?.pressed;padSteer=analogAxis(pad.axes[0]||0);
-  padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4)||down(5))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
+  padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4)||down(5))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(10))padHeld.add('addon');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
   if(down(9)&&!padPause){if(game.state==='paused')resume();else pause();}padPause=down(9);syncInput();}
 const touchEl=document.getElementById('touch');
 function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
@@ -616,7 +638,7 @@ if(steerPad){
 for(const [id,key] of[['analogmode','analogSteering'],['steerassist','steeringAssist']]){
   const toggle=document.getElementById(id);if(toggle){toggle.checked=game[key];toggle.addEventListener('change',()=>{game[key]=toggle.checked;saved[key]=game[key];persist();resetInput();if(['race','countdown'].includes(game.state))showTouch();});}
 }
-bindTouch('tL','left');bindTouch('tR','right');bindTouch('tD','drift');bindTouch('tI','item');bindTouch('tB','brake');bindTouch('tS','special');bindTouch('tP','special');
+bindTouch('tL','left');bindTouch('tR','right');bindTouch('tD','drift');bindTouch('tI','item');bindTouch('tB','brake');bindTouch('tS','special');bindTouch('tP','special');bindTouch('tA','addon');bindTouch('addonHUD','addon');
 game.touch=typeof saved.touchMode==='boolean'?saved.touchMode:matchMedia('(pointer:coarse)').matches;
 function showTouch(){touchEl.classList.toggle?.('analog',game.analogSteering);if(game.touch){touchEl.classList.add('on');if(document.documentElement&&document.documentElement.dataset)document.documentElement.dataset.touch='on';}}
 function hideTouch(){touchEl.classList.remove('on');if(document.documentElement&&document.documentElement.dataset)delete document.documentElement.dataset.touch;}
@@ -653,7 +675,7 @@ function buildRosterUI(){
   const initial=ROSTER.findIndex(d=>d.id===saved.selected);grid.querySelectorAll('.card')[Math.max(0,initial)]?.click();
   document.getElementById('go').onclick=()=>{if(!selected||!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map')return;audioInit();SFX.go();startRace();};
 }
-function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();resetInput();updateBestTime();game.state='roster';if(typeof window.resetRaceSetup==='function')window.resetRaceSetup();if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
+function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();if(typeof clearAddons==='function')clearAddons();resetInput();updateBestTime();game.state='roster';if(typeof window.resetRaceSetup==='function')window.resetRaceSetup();if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
 function startRace(){if(!selected)return false;if(['boot','roster','title'].includes(game.state)&&(!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map'))return false;if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace);if(typeof clearFinishCeremony==='function')clearFinishCeremony();if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------

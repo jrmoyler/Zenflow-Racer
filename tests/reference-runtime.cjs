@@ -38,7 +38,7 @@ for(const mobile of [false,true]){
  }
  assert.equal(signatures.size,3,'three distinct modeled circuits');assert.throws(()=>run("selectMap('missing')"),/Unknown circuit/);
  if(!mobile){
-  run(materialSource);run(read('kart-clips.js'));run(vehicleSource.slice(0,vehicleSource.indexOf('// ---------- Item / token pickups')));run('kartGeos()');const roster=run('ROSTER');assert.equal(roster.length,12);const hashes=new Set(),sizes=new Set();
+  run(materialSource);run(read('kart-clips.js'));run(vehicleSource.slice(0,vehicleSource.indexOf('// ---------- Item / token pickups')));run('kartGeos()');const roster=run('ROSTER');assert.equal(roster.length,20);const hashes=new Set(),sizes=new Set();
   // Rig contract shared with the Blender clip pipeline and race FX: these nodes exist exactly once per chassis.
   const RIG_ONCE=['body','pilot','torso','head','head-mesh','arm-l','arm-r','arm-l-mesh','arm-r-mesh','steering-wheel','steering-wheel-rim','exhaust-l','exhaust-r','wheel-fl','wheel-fr','wheel-rl','wheel-rr','underbody-flow-ring','aegis-shield','halo','star'];
   const UD_KEYS=['wheels','body','pilot','head','arms','steeringWheel','exhaust','under','shield','halo','star','glow','chassis','clipState','clipNodes','anim'];
@@ -73,7 +73,7 @@ for(const mobile of [false,true]){
   }
   assert.equal(itemHashes.size,6,'all inventory models have distinct geometry');
   console.log('PASS all six reference items: finite distinct geometry, energy colors and collision bounds');
-  assert.equal(hashes.size,12,'all divisions have different actual geometry');assert.ok(sizes.size>=6,'division silhouettes have materially distinct bounds');
+  assert.equal(hashes.size,roster.length,'all divisions have different actual geometry');assert.ok(sizes.size>=6,'division silhouettes have materially distinct bounds');
  }
 }
 // Resolve actual UI art and script dependencies against the source or built release.

@@ -281,6 +281,182 @@
         "cambered blade panels, division-specific nose inserts and rear diffusers"
       ],
       "optimization": "glTF Transform 4.2.1 weld / dedup / prune; node extras, leaves and transforms retained"
+    },
+    {
+      "id": "ledger",
+      "file": "ledger.glb",
+      "bytes": 867160,
+      "triangles": 45411,
+      "meshes": 106,
+      "nodes": 123,
+      "sha256": "ffc30477bb3772041d2f9a139ad0ad5399e71efc517d7901d1aa1eba0f39d7c6",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "terra",
+      "file": "terra.glb",
+      "bytes": 847768,
+      "triangles": 45438,
+      "meshes": 77,
+      "nodes": 94,
+      "sha256": "436c8e6d40629f23bb9ca3ade7ea58c0b35840722023111213c1023f00a833a1",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "obsidian",
+      "file": "obsidian.glb",
+      "bytes": 842468,
+      "triangles": 45448,
+      "meshes": 79,
+      "nodes": 96,
+      "sha256": "3672a1f9a7acffb1f4bfcc778227247d383fb930425dc1bfe8e31f763c306e8d",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "civic",
+      "file": "civic.glb",
+      "bytes": 840392,
+      "triangles": 45445,
+      "meshes": 76,
+      "nodes": 93,
+      "sha256": "72edd64dc11c9516f6fa374eca5b71924d88ecd763943e65ee0c7f6dd8fbb3b9",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "cognara",
+      "file": "cognara.glb",
+      "bytes": 842100,
+      "triangles": 45448,
+      "meshes": 76,
+      "nodes": 93,
+      "sha256": "9c47282c5241d4fa1870f86fb81610766336f6613484625de9a837ab57cdcd79",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "gaia",
+      "file": "gaia.glb",
+      "bytes": 837360,
+      "triangles": 45449,
+      "meshes": 76,
+      "nodes": 93,
+      "sha256": "1a67eb1909dfe4e95a4b839227b98b99a791d51d9e36960ee768ef65a7009329",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "nomad",
+      "file": "nomad.glb",
+      "bytes": 927584,
+      "triangles": 45430,
+      "meshes": 150,
+      "nodes": 167,
+      "sha256": "ced2c9c037530b3b5825a97775febd9a49c72291aab564eee96555278aab8d58",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
+    },
+    {
+      "id": "eon",
+      "file": "eon.glb",
+      "bytes": 840316,
+      "triangles": 45424,
+      "meshes": 75,
+      "nodes": 92,
+      "sha256": "bceb7643c5d21b8162d393647906070816f97353ea5985275ae2c92e20dae317",
+      "authored": true,
+      "operations": [
+        "welded coachwork and corrected normals",
+        "voxel union fitted torso and sleeves",
+        "controlled smooth and decimated garment surfaces",
+        "reference sRGB-to-linear enamel palette",
+        "machined spoke and rim bevels",
+        "concave dark wheel dishes and saturated light rims",
+        "tailored continuous suit with restrained fabric folds; helmet shell, mirrored visor, harness, gloves, boots, division headgear and articulated steering controls",
+        "cambered blade panels, division-specific nose inserts and rear diffusers",
+        "Wave2 component inventory coachwork retained from live Three.js mesh scaffold",
+        "final measured triangle budget below 50000, preserving all named rig pivots"
+      ]
     }
   ]
 }
