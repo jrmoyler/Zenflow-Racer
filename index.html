@@ -173,9 +173,18 @@ html[data-touch="on"] #tS{display:none}
     </section>
     <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
     <section class="track-panel race-panel" hidden aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
-      <button class="map-card" data-map="cherry" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Cherry Blossom Skyway</span></button>
-      <button class="map-card" data-map="stormforge" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Nexus Stormforge</span></button>
-      <button class="map-card" data-map="canopy" aria-pressed="false"><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas><span>Vital Canopy Run</span></button>
+      <button class="map-card" data-map="cherry" aria-label="Cherry Blossom Skyway" aria-pressed="false">
+        <span class="circuit-art"><img src="assets/map-cards/cherry.webp" width="1536" height="1024" alt="" decoding="async"><span class="circuit-number" aria-hidden="true">01</span><span class="circuit-selected" aria-hidden="true">✓ SELECTED</span></span>
+        <span class="circuit-copy"><span class="circuit-kicker">SANCTUARY IN THE CLOUDS</span><strong class="circuit-name">Cherry Blossom Skyway</strong><span class="circuit-bottom"><span class="circuit-difficulty">Flowing</span><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas></span></span>
+      </button>
+      <button class="map-card" data-map="stormforge" aria-label="Nexus Stormforge" aria-pressed="false">
+        <span class="circuit-art"><img src="assets/map-cards/stormforge.webp" width="1536" height="1024" alt="" decoding="async"><span class="circuit-number" aria-hidden="true">02</span><span class="circuit-selected" aria-hidden="true">✓ SELECTED</span></span>
+        <span class="circuit-copy"><span class="circuit-kicker">THE TURBINE FOUNDRY</span><strong class="circuit-name">Nexus Stormforge</strong><span class="circuit-bottom"><span class="circuit-difficulty">Technical</span><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas></span></span>
+      </button>
+      <button class="map-card" data-map="canopy" aria-label="Vital Canopy Run" aria-pressed="false">
+        <span class="circuit-art"><img src="assets/map-cards/canopy.webp" width="1536" height="1024" alt="" decoding="async"><span class="circuit-number" aria-hidden="true">03</span><span class="circuit-selected" aria-hidden="true">✓ SELECTED</span></span>
+        <span class="circuit-copy"><span class="circuit-kicker">GARDENS ABOVE THE SEA</span><strong class="circuit-name">Vital Canopy Run</strong><span class="circuit-bottom"><span class="circuit-difficulty">Sweeping</span><canvas class="track-outline" width="180" height="100" aria-hidden="true"></canvas></span></span>
+      </button>
     </div><p id="map-description">Floating gardens, cascading waterfalls, and sweeping sky bridges.</p><div class="track-meta"><span>12 RACERS</span><span>03 LAPS</span></div><p id="map-prompt" role="status">Select a circuit to continue.</p><button id="go" class="btn" disabled>Enter race →</button><button id="back-racer" type="button">← Change racer</button></section>
   </div>
   <div class="selector-heading"><span>CHOOSE YOUR RACER</span><span>← → ARROWS OR SWIPE TO EXPLORE</span></div>

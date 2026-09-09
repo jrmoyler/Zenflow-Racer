@@ -23,7 +23,7 @@ function immersionBudget(n){return (typeof MOBILEFX!=='undefined'&&MOBILEFX)?Mat
 function immersionAlongTrack(u,lat,h,out){if(typeof trackPoint==='function')return trackPoint(u,lat,h,out);out.set(0,h,0);return out;}
 function immersionRand(seed){let s=seed|0;return()=>{s=s+0x6d2b79f5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function buildImmersionWeather(){
-  const count=immersionBudget(activeMap.id==='canopy'?420:activeMap.id==='stormforge'?360:520);
+  const count=immersionBudget(activeMap.id==='canopy'?100:activeMap.id==='stormforge'?120:180);
   const pos=new Float32Array(count*3),col=new Float32Array(count*3),vel=new Float32Array(count*3);
   const color=new THREE.Color(),rnd=typeof mulberry==='function'?mulberry(910+activeMap.id.length):immersionRand(910);
   const palette=activeMap.id==='stormforge'?[0xff7a32,0xffc56a,0xffe7a3,0x6ec8ff]:activeMap.id==='canopy'?[0x7dff9a,0xc6ff7a,0xfff4a8,0x7ef0ff]:[0xffd5f3,0xf79cdc,0xffedf9,0xe77bc8];
@@ -35,7 +35,7 @@ function buildImmersionWeather(){
     vel[i*3]=(rnd()-.5)*.8;vel[i*3+1]=activeMap.id==='stormforge'?1.6+rnd()*2.2:-(.6+rnd()*1.4);vel[i*3+2]=(rnd()-.5)*.8;
   }
   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));
-  const mat=new THREE.PointsMaterial({size:activeMap.id==='stormforge'?.28:.42,vertexColors:true,transparent:true,opacity:.92,depthWrite:false,sizeAttenuation:true,blending:THREE.AdditiveBlending});
+  const mat=new THREE.PointsMaterial({size:activeMap.id==='stormforge'?.28:.42,vertexColors:true,transparent:true,opacity:.92,depthWrite:false,sizeAttenuation:true,blending:THREE.NormalBlending});
   const points=new THREE.Points(geo,mat);points.name='immersion-weather';points.userData.dynamic=true;points.frustumCulled=false;
   world.add(points);
   IMMERSION.weather={points,pos,vel,count,floor:activeMap.id==='stormforge'?-8:2,ceil:activeMap.id==='stormforge'?48:36,rnd:immersionRand(4401)};
@@ -91,16 +91,21 @@ function buildImmersionLanterns(){
 function buildCherryHero(){
   const g=new THREE.Group();g.name='immersion-hero';g.position.set(-40,38,-40);
   const moon=new THREE.Mesh(new THREE.SphereGeometry(16,32,24),new THREE.MeshBasicMaterial({color:0xffe8d2}));moon.position.set(-80,70,-160);g.add(moon);
-  const halo=new THREE.Mesh(new THREE.RingGeometry(17.2,19.4,48),new THREE.MeshBasicMaterial({color:0xffc6e4,side:THREE.DoubleSide,transparent:true,opacity:.35}));halo.position.copy(moon.position);halo.lookAt(0,20,-120);g.add(halo);
+
   const vermilion=new THREE.MeshStandardMaterial({color:0x8c3e50,roughness:.55,metalness:.08}),dark=new THREE.MeshStandardMaterial({color:0x2a2438,roughness:.5}),gold=new THREE.MeshStandardMaterial({color:0xd4a843,roughness:.35,metalness:.45});
   for(let k=0;k<5;k++){
-    const gate=new THREE.Group();const x=-70+k*28;gate.position.set(x,8,-210);
+    const gate=new THREE.Group();const x=-70+k*28;gate.position.set(x,8,-240);
     for(const s of[-4.2,4.2]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.28,.34,9,10),vermilion);post.position.set(s,4.5,0);gate.add(post);}
     const beam=new THREE.Mesh(new THREE.BoxGeometry(10,.45,.5),dark);beam.position.y=8.6;gate.add(beam);
     const cap=new THREE.Mesh(new THREE.BoxGeometry(11.4,.35,.7),vermilion);cap.position.y=9.3;gate.add(cap);
     const lamp=new THREE.Mesh(new THREE.SphereGeometry(.42,8,6),new THREE.MeshBasicMaterial({color:0xffc56a}));lamp.position.set(0,7.2,0);gate.add(lamp);
+    // Each gate belongs to a continuous stone causeway, with a deep cliff footing.
     g.add(gate);
   }
+  const terraceMat=new THREE.MeshStandardMaterial({color:0x8c839b,roughness:.93});
+  const causeway=new THREE.Mesh(new THREE.BoxGeometry(132,3,14),terraceMat);causeway.position.set(-14,6.5,-240);causeway.receiveShadow=true;g.add(causeway);
+  const foundation=new THREE.Mesh(new THREE.CylinderGeometry(75,43,70,32),terraceMat);foundation.scale.z=.22;foundation.position.set(-14,-30,-240);foundation.receiveShadow=true;g.add(foundation);
+  const pagodaBase=new THREE.Mesh(new THREE.CylinderGeometry(15,9,54,20),terraceMat);pagodaBase.position.set(80,-21,-190);g.add(pagodaBase);
   const pagoda=new THREE.Group();pagoda.position.set(80,6,-190);
   const plaster=new THREE.MeshStandardMaterial({color:0xe7d6df,roughness:.78});
   for(let j=0;j<3;j++){
@@ -137,6 +142,9 @@ function buildStormHero(){
     const hook=new THREE.Mesh(new THREE.BoxGeometry(2.4,2.4,2.4),dark);hook.position.set(20,16,0);crane.add(hook);
     const lamp=new THREE.Mesh(new THREE.SphereGeometry(.5,8,6),glow);lamp.position.set(20,18.2,0);crane.add(lamp);
   }
+  // Reactor and crane loads terminate in the same service deck and bedrock.
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(102,3,42),ivory);deck.position.set(0,-10,-10);deck.receiveShadow=true;g.add(deck);
+  for(const x of[-36,0,36]){const footing=new THREE.Mesh(new THREE.CylinderGeometry(9,14,62,12),dark);footing.position.set(x,-42,-10);g.add(footing);}
   world.add(g);IMMERSION.hero=g;
 }
 function buildCanopyHero(){
@@ -155,6 +163,7 @@ function buildCanopyHero(){
     cap.position.set(Math.cos(a)*18,2.2,Math.sin(a)*18);cap.scale.set(1,.45,1);g.add(cap);
     const stem=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,2.2,6),bark);stem.position.set(Math.cos(a)*18,1.1,Math.sin(a)*18);g.add(stem);
   }
+  const earth=new THREE.Mesh(new THREE.CylinderGeometry(24,15,50,24),bark);earth.position.set(-48,-26,-110);g.add(earth);
   const count=immersionBudget(24),geo=new THREE.ConeGeometry(.35,1.1,5),mat=new THREE.MeshStandardMaterial({color:0x2f6a3a,roughness:.8});
   const birds=new THREE.InstancedMesh(geo,mat,count);
   birds.name='immersion-birds';birds.userData.dynamic=true;
@@ -218,6 +227,7 @@ function updateImmersion(dt){
   }
   if(typeof scene!=='undefined'&&scene.fog){
     const spd=(typeof game!=='undefined'&&game.player)?clamp(game.player.speed/46,0,1):0;
-    scene.fog.near=lerp(scene.fog.near||280,240-spd*70,.08);
+    const near=activeMap.id==='canopy'?300:activeMap.id==='stormforge'?200:260;
+    scene.fog.near=lerp(scene.fog.near||near,near-spd*35,1.-Math.exp(-dt*4));
   }
 }

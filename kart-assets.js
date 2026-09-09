@@ -63,5 +63,5 @@ function createLoadedKart(div){
  root.userData.sculptRuntime={parts,source:'Blender 4.5',collider:{halfExtents:[1.53,1.38,2.25]},pick:raycaster=>raycaster.intersectObjects(parts,false),setExploded:amount=>{
   const k=Math.max(0,Math.min(1,amount));for(const part of restParts){part.node.position.copy(part.position);if(k){const direction=part.center.clone().sub(center).multiplyScalar(k);const worldOrigin=part.node.parent.getWorldPosition(new THREE.Vector3());const offset=part.node.parent.worldToLocal(worldOrigin.add(direction));part.node.position.add(offset);}}
  }};
- resolveKartRig(root);return root;
+ finishKartCockpit(root);resolveKartRig(root);return root;
 }

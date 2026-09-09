@@ -32,6 +32,7 @@ function applyMapAtmosphere(){
   if(typeof rim!=='undefined'){rim.color.setHex(activeMap.id==='stormforge'?0x8bcaff:activeMap.id==='canopy'?0xb6f6ff:0xaecaff);rim.intensity=.55;}
   if(typeof renderer!=='undefined')renderer.toneMappingExposure=activeMap.id==='stormforge'?.88:.94;
   if(typeof game!=='undefined'&&game.skyMat?.uniforms.skyTop){game.skyMat.uniforms.skyTop.value.setHex(activeMap.skyTop);game.skyMat.uniforms.skyHorizon.value.setHex(activeMap.skyHorizon);}
+  if(typeof game!=='undefined'&&game.skyMat?.uniforms.storm){game.skyMat.uniforms.storm.value=activeMap.id==='stormforge'?1:0;game.skyMat.uniforms.cloudCover.value=activeMap.id==='stormforge'?.77:activeMap.id==='canopy'?.54:.63;}
   if(typeof refreshMapEnvironment==='function')refreshMapEnvironment();
 }
 function updateMapScenery(dt){

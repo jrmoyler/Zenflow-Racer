@@ -1,18 +1,30 @@
 /* CPU rendering uses exact playable topology, a bounded raster and real occlusion. */
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const THREE=require('../vendor/three.min.js');
-let uploads=0,blits=0;
-const makeCanvas=()=>{const canvas={style:{},dataset:{},setAttribute(){}};canvas.ctx={canvas,save(){},restore(){},setTransform(){},beginPath(){},rect(){},clip(){},createLinearGradient(){return {addColorStop(){}};},fillRect(){},createImageData(w,h){return {data:new Uint8ClampedArray(w*h*4),width:w,height:h};},putImageData(){uploads++;},drawImage(){blits++;}};canvas.getContext=()=>canvas.ctx;return canvas;};
+let uploads=0,blits=0,skyLobes=0;
+const makeCanvas=()=>{const canvas={style:{},dataset:{},setAttribute(){}};canvas.ctx={canvas,save(){},restore(){},setTransform(){},beginPath(){},moveTo(){},ellipse(){skyLobes++;},fill(){},rect(){},clip(){},createLinearGradient(){return {addColorStop(){}};},fillRect(){},createImageData(w,h){return {data:new Uint8ClampedArray(w*h*4),width:w,height:h};},putImageData(){uploads++;},drawImage(){blits++;}};canvas.getContext=()=>canvas.ctx;return canvas;};
 const source=fs.readFileSync(path.join(__dirname,'../fallback-renderer.js'),'utf8');
 const context={THREE,innerWidth:320,innerHeight:240,document:{createElement:makeCanvas},console};vm.createContext(context);vm.runInContext(source+';globalThis.Renderer=CanvasRaceRenderer',context);
 const renderer=new context.Renderer({canvas:makeCanvas()}),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,320/240,.1,100);
 camera.position.set(3,2,5);camera.lookAt(0,0,0);
 const kart=new THREE.Mesh(new THREE.BoxGeometry(1,1,3),new THREE.MeshStandardMaterial({color:0x20cff5}));scene.add(kart);
 const bytes=()=>Buffer.from(renderer.target.image.data),pixelCount=()=>{let n=0;for(let i=3;i<renderer.target.image.data.length;i+=4)if(renderer.target.image.data[i])n++;return n;};
-renderer.render(scene,camera);assert.ok(pixelCount()>100,'actual geometry fills pixels');const initial=bytes();kart.rotation.y=Math.PI/3;renderer.render(scene,camera);assert.notDeepEqual(bytes(),initial,'rotation changes the real silhouette');
+renderer.render(scene,camera);assert.ok(skyLobes>0&&skyLobes<=170,'bounded cloud geometry draws behind the scene');assert.ok(pixelCount()>100,'actual geometry fills pixels');const initial=bytes();kart.rotation.y=Math.PI/3;renderer.render(scene,camera);assert.notDeepEqual(bytes(),initial,'rotation changes the real silhouette');
 kart.visible=false;renderer.render(scene,camera);assert.equal(pixelCount(),0,'hidden scene geometry excluded');
 const instances=new THREE.InstancedMesh(kart.geometry,kart.material,2);instances.setMatrixAt(0,new THREE.Matrix4().makeTranslation(-1,0,0));instances.setMatrixAt(1,new THREE.Matrix4().makeTranslation(1,0,0));scene.add(instances);renderer.render(scene,camera);const two=pixelCount();instances.count=1;renderer.render(scene,camera);assert.ok(two>pixelCount(),'instance transforms have separate coverage');
 const cached=renderer.meshData(kart.geometry);assert.equal(cached,renderer.meshData(kart.geometry));assert.equal(cached.positions.length,kart.geometry.attributes.position.count*3,'no destructive vertex clustering');assert.equal(cached.indices.length,kart.geometry.index.count,'all authored triangles retained');
+// Dynamic IK geometry updates retain buffers but refresh visible sleeve shape.
+const deformScene=new THREE.Scene(),deformGeometry=new THREE.PlaneGeometry(1,1),deformMesh=new THREE.Mesh(deformGeometry,new THREE.MeshStandardMaterial({color:0xcc7833,side:THREE.DoubleSide}));
+deformGeometry.boundingSphere=new THREE.Sphere(new THREE.Vector3(),5);deformScene.add(deformMesh);
+renderer.drawScene(deformScene,camera,{width:100,height:100},false);
+const deformBefore=bytes(),deformCache=renderer.meshData(deformGeometry),positionStorage=deformCache.positions,projectionStorage=deformCache.projected,indexStorage=deformCache.indices;
+const attribute=deformGeometry.attributes.position;for(let i=0;i<attribute.count;i++)if(attribute.getY(i)>0)attribute.setX(i,attribute.getX(i)+1.1);attribute.needsUpdate=true;deformGeometry.computeVertexNormals();
+renderer.drawScene(deformScene,camera,{width:100,height:100},false);
+assert.notDeepEqual(bytes(),deformBefore,'deforming sleeve attributes changes rasterized pixels');
+assert.equal(renderer.meshData(deformGeometry),deformCache,'attribute deformation preserves cached mesh record');
+assert.equal(deformCache.positions,positionStorage);assert.equal(deformCache.projected,projectionStorage);assert.equal(deformCache.indices,indexStorage,'deformation does not allocate topology');
+assert.equal(deformGeometry.boundingSphere.radius,5,'authored conservative IK bounds survive caching');
+const normalAttribute=deformGeometry.attributes.normal;normalAttribute.setXYZ(0,0,1,0);normalAttribute.needsUpdate=true;renderer.meshData(deformGeometry);assert.equal(deformCache.normals[1],1,'normal revisions refresh independently');
 // Overlapping opaque triangles must be depth tested independently of draw order.
 const occlusion=new THREE.Scene(),cam=new THREE.PerspectiveCamera(55,1,.1,20);cam.position.z=3;
 const plane=new THREE.PlaneGeometry(2,2),back=new THREE.Mesh(plane,new THREE.MeshBasicMaterial({color:0x0000ff})),front=new THREE.Mesh(plane,new THREE.MeshBasicMaterial({color:0xff0000}));front.position.z=.4;occlusion.add(front,back);renderer.drawScene(occlusion,cam,{width:100,height:100},false);
