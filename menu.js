@@ -88,16 +88,17 @@
  settings.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.getElementById('settings-close').click();}});
  document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');raceSetup.step='title';raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false;roster.inert=true;document.getElementById('title-start').focus();});
  const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: botanical gardens, spore-light and a rolling turquoise sea.'};
+ const mapName=button=>MAPS.find(map=>map.id===button.dataset.map)?.name||button.textContent.trim();
  const syncMap=(id)=>{
    const button=document.querySelector('[data-map="'+id+'"]');if(!button)return;
    document.querySelectorAll('[data-map]').forEach(b=>{const selected=raceSetup.mapConfirmed&&b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
    document.getElementById('map-description').textContent=descriptions[id];
-   document.getElementById('map-tag').textContent=button.textContent.trim().toUpperCase();
-   document.getElementById('race-map-name').textContent=button.textContent.trim();
+   document.getElementById('map-tag').textContent=mapName(button).toUpperCase();
+   document.getElementById('race-map-name').textContent=mapName(button);
  };
  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',()=>{
    if(typeof chooseMap!=='function'||raceSetup.step!=='map'||!raceSetup.racerConfirmed)return;
-   transitionScene(button.textContent.trim().toUpperCase(),()=>{if(chooseMap(button.dataset.map)!==false){if(selectMap(button.dataset.map))miniBounds=null;raceSetup.mapConfirmed=true;syncMap(button.dataset.map);document.getElementById('go').disabled=false;document.getElementById('map-prompt').textContent=selected.name+' · '+button.textContent.trim()+' · Ready';document.getElementById('go').focus({preventScroll:true});}});
+   transitionScene(mapName(button).toUpperCase(),()=>{if(chooseMap(button.dataset.map)!==false){if(selectMap(button.dataset.map))miniBounds=null;raceSetup.mapConfirmed=true;syncMap(button.dataset.map);document.getElementById('go').disabled=false;document.getElementById('map-prompt').textContent=selected.name+' · '+mapName(button)+' · Ready';document.getElementById('go').focus({preventScroll:true});}});
  }));
  window.addEventListener('mapselect',event=>syncMap(event.detail.id));
  syncMap(typeof chosenMapId==='string'?chosenMapId:'cherry');

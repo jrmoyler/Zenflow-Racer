@@ -42,9 +42,50 @@ const rim=new THREE.DirectionalLight(0xaecaff,0.55);rim.position.set(160,80,200)
 const zenWorldTime={value:0};
 let refreshMapEnvironment=null;
 function buildSky(){
+  // Fixed at renderer creation: map changes only update uniforms. Phones use
+  // 16 noise hashes/pixel and LOWFX 4, versus 48 on desktop; the lighting probe
+  // is compiled out on constrained GPUs rather than paid for behind a uniform.
+  const octaves=LOWFX?1:MOBILEFX?2:4;
+  const noiseScale=(1.-Math.pow(.48,4))/(1.-Math.pow(.48,octaves));
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
-    uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)}},vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;void main(){vec3 d=normalize(direction);float h=smoothstep(-.12,.82,d.y);vec3 sky=mix(skyHorizon,skyTop,h);sky=mix(vec3(.55,.64,.8),sky,smoothstep(-.85,-.02,d.y));vec3 sunDir=normalize(vec3(-.35,.42,-.55));float disc=pow(max(0.,dot(d,sunDir)),86.);float glow=pow(max(0.,dot(d,sunDir)),7.);sky+=vec3(1.,.93,.78)*disc*1.45+vec3(1.,.68,.42)*glow*.38;float cloud=sin(d.x*14.+d.z*9.+time*.08)*.5+sin(d.x*31.-d.z*17.+time*.13)*.22;sky+=vec3(.13,.11,.12)*smoothstep(.28,.72,cloud)*exp(-pow((d.y-.18)*4.2,2.));float star=smoothstep(.996,1.,sin(d.x*220.)*sin(d.z*180.+d.y*40.));sky+=vec3(.9,.95,1.)*star*smoothstep(.2,.6,d.y)*.55;gl_FragColor=vec4(sky,1.);
+    defines:{SKY_CLOUD_OCTAVES:octaves,SKY_NOISE_SCALE:noiseScale.toFixed(6),SKY_CLOUD_LIGHT_PROBE:(!LOWFX&&!MOBILEFX)?1:0,SKY_SECOND_DECK:LOWFX?0:1},
+    uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)},storm:{value:activeMap.id==='stormforge'?1:0},cloudCover:{value:activeMap.id==='canopy'?.54:.63}},
+    vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;uniform float storm;uniform float cloudCover;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
+float cloud(vec2 p){float n=0.;float a=.55;for(int i=0;i<SKY_CLOUD_OCTAVES;i++){n+=a*noise(p);p=mat2(1.6,-1.2,1.2,1.6)*p+vec2(13.2,7.8);a*=.48;}return n*SKY_NOISE_SCALE;}
+void main(){
+vec3 d=normalize(direction),sunDir=normalize(vec3(-180.,220.,-120.));
+float h=smoothstep(-.10,.85,d.y);vec3 sky=mix(skyHorizon,skyTop,h);
+sky=mix(skyHorizon*.76,sky,smoothstep(-.55,.04,d.y));
+float mu=max(0.,dot(d,sunDir));
+sky+=vec3(1.,.84,.63)*(pow(mu,420.)*1.7+pow(mu,9.)*.25)*(1.-storm*.65);
+// Perspective-projected cloud decks: distant banks compress naturally into haze.
+vec2 plane=d.xz/max(.11,d.y+.14);vec2 wind=vec2(time*.007,time*.003);
+float lower=cloud(plane*1.3+wind);
+#if SKY_SECOND_DECK == 1
+float upper=cloud(plane*2.8-wind*.6+31.);
+#else
+float upper=0.;
+#endif
+float density=smoothstep(1.-cloudCover-.10,1.-cloudCover+.18,lower);
+float high=smoothstep(.5,.72,upper)*.42;
+float mask=smoothstep(-.01,.10,d.y)*(1.-smoothstep(.72,.99,d.y));
+#if SKY_CLOUD_LIGHT_PROBE == 1
+float illumination=clamp((lower-cloud(plane*1.3+wind+sunDir.xz*.12))*5.+.58,.08,1.);
+#else
+float illumination=clamp(.82-density*.32+mu*.12,.08,1.);
+#endif
+vec3 shadow=mix(vec3(.59,.65,.79),vec3(.24,.30,.41),storm);
+vec3 lit=mix(vec3(1.,.94,.89),vec3(.72,.75,.80),storm);
+vec3 clouds=mix(shadow,lit,illumination);
+float lining=pow(max(0.,1.-abs(density-.42)*2.),3.)*pow(mu,5.);
+clouds+=vec3(1.,.82,.60)*lining*.48*(1.-storm*.7);
+sky=mix(sky,clouds,max(density,high)*mask*(.88+storm*.1));
+// Atmospheric scattering unifies the cloud banks and modeled horizon.
+sky=mix(sky,skyHorizon,(1.-smoothstep(-.08,.15,d.y))*.38);
+gl_FragColor=vec4(sky,1.);
 #include <tonemapping_fragment>
 #include <encodings_fragment>
 }`});
@@ -463,7 +504,28 @@ function buildCircuitArchitecture(){
     const sea=new THREE.MeshPhysicalMaterial({color:0x26b7c2,bumpMap:TEX.cliffHeight||null,bumpScale:.08,roughness:.2,metalness:.38,transparent:true,opacity:.9});
     const ocean=mapMesh(new THREE.CircleGeometry(850,64),sea,world,-20,-100,-120);ocean.rotation.x=-Math.PI/2;ocean.receiveShadow=false;
   }
+  buildHorizonLandscape();
   buildMapClouds();
+}
+// Three concentric silhouettes have actual depth and parallax. One mesh per
+// layer, no alpha overdraw, no shadows and no runtime geometry allocation.
+function buildHorizonLandscape(){
+  const garden=activeMap.id==='canopy',industrial=activeMap.id==='stormforge';
+  const group=new THREE.Group();group.name='horizon-landscape';
+  for(let layer=0;layer<3;layer++){
+    const radius=440+layer*165,segments=MOBILEFX?96:144,positions=[],indices=[];
+    for(let i=0;i<=segments;i++){
+      const a=i/segments*Math.PI*2;
+      const ridge=Math.sin(a*5+layer)*.5+Math.sin(a*11+1.2)*.26+Math.sin(a*23+layer*2)*.12;
+      const top=(garden?20:industrial?44:12)+layer*15+Math.pow(Math.abs(ridge),1.3)*(garden?115:industrial?100:145);
+      positions.push(-20+Math.cos(a)*radius,top,-120+Math.sin(a)*radius,-20+Math.cos(a)*radius,-125,-120+Math.sin(a)*radius);
+      if(i<segments){const k=i*2;indices.push(k,k+1,k+2,k+2,k+1,k+3);}
+    }
+    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
+    const color=new THREE.Color(garden?0x527b78:industrial?0x59677c:0x7d7799).lerp(new THREE.Color(activeMap.fog),layer*.24);
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,fog:true}));mesh.name='horizon-ridge-'+layer;group.add(mesh);
+  }
+  world.add(group);
 }
 function buildMapClouds(){
   // Soft alpha billboards below the road preserve clear racing sightlines.

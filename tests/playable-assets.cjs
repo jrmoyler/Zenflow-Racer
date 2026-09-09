@@ -44,6 +44,29 @@ function assertClosedSkin(geometry,label){
   assert.ok(torsoBox.max.y>=headBox.min.y-.08,div.id+': neck remains attached to head');
   for(const side of ['l','r']){const bounds=new THREE.Box3().setFromObject(a.getObjectByName('arm-'+side+'-mesh')).getSize(new THREE.Vector3());assert.ok(bounds.y>.3&&bounds.z>.5,div.id+': complete articulated arm '+side);}
 
+  // Real shipped meshes must keep both gloves on their moving steering grips,
+  // including scaled pilots and additive drift/boost/hit poses.
+  const templateArm=run('KART_ASSETS.templates.get(div.id)').getObjectByName('arm-l-mesh').geometry;
+  const templatePositions=Float32Array.from(templateArm.attributes.position.array);
+  assert.notEqual(a.getObjectByName('arm-l-mesh').geometry,templateArm,'deforming sleeves are instance-owned');
+  for(const state of ['idle','drive','drift','boost','hit','defeat','victory','spinout'])for(const turn of [-1,0,1]){
+    c.clipKart=a;c.clipState=state;c.turn=turn;
+    run('resetClipNodes(clipKart.userData);clipKart.userData.steeringWheel.rotation.z=turn;clipKart.userData.pilot.rotation.z=turn*.14;sampleKartClip(clipState,.25,1,clipKart.userData);constrainKartHands(clipKart,clipState)');
+    a.updateMatrixWorld(true);
+    for(const [i,contact] of a.userData.contactRig.arms.entries()){
+      if(state==='spinout'||state==='victory'&&i===1)continue;
+      const actual=contact.arm.getObjectByName('racing-glove').getWorldPosition(new THREE.Vector3());
+      const expected=a.userData.steeringWheel.localToWorld(contact.grip.clone());
+      assert.ok(actual.distanceTo(expected)<1e-5,div.id+': '+state+' glove '+i+' stays on rim');
+      assert.ok(contact.mesh.geometry.attributes.position.array.every(Number.isFinite),'finite deformed sleeve');
+      // Vertices at the shoulder remain fixed, so the sleeve never separates from the torso.
+      for(let j=0;j<contact.weights.length;j++)if(contact.weights[j]===0)for(let k=0;k<3;k++)assert.equal(contact.mesh.geometry.attributes.position.array[j*3+k],contact.rest[j*3+k]);
+    }
+  }
+  assert.deepEqual(Array.from(templateArm.attributes.position.array),Array.from(templatePositions),'animation never deforms another racer or cached template');
+  run('resetClipNodes(clipKart.userData)');
+  assert.equal(a.getObjectByName('cockpit-contact-hardware').children.length,2,'six cockpit components cost only two material draws');
+  assert.ok(a.getObjectByName('seat-back-shell')&&a.getObjectByName('pedal-plate'),'cockpit has physical seat and pedal contacts');
   a.userData.exhaust[0].material.emissiveIntensity=9;assert.notEqual(b.userData.exhaust[0].material.emissiveIntensity,9);
   const clone=a.clone(true);assert.ok(clone.getObjectByName('torso'),'ability ghost can clone GLB rig without circular userData');
   c.kart=a;run('for(let i=0;i<60;i++)animateShowroomKart(kart,i/60,1/60)');a.updateMatrixWorld(true);

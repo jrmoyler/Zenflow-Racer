@@ -7,7 +7,7 @@ function element(tag='div'){
   style:{setProperty(k,v){this[k]=v;}},classList:{toggle(k,on){on?classes.add(k):classes.delete(k);},contains:k=>classes.has(k)},
   setAttribute(k,v){this.attributes[k]=String(v);},getAttribute(k){return this.attributes[k];},append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
   querySelectorAll(selector){return this.children.flatMap(n=>[...(selector==='button'&&n.tagName==='BUTTON'?[n]:[]),...n.querySelectorAll(selector)]);},
-  addEventListener(name,fn){(this.events[name]??=[]).push(fn);},fire(name){for(const fn of this.events[name]||[])fn({preventDefault(){}});},
+  addEventListener(name,fn){(this.events[name]??=[]).push(fn);},fire(name,event={}){for(const fn of this.events[name]||[])fn({preventDefault(){},...event});},
   showModal(){this.open=true;},close(){this.open=false;},focus(){this.focused=true;}};
 }
 function fixture(raw='{}'){
@@ -21,14 +21,14 @@ function fixture(raw='{}'){
  return {el,run,open,rows,equip,window,context,stored:()=>stored,writes:()=>writes};
 }
 {
- const f=fixture();f.open();assert.equal(f.rows().length,25,'24 imported powers and an empty slot');assert.equal(f.el('loadout-dialog').open,true);assert.equal(f.el('addon-search').focused,true);
+ const f=fixture();f.open();assert.equal(f.rows().length,25,'24 imported powers and an empty slot');assert.equal(f.el('loadout-dialog').open,true);assert.ok(f.rows().some(row=>row.focused),'catalog receives focus without opening the mobile keyboard');
  for(const row of f.rows())assert.match(row.style['--addon-color'],/^#[\da-f]{6}$/i,'valid catalog accent colour');
  f.equip('fire');assert.equal(f.el('equipped-addon').textContent,'Elemental Fire');assert.equal(JSON.parse(f.stored()).addons.zenflow,'fire');
  assert.equal(f.rows().filter(n=>n.getAttribute('aria-pressed')==='true').length,1,'one selected slot');
- f.context.selected={id:'eon',name:'Eon Core'};f.window.fire('racerselect');assert.equal(f.el('equipped-addon').textContent,'None equipped');f.open();f.equip('tide-ring');
+ f.context.selected={id:'eon',name:'Eon Core'};f.window.fire('racerselect');assert.equal(f.el('equipped-addon').textContent,'Choose from 24 bonus powers');f.open();f.equip('tide-ring');
  assert.deepEqual(JSON.parse(f.stored()).addons,{zenflow:'fire',eon:'tide-ring'},'equipment belongs to the selected division');
  const loaded=fixture(f.stored());assert.equal(loaded.el('equipped-addon').textContent,'Elemental Fire','equipment restores on reload');loaded.open();loaded.equip('');
- assert.equal(loaded.el('equipped-addon').textContent,'None equipped');assert.equal(JSON.parse(loaded.stored()).addons.zenflow,null,'empty slot persists');assert.equal(JSON.parse(loaded.stored()).addons.eon,'tide-ring','clearing one division preserves another');
+ assert.equal(loaded.el('equipped-addon').textContent,'Choose from 24 bonus powers');assert.equal(JSON.parse(loaded.stored()).addons.zenflow,null,'empty slot persists');assert.equal(JSON.parse(loaded.stored()).addons.eon,'tide-ring','clearing one division preserves another');
  loaded.el('done-loadout').fire('click');assert.equal(loaded.el('loadout-dialog').open,false);assert.equal(loaded.el('open-loadout').focused,true);
  loaded.open();loaded.el('open-loadout').focused=false;loaded.el('loadout-dialog').fire('cancel');assert.equal(loaded.el('open-loadout').focused,true,'Escape cancellation restores trigger focus');
  console.log('PASS add-on selection: complete catalog, per-racer save/reload, optional empty slot and focus return');
@@ -37,11 +37,11 @@ function fixture(raw='{}'){
  const f=fixture();f.open();for(const [query,id] of [['  fIrE  ','fire'],['ring gate','tide-ring'],['charged surge','electric-boost']]){f.el('addon-search').value=query;f.el('addon-search').fire('input');assert.ok(f.rows().some(n=>n.dataset.addon===id),'search matches name, type and description: '+query);}
  f.el('addon-search').value='nonexistent power';f.el('addon-search').fire('input');assert.equal(f.rows().length,0);assert.match(f.el('addon-list').children[0].textContent,/No matching powers/);
  f.el('addon-search').value='';f.el('addon-search').fire('input');f.run("game.state='race'");const before=f.writes();f.equip('fire');assert.equal(f.writes(),before,'race input cannot change equipment');
- f.el('loadout-dialog').close();f.open();assert.equal(f.el('loadout-dialog').open,false,'race cannot open loadout');f.run("game.state='roster'");f.context.raceSetup.step='map';f.open();assert.equal(f.el('loadout-dialog').open,false,'map confirmation cannot change equipment');
+ f.el('loadout-dialog').close();f.open();assert.equal(f.el('loadout-dialog').open,false,'race cannot open loadout');f.run("game.state='roster'");f.context.raceSetup.step='map';f.open();assert.equal(f.el('loadout-dialog').open,true,'map step keeps equipment reachable');f.equip('fire');assert.equal(JSON.parse(f.stored()).addons.zenflow,'fire');
  console.log('PASS add-on search, empty results and setup/race guards');
 }
 for(const raw of ['{','null','[]','42','"bad"','{"addons":null}','{"addons":[]}','{"addons":"bad"}','{"addons":{"zenflow":"unknown"}}','{"addons":{"zenflow":{}}}']){
- const f=fixture(raw);assert.equal(f.el('equipped-addon').textContent,'None equipped');f.open();f.equip('ward');assert.equal(JSON.parse(f.stored()).addons.zenflow,'ward','malformed data remains recoverable: '+raw);
+ const f=fixture(raw);assert.equal(f.el('equipped-addon').textContent,'Choose from 24 bonus powers');f.open();f.equip('ward');assert.equal(JSON.parse(f.stored()).addons.zenflow,'ward','malformed data remains recoverable: '+raw);
 }
 console.log('PASS malformed saved state: invalid JSON, primitives, arrays, unknown IDs and non-string selections');
 {
@@ -55,4 +55,19 @@ console.log('PASS malformed saved state: invalid JSON, primitives, arrays, unkno
  for(const blocked of [{vault:1},{spin:1},{finished:true}]){Object.assign(f.context.r,{vault:0,spin:0,finished:false},blocked);f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').disabled,true,'racer status gates HUD');assert.equal(f.el('tA').disabled,true);}
  f.context.r.addonId='missing';f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').hidden,true);assert.equal(f.el('tA').hidden,true);
  console.log('PASS add-on HUD: cooldown rounding, ready state, incapacitation and empty slot');
+}
+
+{
+ const f=fixture();f.open();const ids=f.rows().map(row=>row.dataset.addon).filter(Boolean);
+ for(const id of ids){f.equip(id);assert.equal(JSON.parse(f.stored()).addons.zenflow,id);assert.equal(f.run('addonDefinition(saved.addons.zenflow).id'),id);}
+ f.context.raceSetup.step='map';f.el('loadout-dialog').close();f.open();f.equip('cyber');assert.equal(JSON.parse(f.stored()).addons.zenflow,'cyber','last-minute circuit-step change reaches saved racer slot');
+ console.log('PASS all 24 powers can be equipped and resolved, including after circuit selection');
+}
+
+{
+ const f=fixture();let casts=0;f.context.useAddon=()=>{casts++;};f.run("game.state='race';game.player={}");
+ f.el('addonHUD').fire('click',{detail:0});assert.equal(casts,1,'assistive / keyboard click casts without pointerdown');
+ f.el('addonHUD').fire('click',{detail:1});assert.equal(casts,1,'pointer click does not duplicate held-input cast');
+ f.run("game.state='paused'");f.el('addonHUD').fire('click',{detail:0});assert.equal(casts,1,'paused race cannot cast');
+ console.log('PASS native keyboard/assistive activation and duplicate-pointer prevention');
 }

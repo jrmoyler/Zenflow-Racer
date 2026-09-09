@@ -107,3 +107,48 @@ button:disabled{cursor:not-allowed;opacity:.5}button:not(:disabled):active{trans
  #roster[data-step="map"] .track-meta{margin:8px 0}
  #roster[data-step="map"] #map-prompt{margin:6px 0}
 }
+
+/* Commissioned circuit artwork: selection cards only; gameplay remains real 3D. */
+#roster[data-step="map"] .showroom{width:min(100%,1240px)}
+#roster[data-step="map"] .track-panel{padding:24px;background:var(--ink)}
+#roster[data-step="map"] .map-card{display:block;position:relative;padding:0;overflow:hidden;text-align:left;min-height:0;border:2px solid #59616d;background:#222c38;transition:border-color .18s,transform .18s}
+#roster[data-step="map"] .map-card span{padding:0;min-height:0;font-size:inherit;line-height:inherit}
+#roster[data-step="map"] .map-card .circuit-art{display:block;position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#39495b}
+.circuit-art img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+#roster[data-step="map"] .map-card .circuit-number{position:absolute;top:12px;left:12px;padding:7px 10px;background:var(--ink);color:var(--paper);font:700 17px/1 var(--display)}
+#roster[data-step="map"] .map-card .circuit-selected{display:none;position:absolute;right:10px;bottom:10px;padding:7px 9px;background:var(--lavender);color:var(--ink);font:700 11px/1 var(--body);letter-spacing:.06em}
+#roster[data-step="map"] .map-card.selected .circuit-selected{display:block}
+#roster[data-step="map"] .map-card.selected span::after{content:none}
+#roster[data-step="map"] .map-card .circuit-copy{display:block;padding:18px 16px 10px}
+#roster[data-step="map"] .map-card .circuit-kicker{display:block;font:700 10px/1.4 var(--body);letter-spacing:.12em;color:#c3bdcf;margin-bottom:7px}
+.circuit-name{display:block;font:700 clamp(21px,2.1vw,30px)/1.03 var(--display);color:var(--paper);min-height:2.06em}
+#roster[data-step="map"] .map-card .circuit-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;border-top:1px solid #53606d;padding-top:5px}
+#roster[data-step="map"] .map-card .circuit-difficulty{font:600 13px/1.2 var(--body);color:#cbd1d8}
+#roster[data-step="map"] .map-card .track-outline{width:96px;height:54px;margin:0;flex:none}
+#roster[data-step="map"] .map-card:hover{border-color:var(--paper);background:#2d3946;transform:translateY(-3px)}
+#roster[data-step="map"] .map-card:hover img{transform:scale(1.035)}
+#roster[data-step="map"] .map-card.selected{border-color:var(--lavender);background:#383849;box-shadow:0 4px 0 var(--lavender)}
+#roster[data-step="map"] .map-card:focus-visible{outline:3px solid var(--cyan);outline-offset:4px}
+#roster[data-step="map"] #go{max-width:380px;margin-left:auto;display:block}
+#roster[data-step="map"] #map-description{font-size:15px;line-height:1.5;max-width:720px;margin:22px 0 12px;color:#d4d6dc}
+@media(max-width:700px){
+ #roster[data-step="map"] .track-panel{padding:14px}
+ #roster[data-step="map"] .map-card{display:grid;grid-template-columns:43% 1fr;align-items:stretch;min-height:136px}
+ #roster[data-step="map"] .map-card .circuit-art{height:100%;aspect-ratio:auto}
+ #roster[data-step="map"] .map-card .circuit-copy{padding:12px}
+ .circuit-name{font-size:23px;min-height:0}
+ #roster[data-step="map"] .map-card .circuit-kicker{font-size:8px;letter-spacing:.07em;margin-bottom:6px}
+ #roster[data-step="map"] .map-card .circuit-bottom{margin-top:8px;gap:4px}
+ #roster[data-step="map"] .map-card .track-outline{width:64px;height:36px}
+ #roster[data-step="map"] .map-card .circuit-difficulty{font-size:11px}
+ #roster[data-step="map"] .map-card .circuit-number{font-size:13px;top:7px;left:7px;padding:5px 7px}
+ #roster[data-step="map"] .map-card .circuit-selected{font-size:8px;bottom:7px;right:7px;padding:5px}
+ #roster[data-step="map"] #go{max-width:none;width:100%}
+}
+@media(max-height:560px) and (min-width:701px){
+ #roster[data-step="map"] .map-card .circuit-art{aspect-ratio:2.4}
+ #roster[data-step="map"] .map-card .circuit-copy{padding:10px 12px 6px}
+ .circuit-name{font-size:21px;min-height:0}
+ #roster[data-step="map"] .map-card .track-outline{height:32px;width:68px}
+}
+@media(prefers-reduced-motion:reduce){#roster[data-step="map"] .map-card,.circuit-art img{transition:none}#roster[data-step="map"] .map-card:hover{transform:none}#roster[data-step="map"] .map-card:hover img{transform:none}}

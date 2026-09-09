@@ -376,7 +376,82 @@ function buildKart(div){
     const cap=add(new THREE.TorusGeometry(.132,.018,6,20),['hybrid','helix'].includes(div.id)?metal:panel,arms[i],'shoulder-seam');cap.rotation.y=Math.PI/2;cap.position.x=i===0?-.03:.03;
   }
   for(const w of wheels){const spokes=[];for(let j=0;j<5;j++){const a=j/5*Math.PI*2;const g=new THREE.BoxGeometry(.035,.055,.27);g.translate(0,0,.18);g.rotateX(a);g.translate(w.side*.249,0,0);spokes.push(g);}const g=mergeKartGeometry(spokes);spokes.forEach(p=>p.dispose());add(g,metal,w.spin,'machined-wheel-spokes');}
-  batchKartBody(body);resolveKartRig(root);return root;
+  batchKartBody(body);finishKartCockpit(root);resolveKartRig(root);return root;
+}
+
+// Contact constraints run AFTER the authored clips: shoulders remain attached to the
+// suit while the original Blender sleeve surface bends to the moving steering grips.
+// Each instance owns only its two deforming meshes; shared GLB templates stay immutable.
+function prepareKartContactRig(root){
+  const ud=root.userData;if(ud.contactRig||!ud.arms||!THREE.Vector3)return;
+  const arms=ud.arms.map((arm,i)=>{
+    const mesh=arm.getObjectByName(arm.name+'-mesh');
+    if(!mesh||!mesh.geometry.attributes.position)return null;
+    mesh.geometry=mesh.geometry.clone();delete mesh.geometry.userData.blenderShared;
+    const g=mesh.geometry;
+    // Optimized GLBs may interleave attributes. Give mutable streams their own
+    // buffers before editing; touching an interleaved array corrupts UVs/normals.
+    for(const key of ['position','normal']){const source=g.attributes[key];if(!source)continue;
+      const values=new Float32Array(source.count*3);for(let j=0;j<source.count;j++){values[j*3]=source.getX(j);values[j*3+1]=source.getY(j);values[j*3+2]=source.getZ(j);}
+      g.setAttribute(key,new THREE.BufferAttribute(values,3));
+    }
+    const p=g.attributes.position,n=g.attributes.normal;
+    const glove=arm.getObjectByName('racing-glove');
+    const wrist=glove?glove.position.clone():new THREE.Vector3(i?-.065:.065,-.425,-.715);
+    const accessories=arm.children.filter(o=>/racing-glove|glove-knuckle/.test(o.name)).map(node=>({node,rest:node.position.clone()}));
+    const weights=new Float32Array(p.count),derivatives=new Float32Array(p.count);
+    for(let j=0;j<p.count;j++){const t=Math.max(0,Math.min(1,(-p.getZ(j)-.12)/.56));weights[j]=t*t*(3-2*t);derivatives[j]=-6*t*(1-t)/.56;}
+    p.setUsage(THREE.DynamicDrawUsage);if(n)n.setUsage(THREE.DynamicDrawUsage);
+    // Deformation stays within the cockpit; conservative bounds avoid per-frame scans.
+    g.computeBoundingSphere();g.boundingSphere.radius+=.8;
+    return {arm,mesh,wrist,accessories,rest:new Float32Array(p.array),normal:n?new Float32Array(n.array):null,weights,derivatives,delta:new THREE.Vector3(),grip:new THREE.Vector3(i?.244:-.244,.052,.018)};
+  });
+  ud.contactRig={arms};
+}
+function constrainKartHands(root,state){
+  const ud=root.userData,rig=ud.contactRig;if(!rig||!ud.steeringWheel)return;
+  root.updateMatrixWorld(true);
+  for(let i=0;i<rig.arms.length;i++){
+    const a=rig.arms[i];if(!a)continue;
+    // Celebration deliberately releases the right hand; spinout releases both.
+    const release=state==='spinout'||state==='victory'&&i===1;
+    a.delta.copy(a.grip);ud.steeringWheel.localToWorld(a.delta);a.arm.worldToLocal(a.delta);a.delta.sub(a.wrist);
+    if(release)a.delta.set(0,0,0);
+    const p=a.mesh.geometry.attributes.position,n=a.mesh.geometry.attributes.normal,d=a.delta;
+    for(let j=0;j<p.count;j++){
+      const k=j*3,w=a.weights[j];p.array[k]=a.rest[k]+d.x*w;p.array[k+1]=a.rest[k+1]+d.y*w;p.array[k+2]=a.rest[k+2]+d.z*w;
+      if(n&&a.normal){const nx=a.normal[k],ny=a.normal[k+1],nz=a.normal[k+2],dw=a.derivatives[j];
+        const z=nz-dw*(d.x*nx+d.y*ny+d.z*nz)/Math.max(.15,1+d.z*dw),len=Math.hypot(nx,ny,z)||1;
+        n.array[k]=nx/len;n.array[k+1]=ny/len;n.array[k+2]=z/len;}
+    }
+    p.needsUpdate=true;if(n)n.needsUpdate=true;
+    for(const part of a.accessories)part.node.position.copy(part.rest).add(d);
+  }
+}
+// Seat shell, cushion and pedal plates provide visible mechanical points of contact.
+function finishKartCockpit(root){
+  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;
+  const fabric=new THREE.MeshStandardMaterial({color:0x192029,roughness:.91,metalness:0});
+  const trim=new THREE.MeshStandardMaterial({color:0x434b54,roughness:.34,metalness:.7});
+  const cockpit=new THREE.Group();cockpit.name='cockpit-contact-hardware';ud.body.add(cockpit);
+  const add=(name,g,m,x,y,z)=>{const o=new THREE.Mesh(g,m);o.name=name;o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;cockpit.add(o);return o;};
+  const cushion=add('seat-cushion',new THREE.SphereGeometry(1,20,12),fabric,0,.96,.40);cushion.scale.set(.37,.095,.39);
+  const back=add('seat-back-shell',new THREE.SphereGeometry(1,20,12),fabric,0,1.47,.67);back.scale.set(.41,.58,.105);back.rotation.x=-.12;
+  for(const side of[-1,1]){
+    const bolster=add('seat-side-bolster',new THREE.SphereGeometry(1,16,10),fabric,side*.36,1.23,.50);bolster.scale.set(.07,.28,.25);
+    const pedal=add('pedal-plate',new THREE.BoxGeometry(.19,.025,.24),trim,side*.245,.41,-.65);pedal.rotation.x=-.28;
+  }
+  // All six static pieces share two material batches: two draws per racer.
+  batchKartBody(cockpit);
+  for(const mesh of cockpit.children)mesh.name=mesh.material===fabric?'seat-back-shell':'pedal-plate';
+  // Shipping GLBs do not carry the procedural fallback's shadow footprint.
+  // Share its texture so tyres remain grounded on low-shadow mobile presets too.
+  if(typeof TEX!=='undefined'&&TEX.contactShadow&&!root.getObjectByName('contact-shadow')){
+    if(!KART_GEO.contactFootprint)KART_GEO.contactFootprint=new THREE.PlaneGeometry(3.9,5.4);
+    const contact=new THREE.Mesh(KART_GEO.contactFootprint,new THREE.MeshBasicMaterial({map:TEX.contactShadow,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1}));
+    contact.name='contact-shadow';contact.rotation.x=-Math.PI/2;contact.position.y=.035;root.add(contact);
+  }
+  prepareKartContactRig(root);
 }
 
 // ---------- Kart rig animation ----------
@@ -458,7 +533,7 @@ function animateKart(r,dt,ag=0){
   const speed=r.speed,drift=r.drifting?r.driftDir||0:0,spinning=r.spin>0,wheelspin=r.wheelspin>0,boosting=r.boost>0,braking=!!r.brake&&speed>1;
   const finished=!!r.finished,victory=finished&&r.rank===1,defeat=finished&&!victory,hitting=r.hitCd>0&&!spinning;
   // --- root: track placement, drift yaw, hop (unchanged presentation contract)
-  r.wheelRot+=speed*dt/.48;
+  r.wheelRot+=speed*dt/.61;
   const spinYaw=spinning?(1-r.spin/1.1)*Math.PI*4:0;
   const driftYaw=r.drifting?r.driftDir*.55+r.steer*.15:r.steer*.12;
   r.visualYaw=lerp(r.visualYaw,driftYaw,1-Math.exp(-dt*8));
@@ -486,7 +561,7 @@ function animateKart(r,dt,ag=0){
   // --- wheels: spin, steer, anti-grav fold, glow
   a.overspin=wheelspin?a.overspin+dt*38:a.overspin*Math.exp(-dt*4);
   for(let i=0;i<4;i++){const w=ud.wheels[i];if(!w)continue;
-    w.spin.rotation.x=r.wheelRot+(i>=2?a.overspin:0);w.pivot.rotation.y=i<2?r.steer*.38:0;
+    w.spin.rotation.x=r.wheelRot+(i>=2?a.overspin:0);w.pivot.rotation.y=i<2?Math.atan2(2.53*r.steer,6.65-w.side*r.steer*1.23):0;
     a.fold[i]=ease(a.fold[i],w.side*ag*Math.PI/2,dt,5);w.pivot.rotation.z=a.fold[i];
     w.glow.material.emissiveIntensity=.65+ag*1.0;w.glow.material.opacity=1;}
   ud.under.material.emissiveIntensity=ag*2.4;
@@ -514,13 +589,14 @@ function animateKart(r,dt,ag=0){
   // --- state clips (additive, crossfaded)
   const state=victory?'victory':defeat?'defeat':spinning?'spinout':hitting?'hit':boosting?'boost':r.drifting?'drift':idle?'idle':'drive';
   applyKartClips(ud,state,dt);
+  if(typeof constrainKartHands==='function')constrainKartHands(r.mesh,state);
 }
 // Turntable presentation: heave, settling suspension, breathing pilot who follows the showroom camera.
 function animateShowroomKart(kart,time,dt,yaw){
   const ud=kart.userData;if(!ud||!ud.wheels)return;
   const a=kartAnimState(ud);if(!ud.clipNodes)resolveKartRig(kart);
   if(!a.settled){a.settled=true;for(let i=0;i<4;i++)a.suspV[i]=1.6;a.heaveV=-.8;}
-  if(yaw!==undefined)kart.rotation.y=yaw;kart.position.y=.05+Math.sin(time*1.5)*.045;resetClipNodes(ud);
+  if(yaw!==undefined)kart.rotation.y=yaw;kart.position.y=.02;resetClipNodes(ud);
   kartWheelSprings(ud,a,dt,0,0,0,0,0,0,0);
   {const h=Math.min(dt,.033);a.heaveV+=(-420*a.heave-41*a.heaveV)*h;a.heave+=a.heaveV*h;}
   kartBodyPose(ud.body,Math.sin(time*.9)*.004,0,Math.sin(time*1.3)*.005,a.heave,0);
@@ -537,6 +613,7 @@ function animateShowroomKart(kart,time,dt,yaw){
   if(ud.arms){ud.arms[0].rotation.set(-a.wheel*.28,0,0);ud.arms[1].rotation.set(a.wheel*.28,0,0);}
   ud.halo.rotation.y+=dt*2.5;ud.star.rotation.y+=dt*1.5;
   applyKartClips(ud,'idle',dt);
+  if(typeof constrainKartHands==='function')constrainKartHands(kart,'idle');
 }
 
 // ---------- Item / token pickups ----------

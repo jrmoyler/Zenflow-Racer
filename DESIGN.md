@@ -16,3 +16,8 @@ Check title → selection → race → pause → results and settings keyboard f
 
 ## Wave 2 loadout
 Twenty selectable divisions retain twelve-kart race grids. A compact Loadout action below the signature power opens an opaque equipment drawer with searchable add-ons, cooldowns and gameplay descriptions. Equip one of all 24 source powers per racer, or leave the slot empty. The original character → circuit → race flow remains mandatory. F / left-stick press / ADD-ON casts independently of Q / Y / POWER. The loadout dialog traps focus, returns it on close, and uses 44px controls with a scrollable list on compact displays. Contact animations use simulation-driven Anime.js envelopes so pausing freezes them.
+
+## Connected racers and circuit cards
+Racer hands are constrained to the steering rim after the additive clips, with the original sleeve geometry bending and shoulder attachment retained. Victory and spinout can intentionally release grips. Loaded karts receive contact shadows and two batched cockpit assemblies. Skies use animated cloud layers and tiered shader cost (desktop/mobile/LOWFX), with dimensional horizon ridges and landmark foundations.
+
+The three commissioned circuit-card illustrations in `assets/map-cards/` are explicitly embedded in the selection menu at the user's request. This is an exception to the previous menu-art restriction: reference sheets remain excluded from runtime, and all racing scenery stays playable 3D. Track-outline canvases still trace the actual circuit spline. The equipment dock appears before the showroom and remains available in both character and circuit setup; one bonus power is saved per division.
