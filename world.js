@@ -49,18 +49,24 @@ function buildSky(){
   const noiseScale=(1.-Math.pow(.48,4))/(1.-Math.pow(.48,octaves));
   const mat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     defines:{SKY_CLOUD_OCTAVES:octaves,SKY_NOISE_SCALE:noiseScale.toFixed(6),SKY_CLOUD_LIGHT_PROBE:(!LOWFX&&!MOBILEFX)?1:0,SKY_SECOND_DECK:LOWFX?0:1},
-    uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)},storm:{value:activeMap.id==='stormforge'?1:0},cloudCover:{value:activeMap.id==='canopy'?.54:.63}},
+    uniforms:{time:zenWorldTime,skyTop:{value:new THREE.Color(activeMap.skyTop)},skyHorizon:{value:new THREE.Color(activeMap.skyHorizon)},storm:{value:activeMap.id==='stormforge'?1:0},cloudCover:{value:activeMap.id==='canopy'?.54:.63},solarDirection:{value:typeof SOLAR_DIRECTION!=='undefined'?SOLAR_DIRECTION:new THREE.Vector3(-90,140,-60).normalize()}},
     vertexShader:`varying vec3 direction;void main(){direction=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;uniform float storm;uniform float cloudCover;
+    fragmentShader:`varying vec3 direction;uniform float time;uniform vec3 skyTop;uniform vec3 skyHorizon;uniform float storm;uniform float cloudCover;uniform vec3 solarDirection;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
 float cloud(vec2 p){float n=0.;float a=.55;for(int i=0;i<SKY_CLOUD_OCTAVES;i++){n+=a*noise(p);p=mat2(1.6,-1.2,1.2,1.6)*p+vec2(13.2,7.8);a*=.48;}return n*SKY_NOISE_SCALE;}
 void main(){
-vec3 d=normalize(direction),sunDir=normalize(vec3(-180.,220.,-120.));
+vec3 d=normalize(direction),sunDir=normalize(solarDirection);
 float h=smoothstep(-.10,.85,d.y);vec3 sky=mix(skyHorizon,skyTop,h);
 sky=mix(skyHorizon*.76,sky,smoothstep(-.55,.04,d.y));
 float mu=max(0.,dot(d,sunDir));
-sky+=vec3(1.,.84,.63)*(pow(mu,420.)*1.7+pow(mu,9.)*.25)*(1.-storm*.65);
+// Finite solar disc, limb darkening and forward Mie scattering. Angular radius
+// is art-directed to .55 degrees to remain legible on phones; no camera-facing mesh.
+float angle=acos(clamp(mu,0.,1.));
+float disc=1.-smoothstep(.0088,.0104,angle);
+float limb=.45+.55*sqrt(max(0.,1.-pow(angle/.0104,2.)));
+float mie=.012/pow(max(.025,1.-.975*mu),1.35);
+sky+=vec3(1.,.88,.68)*(disc*limb*12.+mie)*(1.-storm*.48);
 // Perspective-projected cloud decks: distant banks compress naturally into haze.
 vec2 plane=d.xz/max(.11,d.y+.14);vec2 wind=vec2(time*.007,time*.003);
 float lower=cloud(plane*1.3+wind);
@@ -89,7 +95,8 @@ gl_FragColor=vec4(sky,1.);
 #include <tonemapping_fragment>
 #include <encodings_fragment>
 }`});
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat));
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(1100,36,18),mat);dome.name="solar-atmosphere";dome.frustumCulled=false;
+  dome.onBeforeRender=(_renderer,_scene,view)=>{dome.position.copy(view.position);dome.updateMatrixWorld();};scene.add(dome);
   if(!FALLBACK_GRAPHICS){refreshMapEnvironment=()=>{scene.environment=createSurfaceEnvironment(renderer,activeMap);};refreshMapEnvironment();}
   return mat;
 }
@@ -327,7 +334,7 @@ function buildEnvironment(){
     // Irregular pale stepping stones on the moss, grouped around the pond.
     const stones=[];for(let k=0;k<8;k++){const g=rockGeo(n*19+k);g.scale(.8,.18,.65);g.translate(island.x+Math.cos(k*.4)*island.r*.5,island.y+.15,island.z+Math.sin(k*.4)*island.r*.38);stones.push(g);}const stoneGeo=mergeGeos(stones);stones.forEach(g=>g.dispose());world.add(new THREE.Mesh(stoneGeo,stoneMat));
   });
-  function instanceTrees(spots,isBonsai){if(!spots.length)return;const can=new THREE.InstancedMesh(isBonsai?greenGeo:pinkGeo,isBonsai?pinkMat:blossomMat,spots.length),tr=new THREE.InstancedMesh(trunk,barkMat,spots.length),matrix=new THREE.Matrix4(),q=new THREE.Quaternion(),axis=new THREE.Vector3(0,1,0);spots.forEach((s,i)=>{q.setFromAxisAngle(axis,s.rot);matrix.compose(new THREE.Vector3(s.x,s.y,s.z),q,new THREE.Vector3(s.s,s.s*(isBonsai?.72:1),s.s));tr.setMatrixAt(i,matrix);matrix.compose(new THREE.Vector3(s.x,s.y+s.s*(isBonsai?2.6:3.6),s.z),q,new THREE.Vector3(s.s*(isBonsai?1.25:1),s.s*(isBonsai?.38:1),s.s));can.setMatrixAt(i,matrix);});can.castShadow=true;tr.castShadow=true;world.add(can,tr);}
+  function instanceTrees(spots,isBonsai){if(!spots.length)return;const can=new THREE.InstancedMesh(isBonsai?greenGeo:pinkGeo,isBonsai?pinkMat:blossomMat,spots.length),tr=new THREE.InstancedMesh(trunk,barkMat,spots.length),matrix=new THREE.Matrix4(),q=new THREE.Quaternion(),axis=new THREE.Vector3(0,1,0);spots.forEach((s,i)=>{q.setFromAxisAngle(axis,s.rot);matrix.compose(new THREE.Vector3(s.x,s.y,s.z),q,new THREE.Vector3(s.s,s.s*(isBonsai?.72:1),s.s));tr.setMatrixAt(i,matrix);matrix.compose(new THREE.Vector3(s.x,s.y+s.s*(isBonsai?2.6:3.6),s.z),q,new THREE.Vector3(s.s*(isBonsai?1.25:1),s.s*(isBonsai?.38:1),s.s));can.setMatrixAt(i,matrix);});can.geometry.userData.wind=true;can.castShadow=true;tr.castShadow=true;world.add(can,tr);}
   // Planted terraces frame the road at driver height. No vegetation enters the lanes.
   for(let k=0;k<50;k++){
     const u=k/50+.009;if(trackAG(u)>.15)continue;
@@ -349,6 +356,7 @@ function buildEnvironment(){
   for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);const originals=new Set(meshes.map(mesh=>mesh.geometry));meshes.forEach(mesh=>mesh.parent.remove(mesh));originals.forEach(g=>g.dispose());geometries.forEach(g=>g.dispose());world.add(merged);}
   buildRaceVenue();
   if(typeof buildImmersion==='function')buildImmersion();
+  if(typeof buildLivingWorld==='function')buildLivingWorld();
 
 }
 
@@ -497,7 +505,7 @@ function buildCircuitArchitecture(){
     for(let j=0;j<12;j++){
       const a=j*Math.PI/6;mapTube([[Math.cos(a)*19,-1,Math.sin(a)*19],[Math.cos(a)*9,5,Math.sin(a)*9],[Math.cos(a)*5,21,Math.sin(a)*5]],1.6,bark,tree,14);
       const y=40+j%4*7,points=[[0,y-10,0],[Math.cos(a)*11,y,Math.sin(a)*11],[Math.cos(a)*28,y+8,Math.sin(a)*28]];mapTube(points,1.4,bark,tree,18);
-      const crown=mapMesh(treeCanopyGeo(800+j,[0x25482b,0x82a84b]),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,side:THREE.DoubleSide}),tree,Math.cos(a)*23,y+7,Math.sin(a)*23);crown.scale.set(3.5,1.6,3.5);
+      const crown=mapMesh(treeCanopyGeo(800+j,[0x25482b,0x82a84b]),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,side:THREE.DoubleSide}),tree,Math.cos(a)*23,y+7,Math.sin(a)*23);crown.scale.set(3.5,1.6,3.5);crown.geometry.userData.wind=true;
     }
     for(const y of[26,39,52]){mapMesh(new THREE.CylinderGeometry(11.5,7.5,2.2,40),metal,tree,0,y,0);const rail=mapMesh(new THREE.TorusGeometry(11.4,.15,6,48),cyan,tree,0,y+1.8,0);rail.rotation.x=Math.PI/2;}
     // Far below the circuit: a rippled turquoise sea instead of an empty void.

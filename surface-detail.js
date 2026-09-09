@@ -27,6 +27,8 @@ function buildSurfaceTextures(){
   surfaceTexture('roadDetail',(u,v,x,y)=>{const seam=(v<.004||u<.002)?145:0;const k=244-seam-hash2(x,y)*9;return [k,k,k];});
   surfaceTexture('roadRoughness',(u,v,x,y)=>{const wear=Math.exp(-Math.pow((u-.28)*17,2))+Math.exp(-Math.pow((u-.72)*17,2));const k=140-wear*30+hash2(x,y)*15;return [k,k,k];},false);
   surfaceTexture('mossColor',(u,v,x,y)=>{const n=noise(u,v)*.5+.5,g=hash2(x,y);return [41+n*40+g*12,66+n*66+g*18,23+n*27];});
+  surfaceTexture('fabricWeave',(u,v,x,y)=>{const k=225+((x%4<2)===(y%4<2)?12:-12);return [k,k,k];});
+  surfaceTexture('metalGrain',(u,v,x,y)=>{const k=120+hash2(x,y)*20+Math.sin(v*600)*8;return [k,k,k];},false);
   surfaceTexture('contactShadow',(u,v)=>{const d=Math.hypot((u-.5)*2,(v-.5)*2);return [8,17,30,Math.max(0,1-d)*130];},false,64);
 }
 

@@ -21,7 +21,8 @@ function renderReconstructionReview(){
   }else if(r.mode==='map'){
    if(!MAPS.some(m=>m.id===r.asset))r.asset='cherry';selectMap(r.asset);buildPickups();
    const u=r.view==='rear'?.55:r.view==='side'?.32:.045;
-   trackPoint(u,0,4,camera.position);const target=trackPoint(u+.025,0,2,new THREE.Vector3());camera.lookAt(target);camera.fov=65;camera.updateProjectionMatrix();
+   trackPoint(u,0,4,camera.position);const target=trackPoint(u+.025,0,2,new THREE.Vector3());camera.lookAt(target);if(r.view==='sun'){camera.position.set(25,25,20);camera.lookAt(camera.position.clone().addScaledVector(SOLAR_DIRECTION,100));}
+   camera.fov=r.view==='sun'?48:65;camera.updateProjectionMatrix();
    r.scene=scene;
   }else{
    r.scene=new THREE.Scene();r.scene.background=new THREE.Color(0xc7daeb);r.scene.environment=scene.environment;
