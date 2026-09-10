@@ -155,11 +155,21 @@ function stepRacer(r,dt){
   // Coasting, braking and drifting bleed toward the capped speed too, so a snare
   // bites the instant it lands instead of waiting for the next throttle input.
   if(slowed&&r.speed>max&&r.wheelspin<=0)r.speed=Math.max(max,r.speed-(r.speed-max)*SLOW_BLEED*dt);
+  // Resolve gravity along the banked road only during live driving. Brakes hold
+  // a stopped kart; countdown and anti-gravity sections cannot roll the grid.
+  if(game.state!=='countdown'&&r.spin<=0&&r.wheelspin<=0){
+    trackTan(r.u,_v1);
+    if(Math.abs(r.speed)>.2||r.throttle)r.speed-=9.81*_v1.y*(1-ag)*dt;
+    r.speed=clamp(r.speed,-9,r.maxSpeed*1.15);
+  }
   // corner scrub (turning bleeds speed unless drifting)
   if(!r.drifting&&r.spin<=0)r.speed*=1-Math.abs(r.theta)*1.6*dt*(r.predict>0?.7:1);
   // --- lateral
   const curv=trackCurv(r.u);
   let latVel=r.speed*Math.sin(r.theta) - curv*r.speed*r.speed*.05*(r.drifting?.55:1);
+  // Banked roads pull toward their low side; anti-gravity cancels this force.
+  trackRight(r.u,_v2);
+  latVel-=9.81*_v2.y*(1-ag)*.12*Math.min(1,Math.abs(r.speed)/8);
   r.lat+=latVel*dt;
   const W=TRACK_W/2-0.9,edgeGrip=r.div.id==='gaia'&&r.specialActive>0?.35:1;
   if(Math.abs(r.lat)>W){const side=Math.sign(r.lat);r.lat=side*W;
@@ -173,7 +183,7 @@ function stepRacer(r,dt){
   r.wallCd-=dt;
   if(r.anchor>0&&r.spin<=0)r.speed=clamp(r.speed,r.anchorSpeed-2,r.anchorSpeed+2);
   // --- advance along track
-  advanceRaceDistance(r,r.speed*dt/track.len,dt);
+  advanceRaceDistance(r,r.speed*Math.cos(r.theta)*dt/track.len,dt);
   // --- timers
   if(r.spin>0)r.spin-=dt;if(r.shield>0)r.shield-=dt;if(r.hitCd>0)r.hitCd-=dt;if(r.tripleCd>0)r.tripleCd-=dt;
   // --- roulette
@@ -227,10 +237,20 @@ function stepWorld(dt){
   const R=game.racers;
   // kart vs kart
   for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0||a.finished||b.finished)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
-    if(Math.abs(ds)<2.6&&Math.abs(dl)<1.9){if(a.ram>0)hitRacer(b,'ram',a);if(b.ram>0)hitRacer(a,'ram',b);const push=(1.9-Math.abs(dl))*.5,sgn=dl>=0?1:-1;const wa=a.weight,wb=b.weight;if(!(a.anchor>0))a.lat-=sgn*push*wb/(wa+wb);if(!(b.anchor>0))b.lat+=sgn*push*wa/(wa+wb);
+    if(Math.abs(ds)<2.6&&Math.abs(dl)<1.9){if(a.ram>0)hitRacer(b,'ram',a);if(b.ram>0)hitRacer(a,'ram',b);const push=1.9-Math.abs(dl),sgn=dl>=0?1:-1;
+      const invA=a.anchor>0?0:1/a.weight,invB=b.anchor>0?0:1/b.weight,total=invA+invB;
+      if(total>0){a.lat-=sgn*push*invA/total;b.lat+=sgn*push*invB/total;}
+      const boundary=TRACK_W/2-.9;
+      a.lat=clamp(a.lat,-boundary,boundary);b.lat=clamp(b.lat,-boundary,boundary);
       if(a.perimeter>0){if(!(b.anchor>0))b.lat=clamp(b.lat+sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(b,.5,a);}
       if(b.perimeter>0){if(!(a.anchor>0))a.lat=clamp(a.lat-sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(a,.5,b);}
-      if(Math.abs(ds)<1.2){const front=ds>0?b:a,back=ds>0?a:b;if(!(back.anchor>0))back.speed*=.94;if(!(front.anchor>0))front.speed=Math.min(front.speed+1.5,front.maxSpeed*1.1);}
+      // Only closing velocity creates an impulse. Equal-speed overlap cannot
+      // manufacture acceleration on every simulation tick.
+      const front=ds>=0?b:a,back=ds>=0?a:b,closing=back.speed-front.speed;
+      if(closing>0&&total>0){const impulse=closing*.82/total;
+        if(!(back.anchor>0))back.speed-=impulse/back.weight;
+        if(!(front.anchor>0))front.speed+=impulse/front.weight;
+      }
       if(a.isPlayer||b.isPlayer){if(Math.abs(dl)<1.2&&game.trauma<.2)game.trauma+=.08;}}}
   // item boxes / tokens
   itemBoxes.forEach(b=>{if(b.t>0){b.t-=dt;if(b.t<=0)b.mesh.visible=true;return;}
