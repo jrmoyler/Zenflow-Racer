@@ -152,3 +152,10 @@ button:disabled{cursor:not-allowed;opacity:.5}button:not(:disabled):active{trans
  #roster[data-step="map"] .map-card .track-outline{height:32px;width:68px}
 }
 @media(prefers-reduced-motion:reduce){#roster[data-step="map"] .map-card,.circuit-art img{transition:none}#roster[data-step="map"] .map-card:hover{transform:none}#roster[data-step="map"] .map-card:hover img{transform:none}}
+
+/* Size setup around its content: the confirm action must stay above the roster rail. */
+#roster .showroom{flex:0 0 auto;height:auto;min-height:min-content;align-items:stretch}
+#roster .director-panel{height:auto;align-self:stretch}
+#roster .selector-heading,#roster .menu-tools,#roster .head,#roster #footer{flex-shrink:0}
+#grid .portrait{pointer-events:none}
+@media(min-width:601px){#roster[data-step="character"] .showroom{grid-template-rows:auto}#roster[data-step="character"] #kart-preview{min-height:380px}}

@@ -26,8 +26,7 @@ function renderReconstructionReview(){
    r.scene=scene;
   }else{
    r.scene=new THREE.Scene();r.scene.background=new THREE.Color(0xc7daeb);r.scene.environment=scene.environment;
-   r.scene.add(new THREE.HemisphereLight(0xe9f6ff,0x647b8f,.75));
-   const key=new THREE.DirectionalLight(0xfff0df,1.6);key.position.set(-4,7,-5);r.scene.add(key);
+   copyCircuitLights(r.scene);
    const fill=new THREE.DirectionalLight(0xb2eaff,.7);fill.position.set(5,3,1);r.scene.add(fill);
    r.object=r.mode==='kart'?buildKart(ROSTER.find(d=>d.id===r.asset)||ROSTER[0]):buildInventoryModel(r.asset);r.scene.add(r.object);
    const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0xc4d8e9,roughness:.28,metalness:.18}));ground.rotation.x=-Math.PI/2;ground.position.y=r.mode==='kart'?-.025:-1;ground.receiveShadow=true;r.scene.add(ground);

@@ -359,8 +359,10 @@ function buildEnvironment(){
   for(const [material,meshes] of batches){if(meshes.length<3)continue;const geometries=meshes.map(mesh=>mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));const merged=new THREE.Mesh(mergeGeos(geometries),material);merged.castShadow=meshes.some(m=>m.castShadow);merged.receiveShadow=meshes.some(m=>m.receiveShadow);const originals=new Set(meshes.map(mesh=>mesh.geometry));meshes.forEach(mesh=>mesh.parent.remove(mesh));originals.forEach(g=>g.dispose());geometries.forEach(g=>g.dispose());world.add(merged);}
   buildRaceVenue();
   if(typeof buildImmersion==='function')buildImmersion();
-  if(typeof buildLivingWorld==='function')buildLivingWorld();
   if(typeof buildNaturalStonework==='function')buildNaturalStonework();
+  if(typeof buildTerrainPlanting==='function')buildTerrainPlanting();
+  if(typeof buildLivingWorld==='function')buildLivingWorld();
+  if(typeof buildAudience==='function')buildAudience();
 
 }
 
@@ -554,6 +556,7 @@ function buildMapClouds(){
 // instanced by geometry/material, with opaque surfaces and deterministic crowds.
 // All placements use the real transported track frame, including elevated bends.
 function buildRaceVenue(){
+  if(typeof resetAudience==='function')resetAudience();
   const root=new THREE.Group();root.name='race-venue';world.add(root);
   const industrial=activeMap.id==='stormforge',garden=activeMap.id==='canopy';
   const materials={
@@ -600,8 +603,9 @@ function buildRaceVenue(){
         const z=-11.5+seat*(MOBILEFX?1.7:1.1),h=.8+random()*.28;
         const palette=[0xc94849,0xebb657,0x498ab0,0xede5d0,0x46644c,0x9478ac];
         const color=palette[Math.floor(random()*palette.length)];
-        part(base,'box','people',x,y+.65,z,.43,h,.38,0,color);
-        part(base,'head','people',x,y+1.27,z,.36,.43,.36,0,[0xd6a27c,0x956447,0x613d2d][seat%3]);spectators++;
+        if(typeof addAudienceSeat==='function')addAudienceSeat(base,x,y+.36,z,side,color,stands*200+row*24+seat);
+        else {part(base,'box','people',x,y+.65,z,.43,h,.38,0,color);part(base,'head','people',x,y+1.27,z,.36,.43,.36,0,[0xd6a27c,0x956447,0x613d2d][seat%3]);}
+        spectators++;
       }
     }
     for(const z of[-12,12])for(const x of[-5.6,5.6])part(base,'post','structure',x,4.2,z,.24,9,.24);
@@ -722,9 +726,8 @@ function buildRaceVenue(){
     }
     for(let visitor=0;visitor<5;visitor++){
       const z=-7+visitor*3.1,x=.8+random();
-      part(base,'box','people',x,.95,z,.48,.9,.36,0,[0xc96a55,0x567795,0xe1ba72][visitor%3]);
-      part(base,'head','people',x,1.6,z,.38,.44,.38,0,0xb78464);
-      for(const leg of[-1,1])part(base,'post','dark',x+leg*.13,.32,z,.15,.65,.15);
+      if(typeof addAudienceSeat==='function')addAudienceSeat(base,x,.84,z,side,[0xc96a55,0x567795,0xe1ba72][visitor%3],1000+districts*5+visitor,true);
+      else {part(base,'box','people',x,.95,z,.48,.9,.36,0,[0xc96a55,0x567795,0xe1ba72][visitor%3]);part(base,'head','people',x,1.6,z,.38,.44,.38,0,0xb78464);for(const leg of[-1,1])part(base,'post','dark',x+leg*.13,.32,z,.15,.65,.15);}
       spectators++;
     }
   }

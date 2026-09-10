@@ -1,6 +1,6 @@
 # ZenFlow Racer — Three Circuit Edition
 
-Reference-driven floating-island arcade racer with three selectable circuits, twelve distinct division chassis, twelve powers, and six illustrated items. See [abilities](docs/abilities.md), [verification](docs/upgrade-verification.md) and the original visual references in references/.
+Reference-driven floating-island arcade racer with three selectable circuits, twenty distinct division chassis, twenty signature powers, 24 equippable add-ons, and six items. See [abilities](docs/abilities.md), [verification](docs/upgrade-verification.md) and the original visual references in references/.
 
 ## Play
 Start from the illustrated title menu. Choose Select Division to pick a director, circuit, and difficulty, then Enter Race. The character select shows the selected director's actual race chassis on a 360° holographic turntable: it turns continuously, can be dragged to spin, and the arrow buttons or keyboard arrows step through the roster. Twelve directors compete across three complete laps. Hop then hold to drift and release for a surge boost; tuck in behind rivals for a slipstream; collect tokens and items. Results list best lap and gap to the leader; Next Circuit cycles the three maps.

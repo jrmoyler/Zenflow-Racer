@@ -9,6 +9,7 @@ function raceRecordKey(division,difficulty,mapId=chosenMapId){return mapId+'-'+d
 function chooseMap(id){
   if(typeof MAPS==='undefined'||!MAPS.some(m=>m.id===id)||!['boot','roster','title','results'].includes(game.state))return false;
   chosenMapId=id;saved.map=id;persist();updateBestTime();
+  if(typeof selectMap==='function'&&selectMap(id))miniBounds=null;
   if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('mapselect',{detail:{id,map:MAPS.find(m=>m.id===id)}}));
   return true;
 }
@@ -747,10 +748,7 @@ const previewSpin={velocity:0,dragging:false,lastX:0,pointer:null};
 function disposePreview(){if(previewKart){previewScene.remove(previewKart);if(typeof disposeKart==='function')disposeKart(previewKart);previewKart=null;}}
 function buildPreviewStage(){
  previewScene=new THREE.Scene();previewScene.environment=scene.environment;previewCamera=new THREE.PerspectiveCamera(30,1,.1,80);
- previewScene.add(new THREE.HemisphereLight(0xdff6ff,0x55688c,.72));
- const key=new THREE.DirectionalLight(0xfff3ea,1.05);key.position.set(-4,7,-6);previewScene.add(key);
- const fill=new THREE.DirectionalLight(0xbfe9ff,.35);fill.position.set(6,3,4);previewScene.add(fill);
- const rim=new THREE.DirectionalLight(0x9effff,.9);rim.position.set(2,4,8);previewScene.add(rim);
+ const lights=copyCircuitLights(previewScene);
  previewStage=new THREE.Group();previewScene.add(previewStage);
  // Soft contact shadow keeps the chassis grounded on the pedestal.
  const c=mkCanvas(128,128),g=c.getContext('2d'),gr=g.createRadialGradient(64,64,4,64,64,64);gr.addColorStop(0,'rgba(8,18,40,.6)');gr.addColorStop(.55,'rgba(8,18,40,.2)');gr.addColorStop(1,'rgba(8,18,40,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
@@ -760,7 +758,7 @@ function buildPreviewStage(){
  const ring=new THREE.Mesh(new THREE.CylinderGeometry(2.81,2.81,.035,64,1,true),new THREE.MeshStandardMaterial({color:0xe85e43,roughness:.46,metalness:.55}));ring.position.y=-.12;previewStage.add(ring);
  const halo=new THREE.Group(),ticks=new THREE.Group();previewStage.add(halo,ticks);
  for(let i=0;i<8;i++){const bolt=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.014,6),new THREE.MeshStandardMaterial({color:0x92979c,roughness:.4,metalness:.8}));const a=i/8*Math.PI*2;bolt.position.set(Math.cos(a)*2.55,.001,Math.sin(a)*2.55);ticks.add(bolt);}
- previewStage.userData={ring,halo,disc,ticks,rim};
+ previewStage.userData={ring,halo,disc,ticks,lights};
 }
 function updateSelectedPreview(d){
  const power=typeof ABILITIES!=='undefined'?ABILITIES[d.id]:null;
@@ -775,7 +773,7 @@ function updateSelectedPreview(d){
  disposePreview();if(!previewScene)buildPreviewStage();
  previewKart=buildKart(d);previewScene.add(previewKart);
  const accent=new THREE.Color(d.id==='vector'?'#309DFF':d.acc);
- previewStage.userData.rim.color.set(0xfff4e7);
+
  previewStage.userData.ring.material.color.copy(accent);
  previewStage.userData.disc.material.color.set(0x24272b);
  previewSpin.velocity=0;
@@ -792,7 +790,7 @@ function renderSelectedPreview(dt){if(document.body?.classList.contains('title-o
  if(!previewSpin.dragging&&!matchMedia('(prefers-reduced-motion: reduce)').matches){previewAngle+=dt*(.58+previewSpin.velocity);previewSpin.velocity*=Math.exp(-dt*2.4);}
  if(typeof renderer.renderRosterPreview==='function'){renderer.renderRosterPreview(selected,rect,previewAngle);return;}
  if(!previewKart||!renderer.setScissor)return;
- previewScene.environment=scene.environment;
+ syncCircuitLights(previewScene,previewStage.userData.lights);
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  animateShowroomKart(previewKart,reduced?0:game.time,reduced?0:dt,previewAngle);
  const stage=previewStage.userData;stage.ticks.rotation.y=previewAngle;
@@ -801,8 +799,18 @@ function renderSelectedPreview(dt){if(document.body?.classList.contains('title-o
  const y=innerHeight-rect.bottom;renderer.setViewport(rect.left,y,rect.width,rect.height);renderer.setScissor(rect.left,y,rect.width,rect.height);renderer.setScissorTest(true);const oldAuto=renderer.autoClear;renderer.autoClear=false;renderer.clearDepth();renderer.render(previewScene,previewCamera);renderer.autoClear=oldAuto;renderer.setScissorTest(false);renderer.setViewport(0,0,innerWidth,innerHeight);
 }
 // Portraits share the main renderer and its reflection environment: no extra GPU context.
+function copyCircuitLights(target){
+ const lights=[hemi,sun,rim].map(source=>{const light=source.clone();light.castShadow=false;target.add(light);return light;});
+ syncCircuitLights(target,lights);return lights;
+}
+function syncCircuitLights(target,lights){
+ target.environment=scene.environment;
+ [hemi,sun,rim].forEach((source,i)=>{const light=lights[i];light.color.copy(source.color);light.intensity=source.intensity;light.position.copy(source.position);if(light.target){light.position.sub(source.target.position);light.target.position.set(0,0,0);}if(light.groundColor)light.groundColor.copy(source.groundColor);});
+}
 const directorPortraits=new Map();
+let directorPortraitMap=null;
 window.renderDirectorPortrait=function(d){
+ if(directorPortraitMap!==activeMap.id){directorPortraits.clear();renderer.portraits?.clear();directorPortraitMap=activeMap.id;}
  if(directorPortraits.has(d.id))return directorPortraits.get(d.id);
  if(typeof renderer.renderDirectorPortrait==='function'){const out=renderer.renderDirectorPortrait(d);directorPortraits.set(d.id,out);return out;}
  const target=new THREE.WebGLRenderTarget(160,180,{encoding:THREE.sRGBEncoding,depthBuffer:true});
@@ -810,7 +818,7 @@ window.renderDirectorPortrait=function(d){
  let kart;
  try{
   const stage=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,160/180,.1,30);kart=buildKart(d);
-  stage.environment=scene.environment;stage.add(kart);stage.add(new THREE.HemisphereLight(0xffffff,0x798cb0,.6));const key=new THREE.DirectionalLight(0xffffff,1.2);key.position.set(-2,5,-4);stage.add(key);
+  stage.add(kart);copyCircuitLights(stage);
   cam.position.set(2.5,2.4,-5.5);cam.lookAt(0,1.15,0);
   renderer.setRenderTarget(target);renderer.setViewport(0,0,160,180);renderer.setScissorTest(false);renderer.setClearColor(0xeff8fb,0);renderer.autoClear=true;renderer.render(stage,cam);
   const pixels=new Uint8Array(160*180*4);renderer.readRenderTargetPixels(target,0,0,160,180,pixels);

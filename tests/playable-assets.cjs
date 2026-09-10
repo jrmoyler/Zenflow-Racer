@@ -32,6 +32,8 @@ function assertClosedSkin(geometry,label){
   for(const state of ['idle','drive','drift','boost','spinout','hit','victory','defeat']){c.clipKart=a;c.clipState=state;run('resetClipNodes(clipKart.userData);sampleKartClip(clipState,.25,1,clipKart.userData)');a.updateMatrixWorld(true);a.traverse(o=>assert.ok(o.matrixWorld.elements.every(Number.isFinite),div.id+': '+state+' transform'));}
   run('resetClipNodes(clipKart.userData)');a.updateMatrixWorld(true);
   assertClosedSkin(a.getObjectByName('head-mesh').geometry,div.id+' head');
+  const paint=[];a.traverse(o=>{if(o.isMesh&&o.material?.name===a.getObjectByName('helmet-shell').material.name)paint.push(o.material);});assert.ok(paint.length>0,div.id+': painted body exists');
+  const expectedPaint=new THREE.Color(div.acc).convertSRGBToLinear();for(const m of paint)assert.ok(m.color.distanceTo?m.color.distanceTo(expectedPaint)<1e-6:m.color.equals(expectedPaint),div.id+': full body matches division paint');
   const skin=a.getObjectByName('head-mesh').material,templateSkin=run('KART_ASSETS.templates.get(div.id)').getObjectByName('head-mesh').material;
   assert.notEqual(skin,templateSkin,'lighting never mutates cached model material');assert.ok(skin.roughness>=.7&&skin.metalness<.05&&!(skin.clearcoat>0),div.id+': loaded suit remains matte fabric');
   for(const name of ['helmet-shell','helmet-mirrored-visor','suit-raised-collar','harness-buckle','racing-glove','racing-boot','steering-hub','shift-paddle','wheel-center-marker'])assert.ok(a.getObjectByName(name),div.id+': finished equipment '+name);

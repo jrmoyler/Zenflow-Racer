@@ -16,7 +16,9 @@
   function addPortraits(){
     grid.querySelectorAll('.card').forEach(card=>{
       let slot=card.querySelector('.portrait');if(!slot){slot=document.createElement('div');slot.className='portrait';slot.setAttribute('aria-hidden','true');card.prepend(slot);}
-      if(slot.childElementCount)return;
+      const mapId=typeof activeMap!=='undefined'?activeMap.id:'';
+      if(slot.childElementCount&&slot.dataset.map===mapId)return;
+      slot.replaceChildren();slot.dataset.map=mapId;
       if(typeof window.renderDirectorPortrait==='function'){
         const result=window.renderDirectorPortrait(ROSTER[Number(card.dataset.i)],Number(card.dataset.i));
         if(result instanceof HTMLElement)slot.appendChild(result);
@@ -31,6 +33,7 @@
   grid.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')requestAnimationFrame(updateCardDetails);});
   window.addEventListener('racerselect',()=>{updateCardDetails();addPortraits();});
   window.addEventListener('portraitsready',addPortraits);
+  window.addEventListener('mapselect',addPortraits);
   updateCardDetails();addPortraits();
   // Animate on actual entry, rather than spending the animation behind loading.
   const rosterScreen=document.getElementById('roster');
