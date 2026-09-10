@@ -38,3 +38,15 @@ for(const source of [water.fragmentShader,read('world.js'),read('immersion.js')]
 const fresnel=angle=>Math.pow(1-Math.abs(Math.cos(angle)),5);
 assert.equal(fresnel(0),0);assert.ok(fresnel(Math.PI*.49)>.8,'grazing view receives stronger water sheen');
 console.log('PASS HDR target chain, capability fallback, single display transform, exposure, failure restoration and water view response');
+
+// Previews copy the actual circuit light colors/intensities and world direction.
+{
+ const scene=new THREE.Scene(),hemi=new THREE.HemisphereLight(0xabcdff,0x61743a,.72),sun=new THREE.DirectionalLight(0xffbdaa,1.15),rim=new THREE.DirectionalLight(0xaacfff,.55);
+ sun.position.set(200,140,30);sun.target.position.set(290,0,90);rim.position.set(160,80,200);scene.environment=new THREE.Texture();
+ const ctx={THREE,scene,hemi,sun,rim};vm.createContext(ctx);const game=read('game.js');vm.runInContext(game.slice(game.indexOf('function copyCircuitLights'),game.indexOf('const directorPortraits')),ctx);
+ const target=new THREE.Scene();ctx.target=target;const lights=vm.runInContext('copyCircuitLights(target)',ctx);
+ assert.equal(target.environment,scene.environment);
+ for(const [i,source] of [hemi,sun,rim].entries()){assert.ok(lights[i].color.equals(source.color));assert.equal(lights[i].intensity,source.intensity);if(source.target)assert.ok(lights[i].position.clone().sub(lights[i].target.position).normalize().distanceTo(source.position.clone().sub(source.target.position).normalize())<1e-9);}
+ sun.color.setHex(0xaaffff);sun.intensity=.9;ctx.lights=lights;vm.runInContext('syncCircuitLights(target,lights)',ctx);assert.ok(lights[1].color.equals(sun.color));assert.equal(lights[1].intensity,.9);
+ console.log('PASS roster/showroom lighting: same circuit environment, colors, intensity and direction across moving sun targets');
+}

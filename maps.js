@@ -41,4 +41,5 @@ function updateMapScenery(dt){
   for(const rotor of mapSceneryAnimations)rotor.rotation.z+=dt*(rotor.userData.spinRate||.2);
   if(typeof updateImmersion==='function')updateImmersion(dt);
   if(typeof updateLivingWorld==='function')updateLivingWorld(dt);
+  if(typeof updateAudience==='function')updateAudience(dt);
 }

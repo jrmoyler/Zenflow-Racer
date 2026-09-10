@@ -26,15 +26,20 @@ async function loadKartAssets(onProgress=()=>{}){
  return KART_ASSETS.promise;
 }
 // Tune cloned shipping materials; template materials stay immutable across previews/races.
-function lightPlayableMaterial(material){
+function lightPlayableMaterial(material,div,roles={}){
  const m=material.clone();
  if(m.isMeshStandardMaterial||m.isMeshPhysicalMaterial){
   m.envMapIntensity=1.15;
   if(/anatomical-enamel/.test(m.name)){
    m.roughness=.17;m.metalness=.28;m.clearcoat=1;m.clearcoatRoughness=.1;
    m.emissive.copy(m.color);m.emissiveIntensity=.16;
-  }else if(/fairing-pearl/.test(m.name)){
-   m.roughness=.24;m.metalness=.18;m.clearcoat=1;m.clearcoatRoughness=.12;
+  }else if(/fairing-pearl/.test(m.name)||m.name===roles.paint){
+   if(div)m.color.set(div.acc).convertSRGBToLinear();
+   m.roughness=.28;m.metalness=.18;m.clearcoat=1;m.clearcoatRoughness=.12;
+  }else if(div&&/woven-race-suit/.test(m.name)){
+   m.color.set(div.acc).convertSRGBToLinear().multiplyScalar(.42);m.roughness=.92;m.metalness=0;
+  }else if(div&&m.name===roles.trim){
+   m.color.set(div.acc2).convertSRGBToLinear();
   }else if(/luminous-rim/.test(m.name)){
    m.emissive.copy(m.color);m.emissiveIntensity=.65;m.roughness=.2;
   }
@@ -44,10 +49,11 @@ function lightPlayableMaterial(material){
 function createLoadedKart(div){
  const template=KART_ASSETS.templates.get(div.id);if(!template)return null;
  const root=template.clone(true),materials=new Map();
+ const roles={paint:template.getObjectByName('helmet-shell')?.material?.name,trim:template.getObjectByName('helmet-crown-stripe')?.material?.name};
  root.traverse(node=>{
   if(!node.isMesh)return;
   const own=/^(wheel-light-ring|exhaust-[lr]|underbody-flow-ring|aegis-shield)$/.test(node.name);
-  const copy=source=>{if(own)return lightPlayableMaterial(source);if(!materials.has(source))materials.set(source,lightPlayableMaterial(source));return materials.get(source);};
+  const copy=source=>{if(own)return lightPlayableMaterial(source,div,roles);if(!materials.has(source))materials.set(source,lightPlayableMaterial(source,div,roles));return materials.get(source);};
   node.material=Array.isArray(node.material)?node.material.map(copy):copy(node.material);
  });
  const find=name=>root.getObjectByName(name),body=find('body'),pilot=find('pilot');

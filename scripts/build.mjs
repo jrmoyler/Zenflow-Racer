@@ -6,7 +6,7 @@ const root=process.cwd(), out=path.join(root,'dist');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 // Only ship runtime assets. New documentation, exports and local files stay private.
-const runtime=['reconstruction-review.js','responsive-review.html','race-telemetry.js','index.html','core.js','surface-detail.js','kart-materials.js','kart-clips.js','racefx.js','fallback-renderer.js','maps.js','world-motion-data.js','living-world.js','natural-stone-data.js','natural-world.js','world.js','immersion.js','vehicles.js',
+const runtime=['reconstruction-review.js','responsive-review.html','race-telemetry.js','index.html','core.js','surface-detail.js','kart-materials.js','kart-clips.js','racefx.js','fallback-renderer.js','maps.js','world-motion-data.js','living-world.js','natural-stone-data.js','natural-world.js','audience-data.js','audience.js','world.js','immersion.js','vehicles.js',
  'addons.js','addon-effects.js','addon-ui.js','addon-ui.css','power-icons.js','kart-assets.js','item-art.js','item-models.js','effects.js','abilities.js','postfx.js','game.js','title-attract.js','menu.js','pwa.js','polish.css','reference-polish.css',
  'presentation.js','presentation.css','fonts.css','manifest.webmanifest','vendor','icons','assets'];
 for(const file of runtime){

@@ -1,0 +1,12 @@
+{
+  "authorization": "Please finish the work in the most recent chat in this project please",
+  "baseCommit": "16baf291e1ed0a0c441006625e1f6e70304f735b",
+  "preservedPriorEvidence": {
+    ".img2threejs/vehicle/state.json": "188a1afae3edd249cc59cb255eb190fadb89e0f692b10bcf44e45dbb8f2ce6cf",
+    ".img2threejs/vehicle/spec.json": "e85523deffb48065845546ec8fae04057494299523f4f104a7e9f6bb0ff56672",
+    ".img2threejs/vehicle/blocker.json": "2cd59b66981a67edb66a35503c0bfa2829141fc211fc4278ca6a7fa6339ea07a"
+  },
+  "stateGate": "forge/next.py cannot resolve the prior workspace absolute spec path. Original state, reviews, scores and thresholds are unchanged.",
+  "strategy": "Direct Blender joint-local audience authoring and actual Three.js material-role lookup; use active circuit lights for every racer view. Full body division paint supersedes the older pearl-white body reference.",
+  "acceptance": "Structural and runtime checks pass. Legacy exact-image fidelity acceptance remains open. No new likeness score is asserted."
+}
