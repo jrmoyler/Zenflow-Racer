@@ -61,7 +61,8 @@ function createLoadedKart(div){
  const find=name=>root.getObjectByName(name),body=find('body'),pilot=find('pilot');
  const wheels=['wheel-fl','wheel-fr','wheel-rl','wheel-rr'].map((name,i)=>{const pivot=find(name);return {pivot,spin:pivot.getObjectByName('spin'),glow:pivot.getObjectByName('wheel-light-ring'),side:i%2?1:-1,rest:pivot.position.clone()};});
  const under=find('underbody-flow-ring'),shield=find('aegis-shield'),halo=find('halo'),star=find('star');shield.visible=halo.visible=star.visible=false;
- root.userData={wheels,body,pilot,head:find('head'),arms:[find('arm-l'),find('arm-r')],steeringWheel:find('steering-wheel'),exhaust:[find('exhaust-l'),find('exhaust-r')],under,shield,halo,star,glow:under.material,chassis:div.id,asset:'blender-glb',clipState:null,clipNodes:null,anim:null};
+ const identityBaked=!!(template.userData.zf_rider_identity_baked||find('division-rider-identity'));
+ root.userData={zf_rider_identity_baked:identityBaked,wheels,body,pilot,head:find('head'),arms:[find('arm-l'),find('arm-r')],steeringWheel:find('steering-wheel'),exhaust:[find('exhaust-l'),find('exhaust-r')],under,shield,halo,star,glow:under.material,chassis:div.id,asset:'blender-glb',clipState:null,clipNodes:null,anim:null};
  Object.defineProperty(root.userData,'toJSON',{value:()=>({chassis:div.id,asset:'blender-glb'}),enumerable:false});
  // An inspectable, articulated hierarchy also supports scene picking and exploded review.
  const parts=[];root.traverse(node=>{if(node.isMesh){node.userData.partId=node.name;parts.push(node);}});
