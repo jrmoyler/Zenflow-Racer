@@ -1,0 +1,18 @@
+{
+  "authorization": "Now that is open fully finish P0",
+  "prior": [
+    {
+      "path": ".img2threejs/state.json",
+      "sha256": "19562813974d944bcb9b3a3bd46350d3485f6a26afc8ae1a9611e59c01d062fb"
+    },
+    {
+      "path": ".img2threejs/spec.json",
+      "sha256": "99f830307f440c881f0a4720e92804a67da91a9d2c0f5beab1bbd812f54cd420"
+    }
+  ],
+  "stateGate": "active build-current-pass blockout",
+  "migration": "resume rejected because active state is not a stopped correction checkpoint; preserve state and review history unchanged",
+  "method": "twenty explicit rider profiles, recovered Blender export, same rig contracts",
+  "plan": "docs/p0-final-pass/correction-plan.md",
+  "acceptance": "pending actual evidence"
+}

@@ -87,7 +87,9 @@ function updateAddonHUD(r){
   button.dataset.ready=String(ready);button.disabled=!ready||blocked;
   const state=r.finished?'FINISHED':r.vault>0?'LOCKED':r.spin>0?'RECOVERING':ready?'READY':Math.ceil(r.addonCooldown)+'s';
   document.getElementById('addonLabel').textContent=a.name+' · '+state;
-  button.setAttribute('aria-label',a.name+' · '+state+' · F to activate');
+  const binding=game.gamepadConnected?'RB / R1':'F';
+  button.setAttribute('aria-label',a.name+' · '+state+' · '+binding+' to activate');
+  const hint=document.getElementById('addonBinding');if(hint)hint.textContent=binding;
   button.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/a.cooldown)*100)+'%');
   if(touch)touch.setAttribute('aria-label',a.name+' · '+state);
   if(touch){touch.disabled=button.disabled;const glyph=typeof addonIconSVG==='function'?addonIconSVG(a):'';if(touch.dataset.addon!==a.id+':'+state){touch.dataset.addon=a.id+':'+state;touch.innerHTML='<span class="touch-addon-glyph" aria-hidden="true">'+glyph+'</span><span>ADD-ON</span><small>'+state+'</small>';}touch.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/a.cooldown)*100)+'%');touch.classList.toggle('ready',ready&&!blocked);}

@@ -704,9 +704,9 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){resetInput
 // Rescale the usable axis range to avoid a sudden steering jump at the deadzone.
 function analogAxis(value,deadzone=.12){const magnitude=Math.abs(value);if(!Number.isFinite(value)||magnitude<=deadzone)return 0;const t=clamp((magnitude-deadzone)/(1-deadzone),0,1);return Math.sign(value)*t*(.65+.35*t);}
 function steeringGain(speed,maxSpeed){return lerp(1.24,.78,clamp(Math.abs(speed)/Math.max(1,maxSpeed),0,1));}
-function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(p=>p&&p.connected!==false);if(!pad){padHeld.clear();padSteer=0;padPause=false;syncInput();return;}
+function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(p=>p&&p.connected!==false);game.gamepadConnected=!!pad;if(!pad){padHeld.clear();padSteer=0;padPause=false;syncInput();return;}
   const down=i=>!!pad.buttons[i]?.pressed;padSteer=analogAxis(pad.axes[0]||0);
-  padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4)||down(5))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(10))padHeld.add('addon');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
+  padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(5)||down(10))padHeld.add('addon');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
   if(down(9)&&!padPause){if(game.state==='paused')resume();else pause();}padPause=down(9);syncInput();}
 const touchEl=document.getElementById('touch');
 function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
@@ -714,7 +714,7 @@ function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
     if(el.disabled||el.hidden||!['race','countdown'].includes(game.state))return;e.preventDefault();audioInit();
     activeTouchPointers.set(e.pointerId,{key,el});el.setPointerCapture?.(e.pointerId);touchHeld.add(key);syncInput();el.classList.add('act');
   });
-  const off=e=>{if(activeTouchPointers.get(e.pointerId)?.el!==el)return;activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();if(e.type==='pointercancel'&&['item','special','addon'].includes(key)&&!input[key])input[key+'Edge']=false;}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
+  const off=e=>{if(activeTouchPointers.get(e.pointerId)?.el!==el)return;activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();if(['pointercancel','lostpointercapture'].includes(e.type)&&['item','special','addon'].includes(key)&&!input[key])input[key+'Edge']=false;}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
   el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',off);
 }
 const steerPad=document.getElementById('tSteer');let steerPointer=null;
