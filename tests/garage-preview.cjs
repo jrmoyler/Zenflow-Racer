@@ -14,5 +14,24 @@ w.eval(fs.readFileSync('garage-preview.js','utf8')+';window.createGaragePreview=
  const targets=[];w.THREE.PMREMGenerator=class{fromScene(){const t={texture:{},dispose(){this.disposed=true}};targets.push(t);return t}dispose(){}};
  w.eval(fs.readFileSync('surface-detail.js','utf8')+';window.makeRaceEnvironment=createSurfaceEnvironment;window.makePreviewEnvironment=createSurfaceEnvironmentTarget;');
  const map={skyHorizon:0x334455,skyTop:0x223344};const raceTexture=w.makeRaceEnvironment({},map),previewTarget=w.makePreviewEnvironment({},map);previewTarget.dispose();assert.equal(targets[0].disposed,undefined,'showroom PMREM disposal must preserve race environment');assert.equal(raceTexture,targets[0].texture);w.makeRaceEnvironment({},map);assert.equal(targets[0].disposed,true,'race wrapper replaces only its own target');
+ // Exercise the real software rasterizer after observed WebGL allocation failure.
+ Object.defineProperty(w.document,'hidden',{value:false});
+ let blits=0,softwareRenderer,animationSteps=[];
+ w.HTMLCanvasElement.prototype.getContext=function(){return {canvas:this,save(){},restore(){},setTransform(){},beginPath(){},rect(){},clip(){},fillRect(){},createImageData(width,height){return {data:new Uint8ClampedArray(width*height*4),width,height};},putImageData(){},drawImage(){blits++;}};};
+ w.eval(fs.readFileSync('fallback-renderer.js','utf8')+';window.RealSoftwareRenderer=CanvasRaceRenderer;');
+ w.eval('CanvasRaceRenderer=class extends RealSoftwareRenderer {constructor(options){super(options);window.softwareInstance=this;}}');
+ w.THREE.WebGLRenderer=class{constructor(){throw Error('WebGL context allocation failed');}};
+ w.matchMedia=()=>({matches:false});w.animateShowroomKart=(kart,time,dt,yaw)=>{animationSteps.push({time,dt});kart.rotation.y=yaw;};
+ w.buildKart=r=>{const g=new THREE.Group();g.add(new THREE.Mesh(new THREE.BoxGeometry(1,1,2),new THREE.MeshStandardMaterial({color:0x00aaff})));models.push(g);return g;};
+ Object.defineProperty(host,'clientWidth',{value:320});Object.defineProperty(host,'clientHeight',{value:240});
+ const fallback=w.createGaragePreview(host);assert.equal(fallback.open(),true,'software path keeps showroom available');
+ fallback.update({id:'a'},save);softwareRenderer=w.softwareInstance;
+ assert.equal(host.querySelector('canvas').dataset.renderer,'software-3d');assert.ok(blits>0,'actual rasterizer presents geometry');
+ assert.ok(softwareRenderer.info.render.triangles>0,'real kart triangles are rasterized');
+ const pump=now=>{const current=[...frames.values()];frames.clear();current.forEach(fn=>fn(now));};
+ pump(1000);const count=blits;pump(1050);assert.equal(blits,count,'software preview is limited to ten frames per second');pump(1100);
+ assert.equal(blits,count+1);assert.ok(Math.abs(animationSteps.at(-1).dt-.1)<1e-8,'throttled animations advance actual elapsed time');
+ const modelCount=models.length;save.builds.a=['Armor'];fallback.update({id:'a'},save);assert.equal(models.length,modelCount+1,'upgrades rebuild same playable model under fallback');
+ fallback.dispose();assert.equal(host.querySelector('canvas'),null);assert.equal(frames.size,0,'closing stops software animation');
  dom.window.close();console.log('PASS garage preview: shared build, idempotent refresh, rotation, reduced motion, disposal and stale context-loss protection');
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});
