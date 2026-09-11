@@ -95,7 +95,7 @@ function addonBlast(e,radius=e.radius){for(const r of game.racers)if(r!==e.owner
 function useAddon(r){
  const a=addonDefinition(r.addonId);
  if(!a||game.state!=='race'||r.finished||r.vault>0||r.spin>0||r.addonCooldown>0)return false;
- r.addonCooldown=a.cooldown;
+ r.addonCooldown=a.cooldown*(1-(Math.min(3,r.addonLevel||1)-1)*.02);
  if(r.isPlayer&&typeof setToast==='function'){setToast(a.name.toUpperCase(),'teal');if(typeof SFX!=='undefined')SFX.ui();}
  switch(a.id){
  case 'ward':r.shield=Math.max(r.shield||0,6);addonZone(a.id,r,-5,6,{radius:4});addonBuff(r,1);break;

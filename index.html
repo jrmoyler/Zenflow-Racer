@@ -145,6 +145,7 @@ html[data-touch="on"] #tS{display:none}
 <link rel="stylesheet" href="reference-polish.css">
 <link rel="stylesheet" href="presentation.css">
 <link rel="stylesheet" href="addon-ui.css">
+<link rel="stylesheet" href="garage.css">
 </head>
 <body>
 <canvas id="gl" aria-label="ZenFlow racing circuit"></canvas>
@@ -222,9 +223,9 @@ html[data-touch="on"] #tS{display:none}
 </div>
 <div id="touch"><div id="tSteer" role="slider" tabindex="0" aria-label="Drag left or right to steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><span class="steer-track"></span><span class="steer-thumb"></span><span class="steer-label">STEER</span></div><button class="tz" id="tL" aria-label="Steer left">◀</button><button class="tz" id="tR" aria-label="Steer right">▶</button><button class="tz" id="tD" aria-label="Hold to drift">DRIFT</button><button class="tz" id="tI" aria-label="Use item">ITEM</button><button class="tz" id="tB" aria-label="Brake">BRAKE</button><button class="tz" id="tA" aria-label="Activate equipped add-on" hidden>ADD-ON</button><button class="tz" id="tP" aria-label="Activate racer power">POWER</button></div>
 
-<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">RACE CONTROL</div><h2>Race paused.</h2><p>Session on hold. Return to the track when you’re ready.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Roster</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
+<div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race paused"><div class="panel"><div class="eyebrow">RACE CONTROL</div><h2>Race paused.</h2><p>Session on hold. Return to the track when you’re ready.</p><p class="keys"><kbd>Esc</kbd> resume · <kbd>R</kbd> restart · <kbd>M</kbd> sound</p><div class="row"><button id="quit" class="btn ghost">Change Racer</button><button id="pausemute" class="btn ghost">SOUND ON</button><button id="restart" class="btn ghost">Restart Race</button><button id="resume" class="btn">Resume</button></div></div></div>
 
-<div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><div class="row"><button id="again" class="btn ghost">Roster</button><button id="nextmap" class="btn ghost">Next Circuit</button><button id="rematch" class="btn">Rematch</button></div></div></div>
+<div id="results" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race results"><div class="panel"><h2 id="rtitle">Race <span>Complete</span></h2><div class="sub" id="rsub"></div><div id="board"></div><section id="reward-summary" aria-live="polite"></section><div class="row"><button id="again" class="btn ghost">Change Racer</button><button id="nextmap" class="btn ghost">Next Circuit</button><button id="rematch" class="btn">Retry</button></div></div></div>
 
 
 <dialog id="loadout-dialog" aria-labelledby="loadout-title"><header><div><p class="panel-kicker">RACER EQUIPMENT / <span id="loadout-racer"></span></p><h2 id="loadout-title">Choose your add-on</h2></div><button id="close-loadout" type="button" aria-label="Close loadout">✕</button></header><p class="loadout-intro">One extra power, its own cooldown. Your division’s signature power stays equipped.</p><label class="loadout-search">Find a power<input id="addon-search" type="search" placeholder="Search powers or effects" autocomplete="off"></label><div id="addon-list" aria-label="Available add-on powers"></div><footer><span id="loadout-status" role="status">Choose an add-on.</span><button id="done-loadout" type="button" class="btn">Done</button></footer></dialog>
@@ -242,6 +243,7 @@ html[data-touch="on"] #tS{display:none}
 <script src="kart-clips.js"></script>
 <script src="fallback-renderer.js"></script>
 <script src="surface-detail.js"></script>
+<script src="circuit-extensions.js"></script>
 <script src="maps.js"></script>
 <script src="world-motion-data.js"></script>
 <script src="living-world.js"></script>
@@ -264,12 +266,15 @@ html[data-touch="on"] #tS{display:none}
 <script src="kart-assets.js"></script>
 <script src="race-telemetry.js"></script>
 <script src="presentation.js"></script>
+<script src="economy.js"></script>
+<script src="progression.js"></script>
 <script src="game.js"></script>
 <script src="reconstruction-review.js"></script>
 <script src="title-attract.js"></script>
 <script src="vendor/anime.umd.min.js"></script>
 <script src="menu.js"></script>
 <script src="addon-ui.js"></script>
+<script src="garage.js"></script>
 <script src="pwa.js" defer></script>
 </body>
 </html>

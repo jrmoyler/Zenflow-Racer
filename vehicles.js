@@ -429,8 +429,23 @@ function constrainKartHands(root,state){
   }
 }
 // Seat shell, cushion and pedal plates provide visible mechanical points of contact.
+// Per-rider local proportions, applied to the complete helmet assembly so visor,
+// chin guard and fasteners remain connected. Neck/shoulder/wheel pivots are fixed.
+const RIDER_FIT={
+ zenflow:[1,.98,1.06,1],collective:[1.08,.94,1,1.12],hybrid:[.94,1.08,1.03,.92],nexus:[1.04,1.06,.94,1.04],
+ kinetic:[.94,.94,1.13,.9],juris:[1.12,1.02,.96,1.17],signal:[.91,.97,1.15,.93],loom:[.95,1.12,.96,.96],
+ vector:[1.02,.92,1.14,1.08],aether:[1.06,1.08,1.02,1.02],animus:[1.13,.94,1.05,1.2],helix:[.94,1.03,.96,.91],
+ ledger:[1.04,1.1,.95,1.07],terra:[1.14,.91,1.08,1.22],obsidian:[1.08,.95,1.12,1.18],civic:[1.01,1.09,1.03,.97],
+ cognara:[.92,1.14,1.04,.94],gaia:[1.05,1.04,1.09,1.03],nomad:[1.07,.99,1.13,1.09],eon:[.96,1.13,.98,.95]
+};
+function finishRiderFit(root){
+ const fit=RIDER_FIT[root.userData.chassis];if(!fit||root.userData.riderFit)return;root.userData.riderFit=true;
+ const scale=new THREE.Vector3(fit[0],fit[1],fit[2]);
+ for(const child of root.userData.head.children){child.scale.multiply(scale);child.position.multiply(scale);}
+ root.traverse(o=>{if(o.name==='suit-shoulder-pad')o.scale.x*=fit[3];});
+}
 function finishKartCockpit(root){
-  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;
+  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;finishRiderFit(root);
   const fabric=new THREE.MeshStandardMaterial({color:0x192029,roughness:.91,metalness:0});
   const trim=new THREE.MeshStandardMaterial({color:0x434b54,roughness:.34,metalness:.7});
   const cockpit=new THREE.Group();cockpit.name='cockpit-contact-hardware';ud.body.add(cockpit);
@@ -575,7 +590,7 @@ function animateKart(r,dt,ag=0){
   // --- pilot: counter-lean, look into slides, brake/boost head pitch, state poses
   const pilot=ud.pilot,head=ud.head,armL=ud.arms&&ud.arms[0],armR=ud.arms&&ud.arms[1];
   const breathe=Math.sin(a.t*1.5)*(idle?.012:.005);
-  let torsoX=(boosting?-.12:0)+accelN*.04-a.flinch*.25,torsoY=-drift*.25-r.steer*.08*sf,torsoZ=-a.roll*1.6-a.lat*.08,pilotY=1+breathe;
+  let torsoX=(boosting?-.12:0)+(braking?-.09:0)+accelN*.04-a.flinch*.25,torsoY=-drift*.25-r.steer*.08*sf,torsoZ=-a.roll*1.6-a.lat*.08,pilotY=1+breathe-Math.max(0,accelN)*.018;
   let lookY=-r.steer*.35*Math.max(.35,sf)-drift*.3,lookX=braking?-.18:boosting?.2:accelN*.06+breathe*.5;
   let aL=-a.wheel*.28,aR=a.wheel*.28,zL=0,zR=0;
   if(spinning){const f=Math.min(1,r.spin);aL=1.3+Math.sin(a.t*16)*.5*f;aR=1.3+Math.cos(a.t*15)*.5*f;zL=.5*f;zR=-.5*f;lookY=Math.sin(a.t*24)*.35*f;lookX=Math.cos(a.t*19)*.2*f;torsoZ+=Math.sin(a.t*14)*.12*f;}

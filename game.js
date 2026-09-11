@@ -3,9 +3,10 @@ const game={state:'boot',racers:[],player:null,time:0,raceTime:0,countdown:0,dif
 const SAVE_KEY='zenflow-racer-v2';
 let saved={};try{saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')||{};}catch{}
 if(typeof saved!=='object'||Array.isArray(saved))saved={};
+if(typeof Economy!=='undefined')saved=Economy.migrate(saved,ADDONS.map(a=>a.id));
 game.autoThrottle=saved.autoThrottle===true;
 let chosenMapId=typeof MAPS!=='undefined'&&MAPS.some(m=>m.id===saved.map)?saved.map:'cherry';
-function raceRecordKey(division,difficulty,mapId=chosenMapId){return mapId+'-'+division+'-'+difficulty;}
+function raceRecordKey(division,difficulty,mapId=chosenMapId){return mapId+(typeof extendedCircuitControls==='function'?'-p0-':'-')+division+'-'+difficulty;}
 function chooseMap(id){
   if(typeof MAPS==='undefined'||!MAPS.some(m=>m.id===id)||!['boot','roster','title','results'].includes(game.state))return false;
   chosenMapId=id;saved.map=id;persist();updateBestTime();
@@ -15,10 +16,13 @@ function chooseMap(id){
 }
 // Existing records belong to the original cherry circuit only.
 for(const d of ROSTER)for(let diff=0;diff<=2;diff++){
-  const old=d.id+'-'+diff,key=raceRecordKey(d.id,diff,'cherry');
+  const old=d.id+'-'+diff,key='cherry-'+d.id+'-'+diff;
   if(Number.isFinite(saved[old])&&!Number.isFinite(saved[key]))saved[key]=saved[old];
 }
-function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(saved));}catch{}}
+function persist(){
+ if(typeof Economy!=='undefined'&&navigator.locks?.request){const snapshot={...saved};return navigator.locks.request(SAVE_KEY,()=>{try{const fresh=Economy.migrate(JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'),ADDONS.map(a=>a.id));for(const key of Economy.FIELDS)snapshot[key]=fresh[key];localStorage.setItem(SAVE_KEY,JSON.stringify(snapshot));}catch{}});}
+ try{localStorage.setItem(SAVE_KEY,JSON.stringify(saved));}catch{}
+}
 const input={throttle:false,brake:false,left:false,right:false,drift:false,item:false,itemEdge:false,special:false,specialEdge:false,addon:false,addonEdge:false};
 
 class Racer{
@@ -28,7 +32,7 @@ class Racer{
     this.maxSpeedBase=37+sp*2.2;this.accel=11+ac*2.6;this.handling=.14+ha*.012;this.weight=1+we*.28;
     this.u=-(0.007+Math.floor(gridIdx/2)*0.0068);this.lat=gridIdx%2?2.3:-2.3;this.speed=0;this.theta=0;this.steer=0;this.throttle=false;this.brake=false;
     this.drifting=false;this.driftDir=0;this.driftTime=0;this.driftTier=0;this.driftKey=false;this.boost=0;this.boostMult=1;
-    this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
+    this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.totalTokensCollected=0;this.hitsTaken=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
     this.spin=0;this.shield=0;this.hitCd=0;this.wallCd=0;this.finished=false;this.finishTime=0;this.rank=gridIdx+1;this.wheelRot=0;this.visualYaw=0;this.lean=0;this.wrongWay=false;
     // Grid-staggered reaction: front rows launch first so the pack fans out instead of piling into row one.
     this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0};
@@ -40,6 +44,7 @@ class Racer{
     this.slipT=0;this.slipOn=false;this.slipBonus=0;this.slipOut=0;this.slipToast=false;this.slipTarget=null;this.rankShown=gridIdx+1;this.rankDelta=0;this.rankToastT=0;
     if(typeof initAbility==='function')initAbility(this);
     if(typeof initAddons==='function')initAddons(this,isPlayer?(saved.addons?.[div.id]||null):(typeof ADDONS!=='undefined'?ADDONS[(gridIdx+ROSTER.indexOf(div))%ADDONS.length]?.id:null));
+    if(typeof applyKartBuild==='function')applyKartBuild(this,gridIdx);
     orientOnTrack(this.mesh,this.u,this.lat,0,0);
   }
   get maxSpeed(){return this.maxSpeedBase*(1+this.tokens*.014)*this.boostMult*(1+(this.slipBonus||0)*.07);}
@@ -48,6 +53,7 @@ class Racer{
 function disposeProjectile(mesh){scene.remove(mesh);if(mesh.userData?.projectileDisposed)return;if(mesh.userData)mesh.userData.projectileDisposed=true;const geometries=new Set(),materials=new Set();mesh.traverse?.(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}
 function clearProjectiles(){mines.forEach(m=>disposeProjectile(m.mesh));missiles.forEach(m=>disposeProjectile(m.mesh));mines=[];missiles=[];}
 function spawnRace(playerDiv){
+  if(typeof beginRewardRace==='function')beginRewardRace();
   const sceneBuildStarted=performance.now();
   disposePreview();if(typeof clearAbilities==='function')clearAbilities();if(typeof clearAddons==='function')clearAddons();
   game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];[sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx].forEach(pool=>pool.clear?.());if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined'&&!(typeof FALLBACK_GRAPHICS!=='undefined'&&FALLBACK_GRAPHICS))raceFX.init();
@@ -117,7 +123,7 @@ function stepRacer(r,dt){
   if(r.spin>0){steerIn=0;r.throttle=false;}
   // Return and countersteer respond faster than turn-in, while high-speed lock is reduced.
   const counter=r.steer*steerIn<0,release=Math.abs(steerIn)<Math.abs(r.steer);
-  r.steer=lerp(r.steer,steerIn,1-Math.exp(-dt*(counter?18:release?14:r.drifting?9:11)*(r.predict>0?1.35:1)));
+  r.steer=lerp(r.steer,steerIn,1-Math.exp(-dt*(counter?18:release?14:r.drifting?9:11)*(r.steerResponse||1)*(r.predict>0?1.35:1)));
   // --- drift state machine: hop first, then commit to a direction inside the hop window
   const wantDrift=r.isPlayer&&!r.finished?input.drift:r.ai.drift;
   if(!r.drifting&&wantDrift&&!r.driftKey&&r.speed>r.maxSpeedBase*.42&&r.spin<=0&&r.hopWindow<=0){r.hop=.28;r.hopWindow=.32;if(r.isPlayer)noiseHit(.08,.2,1200);}
@@ -125,7 +131,7 @@ function stepRacer(r,dt){
   if(r.hopWindow>0){r.hopWindow-=dt;if(!wantDrift||r.spin>0)r.hopWindow=0;else if(!r.drifting&&Math.abs(r.steer)>.3){r.drifting=true;r.driftDir=Math.sign(r.steer);r.driftTime=0;r.driftTier=0;r.hopWindow=0;}}
   if(r.drifting){
     // Steering into the slide charges the mini-turbo faster; counter-steering opens the arc and holds the charge.
-    const into=clamp(r.steer*r.driftDir,-.6,.6);r.driftTime=Math.max(0,r.driftTime+dt*(1+into*.7));
+    const into=clamp(r.steer*r.driftDir,-.6,.6);r.driftTime=Math.max(0,r.driftTime+dt*(1+into*.7)*(r.driftCharge||1));
     let tier=0;for(let i=0;i<DRIFT_TIERS.length;i++)if(r.driftTime>DRIFT_TIERS[i])tier=i+1;
     if(tier>r.driftTier){r.driftTier=tier;if(r.isPlayer){SFX.driftTier(tier);rumble(.15*tier,.35,70);}if(typeof raceFX!=='undefined')raceFX.onDriftTier(r,tier);}
     if(!wantDrift||r.speed<r.maxSpeedBase*.3||r.spin>0){
@@ -163,7 +169,7 @@ function stepRacer(r,dt){
     r.speed=clamp(r.speed,-9,r.maxSpeed*1.15);
   }
   // corner scrub (turning bleeds speed unless drifting)
-  if(!r.drifting&&r.spin<=0)r.speed*=1-Math.abs(r.theta)*1.6*dt*(r.predict>0?.7:1);
+  if(!r.drifting&&r.spin<=0)r.speed*=1-Math.abs(r.theta)*1.6*(r.cornerScrub||1)*dt*(r.predict>0?.7:1);
   // --- lateral
   const curv=trackCurv(r.u);
   let latVel=r.speed*Math.sin(r.theta) - curv*r.speed*r.speed*.05*(r.drifting?.55:1);
@@ -175,7 +181,7 @@ function stepRacer(r,dt){
   if(Math.abs(r.lat)>W){const side=Math.sign(r.lat);r.lat=side*W;
     if(r.wallCd<=0&&r.speed>8){
       // Scrub scales with the impact angle: a graze keeps most of the speed, a square hit loses up to 55%.
-      const angle=Math.atan2(Math.max(0,side*latVel),Math.max(1,Math.abs(r.speed)));const scrub=clamp(.06+angle*1.4,.06,.55)*edgeGrip;
+      const angle=Math.atan2(Math.max(0,side*latVel),Math.max(1,Math.abs(r.speed)));const scrub=clamp(.06+angle*1.4,.06,.55)*edgeGrip*(r.wallLoss||1);
       r.speed*=1-scrub;r.wallCd=.35;r.theta=-side*(.05+angle*.35);r.wallScrub=scrub;if(typeof raceFX!=='undefined')raceFX.onWall(r,side);
       if(r.isPlayer){SFX.wall();game.trauma=Math.min(1,game.trauma+.1+scrub*.5);rumble(.2+scrub,.3,90+scrub*160);haptic(20);}
       trackPoint(r.u,r.lat,.4,_p);trackTan(r.u,_v1);for(let i=0;i<10;i++){_v2.set(-_v1.x*8+(rng()-.5)*6,4+rng()*5,-_v1.z*8+(rng()-.5)*6);sparksOrange.emit(_p,_v2,.35+rng()*.3,.4);}}
@@ -227,7 +233,7 @@ function hitRacer(r,source,attacker=null){
   if(typeof powerProtected==='function'&&powerProtected(r,attacker,source!=='reflection'))return;
   if(r.hitCd>0||r.finished)return;
   if(r.shield>0){r.shield=0;if(typeof spawnAddonContact==='function'&&!String(source).startsWith('addon-'))spawnAddonContact(r.perimeter>0?'obsidian':'shield',r.u,r.lat,r);if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS BLOCK','teal');}return;}
-  r.spin=1.1;r.hitCd=1.6;r.drifting=false;r.driftTier=0;r.boost=0;r.boostMult=1;r.boostTarget=1;r.surge=0;r.hopWindow=0;if(r.slipOn){r.slipOn=false;r.slipT=0;r.slipBonus=0;}if(typeof raceFX!=='undefined')raceFX.onHit(r,source);
+  r.hitsTaken=(r.hitsTaken||0)+1;r.spin=1.1*(r.spinDuration||1);r.hitCd=1.6;r.drifting=false;r.driftTier=0;r.boost=0;r.boostMult=1;r.boostTarget=1;r.surge=0;r.hopWindow=0;if(r.slipOn){r.slipOn=false;r.slipT=0;r.slipBonus=0;}if(typeof raceFX!=='undefined')raceFX.onHit(r,source);
   if(typeof spawnAddonContact==='function'&&!String(source).startsWith('addon-'))spawnAddonContact(['ram','sonic','reflection'].includes(source)?(attacker?.div?.id||source):source,r.u,r.lat,attacker||r);
   const lost=Math.min(3,r.tokens);r.tokens-=lost;r.lastLostTokens=lost;trackPoint(r.u,r.lat,1,_p);
   for(let i=0;i<14+lost*4;i++){_v1.set((rng()-.5)*14,6+rng()*8,(rng()-.5)*14);(i<lost*4?goldFx:hitFx).emit(_p,_v1,.5+rng()*.5,.6);}
@@ -257,9 +263,9 @@ function stepWorld(dt){
   // item boxes / tokens
   itemBoxes.forEach(b=>{if(b.t>0){b.t-=dt;if(b.t<=0)b.mesh.visible=true;return;}
     b.star.rotation.y+=dt*1.6;b.star.rotation.x=Math.sin(game.time*1.3+b.lat)*.35;b.core.rotation.x+=dt*3;const bob=Math.sin(game.time*2.2+b.lat)*.25;orientOnTrack(b.mesh,b.u,b.lat,1.6+bob,0);b.mesh.rotateY(b.star.rotation.y);
-    for(const r of R){if(r.finished||r.phase>0||r.vault>0||r.item||r.roulette>0)continue;if(Math.abs(du_dist(r.u,b.u))<2&&Math.abs(r.lat-b.lat)<1.6){b.t=4.5;b.mesh.visible=false;r.roulette=1.4;r.rouletteTick=0;trackPoint(b.u,b.lat,1.6,_p);if(typeof raceFX!=='undefined')raceFX.onItemBox(_p);for(let i=0;i<18;i++){_v1.set((rng()-.5)*10,3+rng()*7,(rng()-.5)*10);goldFx.emit(_p,_v1,.5+rng()*.4,.5);}if(r.isPlayer)SFX.ui();break;}}});
+    for(const r of R){if(r.finished||r.phase>0||r.vault>0||r.item||r.roulette>0)continue;if(Math.abs(du_dist(r.u,b.u))<2&&Math.abs(r.lat-b.lat)<1.6){b.t=4.5;b.mesh.visible=false;r.roulette=1.4*(r.itemCycle||1);r.rouletteTick=0;trackPoint(b.u,b.lat,1.6,_p);if(typeof raceFX!=='undefined')raceFX.onItemBox(_p);for(let i=0;i<18;i++){_v1.set((rng()-.5)*10,3+rng()*7,(rng()-.5)*10);goldFx.emit(_p,_v1,.5+rng()*.4,.5);}if(r.isPlayer)SFX.ui();break;}}});
   tokens.forEach(t=>{if(t.t>0){t.t-=dt;if(t.t<=0)t.mesh.visible=true;return;}orientOnTrack(t.mesh,t.u,t.lat,.9,0);t.mesh.rotateY(game.time*3+t.lat);
-    for(const r of R){if(!r.finished&&!(r.phase>0)&&!(r.vault>0)&&Math.abs(du_dist(r.u,t.u))<1.7&&Math.abs(r.lat-t.lat)<1.3&&r.tokens<10&&r.spin<=0){t.t=9;t.mesh.visible=false;r.tokens++;r.speed=Math.min(r.speed+1.2,r.maxSpeed*1.05);trackPoint(t.u,t.lat,1,_p);if(typeof raceFX!=='undefined')raceFX.onToken(_p,r.tokens);for(let i=0;i<8;i++){_v1.set((rng()-.5)*6,3+rng()*4,(rng()-.5)*6);goldFx.emit(_p,_v1,.4,.3);}if(r.isPlayer)SFX.token(r.tokens);break;}}});
+    for(const r of R){if(!r.finished&&!(r.phase>0)&&!(r.vault>0)&&Math.abs(du_dist(r.u,t.u))<1.7&&Math.abs(r.lat-t.lat)<1.3&&r.tokens<10&&r.spin<=0){t.t=9;t.mesh.visible=false;r.tokens++;r.totalTokensCollected=(r.totalTokensCollected||0)+1;r.speed=Math.min(r.speed+1.2,r.maxSpeed*1.05);trackPoint(t.u,t.lat,1,_p);if(typeof raceFX!=='undefined')raceFX.onToken(_p,r.tokens);for(let i=0;i<8;i++){_v1.set((rng()-.5)*6,3+rng()*4,(rng()-.5)*6);goldFx.emit(_p,_v1,.4,.3);}if(r.isPlayer)SFX.token(r.tokens);break;}}});
   // mines
   for(let i=mines.length-1;i>=0;i--){const m=mines[i];m.life-=dt;if(m.mesh.rotation)m.mesh.rotation.y+=dt*2;if(m.core&&m.core.material)m.core.material.emissiveIntensity=2+Math.sin(game.time*12)*1.5;
     let hit=false;for(const r of R){if(r.phase>0||r.finished||r===m.owner&&m.life>29.4)continue;if(Math.abs(du_dist(r.u,m.u))<1.8&&Math.abs(r.lat-m.lat)<1.5){hitRacer(r,'mine',m.owner);hit=true;break;}}
@@ -353,11 +359,13 @@ function stepAI(r,dt){
   if(r.finished){r.throttle=true;r.ai.steer=lerp(r.ai.steer,-r.lat*.3,dt*2);r.ai.drift=false;return;}
   if(game.state==='countdown'){r.throttle=false;r.ai.steer=0;r.ai.drift=false;return;}
   r.ai.throttleHold+=dt;r.throttle=r.ai.throttleHold>r.ai.startDelay;
-  const look=0.012+r.speed*0.0004;const cA=trackCurv(r.u+look),cB=trackCurv(r.u+look*2.2);
+  const look=(12+r.speed*.4)/track.len;const cA=trackCurv(r.u+look),cB=trackCurv(r.u+look*2.2);
   const skill=r.ai.skill+game.diff*.08;
   // Racing line: set up wide for the corner seen far ahead, then cut to the apex (inside) as the near curvature builds.
   const nearK=Math.min(Math.abs(cA)*45,1);
   let target=Math.sign(cA)*Math.min(Math.abs(cA)*170,4.4)-Math.sign(cB)*Math.min(Math.abs(cB)*95,3.2)*(1-nearK)+r.ai.offset*(1-nearK);
+  // A safe token line is a choice, never a teleport or invisible grant.
+  if(r.tokens<10&&Math.abs(cA)<.015)for(const token of tokens){const ahead=du_dist(r.u,token.u);if(token.t<=0&&ahead>3&&ahead<18&&Math.abs(token.lat)<TRACK_W/2-1.5){target=lerp(target,token.lat,.65);break;}}
   // avoid mines ahead and missiles closing from behind
   for(let i=0;i<mines.length;i++){const m=mines[i];const d=du_dist(r.u,m.u);if(d>0&&d<28&&Math.abs(m.lat-r.lat)<3){target+= (r.lat>m.lat?2.6:-2.6);}}
   for(let i=0;i<missiles.length;i++){const m=missiles[i];if(m.owner===r)continue;const d=du_dist(m.u,r.u);if(d>0&&d<24&&Math.abs(m.lat-r.lat)<2.4)target+=(r.lat>m.lat?2.4:-2.4);}
@@ -382,11 +390,12 @@ function stepAI(r,dt){
   if(r.item){r.ai.itemHeld+=dt;r.ai.itemDelay-=dt;if(r.ai.itemDelay<=0&&aiWantsItem(r,cA)){useItem(r);r.ai.itemDelay=.6+rng()*1.2;}}
   else{r.ai.itemDelay=.6+rng()*2;r.ai.itemHeld=0;}
   r.ai.specialIdle=r.specialCooldown>0?0:r.ai.specialIdle+dt;
-  // rubber band relative to player: none in SIMULATION; STANDARD/OVERSEER never exceed the player's top speed by more than 8% / 14%.
-  const p=game.player;
-  if(game.diff===0||!p){r.rubber=.9+r.ai.skill*.1;}
-  else{const diff=p.progress-r.progress;const band=[0,.8,.7][game.diff],base=[.9,.95,1.03][game.diff],cap=[1,1.08,1.14][game.diff];
-    r.rubber=clamp(base+diff*band,.84,cap*p.maxSpeedBase/r.maxSpeedBase);}
+  // Difficulty changes decisions and consistency; all racers obey their legal build.
+  r.rubber=1;
+  const corner=Math.max(Math.abs(cA),Math.abs(cB));
+  const safeSpeed=r.maxSpeedBase*clamp(1-corner*(game.diff===0?7:game.diff===1?5:4),.58,1);
+  if(!r.drifting&&r.speed>safeSpeed){r.throttle=false;r.brake=r.speed>safeSpeed+5;}
+
 }
 
 // ---------- Camera ----------
@@ -536,10 +545,11 @@ function updateHUD(dt){
 // ---------- Race flow ----------
 function onPlayerFinish(){
   if(typeof clearAddons==='function')clearAddons();if(typeof clearAbilities==='function')clearAbilities();
-  if(typeof raceTelemetry!=='undefined')raceTelemetry.finish(game.player.finishTime);
+  if(typeof raceTelemetry!=='undefined'){raceTelemetry.event('lap-timing',{circuitRevision:'p0',map:chosenMapId,playerLapSeconds:game.player.lapTimes.slice(),aiLaps:game.racers.filter(r=>!r.isPlayer).map(r=>({division:r.div.id,lapSeconds:r.lapTimes.slice()})),tokensCollected:game.player.totalTokensCollected});raceTelemetry.finish(game.player.finishTime);}
   updateRanks(true);const p=game.player,key=raceRecordKey(p.div.id,game.diff);const old=saved[key];
   game.newBest=!Number.isFinite(old)||p.finishTime<old;game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
   if(game.newBest){saved[key]=p.finishTime;persist();}
+  if(typeof settleRewardRace==='function')settleRewardRace();
   game.state='finish';SFX.finish();rumble(.6,.8,400);
   const pb=game.newBest?(Number.isFinite(old)?'PB '+fmtDelta(game.pbDelta,2):'NEW PERSONAL BEST'):'';
   setToast(p.rank===1?'VICTORY':'FINISH','gold',pb,4);game.finishTimer=3.2;hideTouch();
@@ -555,7 +565,7 @@ function showResults(){
     const gap=!r.finished?'':r===leader?'LEADER':leader&&leader.finished?fmtDelta(r.finishTime-leader.finishTime,2):'';
     return `<div class="${r.isPlayer?'me':''}" style="--c:${r.div.acc}"><b>${i+1}</b><span><em></em>${r.div.name}</span><i>${r.finished?fmtTime(r.finishTime):'RACING · LAP '+Math.min(r.lap,game.laps)}</i><i class="bl${r.bestLap>0&&r.bestLap===fastest?' fastest':''}">${r.bestLap>0?fmtTime(r.bestLap):'—'}</i><i class="gp">${gap}</i></div>`;}).join('');
   document.getElementById('hud').classList.add('hidden');
-  document.getElementById('results').classList.remove('hidden');game.state='results';
+  document.getElementById('results').classList.remove('hidden');game.state='results';if(typeof renderRewardSummary==='function')renderRewardSummary();
 }
 // Results → Next Circuit: cycle to the following MAPS entry and restart with the same director and difficulty.
 function nextCircuit(){
