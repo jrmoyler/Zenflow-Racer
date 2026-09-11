@@ -1,0 +1,41 @@
+{
+  "method": "Arc length / 47m/s. Geometry estimate only; not a human timing certification.",
+  "circuits": [
+    {
+      "map": "cherry",
+      "beforeMetres": 1299.148177985483,
+      "afterMetres": 2003.07600528398,
+      "addedMetres": 703.927827298497,
+      "referenceSpeed": 47,
+      "geometricSeconds": 14.97718781486164,
+      "minCenterClearance": 15.543410988512374,
+      "humanLapSeconds": null,
+      "aiLapSeconds": null,
+      "certified": false
+    },
+    {
+      "map": "stormforge",
+      "beforeMetres": 1318.2291674507244,
+      "afterMetres": 1983.2975715033147,
+      "addedMetres": 665.0684040525903,
+      "referenceSpeed": 47,
+      "geometricSeconds": 14.150391575587028,
+      "minCenterClearance": 24.912076904934057,
+      "humanLapSeconds": null,
+      "aiLapSeconds": null,
+      "certified": false
+    },
+    {
+      "map": "canopy",
+      "beforeMetres": 1196.2556710415915,
+      "afterMetres": 1929.248610620588,
+      "addedMetres": 732.9929395789964,
+      "referenceSpeed": 47,
+      "geometricSeconds": 15.595594459127582,
+      "minCenterClearance": 18.125408631330437,
+      "humanLapSeconds": null,
+      "aiLapSeconds": null,
+      "certified": false
+    }
+  ]
+}

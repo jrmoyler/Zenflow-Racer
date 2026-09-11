@@ -13,11 +13,13 @@ function selectMap(id){
   const next=MAPS.find(m=>m.id===id);if(!next)throw new Error('Unknown circuit: '+id);
   if(next===activeMap&&world.children.length)return false;
   activeMap=next;
-  const controls=next.control||CHERRY_CONTROL;
+  const baseControls=next.control||CHERRY_CONTROL;
+  const controls=typeof extendedCircuitControls==='function'?extendedCircuitControls(id,baseControls):baseControls;
+  const adapt=keys=>typeof extendedCircuitKeys==='function'?extendedCircuitKeys(id,keys):keys;
   CTRL.splice(0,CTRL.length,...controls.map(p=>p.slice()));
   // Wide, gently banked circuits maintain a continuous start/finish frame.
-  ROLL_KEYS.splice(0,ROLL_KEYS.length,...(next.id==='cherry'?CHERRY_ROLL:[[0,0],[3,0],[4,-12],[6,0],[9,9],[12,0],[16,-8],[18,0],[20,0]]).map(p=>p.slice()));
-  AG_KEYS.splice(0,AG_KEYS.length,...(next.id==='cherry'?CHERRY_AG:[[0,0],[20,0]]).map(p=>p.slice()));
+  ROLL_KEYS.splice(0,ROLL_KEYS.length,...adapt(next.id==='cherry'?CHERRY_ROLL:[[0,0],[3,0],[4,-12],[6,0],[9,9],[12,0],[16,-8],[18,0],[20,0]]).map(p=>p.slice()));
+  AG_KEYS.splice(0,AG_KEYS.length,...adapt(next.id==='cherry'?CHERRY_AG:[[0,0],[20,0]]).map(p=>p.slice()));
   const geos=new Set(),mats=new Set();world.traverse(o=>{if(o.geometry)geos.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>mats.add(m));});
   world.clear();geos.forEach(g=>g.dispose());mats.forEach(m=>{m.userData?.mapTexture?.dispose();m.dispose();});mapSceneryAnimations=[];
   buildTrackFrames();buildTrackMeshes();buildEnvironment();applyMapAtmosphere();

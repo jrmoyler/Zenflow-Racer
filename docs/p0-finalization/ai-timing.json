@@ -1,0 +1,65 @@
+{
+  "method": "Deterministic ZenFlow / Standard / solo / no items / authored banking and anti-gravity; actual stepAI and stepRacer, 120Hz. Not physical-device or human evidence.",
+  "runs": [
+    {
+      "map": "cherry",
+      "extended": false,
+      "lapSeconds": [
+        32.18473159301609,
+        31.40598662558638,
+        31.406492688354398
+      ],
+      "meanLapSeconds": 31.665736968985623
+    },
+    {
+      "map": "cherry",
+      "extended": true,
+      "lapSeconds": [
+        49.25275338996419,
+        48.508691356019064,
+        48.5077355702787
+      ],
+      "meanLapSeconds": 48.75639343875398
+    },
+    {
+      "map": "stormforge",
+      "extended": false,
+      "lapSeconds": [
+        33.975443785343565,
+        33.18615721136947,
+        33.191679977945114
+      ],
+      "meanLapSeconds": 33.451093658219385
+    },
+    {
+      "map": "stormforge",
+      "extended": true,
+      "lapSeconds": [
+        50.87033821678522,
+        50.1138189550181,
+        50.09493331214004
+      ],
+      "meanLapSeconds": 50.35969682798112
+    },
+    {
+      "map": "canopy",
+      "extended": false,
+      "lapSeconds": [
+        31.885739472726094,
+        31.10853803388151,
+        31.095663944224142
+      ],
+      "meanLapSeconds": 31.363313816943915
+    },
+    {
+      "map": "canopy",
+      "extended": true,
+      "lapSeconds": [
+        49.5374101719968,
+        48.76621382252816,
+        48.758750978334305
+      ],
+      "meanLapSeconds": 49.02079165761975
+    }
+  ]
+}

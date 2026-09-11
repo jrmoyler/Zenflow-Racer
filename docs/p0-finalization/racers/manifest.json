@@ -1,0 +1,422 @@
+[
+  {
+    "id": "zenflow",
+    "file": "zenflow.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "collective",
+    "file": "collective.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "hybrid",
+    "file": "hybrid.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "nexus",
+    "file": "nexus.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "kinetic",
+    "file": "kinetic.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "juris",
+    "file": "juris.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "signal",
+    "file": "signal.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "loom",
+    "file": "loom.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "vector",
+    "file": "vector.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "aether",
+    "file": "aether.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "animus",
+    "file": "animus.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "helix",
+    "file": "helix.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "ledger",
+    "file": "ledger.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "terra",
+    "file": "terra.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "obsidian",
+    "file": "obsidian.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "civic",
+    "file": "civic.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "cognara",
+    "file": "cognara.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "gaia",
+    "file": "gaia.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "nomad",
+    "file": "nomad.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  },
+  {
+    "id": "eon",
+    "file": "eon.png",
+    "views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "hero",
+      "cockpit",
+      "chase",
+      "drift",
+      "boost",
+      "victory",
+      "spinout",
+      "neutral"
+    ],
+    "renderer": "CanvasRaceRenderer CPU diagnostic",
+    "webgl": false,
+    "visualApproval": false
+  }
+]

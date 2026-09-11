@@ -48,12 +48,12 @@ function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,
 function useSpecial(r){
  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.spin>0&&!['helix','eon'].includes(r.div.id))return false;
  const power=ABILITIES[r.div.id];if(!power)return false;
- r.specialCooldown=power.cooldown;abilityFX(r);powerOutcome.last='';
+ r.specialCooldown=power.cooldown*(r.powerCycle||1);abilityFX(r);powerOutcome.last='';
  switch(r.div.id){
  case 'zenflow':r.specialActive=4;r.specialSeen.clear();break;
  case 'collective':{
   const nearby=game.racers.filter(o=>o!==r&&!o.finished&&o.tokens>0&&!(o.vault>0)&&Math.abs(du_dist(r.u,o.u))<35).sort((a,b)=>Math.abs(du_dist(r.u,a.u))-Math.abs(du_dist(r.u,b.u)));
-  let taken=0;for(const o of nearby){if(r.tokens>=10||r.vault>0||taken>=3)break;if(powerProtected(o,r,false))continue;if(o.shield>0&&!(o.perimeter>0)){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;taken++;}
+  let taken=0;for(const o of nearby){if(r.tokens>=10||r.vault>0||taken>=3)break;if(powerProtected(o,r,false))continue;if(o.shield>0&&!(o.perimeter>0)){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;r.totalTokensCollected=(r.totalTokensCollected||0)+1;taken++;}
   // A siphon that finds nothing to take still converts the reserve into speed:
   // the cooldown is committed either way, so the activation must never be inert.
   if(taken)powerOutcome(r,'+'+taken+' TOKEN'+(taken===1?'':'S'));
@@ -111,7 +111,7 @@ function stepAbilities(dt){
   if(r.div.id==='ledger'){let locked=0;for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<16&&!powerProtected(o,r,false)){o.vault=Math.max(o.vault,r.specialActive);locked++;}}
    if(locked&&r.isPlayer)powerReport(r,'VAULT LOCK',powerLanded(locked,'RIVAL')+' LOCKED');}
   if(r.div.id==='civic'){let target=null,best=14;for(const o of game.racers){const d=Math.abs(du_dist(r.u,o.u));if(o!==r&&!o.finished&&!(o.phase>0)&&d<best&&Math.abs(r.lat-o.lat)<4){target=o;best=d;}}if(target)target.civicDraft=Math.max(target.civicDraft,.4);}
-  if(r.div.id==='aether'&&r.spin<=0&&!(r.phase>0)&&!(r.vault>0))for(const t of tokens){if(t.t<=0&&r.tokens<10&&Math.abs(du_dist(r.u,t.u))<24){t.t=9;t.mesh.visible=false;r.tokens++;if(r.isPlayer)SFX.token(r.tokens);}}
+  if(r.div.id==='aether'&&r.spin<=0&&!(r.phase>0)&&!(r.vault>0))for(const t of tokens){if(t.t<=0&&r.tokens<10&&Math.abs(du_dist(r.u,t.u))<24){t.t=9;t.mesh.visible=false;r.tokens++;r.totalTokensCollected=(r.totalTokensCollected||0)+1;if(r.isPlayer)SFX.token(r.tokens);}}
   if(r.div.id==='animus'){
    r.specialElapsed+=activeDt;
    while(r.specialPulses<3&&r.specialPulses*1.5<=r.specialElapsed){r.specialPulses++;let target=null,best=32;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best&&Math.abs(r.lat-o.lat)<6){target=o;best=d;}}if(target&&powerSlow(target,1.1,r)){target.speed*=.84;abilityFX(target,'animus-pulse');}}

@@ -1,0 +1,20 @@
+P0 verification
+
+npm ci: PASS (Node 24.19.0)
+npm run verify: PASS, exit 0
+  Includes npm test, build, test:release, test:runtime, test:assets.
+  241 PASS output lines across the combined pipeline (not a unique-test count).
+Final save/racer-target fixes: node tests/progression.cjs, node tests/garage.cjs and node tests/economy.cjs PASS.
+Final npm run build and npm run test:release: PASS.
+git diff --check: PASS.
+
+Additional diagnostics:
+node tests/circuit-extensions.cjs: PASS
+node tools/p0-ai-timing.cjs: PASS, six complete solo three-lap simulations
+node tools/p0-racer-review.cjs: PASS, twenty sheets / twelve views each
+
+Unpassed acceptance gates:
+Blender 4.5 startup: FAIL, exit 139, including --version. Original GLBs were not overwritten.
+Local Browser preview: BLOCKED, ERR_BLOCKED_BY_CLIENT.
+Physical device tests: NOT RUN, no connected hardware.
+Human lap timing / fastest legal lap / final WebGL visual approval / complete shortcut and landmark art: OPEN.

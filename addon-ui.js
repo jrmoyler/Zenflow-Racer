@@ -17,15 +17,16 @@
   function canEquip(){return !!selected&&game.state==='roster'&&['character','map'].includes(raceSetup.step);}
   function equipped(){return catalog.find(a=>a.id===saved.addons?.[selected?.id])||null;}
   function sync(){const a=equipped();document.getElementById('equipped-addon').textContent=a?a.name:'Choose from 24 bonus powers';launch.setAttribute('aria-label',(a?'Change '+a.name:'Equip a bonus power')+' for '+(selected?.name||'your racer'));}
-  function equip(id){
+  async function equip(id){
     if(!canEquip())return;
+    if(id&&typeof Economy!=='undefined'&&!saved.ownedAddons.includes(id)){status.textContent='Locked · Purchase this power in the Garage.';return;}
     if(!saved.addons||typeof saved.addons!=='object'||Array.isArray(saved.addons))saved.addons={};
-    saved.addons[selected.id]=id;persist();sync();
+    if(typeof economyTransaction==='function'){try{await economyTransaction(s=>({...s,addons:{...s.addons,[selected.id]:!id||s.ownedAddons.includes(id)?id:null}}));}catch(error){status.textContent=error.message;return;}}else{saved.addons[selected.id]=id;persist();}sync();
     const a=equipped();status.textContent=a?a.name+' equipped · Press F or tap ADD-ON in your race.':'Add-on slot cleared.';
     list.querySelectorAll('button').forEach(b=>{const active=b.dataset.addon===(a?.id||'');b.setAttribute('aria-pressed',String(active));
       const parts=rowParts.get(b);if(!parts)return;
       parts.cd.textContent=b.dataset.addon?addonDefinition(b.dataset.addon).cooldown+'s COOLDOWN':'NO ADD-ON';
-      parts.action.textContent=active?'EQUIPPED ✓':b.dataset.addon?'ADD ON':'CLEAR SLOT';});
+      parts.action.textContent=active?'EQUIPPED ✓':b.dataset.addon?(typeof Economy!=='undefined'&&!saved.ownedAddons.includes(b.dataset.addon)?'LOCKED · GARAGE':'EQUIP'):'CLEAR SLOT';});
     SFX.ui();
   }
   function render(){
@@ -49,7 +50,7 @@
       // The row is one button, so the call to action is a chip inside it rather
       // than a nested control that would break keyboard and pointer semantics.
       const action=document.createElement('span');action.className='addon-action';
-      action.textContent=active?'EQUIPPED ✓':a.id?'ADD ON':'CLEAR SLOT';
+      action.textContent=active?'EQUIPPED ✓':a.id?(typeof Economy!=='undefined'&&!saved.ownedAddons.includes(a.id)?'LOCKED · GARAGE':'EQUIP'):'CLEAR SLOT';
       button.append(mark,copy,action);rowParts.set(button,{cd,action});
       button.addEventListener('click',()=>equip(a.id||null));list.append(button);
     }
@@ -72,7 +73,7 @@
     // Native keyboard / assistive clicks have no pointerdown event.
     if(event.detail===0&&game.player&&game.state==='race')useAddon(game.player);
   });
-  document.getElementById('grid').addEventListener('click',()=>requestAnimationFrame(sync));window.addEventListener('racerselect',sync);sync();
+  document.getElementById('grid').addEventListener('click',()=>requestAnimationFrame(sync));window.addEventListener('racerselect',sync);window.addEventListener('garagechange',()=>{sync();if(dialog.open)render();});sync();
 })();
 function updateAddonHUD(r){
   const a=typeof addonDefinition==='function'?addonDefinition(r.addonId):(typeof ADDONS==='undefined'?null:(Array.isArray(ADDONS)?ADDONS:Object.values(ADDONS)).find(a=>a.id===r.addonId));

@@ -7,9 +7,10 @@
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
-    "test": "node tests/game-regression.cjs && node tests/setup-flow.cjs && node tests/race-telemetry.cjs && node tests/immersion-regression.cjs && node tests/presentation.cjs && node tests/webgl-lighting.cjs && node tests/finish-ceremony.cjs && node tests/item-finish.cjs && node tests/addon-powers.cjs && node tests/addon-ui.cjs && node tests/power-icons.cjs && node tests/addon-effects.cjs && node tests/living-world.cjs && node tests/natural-world.cjs && node tests/audience.cjs && node tests/automatic-update.cjs && node tests/review-bootstrap.cjs",
+    "test": "node tests/p0-completion.cjs && node tests/garage.cjs && node tests/progression.cjs && node tests/circuit-extensions.cjs && node tests/economy.cjs && node tests/game-regression.cjs && node tests/setup-flow.cjs && node tests/race-telemetry.cjs && node tests/immersion-regression.cjs && node tests/presentation.cjs && node tests/webgl-lighting.cjs && node tests/finish-ceremony.cjs && node tests/item-finish.cjs && node tests/addon-powers.cjs && node tests/addon-ui.cjs && node tests/power-icons.cjs && node tests/addon-effects.cjs && node tests/living-world.cjs && node tests/natural-world.cjs && node tests/audience.cjs && node tests/automatic-update.cjs && node tests/review-bootstrap.cjs",
     "test:release": "node tests/build-shell.cjs",
     "verify": "npm test && npm run build && npm run test:release && npm run test:runtime && npm run test:assets",
+    "test:balance": "node tools/p0-field-balance.cjs",
     "test:runtime": "node tests/reference-runtime.cjs",
     "blender:karts": "node tools/export-kart-rig.cjs && bash tools/render-karts-blender.sh",
     "test:assets": "node tests/playable-assets.cjs",
@@ -23,5 +24,8 @@
   "dependencies": {
     "animejs": "4.2.2",
     "three": "0.128.0"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
   }
 }

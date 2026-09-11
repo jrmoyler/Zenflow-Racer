@@ -18,7 +18,7 @@ for(const mobile of [false,true]){
  const scene=new THREE.Scene();scene.fog=new THREE.Fog(0xffffff,180,780);
  const c={THREE,console,document:{createElement:canvas},FALLBACK_GRAPHICS:true,MOBILEFX:mobile,LOWFX:false,TEX:{finish:new THREE.Texture()},zenWorldTime:{value:0},scene,sun:new THREE.DirectionalLight(),hemi:new THREE.HemisphereLight()};
  vm.createContext(c);const run=code=>vm.runInContext(code,c);
- run(core.slice(0,core.indexOf('function hexToRgb')));run(read('surface-detail.js'));run(read('maps.js'));run(worldSource.slice(worldSource.indexOf('const CTRL=')));run(read('immersion.js'));
+ run(core.slice(0,core.indexOf('function hexToRgb')));run(read('surface-detail.js'));run(read('circuit-extensions.js'));run(read('maps.js'));run(worldSource.slice(worldSource.indexOf('const CTRL=')));run(read('immersion.js'));
  const counts={},signatures=new Set();let priorSceneCount;
  for(const id of ['cherry','stormforge','canopy','cherry']){
   let geometryDisposals=0,materialDisposals=0,textureDisposals=0,ownedGeos=new Set(),ownedMats=new Set(),ownedTextures=new Set();
