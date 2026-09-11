@@ -471,6 +471,11 @@ function finishRiderIdentity(root){
  const marker=new THREE.Group();marker.name='division-rider-identity';pilot.add(marker);
  marker.userData={division:ud.chassis,family:profile.family};
  const paint=new THREE.MeshPhysicalMaterial({color:div.acc,metalness:.38,roughness:.28,clearcoat:.7,clearcoatRoughness:.24});
+ paint.name=div.id+'-identity-enamel';paint.userData.surface='paint';
+ // Loaded glTF factors are linear; the procedural export scaffold uses sRGB.
+ if(ud.asset==='blender-glb')paint.color.convertSRGBToLinear();
+ const fabric=new THREE.MeshStandardMaterial({color:paint.color.clone().multiplyScalar(.42),metalness:0,roughness:.92});
+ fabric.name=div.id+'-identity-woven-race-suit';
  const trim=root.getObjectByName('helmet-crown-stripe').material;
  const dark=new THREE.MeshStandardMaterial({color:0x151e29,metalness:.12,roughness:.66});
  const add=(parent,name,g,m)=>{const mesh=new THREE.Mesh(g,m);mesh.name=name;mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);return mesh;};
@@ -485,8 +490,8 @@ function finishRiderIdentity(root){
  // neck termination are held fixed to retain the original seated rig contract.
  const torso=root.getObjectByName('torso');
  sculpt(torso,(x,y,z)=>{const t=Math.sin(Math.PI*clamp((y-.27)/.98,0,1));return [x*(1+(profile.chest-1)*t),y,z*(1+.14*t)];});
- torso.material=paint;
- for(const arm of ud.arms){const sleeve=arm.getObjectByName(arm.name+'-mesh');if(sleeve)sleeve.material=paint;}
+ torso.material=fabric;
+ for(const arm of ud.arms){const sleeve=arm.getObjectByName(arm.name+'-mesh');if(sleeve)sleeve.material=fabric;}
  // A continuous tapered neck seal overlaps the suit and helmet base. The former
  // exposed torus read as a separate spacer, making the helmet appear to float.
  const collar=pilot.getObjectByName('suit-raised-collar');

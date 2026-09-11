@@ -46,7 +46,12 @@ function assertClosedSkin(geometry,label){
   assert.notEqual(a.getObjectByName('helmet-shell').geometry,b.getObjectByName('helmet-shell').geometry,'sculpted helmet geometry is instance-owned');
   assert.equal(a.getObjectByName('rounded-wheel-shell').geometry,b.getObjectByName('rounded-wheel-shell').geometry,'immutable wheel meshes shared');
   assert.ok(a.getObjectByName('tailored-suit-inserts')&&a.getObjectByName('active-cooling-vanes'));
-  assert.equal(a.getObjectByName('suit-raised-collar').position.y,1.235);
+  const collarBox=new THREE.Box3().setFromObject(a.getObjectByName('suit-raised-collar'));
+  const helmetBox=new THREE.Box3().setFromObject(a.getObjectByName('helmet-shell'));
+  const suitBox=new THREE.Box3().setFromObject(a.getObjectByName('torso'));
+  assert.ok(collarBox.min.y<=suitBox.max.y&&collarBox.max.y>=helmetBox.min.y,div.id+': neck seal connects suit to helmet');
+  assert.notEqual(a.getObjectByName('torso').material,a.getObjectByName('helmet-shell').material,div.id+': cloth and enamel use separate finishes');
+  assert.ok(a.getObjectByName('torso').material.roughness>=.9&&a.getObjectByName('torso').material.metalness===0,div.id+': torso remains matte cloth');
   for(const w of a.userData.wheels){assert.equal(w.spin.getObjectByName('brake-and-spoke-hardware').children.length,1,'brake and spokes batched');assert.ok(w.spin.getObjectByName('rounded-wheel-shell').material.roughness>.8,'rubber tire shell');}
   a.updateMatrixWorld(true);const torsoBox=new THREE.Box3().setFromObject(a.getObjectByName('torso')),headBox=new THREE.Box3().setFromObject(a.getObjectByName('head-mesh')),torsoSize=torsoBox.getSize(new THREE.Vector3());
   assert.ok(torsoSize.y>1.4&&torsoSize.x>.65&&torsoSize.z>.65,div.id+': full torso, hips and legs survive Blender processing');
