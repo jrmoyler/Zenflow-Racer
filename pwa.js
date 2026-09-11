@@ -1,5 +1,16 @@
 (() => {
-  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !['terminal.local', 'localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
+  const localHost=['terminal.local','localhost','127.0.0.1','[::1]'].includes(location.hostname);
+  if('serviceWorker' in navigator&&location.protocol!=='file:'&&localHost){
+    window.addEventListener('load',async()=>{
+      try{
+        const script=new URL('./sw.js',location.href).href;
+        const registrations=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.filter(r=>[r.active,r.waiting,r.installing].some(w=>w&&new URL(w.scriptURL).href===script)).map(r=>r.unregister()));
+        if('caches' in window){const keys=await window.caches.keys();await Promise.all(keys.filter(k=>k.startsWith('zenflow-racer-')).map(k=>window.caches.delete(k)));}
+      }catch(_){/* A denied storage API must not prevent local play. */}
+    });
+  }
+  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !localHost) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').then(registration => {
       let reloading=false,reloadQueued=false,reloadIssued=false;
       navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading){reloadQueued=true;applyAtMenu();}});

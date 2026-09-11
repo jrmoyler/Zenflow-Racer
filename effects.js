@@ -174,7 +174,7 @@ function stepWaveTwoGeometry(f,dt,clock){
  const line=f.mesh.getObjectByName(f.kind==='civic'?'civic-beneficiary':'predictive-road-line');if(!line)return;
  if(typeof track==='undefined'||!track||typeof trackPoint!=='function')return;
  let target=null;
- if(f.kind==='civic'&&typeof game!=='undefined')target=game.racers.filter(r=>r!==f.owner&&!r.finished&&Math.abs(du_dist(f.owner.u,r.u))<14&&Math.abs(r.lat-f.owner.lat)<4).sort((a,b)=>Math.abs(du_dist(f.owner.u,a.u))-Math.abs(du_dist(f.owner.u,b.u)))[0];
+ if(f.kind==='civic'&&typeof game!=='undefined')target=game.racers.filter(r=>r!==f.owner&&!r.finished&&!(r.phase>0)&&Math.abs(du_dist(f.owner.u,r.u))<14&&Math.abs(r.lat-f.owner.lat)<4).sort((a,b)=>Math.abs(du_dist(f.owner.u,a.u))-Math.abs(du_dist(f.owner.u,b.u)))[0];
  line.visible=f.kind==='cognara'||!!target;if(!line.visible)return;
  f.mesh.updateMatrixWorld(true);const inverse=new THREE.Matrix4().copy(f.mesh.matrixWorld).invert(),v=new THREE.Vector3(),a=line.geometry.attributes.position;
  const distance=target?du_dist(f.owner.u,target.u):24;

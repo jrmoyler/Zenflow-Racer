@@ -115,10 +115,19 @@ function buildAddonProjectileSignature(root,id,color){
 }
 function removeAddonEffect(f){f.timeline?.cancel();scene.remove(f.mesh);const materials=new Set(),geometries=new Set();f.mesh.traverse(o=>{if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);if(o.userData.ownedGeometry)geometries.add(o.geometry);if(o.isInstancedMesh)o.dispose?.();});materials.forEach(m=>m.dispose());geometries.forEach(g=>g.dispose());}
 function clearAddonEffects(){while(addonEffects.length)removeAddonEffect(addonEffects.pop());}
+// Gameplay already bounds entity count. Pin their telegraphs; optional cast and
+// contact decoration must never evict a hazard that can still hit a racer.
+function reserveAddonEffect(entity){
+ for(let i=addonEffects.length-1;i>=0;i--)if(addonEffects[i].entity&&addonEffects[i].entity.life<=0)removeAddonEffect(addonEffects.splice(i,1)[0]);
+ if(addonEffects.length<ADDON_FX_CAP)return true;
+ const index=addonEffects.findIndex(f=>!f.entity);
+ if(index>=0){removeAddonEffect(addonEffects.splice(index,1)[0]);return true;}
+ return !!entity;
+}
 function spawnAddonEffect(id,u,lat,owner,options={}){
  if(!ADDON_FX_COLORS[id])return null;
- if(addonEffects.length>=ADDON_FX_CAP)removeAddonEffect(addonEffects.shift());
  if(options.phase==='burst')return spawnAddonContact(id,u,lat,owner);
+ if(!reserveAddonEffect(options.entity))return null;
  const mesh=new THREE.Group();mesh.name='addon-'+id;
  if(options.phase==='projectile'&&['growth','cascade','monolith','earth-spire'].includes(id))buildAddonProjectileSignature(mesh,id,ADDON_FX_COLORS[id]);else buildAddonSignature(mesh,id,ADDON_FX_COLORS[id]);
  const duration=options.duration??2.4,fx={id,u,lat,owner,mesh,life:duration,duration,follow:!!options.follow,entity:options.entity,phase:options.phase||'cast',contact:false};if(options.radius&&options.phase!=='projectile'){const base={acid:3.8,pyre:3,kraken:3.7,astral:4.1,rend:3.2,ward:3.1,growth:2.8,ink:3.6,venom:2.8,monolith:3.5}[id]||3;mesh.scale.set(options.radius/base,1,options.radius/base);mesh.userData.effectRadius=options.radius;if(id==='pyre')mesh.userData.safeRadius=options.radius*.5;}
@@ -127,7 +136,7 @@ function spawnAddonEffect(id,u,lat,owner,options={}){
 // Public contact entry point: invoke after a collision/slow/blocked hit resolves.
 // Normal item collisions use their item key, so missiles/mines share the standard.
 function spawnAddonContact(id,u,lat,owner){
- if(addonEffects.length>=ADDON_FX_CAP)removeAddonEffect(addonEffects.shift());
+ if(!reserveAddonEffect())return null;
  const color=ADDON_FX_COLORS[id]||referencePowerColors[id]||'#fff4cb',mesh=new THREE.Group();mesh.name='contact-'+id;
  const ring=addonRing(mesh,color,1, -.6,'contact-shock');ring.scale.setScalar(.2);
  const burst=new THREE.InstancedMesh(addonCrystalGeometry(),addonSurface(color,['pyre','fire','fire-boost','fire-portal'].includes(id)?1:0),powerLow?8:14);burst.name='contact-shards';burst.frustumCulled=false;mesh.add(burst);
@@ -139,11 +148,12 @@ function spawnAddonContact(id,u,lat,owner){
 function stepAddonEffects(dt){
  if(!(dt>0))return;
  for(let i=addonEffects.length-1;i>=0;i--){const f=addonEffects[i];f.life-=dt;
-  if(f.life<=0||(f.entity&&f.entity.life<=0)){removeAddonEffect(f);addonEffects.splice(i,1);continue;}
+  if(f.entity?f.entity.life<=0:f.life<=0){removeAddonEffect(f);addonEffects.splice(i,1);continue;}
   const age=f.duration-f.life,clock=age*(powerReduced?.25:1);
   if(f.entity){f.u=f.entity.u;f.lat=f.entity.lat;}else if(f.follow&&f.owner){f.u=f.owner.u;f.lat=f.owner.lat;}
   orientOnTrack(f.mesh,f.u,f.lat,1,0);
   let fade=Math.min(1,age*7+.15,f.life*3);
+  if(f.entity)fade=Math.max(.35,fade);
   if(f.contact){if(f.timeline)f.timeline.seek(age*1000);else{const t=Math.min(1,age/.65),e=1-Math.pow(1-t,3);f.envelope.spread=.15+e*(powerReduced?1.65:3.65);f.envelope.lift=e*(powerReduced?.3:1.8);f.envelope.fade=1-e;}
    fade=f.envelope.fade;const shock=f.mesh.getObjectByName('contact-shock');shock.scale.setScalar(f.envelope.spread);
    const shards=f.mesh.getObjectByName('contact-shards');for(let n=0;n<shards.count;n++){const a=n/shards.count*Math.PI*2,s=.035+(n%3)*.012;powerDummy.position.set(Math.sin(a)*f.envelope.spread,Math.max(-.8,f.envelope.lift*(.3+n%3*.25)-age*age*3),Math.cos(a)*f.envelope.spread);powerDummy.scale.set(s,s*3,s);powerDummy.rotation.set(age*6+n,a,age*3);powerDummy.updateMatrix();shards.setMatrixAt(n,powerDummy.matrix);}shards.instanceMatrix.needsUpdate=true;

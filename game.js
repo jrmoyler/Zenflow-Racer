@@ -159,7 +159,7 @@ function stepRacer(r,dt){
   // a stopped kart; countdown and anti-gravity sections cannot roll the grid.
   if(game.state!=='countdown'&&r.spin<=0&&r.wheelspin<=0){
     trackTan(r.u,_v1);
-    if(Math.abs(r.speed)>.2||r.throttle)r.speed-=9.81*_v1.y*(1-ag)*dt;
+    if(!r.brake||Math.abs(r.speed)>.2||r.throttle)r.speed-=9.81*_v1.y*(1-ag)*dt;
     r.speed=clamp(r.speed,-9,r.maxSpeed*1.15);
   }
   // corner scrub (turning bleeds speed unless drifting)
@@ -246,10 +246,12 @@ function stepWorld(dt){
       if(b.perimeter>0){if(!(a.anchor>0))a.lat=clamp(a.lat-sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(a,.5,b);}
       // Only closing velocity creates an impulse. Equal-speed overlap cannot
       // manufacture acceleration on every simulation tick.
-      const front=ds>=0?b:a,back=ds>=0?a:b,closing=back.speed-front.speed;
-      if(closing>0&&total>0){const impulse=closing*.82/total;
-        if(!(back.anchor>0))back.speed-=impulse/back.weight;
-        if(!(front.anchor>0))front.speed+=impulse/front.weight;
+      const front=ds>=0?b:a,back=ds>=0?a:b,frontCos=Math.cos(front.theta),backCos=Math.cos(back.theta);
+      const closing=back.speed*backCos-front.speed*frontCos;
+      const effectiveMass=(back.anchor>0?0:backCos*backCos/back.weight)+(front.anchor>0?0:frontCos*frontCos/front.weight);
+      if(closing>0&&effectiveMass>1e-9){const impulse=closing*.82/effectiveMass;
+        if(!(back.anchor>0))back.speed-=impulse*backCos/back.weight;
+        if(!(front.anchor>0))front.speed+=impulse*frontCos/front.weight;
       }
       if(a.isPlayer||b.isPlayer){if(Math.abs(dl)<1.2&&game.trauma<.2)game.trauma+=.08;}}}
   // item boxes / tokens
@@ -759,7 +761,7 @@ async function boot(){
   requestAnimationFrame(frame);
  }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}
 }
-if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('700 20px "Rajdhani"'),document.fonts.load('500 12px "Rajdhani"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
+if(document.fonts&&document.fonts.load){Promise.allSettled([document.fonts.load('700 20px "Rajdhani"'),document.fonts.load('500 12px "Rajdhani"'),document.fonts.load('700 20px "Orbitron"'),document.fonts.load('800 120px "Orbitron"')]).catch(()=>{}).then(()=>setTimeout(boot,30));}else setTimeout(boot,300);
 
 // Isolated selection showroom: the same kart geometry used in the race, presented
 // on a holographic turntable that completes full 360° turns and can be spun by hand.
