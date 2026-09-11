@@ -1,15 +1,21 @@
 (() => {
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !['terminal.local', 'localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').then(registration => {
-      let reloading=false;
-      navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)location.reload();});
-      const offer=()=>{
-        if(!registration.waiting||document.getElementById('game-update'))return;
-        const button=document.createElement('button');button.id='game-update';button.textContent='Update ready · reload game';button.type='button';
-        button.onclick=()=>{if(typeof game!=='undefined'&&['race','countdown','finish'].includes(game.state)){button.textContent='Pause the race to update';return;}reloading=true;registration.waiting?.postMessage({type:'ACTIVATE_UPDATE'});};
-        document.body.append(button);
+      let reloading=false,reloadQueued=false,reloadIssued=false;
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading){reloadQueued=true;applyAtMenu();}});
+      // Apply complete cached releases automatically at a menu. Never reload
+      // a race, a paused race, a result ceremony, or a scene transition.
+      const applyAtMenu=()=>{
+        if(reloadIssued||typeof game==='undefined')return;
+        if(!['title','roster'].includes(game.state)||document.hidden)return;
+        if(typeof sceneCut!=='undefined'&&sceneCut.busy)return;
+        if(reloadQueued){reloadIssued=true;location.reload();return;}
+        if(reloading||!registration.waiting)return;
+        reloading=true;registration.waiting.postMessage({type:'ACTIVATE_UPDATE'});
       };
-      offer();registration.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)offer();});});
+      applyAtMenu();
+      setInterval(applyAtMenu,2000);
+      registration.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)applyAtMenu();});});
     }).catch(() => {}));
   }
   let installPrompt;

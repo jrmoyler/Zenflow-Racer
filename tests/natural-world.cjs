@@ -8,6 +8,7 @@ for(const mobile of [false,true]){
  c.MOBILEFX=mobile;
  for(const id of ['cherry','stormforge','canopy']){
  run(`selectMap('${id}')`);const world=run('world'),rocks=world.getObjectByName('blender-natural-stonework'),caps=[];
+ if(id!=='cherry'){const districts=run('world.userData.circuitDistricts');assert.equal(districts.length,run('world.userData.islands.length'));assert.ok(districts.every(d=>d.type===(id==='canopy'?'terraced-orchard':'machine-yard')));}
  const crowd=world.getObjectByName('blender-animated-audience'),plants=world.getObjectByName('island-understory');assert.ok(crowd.userData.spectators>200);assert.equal(crowd.children.length,12);assert.equal(plants.children.length,3);assert.equal(plants.userData.instances,run('world.userData.islands.length')*(mobile?26:52));
  assert.equal(rocks.children.length,3,'three reusable Blender meshes');
  let sea=0;world.traverse(m=>{if(m.name==='immersion-sea')sea++;if(m.name==='continuous-island-cap')caps.push(m);if(m.geometry)assert.ok(m.geometry.attributes.position.array.every(Number.isFinite));});assert.equal(sea,1,'one ocean per map');

@@ -353,6 +353,7 @@ function buildEnvironment(){
   // Small uninhabited fragments hang beneath the large islands, never in driving space.
   for(let k=0;k<14;k++){const host=islands[k%islands.length],g=islandGeometry(3+random()*3,10+random()*9,k+600),m=new THREE.Mesh(g,cliffMat);m.position.set(host.x+host.r*1.4,host.y-35-random()*30,host.z+host.r);world.add(m);}
   buildCircuitArchitecture();
+  buildCircuitDistricts();
   // Static architecture shares material batches; transparent water remains separate.
   world.updateMatrixWorld(true);const batches=new Map();
   world.traverse(mesh=>{if(!mesh.isMesh||mesh.userData.dynamic||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});
@@ -748,4 +749,116 @@ function buildRaceVenue(){
   // Empty resources must also be released on unusual/custom circuits.
   for(const [type,geo] of Object.entries(geos))if(![...batches.keys()].some(k=>k.startsWith(type+':')))geo.dispose();
   root.userData={stands,garages,spectators,markers,districts,lamps,placements,instanceBatches:batches.size};
+}
+
+// Circuit-specific, supported scenery. All working space begins outside the
+// guardrails. Shared materials join the existing static world batching pass.
+function buildCircuitDistricts(){
+  world.userData.circuitDistricts=[];
+  if(activeMap.id==='cherry')return;
+  const industrial=activeMap.id==='stormforge',rnd=mulberry(industrial?9120:7130);
+  const steel=new THREE.MeshStandardMaterial({color:industrial?0x657485:0xd7d0ba,metalness:industrial?.7:.08,roughness:.54,map:TEX.plasterColor||null});
+  const dark=new THREE.MeshStandardMaterial({color:industrial?0x313d49:0x53634b,metalness:industrial?.5:0,roughness:.85,map:TEX.cliffColor||null});
+  const copper=new THREE.MeshStandardMaterial({color:industrial?0xb6743c:0x796044,metalness:industrial?.65:0,roughness:.61,map:TEX.barkColor||null});
+  const light=new THREE.MeshStandardMaterial({color:industrial?0xffd194:0xf5e8bc,emissive:industrial?0xe78c39:0xcbbb82,emissiveIntensity:.45,roughness:.4});
+  const foliage=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.94,side:THREE.DoubleSide});
+  const districts=[],plants=[];
+  const leafGeos=industrial?[]:[0,1,2].map(i=>{const g=treeCanopyGeo(700+i,[0x234b37,0x89a864]);g.userData.wind=true;return g;});
+  const plant=(root,x,y,z,variant)=>{const m=mapMesh(leafGeos[variant%3],foliage,root,x,y,z);plants.push(m);return m;};
+  const box=(parent,mat,x,y,z,w,h,d)=>mapMesh(new THREE.BoxGeometry(w,h,d),mat,parent,x,y,z);
+  const beam=(parent,mat,a,b,r=.12)=>{const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),delta=end.clone().sub(start);const m=mapMesh(new THREE.CylinderGeometry(r,r,delta.length(),6),mat,parent);m.position.copy(start).add(end).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());return m;};
+  // Island districts replace repeated empty lawn with recognizable places:
+  // machine yards at Stormforge and terraced orchards at Canopy.
+  for(const [i,island] of world.userData.islands.entries()){
+    const root=new THREE.Group();root.position.set(island.x,island.y,island.z);world.add(root);
+    const radius=island.r;
+    if(industrial){
+      const width=radius*.94,depth=radius*.45,z=-radius*.32;
+      box(root,dark,0,.25,z,width,.5,depth);
+      // Deck paving, drainage channels and a safety railing attach to the slab.
+      for(let k=-3;k<=3;k++)box(root,steel,k*width/7,.515,z,.055,.015,depth);
+      for(const side of [-1,1]){
+        beam(root,steel,[-width/2,1.5,z+side*depth/2],[width/2,1.5,z+side*depth/2],.09);
+        for(let k=0;k<=6;k++)beam(root,steel,[-width/2+k*width/6,.5,z+side*depth/2],[-width/2+k*width/6,1.5,z+side*depth/2],.07);
+      }
+      for(const side of[-1,1]){
+        const x=side*width*.3;
+        mapMesh(new THREE.CylinderGeometry(1.5,1.5,5,16),steel,root,x,3,z);
+        mapMesh(new THREE.SphereGeometry(1.5,16,8,0,Math.PI*2,0,Math.PI/2),steel,root,x,5.5,z);
+        for(const h of[1,4.7]){const band=mapMesh(new THREE.TorusGeometry(1.53,.09,6,16),copper,root,x,h,z);band.rotation.x=Math.PI/2;}
+        mapTube([[x,3,z-1.5],[x,3,z-2.8],[x,.9,z-3],[0,.9,z-3]],.16,copper,root,8);
+        box(root,dark,x,2,z+1.53,.8,1.3,.12);box(root,light,x,2.3,z+1.61,.56,.16,.04);
+      }
+      // Braced maintenance hoist, suspended cable and hook over the machinery.
+      const span=width*.45;
+      for(const side of[-1,1]){
+        beam(root,steel,[side*span,.5,z],[side*span,9,z],.24);
+        beam(root,copper,[side*span,5,z],[side*(span-2),9,z],.13);
+        box(root,dark,side*span,.7,z,1.4,.4,1.4);
+      }
+      box(root,steel,0,9,z,span*2+.8,.5,.8);
+      beam(root,dark,[0,8.7,z],[0,5.9,z],.045);
+      mapTube([[0,5.9,z],[.3,5.5,z],[.15,5.1,z],[-.22,5.1,z],[-.35,5.4,z]],.10,copper,root,10);
+    }else{
+      // Low retaining walls with visible soil, orchard branches and underplanting.
+      for(let tier=0;tier<3;tier++){
+        const z=-radius*(.25+tier*.16),width=radius*(1.04-tier*.19),y=tier*.55;
+        box(root,dark,0,y+.32,z,width,.64,radius*.14);
+        box(root,copper,0,y+.66,z,width-.3,.07,radius*.14-.24);
+        for(const side of[-1,1])box(root,steel,0,y+.74,z+side*radius*.07,width+.16,.15,.18);
+        for(let k=0;k<5-tier;k++){
+          const x=(k/(4-tier)-.5)*width*.84;
+          const shrub=plant(root,x,y+1.1,z,i+tier+k);shrub.scale.set(.27,.24,.29);
+          beam(root,copper,[x,y+.7,z],[x,y+2.4,z],.09);
+        }
+      }
+      // Hand-built pergola with curved timber bents and vines at the back edge.
+      const z=-radius*.6;
+      for(const x of[-radius*.28,radius*.28]){
+        for(const dz of[-1.1,1.1])beam(root,copper,[x,0,z+dz],[x,5.2,z+dz],.14);
+        mapTube([[x,4.8,z-2],[x,5.5,z],[x,4.8,z+2]],.17,copper,root,12);
+      }
+      for(let k=0;k<7;k++){
+        const x=(k/6-.5)*radius*.66;
+        beam(root,steel,[x,5.1,z-2],[x,5.1,z+2],.09);
+      }
+      for(const dz of[-1.1,1.1])beam(root,copper,[-radius*.35,5,z+dz],[radius*.35,5,z+dz],.15);
+    }
+    districts.push({x:island.x,z:island.z,r:radius,type:industrial?'machine-yard':'terraced-orchard'});
+  }
+  // Close roadside structure gives each circuit a strong identity at race speed.
+  for(let k=0;k<18;k++){
+    const u=(k+.4)/18;if(trackAG(u)>.15)continue;
+    const root=new THREE.Group(),t=new THREE.Vector3(),up=new THREE.Vector3(),right=new THREE.Vector3();
+    trackPoint(u,0,0,root.position);trackTan(u,t);trackUp(u,up);trackRight(u,right);
+    root.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right,up,t.negate()));world.add(root);
+    for(const side of[-1,1]){
+      const x=side*11.7;
+      if(industrial){
+        box(root,dark,x,-.7,0,4.4,.6,7);
+        for(const dz of[-2.5,2.5])beam(root,steel,[side*7.7,-1,dz],[x,-.5,dz],.2);
+        box(root,steel,x,.7,0,2.7,2.2,3.7);
+        for(let v=0;v<8;v++)box(root,dark,x,1.55, -1.45+v*.42,2.5,.12,.15);
+        box(root,light,x,1,1.87,1.5,.22,.05);
+        mapTube([[x,.6,-2],[x,2.5,-2],[x+side*1.2,3,-2],[x+side*1.2,3,2],[x,2.5,2]],.12,copper,root,12);
+      }else{
+        box(root,dark,x,-.4,0,4.6,.9,7);
+        for(const dz of[-2.7,2.7])beam(root,copper,[side*7.7,-1,dz],[x,-.6,dz],.2);
+        for(const dx of[-2.2,2.2])box(root,steel,x+dx,.3,0,.22,.6,7);
+        for(const dz of[-3.4,3.4])box(root,steel,x,.3,dz,4.6,.6,.22);
+        for(let n=0;n<3;n++){
+          const shrub=plant(root,x,.5,(n-1)*2.2,k+n);shrub.scale.set(.38,.35+rnd()*.14,.38);shrub.geometry.userData.wind=true;
+        }
+      }
+    }
+  }
+  // Hundreds of plants cost three instanced draws and three wind geometries.
+  world.updateMatrixWorld(true);
+  for(const geometry of leafGeos){
+    const copies=plants.filter(m=>m.geometry===geometry),batch=new THREE.InstancedMesh(geometry,foliage,copies.length);
+    batch.name='district-orchard-foliage';batch.castShadow=true;batch.receiveShadow=true;batch.frustumCulled=false;
+    copies.forEach((m,i)=>{batch.setMatrixAt(i,m.matrixWorld);m.parent.remove(m);});world.add(batch);
+  }
+  if(industrial)foliage.dispose();
+  world.userData.circuitDistricts=districts;
 }
