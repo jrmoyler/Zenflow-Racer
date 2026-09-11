@@ -498,10 +498,6 @@ function refineRacingEquipment(root){
   batchKartBody(vents);
   ud.racingEquipment={wheelHardware,vents,restY:vents.position.y};
 }
-function animateRacingEquipment(ud,time,boost=0){
-  const gear=ud.racingEquipment;if(!gear)return;
-  gear.vents.rotation.x=Math.sin(time*1.4)*.012+Math.min(1,Math.max(0,boost))*.08;
-}
 
 function finishKartCockpit(root){
   const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;refineRacingEquipment(root);finishRiderFit(root);
@@ -529,6 +525,11 @@ function finishKartCockpit(root){
 }
 
 // ---------- Kart rig animation ----------
+function animateRacingEquipment(ud,time,boost=0){
+  const gear=ud.racingEquipment;if(!gear)return;
+  gear.vents.rotation.x=Math.sin(time*1.4)*.012+Math.min(1,Math.max(0,boost))*.08;
+}
+
 // Procedural suspension/body/pilot motion, layered with additive Blender clips from KART_CLIPS.
 // Everything here is allocation-free per call and runs both in the browser and under the
 // headless test stubs (only Vector3-like {x,y,z} transforms and plain math are required).
