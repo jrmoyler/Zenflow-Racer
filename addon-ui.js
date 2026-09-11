@@ -71,14 +71,15 @@
   for(const id of ['addonHUD','tA'])document.getElementById(id)?.addEventListener('click',event=>{
     // Pointer activation is already routed through held input in game.js.
     // Native keyboard / assistive clicks have no pointerdown event.
-    if(event.detail===0&&game.player&&game.state==='race')useAddon(game.player);
+    if(event.detail===0&&!event.currentTarget.disabled&&game.player&&game.state==='race')useAddon(game.player);
   });
   document.getElementById('grid').addEventListener('click',()=>requestAnimationFrame(sync));window.addEventListener('racerselect',sync);window.addEventListener('garagechange',()=>{sync();if(dialog.open)render();});sync();
 })();
 function updateAddonHUD(r){
   const a=typeof addonDefinition==='function'?addonDefinition(r.addonId):(typeof ADDONS==='undefined'?null:(Array.isArray(ADDONS)?ADDONS:Object.values(ADDONS)).find(a=>a.id===r.addonId));
   const button=document.getElementById('addonHUD'),touch=document.getElementById('tA');if(!button)return;
-  button.hidden=!a;if(touch)touch.hidden=!a;if(!a)return;
+  button.hidden=false;if(touch)touch.hidden=false;
+  if(!a){button.disabled=true;button.dataset.ready='false';button.style.setProperty('--addon-charge','0%');document.getElementById('addonLabel').textContent='No add-on equipped';button.setAttribute('aria-label','No add-on equipped. Choose one in the Garage.');if(touch){touch.disabled=true;touch.dataset.addon='';touch.innerHTML='<span>ADD-ON</span><small>EMPTY</small>';touch.classList.toggle('ready',false);touch.style.setProperty('--addon-charge','0%');touch.setAttribute('aria-label','No add-on equipped. Choose one in the Garage.');}return;}
   const icon=document.getElementById('addonIcon');
   if(icon&&icon.dataset.addon!==a.id){icon.dataset.addon=a.id;if(typeof addonIconSVG==='function')icon.innerHTML=addonIconSVG(a);}
   button.style.setProperty('--addon-color','#'+a.color.toString(16).padStart(6,'0'));
@@ -89,5 +90,5 @@ function updateAddonHUD(r){
   button.setAttribute('aria-label',a.name+' · '+state+' · F to activate');
   button.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/a.cooldown)*100)+'%');
   if(touch)touch.setAttribute('aria-label',a.name+' · '+state);
-  if(touch){touch.disabled=button.disabled;touch.textContent=ready?'ADD-ON':Math.ceil(r.addonCooldown)+'s';touch.classList.toggle('ready',ready&&!blocked);}
+  if(touch){touch.disabled=button.disabled;const glyph=typeof addonIconSVG==='function'?addonIconSVG(a):'';if(touch.dataset.addon!==a.id+':'+state){touch.dataset.addon=a.id+':'+state;touch.innerHTML='<span class="touch-addon-glyph" aria-hidden="true">'+glyph+'</span><span>ADD-ON</span><small>'+state+'</small>';}touch.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/a.cooldown)*100)+'%');touch.classList.toggle('ready',ready&&!blocked);}
 }

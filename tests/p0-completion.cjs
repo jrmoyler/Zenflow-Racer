@@ -3,7 +3,7 @@ const c={THREE,Economy,saved:{builds:{zenflow:[]},addonUpgradeLevels:{},appearan
 const root=new THREE.Group();root.userData={};const paint=new THREE.MeshStandardMaterial({roughness:.2}),rubber=new THREE.MeshStandardMaterial({roughness:.9}),glass=new THREE.MeshPhysicalMaterial({roughness:.1});paint.userData.surface='paint';
 for(const m of [paint,rubber,glass])root.add(new THREE.Mesh(new THREE.BoxGeometry(),m));
 c.r={mesh:root,div:{id:'zenflow'},isPlayer:true};vm.runInContext('applyKartBuild(r,0)',c);
-assert.equal(paint.roughness,.65);assert.equal(rubber.roughness,.9,'satin must not change unnamed rubber');assert.equal(glass.roughness,.1,'satin must not change unnamed glass');
+assert.equal(root.children[0].material.roughness,.65);assert.equal(paint.roughness,.2,'factory material remains unchanged');assert.equal(rubber.roughness,.9,'satin must not change unnamed rubber');assert.equal(glass.roughness,.1,'satin must not change unnamed glass');
 console.log('PASS satin finish targets paint only, preserves rubber and glass');
 const {JSDOM}=require('jsdom');const dom=new JSDOM('<div id="reward-summary"></div>',{url:'https://test.invalid',runScripts:'outside-only'}),w=dom.window;
 let calls=0;w.anime={animate(target,options){calls++;if('value' in target){target.value=options.value;options.onUpdate();options.onComplete();}}};w.matchMedia=()=>({matches:false});

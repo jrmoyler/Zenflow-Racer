@@ -1,7 +1,7 @@
 // Diagnostic CPU renders of actual loaded geometry; not WebGL or device certification.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),THREE=require('../vendor/three.min.js');
 const {createCanvas}=require(path.join(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES,'@napi-rs/canvas'));
-const root=path.resolve(__dirname,'..'),out=path.join(root,'docs/p0-finalization/racers');fs.mkdirSync(out,{recursive:true});
+const root=path.resolve(__dirname,'..'),out=path.resolve(root,process.argv[2]||'docs/p0-finalization/racers');fs.mkdirSync(out,{recursive:true});
 const canvas=()=>{const c=createCanvas(480,400);c.style={};c.dataset={};return c;};
 const c={THREE,console,TextDecoder,TextEncoder,ArrayBuffer,Uint8Array,self:{URL},URL,Blob,setTimeout,performance,FALLBACK_GRAPHICS:true,TEX:{},innerWidth:480,innerHeight:400,document:{createElement:canvas}};
 vm.createContext(c);const run=s=>vm.runInContext(s,c),read=f=>fs.readFileSync(path.join(root,f),'utf8');

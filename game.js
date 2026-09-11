@@ -618,6 +618,7 @@ function frame(now){
   requestAnimationFrame(frame);
   if(typeof renderReconstructionReview==='function'&&renderReconstructionReview())return;
   if(document.hidden){last=now;return;}
+  if(document.getElementById('garage')?.open){last=now;staticFrameDirty=true;return;}
   reportFrameMetrics(now);
   if(typeof raceTelemetry!=='undefined')raceTelemetry.frame(now,game.state,game.raceTime);
   if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
@@ -710,10 +711,10 @@ function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(
 const touchEl=document.getElementById('touch');
 function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
   el.addEventListener('pointerdown',e=>{
-    if(!['race','countdown'].includes(game.state))return;e.preventDefault();audioInit();
+    if(el.disabled||el.hidden||!['race','countdown'].includes(game.state))return;e.preventDefault();audioInit();
     activeTouchPointers.set(e.pointerId,{key,el});el.setPointerCapture?.(e.pointerId);touchHeld.add(key);syncInput();el.classList.add('act');
   });
-  const off=e=>{activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
+  const off=e=>{if(activeTouchPointers.get(e.pointerId)?.el!==el)return;activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();if(e.type==='pointercancel'&&['item','special','addon'].includes(key)&&!input[key])input[key+'Edge']=false;}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
   el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',off);
 }
 const steerPad=document.getElementById('tSteer');let steerPointer=null;
@@ -810,13 +811,16 @@ function updateSelectedPreview(d){
  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('racerselect',{detail:{division:d,ability:power}}));
  if(typeof THREE.Scene!=='function'||renderer.renderRosterPreview)return;
  disposePreview();if(!previewScene)buildPreviewStage();
- previewKart=buildKart(d);previewScene.add(previewKart);
+ previewKart=buildKart(d);
+ if(typeof applyKartBuildVisuals==='function')applyKartBuildVisuals(previewKart,saved.builds?.[d.id]||[],saved.appearance?.[d.id]||'factory');
+ previewScene.add(previewKart);
  const accent=new THREE.Color(d.id==='vector'?'#309DFF':d.acc);
 
  previewStage.userData.ring.material.color.copy(accent);
  previewStage.userData.disc.material.color.set(0x24272b);
  previewSpin.velocity=0;
 }
+addEventListener('garagechange',()=>{if(selected&&previewKart)updateSelectedPreview(selected);});
 function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previewSpin.velocity+delta*6,-9,9);}
 (()=>{const el=document.getElementById('kart-preview');if(!el||!el.addEventListener)return;
  el.addEventListener('pointerdown',e=>{if((e.button!==0&&e.pointerType==='mouse')||e.target?.closest?.('button'))return;previewSpin.dragging=true;previewSpin.pointer=e.pointerId;previewSpin.lastX=e.clientX;previewSpin.velocity=0;el.setPointerCapture?.(e.pointerId);el.classList.add('dragging');});

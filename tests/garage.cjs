@@ -6,22 +6,23 @@ w.eval(fs.readFileSync('core.js','utf8').split('function hexToRgb')[0]+';window.
 w.eval(fs.readFileSync('addons.js','utf8')+';window.ADDONS=ADDONS;');
 w.eval(fs.readFileSync('economy.js','utf8')+';window.Economy=Economy;');
 w.eval("var SAVE_KEY='zenflow-test',saved=Economy.migrate({},ADDONS.map(a=>a.id)),selected=ROSTER[0],game={state:'roster'},SFX={ui(){}},raceSetup={};function openRoster(){};function transitionScene(label,fn){fn();}");
+let previewOpened=0,previewDisposed=0,previewBuild=null;w.createGaragePreview=()=>({open(){previewOpened++;},dispose(){previewDisposed++;},update(r,s){previewBuild={racer:r.id,build:[...(s.builds[r.id]||[])]};}});
 const dock=d.createElement('div');dock.className='loadout-dock';d.body.append(dock);
 w.eval(fs.readFileSync('progression.js','utf8')+';window.economyTransaction=economyTransaction;');w.eval(fs.readFileSync('garage.js','utf8'));
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 const card=name=>[...d.querySelectorAll('#garage article')].find(a=>a.querySelector('h3').textContent===name);
 (async()=>{
  const launches=[...d.querySelectorAll('button')].filter(b=>b.textContent==='Garage');assert.equal(launches.length,3,'title, loadout and results entries');launches[0].click();
- assert.equal(d.querySelector('#garage').open,true);assert.equal(card('Elemental Fire').querySelector('button').disabled,true,'insufficient funds');
+ assert.equal(d.querySelector('#garage').open,true);assert.equal(previewOpened,1);assert.equal(previewBuild.racer,'zenflow');assert.equal(card('Elemental Fire').querySelector('button').disabled,true,'insufficient funds');
  await w.economyTransaction(s=>({...s,wallet:2000}));d.querySelector('#garage-racer').dispatchEvent(new w.Event('change'));
  card('Elemental Fire').querySelector('button').click();await flush();assert.ok(w.saved.ownedAddons.includes('fire'));assert.equal(d.activeElement,card('Elemental Fire').querySelector('button'),'purchase retains actionable keyboard/controller focus');
  card('Elemental Fire').querySelector('button').click();await flush();assert.equal(w.saved.addons.zenflow,'fire');
  card('Elemental Fire tuning').querySelector('button').click();await flush();assert.equal(w.saved.addonUpgradeLevels.fire,2);
  [...d.querySelectorAll('#garage nav button')].find(b=>b.textContent==='Kart Upgrades').click();card('Launch motor').querySelector('button').click();await flush();card('Launch motor').querySelector('button').click();await flush();assert.ok(w.saved.builds.zenflow.includes('Motor'));
  const selection=d.querySelector('#garage-racer');selection.value='eon';selection.dispatchEvent(new w.Event('change'));assert.equal(card('Launch motor').querySelector('button').textContent,'EQUIP');
- card('Launch motor').querySelector('button').click();await flush();assert.ok(w.saved.builds.eon.includes('Motor'));assert.ok(w.saved.builds.zenflow.includes('Motor'));
+ card('Launch motor').querySelector('button').click();await flush();assert.ok(w.saved.builds.eon.includes('Motor'));assert.deepEqual(previewBuild,{racer:'eon',build:['Motor']});assert.match(d.querySelector('#garage-build-summary').textContent,/Launch motor/);assert.ok(w.saved.builds.zenflow.includes('Motor'));
  assert.equal(d.activeElement,card('Launch motor').querySelector('button'),'equipping retains focus');
  const restored=w.Economy.migrate(JSON.parse(w.localStorage.getItem(w.SAVE_KEY)),w.ADDONS.map(a=>a.id));assert.equal(restored.wallet,w.saved.wallet);assert.equal(restored.addons.zenflow,'fire');assert.equal(restored.addonUpgradeLevels.fire,2);
- d.querySelector('#garage-close').click();assert.equal(d.querySelector('#garage').open,false);
+ d.querySelector('#garage-close').click();assert.equal(d.querySelector('#garage').open,false);assert.equal(previewDisposed,1);
  console.log('PASS Garage DOM: insufficient funds, buy/equip/upgrade, racer builds, persistence and exit');dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1;});

@@ -242,6 +242,20 @@ test('Fresh setup cannot start with only a saved racer or an unconfirmed map',()
  run("raceSetup.step='map';startRace()");assert.equal(run('game.state'),'countdown');
  run("openRoster();raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false");assert.equal(run('startRace()'),false);
 });
+test('Add-on is independent of simultaneous touch and cancels only its pending edge',()=>{
+ racer();run('resetInput()');const ev=(pointerId,type='pointerdown')=>({pointerId,type,preventDefault:noop});
+ element('tD').events.pointerdown(ev(801));element('tP').events.pointerdown(ev(802));element('tA').events.pointerdown(ev(803));
+ assert.equal(run('input.drift&&input.special&&input.addon&&input.addonEdge'),true);
+ element('tA').events.pointercancel(ev(803,'pointercancel'));
+ assert.equal(run('input.addon||input.addonEdge'),false);assert.equal(run('input.drift&&input.special'),true);
+ run('resetInput()');element('tA').disabled=true;element('tA').events.pointerdown(ev(804));assert.equal(run('input.addonEdge'),false);element('tA').disabled=false;
+});
+test('L3 has its own one-shot add-on binding alongside item and signature',()=>{
+ racer();run('resetInput()');const buttons=Array.from({length:16},()=>({pressed:false}));[2,3,10].forEach(i=>buttons[i].pressed=true);
+ context.navigator.getGamepads=()=>[{connected:true,axes:[0],buttons}];run('pollGamepad()');assert.equal(run('input.itemEdge&&input.specialEdge&&input.addonEdge'),true);
+ run('input.itemEdge=input.specialEdge=input.addonEdge=false;pollGamepad()');assert.equal(run('input.addonEdge'),false);
+ context.navigator.getGamepads=()=>[];run('pollGamepad()');assert.equal(run('input.addon'),false);
+});
 require('./circuit-physics.cjs')({test,assert,run,racer,opponent,context});
 require('./division-powers.cjs')({test,assert,run,racer,opponent,context});
 require('./kart-materials-regression.cjs')({test,assert});

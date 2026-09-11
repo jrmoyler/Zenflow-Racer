@@ -1,0 +1,18 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom'),THREE=require('three');
+const dom=new JSDOM('<section id="preview"><p class="garage-preview-note"></p></section>',{runScripts:'outside-only'}),w=dom.window;
+let frames=new Map(),id=0,renderers=[],models=[],disposed=0,environments=[];
+w.requestAnimationFrame=fn=>{frames.set(++id,fn);return id};w.cancelAnimationFrame=n=>frames.delete(n);w.matchMedia=()=>({matches:true});
+class Renderer{constructor({canvas}){this.domElement=canvas;renderers.push(this)}setPixelRatio(){}setSize(){}render(){}dispose(){this.disposed=true}forceContextLoss(){setTimeout(()=>this.domElement.dispatchEvent(new w.Event('webglcontextlost',{cancelable:true})),0)}}
+w.THREE={...THREE,WebGLRenderer:Renderer};w.KART_SHOWROOM_CAMERA=[5.5,2.9,-7.3];w.buildKart=r=>{const g=new THREE.Group();g.name=r.id;models.push(g);return g};w.disposeKart=g=>{disposed++;g.removeFromParent?.();if(g.parent)g.parent.remove(g)};w.animateShowroomKart=()=>{throw Error('reduced motion must not animate')};w.applyKartBuildVisuals=(kart,...args)=>kart.userData.build=args;w.createSurfaceEnvironmentTarget=()=>{const t={texture:{},dispose(){this.disposed=true}};environments.push(t);return t};
+w.eval(fs.readFileSync('garage-preview.js','utf8')+';window.createGaragePreview=createGaragePreview;');
+(async()=>{const host=w.document.querySelector('section'),p=w.createGaragePreview(host),save={builds:{a:['Motor']},appearance:{a:'satin'},addons:{a:'fire'},addonUpgradeLevels:{fire:2}};
+ assert.equal(p.open(),true);p.update({id:'a'},save);assert.equal(models.length,1);assert.deepEqual(JSON.parse(JSON.stringify(models[0].userData.build)),[['Motor'],'satin','fire',2]);p.update({id:'a'},save);assert.equal(models.length,1,'unchanged inventory must not rebuild');
+ const first=host.querySelector('canvas');first.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight'}));assert.equal(models[0].rotation.y,.55);save.builds.a=['Tires'];p.update({id:'a'},save);assert.equal(disposed,1);
+ [...frames.values()][0](100);p.dispose();assert.equal(host.querySelector('canvas'),null);assert.equal(renderers[0].disposed,true);assert.equal(environments[0].disposed,true);assert.equal(p.open(),true);p.update({id:'a'},save);const second=host.querySelector('canvas');assert.notEqual(first,second,'reopen creates a fresh WebGL canvas');
+ await new Promise(r=>setTimeout(r,5));assert.equal(host.querySelector('canvas'),second,'stale context-loss event cannot dispose reopened preview');
+ second.dispatchEvent(new w.Event('webglcontextlost',{cancelable:true}));assert.equal(host.querySelector('canvas'),null);assert.match(host.textContent,/Reopen/);
+ const targets=[];w.THREE.PMREMGenerator=class{fromScene(){const t={texture:{},dispose(){this.disposed=true}};targets.push(t);return t}dispose(){}};
+ w.eval(fs.readFileSync('surface-detail.js','utf8')+';window.makeRaceEnvironment=createSurfaceEnvironment;window.makePreviewEnvironment=createSurfaceEnvironmentTarget;');
+ const map={skyHorizon:0x334455,skyTop:0x223344};const raceTexture=w.makeRaceEnvironment({},map),previewTarget=w.makePreviewEnvironment({},map);previewTarget.dispose();assert.equal(targets[0].disposed,undefined,'showroom PMREM disposal must preserve race environment');assert.equal(raceTexture,targets[0].texture);w.makeRaceEnvironment({},map);assert.equal(targets[0].disposed,true,'race wrapper replaces only its own target');
+ dom.window.close();console.log('PASS garage preview: shared build, idempotent refresh, rotation, reduced motion, disposal and stale context-loss protection');
+})().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});

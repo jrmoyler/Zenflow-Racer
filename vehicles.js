@@ -444,8 +444,67 @@ function finishRiderFit(root){
  for(const child of root.userData.head.children){child.scale.multiply(scale);child.position.multiply(scale);}
  root.traverse(o=>{if(o.name==='suit-shoulder-pad')o.scale.x*=fit[3];});
 }
+// Runtime finishing pass over the shipped rig. Only sculpted surfaces own new
+// vertex buffers; unchanged wheel geometry remains shared by the GLB cache.
+function refineRacingEquipment(root){
+  const ud=root.userData;if(ud.racingEquipment)return;
+  const index=Math.max(0,ROSTER.findIndex(d=>d.id===ud.chassis));
+  const trim=root.getObjectByName('helmet-crown-stripe').material;
+  const rubber=new THREE.MeshStandardMaterial({color:0x151a20,roughness:.86,metalness:.02});
+  const alloy=new THREE.MeshStandardMaterial({color:0x8b949e,roughness:.32,metalness:.85});
+  const sculpt=(mesh,edit)=>{
+    if(!mesh)return;
+    const source=mesh.geometry,g=source.clone();delete g.userData.blenderShared;
+    const attr=source.attributes.position,values=new Float32Array(attr.count*3);
+    for(let i=0;i<attr.count;i++)values.set(edit(attr.getX(i),attr.getY(i),attr.getZ(i)),i*3);
+    g.setAttribute('position',new THREE.BufferAttribute(values,3));g.deleteAttribute('normal');g.computeVertexNormals();g.computeBoundingSphere();
+    mesh.geometry=g;
+    if(!source.userData.blenderShared&&!Object.values(KART_GEO).includes(source))source.dispose();
+  };
+  // Flatten the helmet's cheeks and rear crown without changing neck articulation.
+  sculpt(root.getObjectByName('helmet-shell'),(x,y,z)=>[x*(1-.055*Math.max(0,-z)),y,z*(1-.04*Math.max(0,-y))]);
+  // Broaden the upper suit while preserving the hips, legs and shoulder pivots.
+  sculpt(root.getObjectByName('torso'),(x,y,z)=>{
+    const t=clamp((y-.35)/.40,0,1);return [x*(1+.10*t),y,z*(1+.12*t)];
+  });
+  const collar=root.getObjectByName('suit-raised-collar');
+  if(collar){const old=collar.geometry;collar.geometry=new THREE.TorusGeometry(.135,.06,10,32);collar.position.set(0,1.235,0);collar.rotation.set(Math.PI/2,0,0);collar.scale.set(1,1,1);collar.material=rubber;if(!old.userData.blenderShared&&!Object.values(KART_GEO).includes(old))old.dispose();}
+  const add=(parent,name,g,m,x=0,y=0,z=0)=>{const o=new THREE.Mesh(g,m);o.name=name;o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;parent.add(o);return o;};
+  const suit=new THREE.Group();suit.name='tailored-suit-inserts';ud.pilot.add(suit);
+  for(const side of [-1,1]){
+    add(suit,'chest-insert',limbSurface([[side*.07,.95,-.19],[side*.14,.85,-.26],[side*.13,.65,-.24]],[.025,.045,.025]),trim);
+    for(let i=0;i<3;i++)add(suit,'chest-vent',limbSurface([[side*.26,.76-i*.055,-.18],[side*.31,.74-i*.055,-.14]],[.012,.012]),rubber);
+  }
+  batchKartBody(suit);
+  const wheelHardware=[];
+  for(const w of ud.wheels){
+    for(const name of ['rounded-wheel-shell','translucent-tire-band']){const shell=w.spin.getObjectByName(name);if(shell)shell.material=rubber;}
+    const hardware=new THREE.Group();hardware.name='brake-and-spoke-hardware';w.spin.add(hardware);
+    const rotor=new THREE.CylinderGeometry(.275,.275,.025,32);rotor.rotateZ(Math.PI/2);
+    add(hardware,'ventilated-brake-rotor',rotor,alloy,w.side*.258);
+    for(let j=0;j<6;j++){
+      const a=j/6*Math.PI*2,indexed=a+.10*(index%3);
+      const spoke=new THREE.BoxGeometry(.027,.045,.21);spoke.translate(0,0,.155);spoke.rotateX(indexed);spoke.translate(w.side*.282,0,0);
+      add(hardware,'forged-wheel-spoke',spoke,alloy);
+    }
+    batchKartBody(hardware);hardware.children.forEach(o=>o.name='brake-rotor-and-spokes');wheelHardware.push(hardware);
+    add(w.pivot,'brake-caliper',new THREE.BoxGeometry(.085,.22,.11),trim,w.side*.265,.16,.15);
+  }
+  const vents=new THREE.Group();vents.name='active-cooling-vanes';ud.body.add(vents);
+  for(const side of [-1,1])for(let i=0;i<3;i++){
+    const vane=add(vents,'cooling-vane',new THREE.BoxGeometry(.20,.025,.11),alloy,side*.70,.94,.82+i*.145);vane.rotation.z=side*.12;
+  }
+  // Material batches keep this finishing pass within a small draw-call budget.
+  batchKartBody(vents);
+  ud.racingEquipment={wheelHardware,vents,restY:vents.position.y};
+}
+function animateRacingEquipment(ud,time,boost=0){
+  const gear=ud.racingEquipment;if(!gear)return;
+  gear.vents.rotation.x=Math.sin(time*1.4)*.012+Math.min(1,Math.max(0,boost))*.08;
+}
+
 function finishKartCockpit(root){
-  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;finishRiderFit(root);
+  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;refineRacingEquipment(root);finishRiderFit(root);
   const fabric=new THREE.MeshStandardMaterial({color:0x192029,roughness:.91,metalness:0});
   const trim=new THREE.MeshStandardMaterial({color:0x434b54,roughness:.34,metalness:.7});
   const cockpit=new THREE.Group();cockpit.name='cockpit-contact-hardware';ud.body.add(cockpit);
@@ -604,6 +663,7 @@ function animateKart(r,dt,ag=0){
   // --- state clips (additive, crossfaded)
   const state=victory?'victory':defeat?'defeat':spinning?'spinout':hitting?'hit':boosting?'boost':r.drifting?'drift':idle?'idle':'drive';
   applyKartClips(ud,state,dt);
+  animateRacingEquipment(ud,a.t,boosting?1:0);
   if(typeof constrainKartHands==='function')constrainKartHands(r.mesh,state);
 }
 // Turntable presentation: heave, settling suspension, breathing pilot who follows the showroom camera.
@@ -628,6 +688,7 @@ function animateShowroomKart(kart,time,dt,yaw){
   if(ud.arms){ud.arms[0].rotation.set(-a.wheel*.28,0,0);ud.arms[1].rotation.set(a.wheel*.28,0,0);}
   ud.halo.rotation.y+=dt*2.5;ud.star.rotation.y+=dt*1.5;
   applyKartClips(ud,'idle',dt);
+  animateRacingEquipment(ud,time,0);
   if(typeof constrainKartHands==='function')constrainKartHands(kart,'idle');
 }
 
