@@ -1,0 +1,20 @@
+PR #24 continuation — 2026-09-11
+
+npm ci: PASS, exit 0 (Node 24.19.0)
+npm run verify: PASS, exit 0
+  npm test, npm run build, npm run test:release,
+  npm run test:runtime, npm run test:assets
+  245 PASS output lines, zero FAIL output lines (not a unique-test count).
+node tests/progression.cjs after adding duplicate-result / stale-failure assertions: PASS.
+node tools/p0-ai-timing.cjs: PASS, all six solo three-lap simulations.
+node tools/p0-field-balance.cjs: PASS, exit 0, nine runs / 108 finishers.
+  An initial diagnostic-script execution failed on the final report write
+  (undefined fs binding); the binding was corrected and the entire matrix rerun successfully.
+git diff --check: PASS.
+
+Human before/after timing and fastest legal lap: NOT RUN.
+Final all-20 silhouette/art approval: OPEN; existing diagnostic lineup is not an approval.
+Local browser: BLOCKED, ERR_BLOCKED_BY_CLIENT.
+Hosted PR browser: Vercel sign-in required.
+Physical iPhone / modern Android / low-end Android certification: NOT RUN.
+No FPS, physical-device or WebGL visual success is inferred from headless tests.

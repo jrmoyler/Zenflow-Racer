@@ -32,7 +32,7 @@ class Racer{
     this.maxSpeedBase=37+sp*2.2;this.accel=11+ac*2.6;this.handling=.14+ha*.012;this.weight=1+we*.28;
     this.u=-(0.007+Math.floor(gridIdx/2)*0.0068);this.lat=gridIdx%2?2.3:-2.3;this.speed=0;this.theta=0;this.steer=0;this.throttle=false;this.brake=false;
     this.drifting=false;this.driftDir=0;this.driftTime=0;this.driftTier=0;this.driftKey=false;this.boost=0;this.boostMult=1;
-    this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.totalTokensCollected=0;this.hitsTaken=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
+    this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.totalTokensCollected=0;this.serviceLineMetres=0;this.hitsTaken=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
     this.spin=0;this.shield=0;this.hitCd=0;this.wallCd=0;this.finished=false;this.finishTime=0;this.rank=gridIdx+1;this.wheelRot=0;this.visualYaw=0;this.lean=0;this.wrongWay=false;
     // Grid-staggered reaction: front rows launch first so the pack fans out instead of piling into row one.
     this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0};
@@ -189,7 +189,12 @@ function stepRacer(r,dt){
   r.wallCd-=dt;
   if(r.anchor>0&&r.spin<=0)r.speed=clamp(r.speed,r.anchorSpeed-2,r.anchorSpeed+2);
   // --- advance along track
-  advanceRaceDistance(r,r.speed*Math.cos(r.theta)*dt/track.len,dt);
+  const laneMetric=typeof serviceLaneMetric==='function'?serviceLaneMetric(r.u,r.lat):1;
+  advanceRaceDistance(r,r.speed*Math.cos(r.theta)*dt/(track.len*laneMetric),dt);
+  if(typeof serviceLaneTarget==='function'){
+    const target=serviceLaneTarget(r.u);if(target!==null&&Math.abs(r.lat-target)<.8)r.serviceLineMetres+=Math.max(0,r.speed*Math.cos(r.theta))*dt;
+    const route=track.serviceRoute;if(r.isPlayer&&route&&r.lastU<route.start&&r.u>=route.start&&r.u<route.end)setToast(route.name.toUpperCase(),'gold','GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',3);
+  }
   // --- timers
   if(r.spin>0)r.spin-=dt;if(r.shield>0)r.shield-=dt;if(r.hitCd>0)r.hitCd-=dt;if(r.tripleCd>0)r.tripleCd-=dt;
   // --- roulette
@@ -366,6 +371,8 @@ function stepAI(r,dt){
   let target=Math.sign(cA)*Math.min(Math.abs(cA)*170,4.4)-Math.sign(cB)*Math.min(Math.abs(cB)*95,3.2)*(1-nearK)+r.ai.offset*(1-nearK);
   // A safe token line is a choice, never a teleport or invisible grant.
   if(r.tokens<10&&Math.abs(cA)<.015)for(const token of tokens){const ahead=du_dist(r.u,token.u);if(token.t<=0&&ahead>3&&ahead<18&&Math.abs(token.lat)<TRACK_W/2-1.5){target=lerp(target,token.lat,.65);break;}}
+  // Some drivers choose the marked inside service line; hazards/traffic retain priority.
+  if(typeof serviceLaneTarget==='function'&&(game.diff===2||game.diff===1&&r.ai.offset>0)){const service=serviceLaneTarget(r.u+look);if(service!==null)target=service;}
   // avoid mines ahead and missiles closing from behind
   for(let i=0;i<mines.length;i++){const m=mines[i];const d=du_dist(r.u,m.u);if(d>0&&d<28&&Math.abs(m.lat-r.lat)<3){target+= (r.lat>m.lat?2.6:-2.6);}}
   for(let i=0;i<missiles.length;i++){const m=missiles[i];if(m.owner===r)continue;const d=du_dist(m.u,r.u);if(d>0&&d<24&&Math.abs(m.lat-r.lat)<2.4)target+=(r.lat>m.lat?2.4:-2.4);}
@@ -545,7 +552,7 @@ function updateHUD(dt){
 // ---------- Race flow ----------
 function onPlayerFinish(){
   if(typeof clearAddons==='function')clearAddons();if(typeof clearAbilities==='function')clearAbilities();
-  if(typeof raceTelemetry!=='undefined'){raceTelemetry.event('lap-timing',{circuitRevision:'p0',map:chosenMapId,playerLapSeconds:game.player.lapTimes.slice(),aiLaps:game.racers.filter(r=>!r.isPlayer).map(r=>({division:r.div.id,lapSeconds:r.lapTimes.slice()})),tokensCollected:game.player.totalTokensCollected});raceTelemetry.finish(game.player.finishTime);}
+  if(typeof raceTelemetry!=='undefined'){raceTelemetry.event('lap-timing',{circuitRevision:'p0',map:chosenMapId,playerLapSeconds:game.player.lapTimes.slice(),aiLaps:game.racers.filter(r=>!r.isPlayer).map(r=>({division:r.div.id,lapSeconds:r.lapTimes.slice()})),tokensCollected:game.player.totalTokensCollected,serviceLineMetres:game.player.serviceLineMetres});raceTelemetry.finish(game.player.finishTime);}
   updateRanks(true);const p=game.player,key=raceRecordKey(p.div.id,game.diff);const old=saved[key];
   game.newBest=!Number.isFinite(old)||p.finishTime<old;game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
   if(game.newBest){saved[key]=p.finishTime;persist();}

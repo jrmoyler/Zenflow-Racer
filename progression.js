@@ -19,9 +19,9 @@ async function settleRewardRace(){
  try{
   if(!await game.rewardReady)return;
   let receipt=null;
-  await economyTransaction(s=>{const result=Economy.settle(s,report);receipt=result.reward;return result.save;});
-  if(game.rewardRaceId===id){game.reward=receipt;renderRewardSummary();}
- }catch(error){game.rewardError='Credits could not be saved: '+error.message;renderRewardSummary();}
+  await economyTransaction(s=>{const result=Economy.settle(s,report);receipt=result.reward||(s.lastReward?.id===id?s.lastReward:null);return result.save;});
+  if(game.rewardRaceId===id){game.reward=receipt;game.rewardError=receipt?'':'This race is no longer eligible for rewards (another race was started).';renderRewardSummary();}
+ }catch(error){if(game.rewardRaceId===id){game.rewardError='Credits could not be saved: '+error.message;renderRewardSummary();}}
 }
 function applyKartBuild(r,gridIdx){
  const categories=Object.keys(Economy.BUILDS);
@@ -34,7 +34,9 @@ function applyKartBuild(r,gridIdx){
  if(build.includes('Aero')&&typeof THREE!=='undefined'&&THREE.BoxGeometry){
   const wing=new THREE.Mesh(new THREE.BoxGeometry(2.05,.09,.42),new THREE.MeshStandardMaterial({color:0x252b32,roughness:.7,metalness:.25}));wing.name='garage-stability-wing';wing.position.set(0,1.05,1.65);ud.body.add(wing);
  }
- if(r.isPlayer&&saved.appearance[r.div.id]==='satin')r.mesh.traverse(o=>{if(o.material?.userData?.surface==='paint'||o.material?.name===r.mesh.getObjectByName('helmet-shell')?.material?.name){o.material.roughness=.65;}});
+ if(r.isPlayer&&saved.appearance[r.div.id]==='satin')r.mesh.traverse(o=>{
+  for(const material of (Array.isArray(o.material)?o.material:[o.material]))if(material?.userData?.surface==='paint'){material.roughness=.65;material.roughnessMap=null;if('clearcoat' in material){material.clearcoat=.25;material.clearcoatRoughness=.65;}}
+ });
 }
 function renderRewardSummary(){
  const el=document.getElementById('reward-summary');if(!el||!game.player)return;
@@ -44,5 +46,18 @@ function renderRewardSummary(){
  const text=document.createElement('p');text.textContent=`Placement ${r.placement} · Difficulty ${r.difficulty} · Tokens ${r.tokens} · Personal best ${r.performance} · Clean race ${r.clean} · First circuit ${r.firstMap} · New racer ${r.diversity}`;el.append(text);
  const progress=document.createElement('p');progress.textContent=`${game.player.totalTokensCollected} tokens collected · ${c.races} career races · ${c.wins} wins · ${c.maps.length}/3 circuits · ${c.divisions.length}/20 racers · Wallet ${saved.wallet} Zen Credits`;el.append(progress);
  const next=ADDONS.find(a=>!saved.ownedAddons.includes(a.id));const unlock=document.createElement('p');unlock.textContent=next?`${saved.ownedAddons.length}/24 add-ons owned · ${next.name}: ${Math.min(saved.wallet,Economy.addonPrice(next.id,ADDONS.map(a=>a.id)))}/${Economy.addonPrice(next.id,ADDONS.map(a=>a.id))} credits`:'All 24 add-ons owned';el.append(unlock);
- if(window.anime?.animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)window.anime.animate(title,{opacity:[0,1],translateY:[8,0],duration:500});
+ const awards=[];if(r.firstMap)awards.push('First circuit completion');if(r.diversity)awards.push('First finish with '+game.player.div.name);if(r.performance)awards.push('New personal best');
+ if(awards.length){const achieved=document.createElement('p');achieved.className='reward-achievements';achieved.textContent='ACHIEVED · '+awards.join(' · ');el.append(achieved);}
+ const affordable=ADDONS.filter(a=>!saved.ownedAddons.includes(a.id)&&Economy.addonPrice(a.id,ADDONS.map(a=>a.id))<=saved.wallet);
+ if(affordable.length){const available=document.createElement('p');available.textContent='READY TO UNLOCK · '+affordable.length+' add-ons within budget. Choose yours in the Garage.';el.append(available);}
+ // Count once, when results actually become visible; settlement may finish earlier.
+ if(game.state==='results'&&game.rewardAnimatedId!==game.rewardRaceId){
+  game.rewardAnimatedId=game.rewardRaceId;
+  if(window.anime?.animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+   const counter={value:0};title.setAttribute('aria-label','Earned '+r.total+' Zen Credits');
+   window.anime.animate(counter,{value:r.total,duration:1000,ease:'outCubic',onUpdate:()=>{title.textContent='+'+Math.round(counter.value)+' Zen Credits';},onComplete:()=>{title.textContent='+'+r.total+' Zen Credits';}});
+   window.anime.animate(title,{opacity:[0,1],translateY:[8,0],duration:500});
+  }
+ }
+
 }

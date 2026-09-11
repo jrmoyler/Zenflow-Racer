@@ -31,9 +31,11 @@ function lightPlayableMaterial(material,div,roles={}){
  if(m.isMeshStandardMaterial||m.isMeshPhysicalMaterial){
   m.envMapIntensity=1.15;
   if(/anatomical-enamel/.test(m.name)){
+   m.userData.surface='paint';
    m.roughness=.17;m.metalness=.28;m.clearcoat=1;m.clearcoatRoughness=.1;
    m.emissive.copy(m.color);m.emissiveIntensity=.16;
-  }else if(/fairing-pearl/.test(m.name)||m.name===roles.paint){
+  }else if(/fairing-pearl/.test(m.name)||(roles.paint&&m.name===roles.paint)){
+   m.userData.surface='paint';
    if(div)m.color.set(div.acc).convertSRGBToLinear();
    m.roughness=.28;m.metalness=.18;m.clearcoat=1;m.clearcoatRoughness=.12;
   }else if(div&&/woven-race-suit/.test(m.name)){

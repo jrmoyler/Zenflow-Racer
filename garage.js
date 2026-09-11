@@ -9,18 +9,18 @@
  for(const name of ['Add-Ons','Kart Upgrades','Appearance','Owned / Locked']){const b=document.createElement('button');b.className='btn ghost';b.textContent=name;b.onclick=()=>{category=name;render();};dialog.querySelector('nav').append(b);}
  select.onchange=()=>{racerId=select.value;render();};
  function close(){cancelAnimationFrame(padFrame);dialog.close();opener?.focus();}
- function pollPad(){if(!dialog.open)return;const pad=Array.from(navigator.getGamepads?.()||[]).find(Boolean);if(pad){const pressed=i=>pad.buttons[i]?.pressed;const direction=pressed(13)||pressed(15)?1:pressed(12)||pressed(14)?-1:0;const active=direction||pressed(0)||pressed(1);if(active&&!padHeld){if(pressed(1)){close();return;}if(pressed(0)&&dialog.contains(document.activeElement))document.activeElement.click();if(direction){const controls=[...dialog.querySelectorAll('button:not(:disabled),select')];const at=controls.indexOf(document.activeElement);controls[(at+direction+controls.length)%controls.length]?.focus();}}padHeld=!!active;}padFrame=requestAnimationFrame(pollPad);}
+ function pollPad(){if(!dialog.open)return;const pad=Array.from(navigator.getGamepads?.()||[]).find(Boolean);if(pad){const pressed=i=>pad.buttons[i]?.pressed;const direction=pressed(13)||pressed(15)?1:pressed(12)||pressed(14)?-1:0;const active=direction||pressed(0)||pressed(1);if(active&&!padHeld){if(pressed(1)){close();return;}if(pressed(0)&&dialog.contains(document.activeElement))document.activeElement.click();if(direction&&document.activeElement===select&&(pressed(14)||pressed(15))){select.selectedIndex=(select.selectedIndex+direction+select.options.length)%select.options.length;select.onchange();}else if(direction){const controls=[...dialog.querySelectorAll('button:not(:disabled),select')];const at=controls.indexOf(document.activeElement);controls[(at+direction+controls.length)%controls.length]?.focus();}}padHeld=!!active;}padFrame=requestAnimationFrame(pollPad);}
  dialog.addEventListener('close',()=>{cancelAnimationFrame(padFrame);opener?.focus();});dialog.querySelector('#garage-close').onclick=close;
- function render(){
-  const buildRacerId=racerId;
+ function render(restoreFocus){
+  const buildRacerId=racerId,focusKey=restoreFocus||document.activeElement?.dataset?.garageKey;
   select.value=buildRacerId;dialog.querySelector('#garage-wallet').textContent=saved.wallet+' Zen Credits';list.replaceChildren();
   dialog.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===category)));
   const ids=ADDONS.map(a=>a.id);
   function card(name,type,effect,state,level,cost,action,callback){
    const article=document.createElement('article'),h=document.createElement('h3'),p=document.createElement('p'),meta=document.createElement('p'),button=document.createElement('button');
    h.textContent=name;p.textContent=effect;meta.textContent=`${type} · ${state} · Level ${level} · ${cost?cost+' Zen Credits':'No cost'}`;
-   button.className='btn';button.textContent=action;button.disabled=busy||!callback||(cost>saved.wallet);
-   button.onclick=async()=>{if(busy)return;busy=true;render();try{await economyTransaction(callback);status.textContent=name+' · saved';SFX.ui();window.dispatchEvent(new Event('garagechange'));}catch(error){status.textContent=error.message;}finally{busy=false;render();}};
+   button.className='btn';button.dataset.garageKey=type+':'+name;button.textContent=action;button.disabled=busy||!callback||(cost>saved.wallet);
+   button.onclick=async()=>{if(busy)return;busy=true;render();try{await economyTransaction(callback);status.textContent=name+' · saved';SFX.ui();window.dispatchEvent(new Event('garagechange'));}catch(error){status.textContent=error.message;}finally{busy=false;render(type+':'+name);}};
    article.append(h,p,meta,button);list.append(article);
   }
   if(category==='Add-Ons'||category==='Owned / Locked')for(const a of ADDONS){
@@ -36,6 +36,7 @@
    const owned=saved.cosmetics.includes(id),equipped=(saved.appearance[buildRacerId]||'factory')===id;
    card(id==='factory'?'Factory livery':'Satin paint','Appearance','Material finish only. Original division colors preserved.',equipped?'Equipped':owned?'Owned':'Locked',owned?1:0,owned?0:200,owned?(equipped?'EQUIPPED':'EQUIP'):'BUY',equipped?null:s=>owned?{...s,appearance:{...s.appearance,[buildRacerId]:id}}:Economy.purchase(s,'cosmetic',id,ids));
   }
+  if(focusKey&&dialog.open){const target=[...list.querySelectorAll('button')].find(b=>b.dataset.garageKey===focusKey&&!b.disabled);(target||dialog.querySelector('#garage-close')).focus({preventScroll:true});}
  }
  function entry(parent){if(!parent)return;const button=document.createElement('button');button.className='btn ghost';button.textContent='Garage';button.onclick=()=>{opener=button;racerId=selected?.id||racerId;status.textContent='Build changes apply on the next grid. Earn credits by finishing three-lap races.';render();dialog.showModal();padHeld=false;padFrame=requestAnimationFrame(pollPad);};parent.append(button);}
  entry(document.querySelector('.title-actions'));entry(document.querySelector('.loadout-dock'));entry(document.querySelector('#results .row'));

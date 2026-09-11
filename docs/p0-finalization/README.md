@@ -45,7 +45,7 @@ No streaks, random loot or paid currency. Example: first-place Standard, 19 coll
 | Circuit | Original mean AI lap | Extended mean AI lap | Increase |
 |---|---:|---:|---:|
 | Cherry | 31.67 s | 48.76 s | 17.09 s |
-| Stormforge | 33.45 s | 50.52 s | 17.07 s |
+| Stormforge | 33.45 s | 50.36 s | 16.91 s |
 | Canopy | 31.36 s | 49.02 s | 17.66 s |
 
 Raw splits: `ai-timing.json`. Geometry and sampled nonadjacent road clearance: `track-estimates.json`. Human timing and fastest-legal-lap fields are deliberately not fabricated.
@@ -59,7 +59,7 @@ Blender 4.5 downloaded successfully but its executable crashed with exit 139 eve
 ## Remaining P0 acceptance gates
 
 - Competent-human before/after timing, fastest legal laps, and full-field AI/item balance on each circuit.
-- Complete scene dressing of the new named driving moments and a tested Stormforge shortcut choice; names and geometry alone do not fulfill these art/route requirements.
+- Visual sign-off of the nine new named driving moments and the Stormforge service-apex alternate line. The route is implemented on the existing deck, with an inside-radius distance advantage and unchanged ordered lap gates; human risk/reward tuning is still open.
 - Final rider/kart art direction and all-twenty in-race WebGL QA (clipping, shading, LOD, mobile fallback), including Garage and reward screenshots.
 - Modern iPhone/Safari, modern Android/Chrome and lower-end Android/Chrome physical runs: 12 racers, 3 laps, all circuits, all simultaneous controls, lifecycle, install/offline, audio and context recovery. No physical devices are connected to this session. No FPS certification is claimed.
 
@@ -68,3 +68,27 @@ Blender 4.5 downloaded successfully but its executable crashed with exit 139 eve
 Run `npm ci`, `npm test`, `npm run build`, `npm run test:release`, `npm run verify`, `git diff --check`. New tests: economy model/migration, serialized transaction persistence/failures, Garage DOM interactions and circuit geometry. Existing AI test changed to assert equal legal speed rules instead of the removed catch-up multiplier; catalog assertions now use EQUIP.
 
 The complete npm verification pipeline passed during implementation. See `verification.txt` for the final run summary. The Blender startup failure and outstanding visual/device gates remain failures of the full P0 definition, even when automated tests pass.
+
+## PR #24 continuation — September 11
+
+This continuation updates the existing PR branch at the user's request.
+
+- Fixed satin paint: both fallback and loaded GLB paint have explicit surface roles. Applying a finish cannot touch a non-mesh group, rubber, fabric or glass. Satin reduces clearcoat and removes the gloss roughness map as well as changing roughness. All twenty loaded GLBs are checked for per-racer material isolation.
+- Garage transactions preserve focus after buy/equip/upgrade. A selected racer can be changed with gamepad left/right; up/down still moves focus. Closing during a transaction cannot steal focus back into the hidden dialog.
+- Results count credits once on entry, respect reduced motion, display earned achievements and affordable add-ons, and retain the durable receipt on repeated settlement callbacks. Late failures from an old race cannot overwrite the new race's reward status.
+- Nine named extension landmarks use real geometry anchored to the inserted control points. Cherry has lantern columns, a temple gate and suspension cables; Stormforge has turbine machinery, pipes and gantries; Canopy has root arches, an extended canopy tunnel and bridge cables. Static pieces enter the existing geometry batch pass. Geometry and map-switch lifecycle tests now include the extensions rather than testing the old layouts.
+- Corrected the review cameras: front/rear/left/right, hero, cockpit, chase; added idle/drive/drift/boost/hit/spinout/victory/defeat and a truly neutral view with color maps disabled. `?review=map&asset=stormforge&view=extension-1` addresses the corresponding authored driving moment (1–3 on each map). These are staged inspection views, not completed-race evidence.
+
+### Remaining blockers — no P0 completion claim
+
+The connected browser rejected `http://127.0.0.1:4173` with `ERR_BLOCKED_BY_CLIENT`. Therefore no final WebGL pixel review is claimed. The existing neutral contact sheet still shows related rider silhouettes; it has **not** been reclassified as a passing all-twenty identity review. A final rider/kart art pass and its WebGL review remain necessary. Stormforge's marked service-apex line is implemented and headlessly tested; its human driving validation remains open. No competent-human timing run, fastest legal lap, or physical phone certification has occurred in this session. These requirements are not replaced by passing headless tests.
+
+### Stormforge alternate line
+
+The Turbine Service Apex uses a 1.6 m marked inside line between inserted controls 4 and 6. Actual lane distance follows `1 - curvature * lateralOffset`, bounded to 0.82–1.18; the centerline and all other sections retain the previous rules. This is an alternate apex on the existing full-width road, not a separate branch circuit. It saves distance for taking a tighter radius while leaving less room near the wall. Speed/acceleration/boost caps are unchanged. Standard AI with a positive line offset and Overseer AI may choose it; hazards and slower traffic still override that target. A player-entry cue explains the line. Telemetry counts distance driven within its markings. Regression tests execute actual distance advancement and verify that the exit cannot award a lap or finish.
+
+### Full-field navigation evidence
+
+`npm run test:balance` completed nine seeded simulations: all three maps at all three difficulties, twelve racers and three laps each. All **108 racer runs finished**, using the six legal build categories with `rubber === 1`. It runs actual `stepAI`, `stepRacer` and kart collisions at 120 Hz. `field-balance.json` records every racer, build, lap split, finish time and service-line distance. This isolates navigation and build/collision behavior; it excludes pickups, items, signature/add-on casts and rendering. Existing automated suites test those systems separately. It does not certify the complete human/mobile gameplay loop.
+
+The hosted PR preview also redirects this browser to Vercel sign-in, so it cannot provide WebGL sign-off in the current browser session. No deployment protection was changed.

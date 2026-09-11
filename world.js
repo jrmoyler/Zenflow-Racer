@@ -153,6 +153,7 @@ function buildTrackFrames(){
   // signed curvature (1/units): positive = turning right
   const ds=track.len/N_SAMP;
   for(let i=0;i<=N_SAMP;i++){const a=track.tan[(i+N_SAMP-3)%N_SAMP],b=track.tan[(i+3)%N_SAMP];const d=b.clone().sub(a).divideScalar(6*ds);track.curv.push(d.dot(track.right[i]));}
+  if(typeof configureCircuitRoutes==='function')configureCircuitRoutes();
 }
 // sample helpers (u in 0..1) — allocation-light
 const _v1=new THREE.Vector3(),_v2=new THREE.Vector3(),_v3=new THREE.Vector3();
@@ -354,6 +355,8 @@ function buildEnvironment(){
   for(let k=0;k<14;k++){const host=islands[k%islands.length],g=islandGeometry(3+random()*3,10+random()*9,k+600),m=new THREE.Mesh(g,cliffMat);m.position.set(host.x+host.r*1.4,host.y-35-random()*30,host.z+host.r);world.add(m);}
   buildCircuitArchitecture();
   buildCircuitDistricts();
+  if(typeof buildExtensionLandmarks==='function')buildExtensionLandmarks();
+  world.userData.serviceRoute=null;if(typeof buildServiceLane==='function')buildServiceLane();
   // Static architecture shares material batches; transparent water remains separate.
   world.updateMatrixWorld(true);const batches=new Map();
   world.traverse(mesh=>{if(!mesh.isMesh||mesh.userData.dynamic||mesh.isInstancedMesh||Array.isArray(mesh.material)||mesh.material.transparent||mesh.material.vertexColors)return;const list=batches.get(mesh.material)||[];list.push(mesh);batches.set(mesh.material,list);});

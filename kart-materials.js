@@ -176,5 +176,6 @@ function kartMaterials(div){
   const skin=new THREE.MeshPhysicalMaterial({color:0x182532,roughness:.78,metalness:.02,clearcoat:0,side});skin.name=div.id+'-woven-race-suit';
   const metal=new THREE.MeshPhysicalMaterial({color:metalTint,map:T.metal,roughnessMap:T.metalRough,metalness:.85,roughness:T.metalRough?1:.22,clearcoat:1});
   const tyre=new THREE.MeshStandardMaterial({color:T.tyre?0xffffff:0x1c1d20,map:T.tyre,normalMap:T.tyreNormal,normalScale:v2(.8),roughness:.85,metalness:0});
+  white.userData.surface='paint';
   return {white,dark,panel,glow,skin,metal,tyre,color,light};
 }

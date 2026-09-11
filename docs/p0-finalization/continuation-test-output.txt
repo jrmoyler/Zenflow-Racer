@@ -1,0 +1,802 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.4.0 verify
+> npm test && npm run build && npm run test:release && npm run test:runtime && npm run test:assets
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.4.0 test
+> node tests/p0-completion.cjs && node tests/garage.cjs && node tests/progression.cjs && node tests/circuit-extensions.cjs && node tests/economy.cjs && node tests/game-regression.cjs && node tests/setup-flow.cjs && node tests/race-telemetry.cjs && node tests/immersion-regression.cjs && node tests/presentation.cjs && node tests/webgl-lighting.cjs && node tests/finish-ceremony.cjs && node tests/item-finish.cjs && node tests/addon-powers.cjs && node tests/addon-ui.cjs && node tests/power-icons.cjs && node tests/addon-effects.cjs && node tests/living-world.cjs && node tests/natural-world.cjs && node tests/audience.cjs && node tests/automatic-update.cjs && node tests/review-bootstrap.cjs
+
+PASS satin finish targets paint only, preserves rubber and glass
+PASS reward results: visible count-up once, exact final credits, achievements, affordability and reduced motion
+PASS service apex: inside/outside geometric distance, bounded progression, no outside-section advantage
+PASS Garage DOM: insufficient funds, buy/equip/upgrade, racer builds, persistence and exit
+PASS serialized economic transactions: double-click, replay, restart, quota failure, corruption and durable receipts
+[
+  {
+    "map": "cherry",
+    "beforeMetres": 1299.148177985483,
+    "afterMetres": 2003.07600528398,
+    "addedMetres": 703.927827298497,
+    "referenceSpeed": 47,
+    "geometricSeconds": 14.97718781486164,
+    "minCenterClearance": 15.543410988512374,
+    "humanLapSeconds": null,
+    "aiLapSeconds": null,
+    "certified": false
+  },
+  {
+    "map": "stormforge",
+    "beforeMetres": 1318.2291674507244,
+    "afterMetres": 1983.2975715033147,
+    "addedMetres": 665.0684040525903,
+    "referenceSpeed": 47,
+    "geometricSeconds": 14.150391575587028,
+    "minCenterClearance": 24.912076904934057,
+    "humanLapSeconds": null,
+    "aiLapSeconds": null,
+    "certified": false
+  },
+  {
+    "map": "canopy",
+    "beforeMetres": 1196.2556710415915,
+    "afterMetres": 1929.248610620588,
+    "addedMetres": 732.9929395789964,
+    "referenceSpeed": 47,
+    "geometricSeconds": 15.595594459127582,
+    "minCenterClearance": 18.125408631330437,
+    "humanLapSeconds": null,
+    "aiLapSeconds": null,
+    "certified": false
+  }
+]
+PASS economy migration, persistence, reward bounds, incomplete race, restart/replay rejection, purchases and six builds
+PASS Initial grid / idle update does not award a checkpoint or lap
+PASS Forward driving awards exactly three complete laps
+PASS Reverse looping cannot award laps or finish
+PASS Reverse shortcut then forward start crossing cannot award a lap
+PASS Brake has priority over a held accelerator
+PASS Pause clears held input and restores countdown
+PASS Pause/resume preserves race time
+PASS Finished racers rank by time ahead of unfinished racers
+PASS Paused animation frames freeze physics and race clock
+PASS Paused circuit redraws once, then sleeps while controls remain responsive
+PASS Hidden tabs perform no rendering or simulation work
+PASS Window blur pauses active races and releases controls
+PASS Results distinguish unfinished racers from recorded finish times
+PASS Every division has a separately named, documented power
+PASS All twenty powers activate once and reject cooldown spam
+PASS Power activation is rejected outside racing and after finishing
+PASS Powers recover cooldown only with simulation time and reset in fresh races
+PASS Time Dilation slows nearby rivals but preserves owner and distant rivals
+PASS Shared Fortune transfers tokens and respects the reserve cap
+PASS Phase Walk blocks direct attacks until its duration expires
+PASS Hologram Decoy intercepts a hostile missile then expires
+PASS Impact Drive spins a rival on contact
+PASS Verdict Mirror reflects one attack to the attacker
+PASS Sonic Lance hits the nearest forward rival in its lane
+PASS Thread Snare slows a crossing rival and expires
+PASS Side Step changes lane without advancing race distance
+PASS Orbital Magnet collects across lanes but respects range and cap
+PASS Sentinel Drone slows forward rivals
+PASS Sentinel Drone respects shields, phase, and regeneration
+PASS Regenesis cleanses spin and slow, recovers loss once, and caps tokens
+PASS Race cleanup removes all lingering ability zones
+PASS Projectile expiry disposes GPU resources once, including shared child resources
+PASS Race projectile cleanup releases mines and missiles
+PASS Records remain separate across circuits and selection rejects mid-race changes
+PASS Kart rig animation keeps transforms finite through drift, spin, hit, boost, wheelspin and finish states
+PASS Suspension follows the road at speed and settles back to the wheel rest height at zero speed
+PASS Blender clips layer additively onto the procedural pose and reset once their state fades
+PASS Boosts ramp in as a surge rather than an instant multiplier
+PASS Drift needs a hop, a speed floor and a steering commitment inside the hop window; counter-steer holds the charge
+PASS Slipstream engages after 0.8 s in a rival's draft, tows, then releases into a boost when pulling out
+PASS Wall impacts scrub speed in proportion to the impact angle
+PASS Lap splits record per-lap times, best lap and a delta toast against the previous lap
+PASS AI directors fire powers only on sensible conditions and respect cooldowns
+PASS AI items wait for a purpose: missiles need a target, mines a chaser, and missiles re-arm after 3 s
+PASS AI speed obeys the same legal build for every difficulty and race gap
+PASS Grid slots stagger the start reaction so the front rows launch first
+PASS Item weighting keeps Overseer Pulse from the leader and arms the tail with missiles and clusters
+PASS Live mines are capped at six per race, retiring the oldest first
+PASS Node Cluster bursts are spaced by a short cooldown and each burst is a surge
+PASS Results board lists finish time, best lap and gap to the leader, and the sub-line carries the PB delta
+PASS Next Circuit cycles the map list only from the results screen and restarts with the same director
+PASS Key handlers ignore events typed into form fields and map Escape / R / M
+PASS Position-change toasts are pooled, throttled and yield to higher-priority messages
+PASS HUD update runs headless with the new elements: gap readout, speed bar, wrong-way delay, power button readiness
+PASS The effect rail reports every live buff and debuff, and the order flags held rivals
+PASS Analog steering clamps travel, ignores other fingers and releases on cancellation
+PASS Two fingers on the same action do not release one another
+PASS Touch steering assist is optional and does not override deliberate steering
+PASS Touch drift holds charge a rocket start during the final countdown
+PASS All twenty power effects produce finite geometry and transforms
+PASS Power effects enforce a live cap and dispose evicted materials
+PASS Expired power effects detach themselves and release materials
+PASS Disabling touch mode releases simultaneous steering, drift, item and power
+PASS Resize releases the old steering coordinate and held actions
+PASS Resume requests audio recovery in the button gesture
+PASS Backgrounding immediately mutes audio before hidden frames stop
+PASS Controls probe: A yaws left (player-visible) while moving forward; D yaws right
+PASS Analog deadzone is continuous, symmetric and retains full steering lock
+PASS High speed steering reduces lock and countersteering changes direction promptly
+PASS Reversing across a previously completed lap cannot duplicate split records
+PASS Key released after focus enters a text input does not remain stuck
+PASS Fresh setup cannot start with only a saved racer or an unconfirmed map
+PASS Service apex uses physical lane distance and still requires three complete laps
+PASS Equal-speed overlapping karts cannot gain energy
+PASS Closing contact conserves weighted momentum and reduces kinetic energy
+PASS Contact cannot push a kart past the track boundary
+PASS Anchored contact leaves its position and speed unchanged
+PASS Slope slows uphill travel and accelerates downhill travel
+PASS Countdown karts stay stationary on an incline
+PASS Forward progress uses heading projection through a slide
+PASS Stopped kart rolls downhill without throttle after brake release
+PASS Faster sideways rear kart does not hit a departing leader
+PASS Equal scalar speeds transfer momentum when the leader is drifting
+PASS Time field consumes one shield without slowing that tick, then refreshes through the common slow gate
+PASS Fortune steals from nearest three, consumes ordinary shield, and cannot pierce a vault
+PASS Phase prevents both token and item-box pickup and leaves missiles and mines alive
+PASS Decoy ignores its own missile and all mines, then consumes exactly one hostile missile
+PASS Mutual ram commits both hits while a phased contact is ignored
+PASS Mirror does not block slows or token theft and reflected hits cannot bounce
+PASS Sonic miss remains committed and Vector chooses a clear four metre landing
+PASS Loom refresh is exactly 0.8 seconds and finished targets are unaffected
+PASS Magnet cannot collect during spin, phase, or vault
+PASS Drone has a six metre lane gate and exactly three deterministic pulses
+PASS Vault freezes item use and touching tokens but leaves owner and distant economy free
+PASS Anchor prevents heavy contact displacement and speed slams but remains hittable
+PASS Perimeter shoves and slows without spinning, preserves shield for first hit, and ignores phase
+PASS Shared Lane grants nearest unfinished racer a real speed benefit without self-boosting
+PASS Predictive Line tightens fixed steering and expires without harming anyone
+PASS Root Net slows crossing rivals and its active grip reduces a real wall speed loss
+PASS Waypoint Hop advances six metres and shares lap, finish, and reverse-exploit bookkeeping
+PASS Second Wind fires through spin, cleanses and surges without recovering tokens
+PASS New power AI evaluates actual nearby threats and economy
+PASS A slow is a felt handicap: lower ceiling, blunted throttle and a damped boost
+PASS A committed cast is never inert: an unanswered lance and an empty siphon vent into thrust
+PASS All duration and cooldown timers freeze outside live simulation and reset on initialization
+PASS Stub canvas contexts yield plain materials for all twenty divisions without retrying textures
+PASS Fake 2D canvas produces livery, carbon, tyre and detail maps shared through TEX
+PASS Twenty divisions get twenty distinct livery and tyre textures at a shared detail set
+PASS Kart disposal releases materials but never the shared livery textures
+PASS Race FX init adds a bounded set of pooled meshes with finite geometry
+PASS Race FX hooks fired 200 times keep geometry finite, object count constant and post hints normalised
+PASS Race FX skid ring buffer wraps without growth and continuity survives teleports
+PASS Race FX clear removes every object and disposes each resource exactly once; re-init works
+PASS Race FX hooks are silent no-ops before init and under the stub Three context
+PASS Race FX mobile profile halves pool budgets and keeps the same draw-call bound
+PASS kart-clips.js is generated plain script under 60 KB with version 1 at 30 fps
+PASS Blender clip set covers every kart state
+PASS Every clip track targets a rig contract node with sorted finite additive keys
+PASS One-shot clips start and end at rest so state crossfades stay seamless
+PASS Signature poses exist: victory fist pump, spinout flail, hit whiplash
+{
+  "passed": 120,
+  "total": 120,
+  "cases": [
+    {
+      "name": "Initial grid / idle update does not award a checkpoint or lap",
+      "pass": true
+    },
+    {
+      "name": "Forward driving awards exactly three complete laps",
+      "pass": true
+    },
+    {
+      "name": "Reverse looping cannot award laps or finish",
+      "pass": true
+    },
+    {
+      "name": "Reverse shortcut then forward start crossing cannot award a lap",
+      "pass": true
+    },
+    {
+      "name": "Brake has priority over a held accelerator",
+      "pass": true
+    },
+    {
+      "name": "Pause clears held input and restores countdown",
+      "pass": true
+    },
+    {
+      "name": "Pause/resume preserves race time",
+      "pass": true
+    },
+    {
+      "name": "Finished racers rank by time ahead of unfinished racers",
+      "pass": true
+    },
+    {
+      "name": "Paused animation frames freeze physics and race clock",
+      "pass": true
+    },
+    {
+      "name": "Paused circuit redraws once, then sleeps while controls remain responsive",
+      "pass": true
+    },
+    {
+      "name": "Hidden tabs perform no rendering or simulation work",
+      "pass": true
+    },
+    {
+      "name": "Window blur pauses active races and releases controls",
+      "pass": true
+    },
+    {
+      "name": "Results distinguish unfinished racers from recorded finish times",
+      "pass": true
+    },
+    {
+      "name": "Every division has a separately named, documented power",
+      "pass": true
+    },
+    {
+      "name": "All twenty powers activate once and reject cooldown spam",
+      "pass": true
+    },
+    {
+      "name": "Power activation is rejected outside racing and after finishing",
+      "pass": true
+    },
+    {
+      "name": "Powers recover cooldown only with simulation time and reset in fresh races",
+      "pass": true
+    },
+    {
+      "name": "Time Dilation slows nearby rivals but preserves owner and distant rivals",
+      "pass": true
+    },
+    {
+      "name": "Shared Fortune transfers tokens and respects the reserve cap",
+      "pass": true
+    },
+    {
+      "name": "Phase Walk blocks direct attacks until its duration expires",
+      "pass": true
+    },
+    {
+      "name": "Hologram Decoy intercepts a hostile missile then expires",
+      "pass": true
+    },
+    {
+      "name": "Impact Drive spins a rival on contact",
+      "pass": true
+    },
+    {
+      "name": "Verdict Mirror reflects one attack to the attacker",
+      "pass": true
+    },
+    {
+      "name": "Sonic Lance hits the nearest forward rival in its lane",
+      "pass": true
+    },
+    {
+      "name": "Thread Snare slows a crossing rival and expires",
+      "pass": true
+    },
+    {
+      "name": "Side Step changes lane without advancing race distance",
+      "pass": true
+    },
+    {
+      "name": "Orbital Magnet collects across lanes but respects range and cap",
+      "pass": true
+    },
+    {
+      "name": "Sentinel Drone slows forward rivals",
+      "pass": true
+    },
+    {
+      "name": "Sentinel Drone respects shields, phase, and regeneration",
+      "pass": true
+    },
+    {
+      "name": "Regenesis cleanses spin and slow, recovers loss once, and caps tokens",
+      "pass": true
+    },
+    {
+      "name": "Race cleanup removes all lingering ability zones",
+      "pass": true
+    },
+    {
+      "name": "Projectile expiry disposes GPU resources once, including shared child resources",
+      "pass": true
+    },
+    {
+      "name": "Race projectile cleanup releases mines and missiles",
+      "pass": true
+    },
+    {
+      "name": "Records remain separate across circuits and selection rejects mid-race changes",
+      "pass": true
+    },
+    {
+      "name": "Kart rig animation keeps transforms finite through drift, spin, hit, boost, wheelspin and finish states",
+      "pass": true
+    },
+    {
+      "name": "Suspension follows the road at speed and settles back to the wheel rest height at zero speed",
+      "pass": true
+    },
+    {
+      "name": "Blender clips layer additively onto the procedural pose and reset once their state fades",
+      "pass": true
+    },
+    {
+      "name": "Boosts ramp in as a surge rather than an instant multiplier",
+      "pass": true
+    },
+    {
+      "name": "Drift needs a hop, a speed floor and a steering commitment inside the hop window; counter-steer holds the charge",
+      "pass": true
+    },
+    {
+      "name": "Slipstream engages after 0.8 s in a rival's draft, tows, then releases into a boost when pulling out",
+      "pass": true
+    },
+    {
+      "name": "Wall impacts scrub speed in proportion to the impact angle",
+      "pass": true
+    },
+    {
+      "name": "Lap splits record per-lap times, best lap and a delta toast against the previous lap",
+      "pass": true
+    },
+    {
+      "name": "AI directors fire powers only on sensible conditions and respect cooldowns",
+      "pass": true
+    },
+    {
+      "name": "AI items wait for a purpose: missiles need a target, mines a chaser, and missiles re-arm after 3 s",
+      "pass": true
+    },
+    {
+      "name": "AI speed obeys the same legal build for every difficulty and race gap",
+      "pass": true
+    },
+    {
+      "name": "Grid slots stagger the start reaction so the front rows launch first",
+      "pass": true
+    },
+    {
+      "name": "Item weighting keeps Overseer Pulse from the leader and arms the tail with missiles and clusters",
+      "pass": true
+    },
+    {
+      "name": "Live mines are capped at six per race, retiring the oldest first",
+      "pass": true
+    },
+    {
+      "name": "Node Cluster bursts are spaced by a short cooldown and each burst is a surge",
+      "pass": true
+    },
+    {
+      "name": "Results board lists finish time, best lap and gap to the leader, and the sub-line carries the PB delta",
+      "pass": true
+    },
+    {
+      "name": "Next Circuit cycles the map list only from the results screen and restarts with the same director",
+      "pass": true
+    },
+    {
+      "name": "Key handlers ignore events typed into form fields and map Escape / R / M",
+      "pass": true
+    },
+    {
+      "name": "Position-change toasts are pooled, throttled and yield to higher-priority messages",
+      "pass": true
+    },
+    {
+      "name": "HUD update runs headless with the new elements: gap readout, speed bar, wrong-way delay, power button readiness",
+      "pass": true
+    },
+    {
+      "name": "The effect rail reports every live buff and debuff, and the order flags held rivals",
+      "pass": true
+    },
+    {
+      "name": "Analog steering clamps travel, ignores other fingers and releases on cancellation",
+      "pass": true
+    },
+    {
+      "name": "Two fingers on the same action do not release one another",
+      "pass": true
+    },
+    {
+      "name": "Touch steering assist is optional and does not override deliberate steering",
+      "pass": true
+    },
+    {
+      "name": "Touch drift holds charge a rocket start during the final countdown",
+      "pass": true
+    },
+    {
+      "name": "All twenty power effects produce finite geometry and transforms",
+      "pass": true
+    },
+    {
+      "name": "Power effects enforce a live cap and dispose evicted materials",
+      "pass": true
+    },
+    {
+      "name": "Expired power effects detach themselves and release materials",
+      "pass": true
+    },
+    {
+      "name": "Disabling touch mode releases simultaneous steering, drift, item and power",
+      "pass": true
+    },
+    {
+      "name": "Resize releases the old steering coordinate and held actions",
+      "pass": true
+    },
+    {
+      "name": "Resume requests audio recovery in the button gesture",
+      "pass": true
+    },
+    {
+      "name": "Backgrounding immediately mutes audio before hidden frames stop",
+      "pass": true
+    },
+    {
+      "name": "Controls probe: A yaws left (player-visible) while moving forward; D yaws right",
+      "pass": true
+    },
+    {
+      "name": "Analog deadzone is continuous, symmetric and retains full steering lock",
+      "pass": true
+    },
+    {
+      "name": "High speed steering reduces lock and countersteering changes direction promptly",
+      "pass": true
+    },
+    {
+      "name": "Reversing across a previously completed lap cannot duplicate split records",
+      "pass": true
+    },
+    {
+      "name": "Key released after focus enters a text input does not remain stuck",
+      "pass": true
+    },
+    {
+      "name": "Fresh setup cannot start with only a saved racer or an unconfirmed map",
+      "pass": true
+    },
+    {
+      "name": "Service apex uses physical lane distance and still requires three complete laps",
+      "pass": true
+    },
+    {
+      "name": "Equal-speed overlapping karts cannot gain energy",
+      "pass": true
+    },
+    {
+      "name": "Closing contact conserves weighted momentum and reduces kinetic energy",
+      "pass": true
+    },
+    {
+      "name": "Contact cannot push a kart past the track boundary",
+      "pass": true
+    },
+    {
+      "name": "Anchored contact leaves its position and speed unchanged",
+      "pass": true
+    },
+    {
+      "name": "Slope slows uphill travel and accelerates downhill travel",
+      "pass": true
+    },
+    {
+      "name": "Countdown karts stay stationary on an incline",
+      "pass": true
+    },
+    {
+      "name": "Forward progress uses heading projection through a slide",
+      "pass": true
+    },
+    {
+      "name": "Stopped kart rolls downhill without throttle after brake release",
+      "pass": true
+    },
+    {
+      "name": "Faster sideways rear kart does not hit a departing leader",
+      "pass": true
+    },
+    {
+      "name": "Equal scalar speeds transfer momentum when the leader is drifting",
+      "pass": true
+    },
+    {
+      "name": "Time field consumes one shield without slowing that tick, then refreshes through the common slow gate",
+      "pass": true
+    },
+    {
+      "name": "Fortune steals from nearest three, consumes ordinary shield, and cannot pierce a vault",
+      "pass": true
+    },
+    {
+      "name": "Phase prevents both token and item-box pickup and leaves missiles and mines alive",
+      "pass": true
+    },
+    {
+      "name": "Decoy ignores its own missile and all mines, then consumes exactly one hostile missile",
+      "pass": true
+    },
+    {
+      "name": "Mutual ram commits both hits while a phased contact is ignored",
+      "pass": true
+    },
+    {
+      "name": "Mirror does not block slows or token theft and reflected hits cannot bounce",
+      "pass": true
+    },
+    {
+      "name": "Sonic miss remains committed and Vector chooses a clear four metre landing",
+      "pass": true
+    },
+    {
+      "name": "Loom refresh is exactly 0.8 seconds and finished targets are unaffected",
+      "pass": true
+    },
+    {
+      "name": "Magnet cannot collect during spin, phase, or vault",
+      "pass": true
+    },
+    {
+      "name": "Drone has a six metre lane gate and exactly three deterministic pulses",
+      "pass": true
+    },
+    {
+      "name": "Vault freezes item use and touching tokens but leaves owner and distant economy free",
+      "pass": true
+    },
+    {
+      "name": "Anchor prevents heavy contact displacement and speed slams but remains hittable",
+      "pass": true
+    },
+    {
+      "name": "Perimeter shoves and slows without spinning, preserves shield for first hit, and ignores phase",
+      "pass": true
+    },
+    {
+      "name": "Shared Lane grants nearest unfinished racer a real speed benefit without self-boosting",
+      "pass": true
+    },
+    {
+      "name": "Predictive Line tightens fixed steering and expires without harming anyone",
+      "pass": true
+    },
+    {
+      "name": "Root Net slows crossing rivals and its active grip reduces a real wall speed loss",
+      "pass": true
+    },
+    {
+      "name": "Waypoint Hop advances six metres and shares lap, finish, and reverse-exploit bookkeeping",
+      "pass": true
+    },
+    {
+      "name": "Second Wind fires through spin, cleanses and surges without recovering tokens",
+      "pass": true
+    },
+    {
+      "name": "New power AI evaluates actual nearby threats and economy",
+      "pass": true
+    },
+    {
+      "name": "A slow is a felt handicap: lower ceiling, blunted throttle and a damped boost",
+      "pass": true
+    },
+    {
+      "name": "A committed cast is never inert: an unanswered lance and an empty siphon vent into thrust",
+      "pass": true
+    },
+    {
+      "name": "All duration and cooldown timers freeze outside live simulation and reset on initialization",
+      "pass": true
+    },
+    {
+      "name": "Stub canvas contexts yield plain materials for all twenty divisions without retrying textures",
+      "pass": true
+    },
+    {
+      "name": "Fake 2D canvas produces livery, carbon, tyre and detail maps shared through TEX",
+      "pass": true
+    },
+    {
+      "name": "Twenty divisions get twenty distinct livery and tyre textures at a shared detail set",
+      "pass": true
+    },
+    {
+      "name": "Kart disposal releases materials but never the shared livery textures",
+      "pass": true
+    },
+    {
+      "name": "Race FX init adds a bounded set of pooled meshes with finite geometry",
+      "pass": true
+    },
+    {
+      "name": "Race FX hooks fired 200 times keep geometry finite, object count constant and post hints normalised",
+      "pass": true
+    },
+    {
+      "name": "Race FX skid ring buffer wraps without growth and continuity survives teleports",
+      "pass": true
+    },
+    {
+      "name": "Race FX clear removes every object and disposes each resource exactly once; re-init works",
+      "pass": true
+    },
+    {
+      "name": "Race FX hooks are silent no-ops before init and under the stub Three context",
+      "pass": true
+    },
+    {
+      "name": "Race FX mobile profile halves pool budgets and keeps the same draw-call bound",
+      "pass": true
+    },
+    {
+      "name": "kart-clips.js is generated plain script under 60 KB with version 1 at 30 fps",
+      "pass": true
+    },
+    {
+      "name": "Blender clip set covers every kart state",
+      "pass": true
+    },
+    {
+      "name": "Every clip track targets a rig contract node with sorted finite additive keys",
+      "pass": true
+    },
+    {
+      "name": "One-shot clips start and end at rest so state crossfades stay seamless",
+      "pass": true
+    },
+    {
+      "name": "Signature poses exist: victory fist pump, spinout flail, hit whiplash",
+      "pass": true
+    }
+  ]
+}
+PASS actual menu handlers: ordered setup, default-map confirmation, change racer, title return, stale confirmation reset
+PASS telemetry: percentiles, sustained windows, stalls, lifecycle, bounds and quality reset
+PASS recovery: environment rebake, still-frame invalidation and interrupted audio
+PASS race venue cherry {"stands":6,"garages":3,"spectators":665,"markers":17,"districts":24,"lamps":91,"instanceBatches":10}
+PASS immersion cherry hero parts 10 particles 180
+PASS race venue stormforge {"stands":6,"garages":3,"spectators":677,"markers":37,"districts":24,"lamps":103,"instanceBatches":10}
+PASS immersion stormforge hero parts 26 particles 120
+PASS race venue canopy {"stands":6,"garages":3,"spectators":665,"markers":31,"districts":24,"lamps":106,"instanceBatches":10}
+PASS immersion canopy hero parts 29 particles 100
+PASS immersion layer: weather, heroes, rails, finite updates, map-switch disposal
+PASS race venue GPU resource disposal
+PASS mobile venue density and batch budget
+PASS scene cuts: commit under cover, duplicate/input gating, release and reduced motion
+PASS HDR target chain, capability fallback, single display transform, exposure, failure restoration and water view response
+PASS roster/showroom lighting: same circuit environment, colors, intensity and direction across moving sun targets
+PASS finish ceremony: ranked independent karts, finite responsive cameras, reduced motion, exact resource cleanup and replay
+PASS manufactured item geometry, instance transforms, silhouette and resources: mine
+PASS manufactured item geometry, instance transforms, silhouette and resources: missile
+PASS manufactured item geometry, instance transforms, silhouette and resources: shield
+PASS manufactured item geometry, instance transforms, silhouette and resources: pulse
+PASS manufactured item geometry, instance transforms, silhouette and resources: triple
+PASS manufactured item geometry, instance transforms, silhouette and resources: burst
+PASS 24 unique catalog entries: all live powers, all three boosts and four archived elements
+PASS Selection, race, spin, vault, finish and cooldown guards are authoritative
+PASS Volcanic Ward absorbs one missile and grants an ordinary shield
+PASS Caustic Bloom slows only rivals in its footprint
+PASS Growth plants a stationary summon and spends exactly three targeted lances
+PASS Cyber Serpent steers into another lane before contact
+PASS Venom Surge pierces three racers and leaves a crystal bed
+PASS Monolith rupture detonates into a broad terminal blast
+PASS Sumi Tide slows and pulls laterally toward its center
+PASS Astral collapse is telegraphed, pulls, then detonates
+PASS Cascade fires three staggered blades with a final hard hit
+PASS Celestial Rend only strikes after its 1.1s warning
+PASS Pyre Crown keeps its hollow center safe and burns its boundary
+PASS Kraken slams alternate footprint sides
+PASS Electrical Sphere chains beyond its initial radius through adjacent racers
+PASS Live Earthen Spire becomes a terminal blockade, separate from archived Earth
+PASS Verdant Gate rewards its owner crossing once with shield and surge
+PASS Tidewrought Ring cleanses crossing racers and owner gets stronger boost
+PASS Fire Portal phases without teleporting lap position and leaves exit fire
+PASS Electric Boost gives immediate surge plus short range arc
+PASS Magic Boost clears slowing and sustains regeneration
+PASS Fire Boost lays an actual slowing trail while moving
+PASS Archived Fire explodes on first contact with splash damage
+PASS Archived Water pierces and pushes rivals sideways
+PASS Archived Earth lays four crust sections behind the racer
+PASS Archived Wind combines owner tailwind and rival vortex shove
+PASS A fast projectile sweeps through a racer across the lap seam
+PASS Phase Walk does not consume projectiles or piercing charges
+PASS Phase and shields block harmful gameplay and contact animations
+PASS Pause freezes cooldowns and entities; race clear retires references
+PASS Finished owners retire persistent hazards and entities have a hard ceiling
+31 add-on gameplay tests passed
+PASS add-on selection: complete catalog, per-racer save/reload, optional empty slot and focus return
+PASS add-on search, empty results and setup/race guards
+PASS malformed saved state: invalid JSON, primitives, arrays, unknown IDs and non-string selections
+PASS add-on HUD: cooldown rounding, ready state, incapacitation and empty slot
+PASS catalog rows: per-power equip button, behaviour glyph and live equipped state
+PASS all 24 powers can be equipped and resolved, including after circuit selection
+PASS native keyboard/assistive activation and duplicate-pointer prevention
+PASS power glyphs: 20 distinct signatures, 20 distinct add-on behaviours, no orphans
+PASS All 24 source abilities have distinct finite world-space geometry
+PASS Live projectile entities follow collisions; dead entities remove VFX
+PASS Real anime.js contact envelope advances only with simulation dt and expires
+PASS Mobile cap evicts/disposes materials and canceled anime contacts never revive
+PASS Wave2 zones remain planted; following signatures move with owners
+PASS Predictive line covers 24m of real track and dynamic geometry is disposed
+PASS Pyre visible annulus matches its 3.5m safe center and 7m threat radius
+PASS Summon missiles use blades; travelling earth uses ruptures; bursts are anime contacts
+PASS Consumed Nexus decoys vanish and Gaia root visuals use actual zone pose
+PASS Live hazards survive mobile/desktop overflow and reject optional contacts
+PASS Civic ribbon follows eligible beneficiary and hides if all rivals phase
+11 addon VFX tests passed
+PASS cherry 23 anchored rigs; 2 shared foliage geometries
+PASS stormforge 32 anchored rigs; 1 shared foliage geometries
+PASS canopy 32 anchored rigs; 16 shared foliage geometries
+PASS natural world cherry desktop 23 sealed terrain caps, three stone batches, one ocean
+PASS natural world stormforge desktop 32 sealed terrain caps, three stone batches, one ocean
+PASS natural world canopy desktop 32 sealed terrain caps, three stone batches, one ocean
+PASS natural world cherry mobile 23 sealed terrain caps, three stone batches, one ocean
+PASS natural world stormforge mobile 32 sealed terrain caps, three stone batches, one ocean
+PASS natural world canopy mobile 32 sealed terrain caps, three stone batches, one ocean
+PASS Blender audience: exported mesh channels, 12 batched parts, 3 moving clips, attached elbows, pause, reduced motion and lifecycle
+PASS automatic menu updates: no prompt, no race interruption, hidden/transition guards, single activation
+PASS local workers/cache cleanup: all local hosts, unrelated registrations preserved, denied storage tolerated
+PASS texture boot waits for both Orbitron weights even if another font fails
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.4.0 build
+> node scripts/build.mjs
+
+Static game built in dist/
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.4.0 test:release
+> node tests/build-shell.cjs
+
+PASS software water remains visible using the actual water factory
+PASS release shell: 56 entrypoint resources load offline; script dependency order, manifest launch, icons and 86 cached assets verified.
+PASS software 3D: topology, rotation, instances, occlusion, UV textures, alpha cutouts, material highlights, near clipping, bounded pixels; actual GLB median 149.4 ms, 38464 vertices, 57739 raster triangles, one Canvas blit.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.4.0 test:runtime
+> node tests/reference-runtime.cjs
+
+PASS desktop cherry: 367 meshes, 2003m closed circuit
+PASS desktop stormforge: 411 meshes, 1983m closed circuit
+PASS desktop canopy: 521 meshes, 1929m closed circuit
+PASS desktop cherry: 367 meshes, 2003m closed circuit
+PASS kart zenflow: 80 meshes; 3.03 × 2.81 × 4.14; rig 25 nodes
+PASS kart collective: 77 meshes; 3.03 × 2.79 × 4.03; rig 25 nodes
+PASS kart hybrid: 79 meshes; 3.03 × 2.89 × 4.14; rig 25 nodes
+PASS kart nexus: 74 meshes; 3.03 × 2.86 × 4.16; rig 25 nodes
+PASS kart kinetic: 80 meshes; 3.04 × 2.79 × 4.17; rig 25 nodes
+PASS kart juris: 76 meshes; 3.03 × 2.85 × 4.14; rig 25 nodes
+PASS kart signal: 82 meshes; 3.03 × 2.81 × 4.59; rig 25 nodes
+PASS kart loom: 77 meshes; 3.03 × 2.91 × 4.13; rig 25 nodes
+PASS kart vector: 83 meshes; 3.03 × 2.79 × 4.59; rig 25 nodes
+PASS kart aether: 77 meshes; 3.03 × 2.87 × 4.14; rig 25 nodes
+PASS kart animus: 78 meshes; 3.03 × 2.79 × 4.02; rig 25 nodes
+PASS kart helix: 75 meshes; 3.03 × 2.86 × 4.13; rig 25 nodes
+PASS kart ledger: 107 meshes; 3.03 × 2.88 × 4.07; rig 25 nodes
+PASS kart terra: 78 meshes; 3.03 × 2.78 × 4.12; rig 25 nodes
+PASS kart obsidian: 80 meshes; 3.03 × 2.81 × 4.45; rig 25 nodes
+PASS kart civic: 77 meshes; 3.03 × 2.88 × 4.14; rig 25 nodes
+PASS kart cognara: 77 meshes; 3.03 × 2.92 × 4.12; rig 25 nodes
+PASS kart gaia: 77 meshes; 3.03 × 2.86 × 4.14; rig 25 nodes
+PASS kart nomad: 151 meshes; 3.03 × 2.82 × 4.06; rig 25 nodes
+PASS kart eon: 76 meshes; 3.03 × 2.91 × 4.09; rig 25 nodes
+PASS all six reference items: finite distinct geometry, energy colors and collision bounds
+PASS mobile cherry: 367 meshes, 2003m closed circuit
+PASS mobile stormforge: 411 meshes, 1983m closed circuit
+PASS mobile canopy: 521 meshes, 1929m closed circuit
+PASS mobile cherry: 367 meshes, 2003m closed circuit
+PASS UI resource resolution and runtime script order
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> zenflow-racer@1.4.0 test:assets
+> node tests/playable-assets.cjs
+
+PASS playable assets: 20 actual GLBs, independent live rigs/materials, shared geometry, animation, ghost cloning and disposal; 18.30 MiB, 1312792 triangles.

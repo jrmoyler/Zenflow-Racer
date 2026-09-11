@@ -20,7 +20,8 @@ function renderReconstructionReview(){
    game.player=game.racers[0];game.newBest=false;game.pbDelta=null;showResults();r.scene=scene;
   }else if(r.mode==='map'){
    if(!MAPS.some(m=>m.id===r.asset))r.asset='cherry';selectMap(r.asset);buildPickups();
-   const u=r.view==='rear'?.55:r.view==='side'?.32:.045;
+   const moment=/^extension-[123]$/.test(r.view)?Number(r.view.slice(-1))-1:-1;
+   const u=moment>=0?(world.userData.extensionLandmarks?.[moment]?.u||.045)-.009:r.view==='rear'?.55:r.view==='side'?.32:.045;
    trackPoint(u,0,4,camera.position);const target=trackPoint(u+.025,0,2,new THREE.Vector3());camera.lookAt(target);if(r.view==='sun'){camera.position.set(25,25,20);camera.lookAt(camera.position.clone().addScaledVector(SOLAR_DIRECTION,100));}
    camera.fov=r.view==='sun'?48:65;camera.updateProjectionMatrix();
    r.scene=scene;
@@ -30,7 +31,13 @@ function renderReconstructionReview(){
    const fill=new THREE.DirectionalLight(0xb2eaff,.7);fill.position.set(5,3,1);r.scene.add(fill);
    r.object=r.mode==='kart'?buildKart(ROSTER.find(d=>d.id===r.asset)||ROSTER[0]):buildInventoryModel(r.asset);r.scene.add(r.object);
    const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0xc4d8e9,roughness:.28,metalness:.18}));ground.rotation.x=-Math.PI/2;ground.position.y=r.mode==='kart'?-.025:-1;ground.receiveShadow=true;r.scene.add(ground);
-   const pos=r.view==='side'?[8,3,0]:r.view==='rear'?[5.6,4.5,7]:[-5.6,4.5,-7];
+   const views={front:[0,2.7,-8],rear:[0,2.7,8],left:[-8,2.7,0],right:[8,2.7,0],side:[8,2.7,0],hero:[-5.6,4.5,-7],cockpit:[-1.8,3.6,-3.5],chase:[0,3.7,7]};
+   const pos=views[r.view]||views.hero;
+   if(r.mode==='kart'){
+    const state=['idle','drive','drift','boost','hit','spinout','victory','defeat'].includes(r.view)?r.view:'idle';
+    resetClipNodes(r.object.userData);sampleKartClip(state,.4,1,r.object.userData);constrainKartHands(r.object,state);
+    if(r.view==='neutral')r.object.traverse(o=>{for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m){m.color?.setHex(0x949494);m.emissive?.setHex(0);m.map=null;m.emissiveMap=null;}});
+   }
    camera.position.set(...pos).multiplyScalar(r.mode==='kart'?.88:.31);camera.lookAt(0,r.mode==='kart'?1.0:0,0);camera.fov=35;camera.updateProjectionMatrix();
   }
   const gl=renderer.getContext?.(),debug=gl?.getExtension('WEBGL_debug_renderer_info');

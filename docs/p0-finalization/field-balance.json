@@ -1,0 +1,1679 @@
+{
+  "method": "Seeded 120Hz actual AI/physics/collisions; 12 legal builds, 3 laps; no pickups/items/power casts/rendering; not a human/device benchmark.",
+  "runs": [
+    {
+      "map": "cherry",
+      "difficulty": 0,
+      "racers": [
+        {
+          "division": "zenflow",
+          "finished": true,
+          "laps": [
+            50.658156545374126,
+            50.072746358326,
+            50.11559778451115
+          ],
+          "time": 150.84650068821128,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "collective",
+          "finished": true,
+          "laps": [
+            54.30157988300689,
+            53.457723917159264,
+            53.50709877882281
+          ],
+          "time": 161.26640257898896,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "hybrid",
+          "finished": true,
+          "laps": [
+            52.96735880900009,
+            52.15751681521513,
+            52.33189752139832
+          ],
+          "time": 157.45677314561354,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "nexus",
+          "finished": true,
+          "laps": [
+            47.87979491403797,
+            46.3578408351392,
+            48.08175269108855
+          ],
+          "time": 142.31938844026573,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "kinetic",
+          "finished": true,
+          "laps": [
+            51.65891292168661,
+            49.953541986708146,
+            49.94474984854206
+          ],
+          "time": 151.5572047569368,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "juris",
+          "finished": true,
+          "laps": [
+            52.04622196156685,
+            52.869740415916205,
+            52.73698456568658
+          ],
+          "time": 157.65294694316964,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "signal",
+          "finished": true,
+          "laps": [
+            48.06183333630559,
+            47.85184210496222,
+            47.884683807189006
+          ],
+          "time": 143.79835924845682,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "loom",
+          "finished": true,
+          "laps": [
+            53.215300511838336,
+            51.09544635441195,
+            51.21197819422464
+          ],
+          "time": 155.52272506047493,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            50.585239349824,
+            48.26717984518239,
+            48.263879904893045
+          ],
+          "time": 147.11629909989944,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            52.59202585454761,
+            52.37425073789634,
+            52.568864072923574
+          ],
+          "time": 157.53514066536752,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            52.525421571054785,
+            50.23876760872083,
+            50.28987198355772
+          ],
+          "time": 153.05406116333333,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            54.744790657355416,
+            52.514433236823415,
+            52.5820670289406
+          ],
+          "time": 159.84129092311943,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    },
+    {
+      "map": "cherry",
+      "difficulty": 1,
+      "racers": [
+        {
+          "division": "kinetic",
+          "finished": true,
+          "laps": [
+            49.173113862851906,
+            48.37225711692163,
+            48.37985296184962
+          ],
+          "time": 145.92522394162316,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "juris",
+          "finished": true,
+          "laps": [
+            51.66057209585145,
+            52.07815343738967,
+            51.99839220105336
+          ],
+          "time": 155.7371177342945,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "signal",
+          "finished": true,
+          "laps": [
+            46.830267200286976,
+            44.5467221833382,
+            46.1288938920123
+          ],
+          "time": 137.50588327563747,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "loom",
+          "finished": true,
+          "laps": [
+            49.87776786417856,
+            48.66691554599043,
+            48.656089689134106
+          ],
+          "time": 147.2007730993031,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            48.41372718375062,
+            46.68939637246149,
+            46.69111132266299
+          ],
+          "time": 141.7942348788751,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            50.35784125605745,
+            50.79495202234602,
+            50.86528913998356
+          ],
+          "time": 152.01808241838702,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            50.6864154481365,
+            48.60257901683903,
+            48.650783135757734
+          ],
+          "time": 147.93977760073327,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            53.338712489868115,
+            51.697378882157366,
+            51.82565453295675
+          ],
+          "time": 156.86174590498223,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "ledger",
+          "finished": true,
+          "laps": [
+            53.47799346335557,
+            50.903668499526184,
+            50.9115295427555
+          ],
+          "time": 155.29319150563725,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "terra",
+          "finished": true,
+          "laps": [
+            53.12914127135395,
+            51.21865238985172,
+            51.02923322525653
+          ],
+          "time": 155.3770268864622,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "obsidian",
+          "finished": true,
+          "laps": [
+            51.982555294501246,
+            48.92459205751526,
+            48.65119142625646
+          ],
+          "time": 149.55833877827297,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "civic",
+          "finished": true,
+          "laps": [
+            52.132480161877524,
+            50.82247658102128,
+            50.89237237543408
+          ],
+          "time": 153.84732911833288,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    },
+    {
+      "map": "cherry",
+      "difficulty": 2,
+      "racers": [
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            46.82565004013824,
+            45.80419337033756,
+            45.804770143007104
+          ],
+          "time": 138.4346135534829,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            50.21567372511858,
+            50.85031051933743,
+            50.72376504343241
+          ],
+          "time": 151.7897492878884,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            48.65852751463603,
+            47.68699243840863,
+            47.575164147092295
+          ],
+          "time": 143.92068410013695,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            49.58969004925058,
+            49.915119898738226,
+            49.94484795274764
+          ],
+          "time": 149.44965790073644,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "ledger",
+          "finished": true,
+          "laps": [
+            51.64175169105457,
+            49.891877799130874,
+            50.0793200710083
+          ],
+          "time": 151.61294956119374,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "terra",
+          "finished": true,
+          "laps": [
+            51.3193422720955,
+            50.18601497691445,
+            50.26726396382419
+          ],
+          "time": 151.77262121283414,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "obsidian",
+          "finished": true,
+          "laps": [
+            50.08871324213491,
+            47.70936509864442,
+            47.75022845708192
+          ],
+          "time": 145.54830679786124,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "civic",
+          "finished": true,
+          "laps": [
+            51.063791382451065,
+            50.38583497763408,
+            50.66901474193401
+          ],
+          "time": 152.11864110201915,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "cognara",
+          "finished": true,
+          "laps": [
+            51.43232127401193,
+            49.770381737121674,
+            49.891182892664986
+          ],
+          "time": 151.0938859037986,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "gaia",
+          "finished": true,
+          "laps": [
+            51.930815613369056,
+            49.71419053462261,
+            50.0058083985399
+          ],
+          "time": 151.65081454653156,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "nomad",
+          "finished": true,
+          "laps": [
+            49.82418750725579,
+            46.30806688057158,
+            47.73741881401497
+          ],
+          "time": 143.86967320184235,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "eon",
+          "finished": true,
+          "laps": [
+            55.16709646029737,
+            52.449339631189815,
+            52.44838948754723
+          ],
+          "time": 160.06482557903442,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    },
+    {
+      "map": "stormforge",
+      "difficulty": 0,
+      "racers": [
+        {
+          "division": "zenflow",
+          "finished": true,
+          "laps": [
+            52.31581593545809,
+            53.112166152161365,
+            53.12855016781373
+          ],
+          "time": 158.55653225543318,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 72.80541288116835
+        },
+        {
+          "division": "collective",
+          "finished": true,
+          "laps": [
+            55.1499829584181,
+            56.71967172014623,
+            56.63398863585044
+          ],
+          "time": 168.50364331441477,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 34.94096583096698
+        },
+        {
+          "division": "hybrid",
+          "finished": true,
+          "laps": [
+            56.56064855116504,
+            55.26107264063052,
+            55.54224988347174
+          ],
+          "time": 167.3639710752673,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "nexus",
+          "finished": true,
+          "laps": [
+            52.17649731060341,
+            50.84087557690927,
+            50.913655648065784
+          ],
+          "time": 153.93102853557846,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "kinetic",
+          "finished": true,
+          "laps": [
+            52.826665603695375,
+            52.65541301170572,
+            52.97656982857802
+          ],
+          "time": 158.45864844397911,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 94.13663358011975
+        },
+        {
+          "division": "juris",
+          "finished": true,
+          "laps": [
+            56.536539548358924,
+            56.12274264285187,
+            56.53743164753698
+          ],
+          "time": 169.19671383874777,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 21.005075172370123
+        },
+        {
+          "division": "signal",
+          "finished": true,
+          "laps": [
+            51.971227942951096,
+            50.950722154740625,
+            50.95752333489283
+          ],
+          "time": 153.87947343258455,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 76.0175603976003
+        },
+        {
+          "division": "loom",
+          "finished": true,
+          "laps": [
+            56.336566758986905,
+            54.41329720211725,
+            54.491949611006305
+          ],
+          "time": 165.24181357211046,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 40.71488807518175
+        },
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            52.6970919451794,
+            51.49334687074076,
+            51.60772405912893
+          ],
+          "time": 155.7981628750491,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 46.49814849387728
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            57.751972171070626,
+            55.81268222595765,
+            55.682600226252646
+          ],
+          "time": 169.24725462328092,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 26.938895750504958
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            55.00148396901298,
+            53.591807919093284,
+            53.60030373378861
+          ],
+          "time": 162.19359562189487,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 49.34894988375638
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            58.630857830790035,
+            55.9109961246769,
+            55.90534869939336
+          ],
+          "time": 170.4472026548603,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    },
+    {
+      "map": "stormforge",
+      "difficulty": 1,
+      "racers": [
+        {
+          "division": "kinetic",
+          "finished": true,
+          "laps": [
+            49.5438691103346,
+            49.87798691428705,
+            49.88801800193865
+          ],
+          "time": 149.3098740265603,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 25.993099093220074
+        },
+        {
+          "division": "juris",
+          "finished": true,
+          "laps": [
+            54.40918862643195,
+            53.676456931626056,
+            53.97189797182402
+          ],
+          "time": 162.05754352988203,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "signal",
+          "finished": true,
+          "laps": [
+            48.449968234321084,
+            47.83735483334713,
+            47.833991600741285
+          ],
+          "time": 144.1213146684095,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 41.66461858741579
+        },
+        {
+          "division": "loom",
+          "finished": true,
+          "laps": [
+            50.42143870863847,
+            50.308116403094864,
+            50.3167758121204
+          ],
+          "time": 151.04633092385373,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 32.1966583402755
+        },
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            48.65850736806429,
+            47.928232679140876,
+            47.95012912430788
+          ],
+          "time": 144.53686917151305,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 70.04114730544238
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            53.9716605590276,
+            52.55077675179646,
+            52.49917808221288
+          ],
+          "time": 159.02161539303694,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 31.020801384095975
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            52.282457859243394,
+            50.31817384423381,
+            50.32012766302037
+          ],
+          "time": 152.92075936649758,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            53.92055485732603,
+            53.10123830157891,
+            53.14371727648229
+          ],
+          "time": 160.16551043538723,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 75.76584113119335
+        },
+        {
+          "division": "ledger",
+          "finished": true,
+          "laps": [
+            54.71428459388731,
+            52.420587093144526,
+            52.693962679368255
+          ],
+          "time": 159.8288343664001,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 52.75135300851187
+        },
+        {
+          "division": "terra",
+          "finished": true,
+          "laps": [
+            54.12214679039917,
+            52.58185576381956,
+            52.569810523019555
+          ],
+          "time": 159.2738130772383,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 39.84111651460321
+        },
+        {
+          "division": "obsidian",
+          "finished": true,
+          "laps": [
+            53.0397270668982,
+            50.32730029180741,
+            50.34447915860382
+          ],
+          "time": 153.71150651730943,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "civic",
+          "finished": true,
+          "laps": [
+            54.428756047037986,
+            52.32273527158019,
+            52.34284601349438
+          ],
+          "time": 159.09433733211256,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 47.07566974704908
+        }
+      ]
+    },
+    {
+      "map": "stormforge",
+      "difficulty": 2,
+      "racers": [
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            48.79823596736014,
+            46.85983617723328,
+            46.842146190555454
+          ],
+          "time": 142.50021833514887,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 75.51917395398772
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            49.96686320713965,
+            51.60526317502553,
+            51.66609917710011
+          ],
+          "time": 153.2382255592653,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 92.54906869335252
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            47.34637192068343,
+            48.60061889549795,
+            48.665132332978644
+          ],
+          "time": 144.61212314916003,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 48.53734414757152
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            50.57671620509219,
+            50.62212762098705,
+            50.83323493098834
+          ],
+          "time": 152.03207875706758,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 41.191412605309
+        },
+        {
+          "division": "ledger",
+          "finished": true,
+          "laps": [
+            51.726769388381136,
+            50.807388720862484,
+            50.95675407181331
+          ],
+          "time": 153.49091218105693,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 70.78971682593173
+        },
+        {
+          "division": "terra",
+          "finished": true,
+          "laps": [
+            50.21626360100772,
+            51.10364097983334,
+            50.9904723213311
+          ],
+          "time": 152.31037690217215,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 30.872574577006144
+        },
+        {
+          "division": "obsidian",
+          "finished": true,
+          "laps": [
+            50.269706362059146,
+            48.80993784658934,
+            48.74126741504429
+          ],
+          "time": 147.82091162369278,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 64.87931253826576
+        },
+        {
+          "division": "civic",
+          "finished": true,
+          "laps": [
+            52.57981034271666,
+            51.71218035615478,
+            51.80854085126853
+          ],
+          "time": 156.10053155013998,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 49.32144758626769
+        },
+        {
+          "division": "cognara",
+          "finished": true,
+          "laps": [
+            51.796203200461974,
+            50.77119780118525,
+            50.78439132263381
+          ],
+          "time": 153.35179232428104,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 98.82555608374032
+        },
+        {
+          "division": "gaia",
+          "finished": true,
+          "laps": [
+            52.97254215335602,
+            50.800112485229704,
+            50.88678521195402
+          ],
+          "time": 154.65943985053974,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 27.079733545684935
+        },
+        {
+          "division": "nomad",
+          "finished": true,
+          "laps": [
+            51.73343644716651,
+            49.33145734800971,
+            48.75741132409034
+          ],
+          "time": 149.82230511926656,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 14.326439097876428
+        },
+        {
+          "division": "eon",
+          "finished": true,
+          "laps": [
+            55.2484864170949,
+            53.36959366708724,
+            53.362441960879465
+          ],
+          "time": 161.9805220450616,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 81.39876497628401
+        }
+      ]
+    },
+    {
+      "map": "canopy",
+      "difficulty": 0,
+      "racers": [
+        {
+          "division": "zenflow",
+          "finished": true,
+          "laps": [
+            50.65664737805189,
+            51.00085978042055,
+            51.29716782634341
+          ],
+          "time": 152.95467498481585,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "collective",
+          "finished": true,
+          "laps": [
+            55.03157257573617,
+            54.53525043924483,
+            54.705151168019796
+          ],
+          "time": 164.2719741830008,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "hybrid",
+          "finished": true,
+          "laps": [
+            52.31778202558429,
+            53.37205075330837,
+            53.45177024034997
+          ],
+          "time": 159.14160301924264,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "nexus",
+          "finished": true,
+          "laps": [
+            49.19847498657173,
+            49.30859942936515,
+            49.31787054046005
+          ],
+          "time": 147.82494495639693,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "kinetic",
+          "finished": true,
+          "laps": [
+            52.37135070548195,
+            51.05306093388942,
+            51.04719300836051
+          ],
+          "time": 154.47160464773188,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "juris",
+          "finished": true,
+          "laps": [
+            54.49949774959556,
+            54.40604175564586,
+            54.137857035047574
+          ],
+          "time": 163.043396540289,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "signal",
+          "finished": true,
+          "laps": [
+            51.5735350716157,
+            49.01751930740031,
+            49.03528995461667
+          ],
+          "time": 149.6263443336327,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "loom",
+          "finished": true,
+          "laps": [
+            53.29567972506213,
+            52.249480748235484,
+            52.418979252884185
+          ],
+          "time": 157.9641397261818,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            51.88993175624508,
+            49.35376517046786,
+            49.56705814890216
+          ],
+          "time": 150.8107550756151,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            55.81211444722457,
+            53.55071233946825,
+            53.699867379283276
+          ],
+          "time": 163.0626941659761,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            53.36466616432506,
+            51.54387728285995,
+            51.54329824454696
+          ],
+          "time": 156.45184169173197,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            55.55014313828141,
+            53.853692864868464,
+            53.739664288155325
+          ],
+          "time": 163.1435002913052,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    },
+    {
+      "map": "canopy",
+      "difficulty": 1,
+      "racers": [
+        {
+          "division": "kinetic",
+          "finished": true,
+          "laps": [
+            48.20541388524923,
+            48.42786130935718,
+            48.55893970855753
+          ],
+          "time": 145.19221490316394,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "juris",
+          "finished": true,
+          "laps": [
+            48.26351173669422,
+            51.76095185469597,
+            52.33632038066092
+          ],
+          "time": 152.3607839720511,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "signal",
+          "finished": true,
+          "laps": [
+            47.037550807806944,
+            46.50092968670658,
+            46.500524567461156
+          ],
+          "time": 140.03900506197468,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "loom",
+          "finished": true,
+          "laps": [
+            49.71352135229173,
+            49.28431856472245,
+            48.88385839128293
+          ],
+          "time": 147.8816983082971,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            48.59067835894732,
+            47.348212993956786,
+            47.053157653679705
+          ],
+          "time": 142.9920490065838,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            49.766593033293894,
+            50.524740097828236,
+            51.104764860200206
+          ],
+          "time": 151.39609799132234,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            50.55147059912145,
+            48.57676277472981,
+            48.776149842974064
+          ],
+          "time": 147.90438321682532,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            53.03550891206731,
+            51.88230379358874,
+            51.82597213981046
+          ],
+          "time": 156.7437848454665,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "ledger",
+          "finished": true,
+          "laps": [
+            53.69128214887804,
+            51.15491867678494,
+            51.20754029122898
+          ],
+          "time": 156.05374111689196,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "terra",
+          "finished": true,
+          "laps": [
+            52.3141289821283,
+            51.55410690326092,
+            51.57390855906624
+          ],
+          "time": 155.44214444445547,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "obsidian",
+          "finished": true,
+          "laps": [
+            50.324568481691415,
+            48.73455976882397,
+            48.766288724230805
+          ],
+          "time": 147.8254169747462,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "civic",
+          "finished": true,
+          "laps": [
+            54.13292560629082,
+            50.97537398332937,
+            51.01391822692587
+          ],
+          "time": 156.12221781654605,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    },
+    {
+      "map": "canopy",
+      "difficulty": 2,
+      "racers": [
+        {
+          "division": "vector",
+          "finished": true,
+          "laps": [
+            45.815129386304655,
+            45.75666042341695,
+            45.76118599649398
+          ],
+          "time": 137.3329758062156,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "aether",
+          "finished": true,
+          "laps": [
+            50.16928933553139,
+            50.45028092086787,
+            50.544544195743086
+          ],
+          "time": 151.16411445214234,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "animus",
+          "finished": true,
+          "laps": [
+            48.76119319738785,
+            47.524034575472875,
+            47.478596551955704
+          ],
+          "time": 143.76382432481643,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "helix",
+          "finished": true,
+          "laps": [
+            50.4510341167157,
+            49.6009691350956,
+            49.695876016580854
+          ],
+          "time": 149.74787926839215,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "ledger",
+          "finished": true,
+          "laps": [
+            51.594207581510155,
+            49.85672997444858,
+            49.66234108544539
+          ],
+          "time": 151.11327864140412,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "terra",
+          "finished": true,
+          "laps": [
+            49.169662795681504,
+            50.12136035274436,
+            50.26314669386343
+          ],
+          "time": 149.5541698422893,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "obsidian",
+          "finished": true,
+          "laps": [
+            48.92336894481191,
+            47.417436415682104,
+            47.48266472189914
+          ],
+          "time": 143.82347008239316,
+          "build": [
+            "Tires"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "civic",
+          "finished": true,
+          "laps": [
+            49.53709636151668,
+            50.63513948845385,
+            50.63658993470786
+          ],
+          "time": 150.8088257846784,
+          "build": [
+            "Motor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "cognara",
+          "finished": true,
+          "laps": [
+            51.81851389427171,
+            49.615129293902406,
+            49.477103274869265
+          ],
+          "time": 150.91074646304338,
+          "build": [
+            "Aero"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "gaia",
+          "finished": true,
+          "laps": [
+            48.02948353987592,
+            49.43175767866793,
+            49.73524111329695
+          ],
+          "time": 147.1964823318408,
+          "build": [
+            "Suspension"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "nomad",
+          "finished": true,
+          "laps": [
+            50.03616982619839,
+            47.530955475853844,
+            47.9068010757635
+          ],
+          "time": 145.47392637781573,
+          "build": [
+            "Energy Core"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        },
+        {
+          "division": "eon",
+          "finished": true,
+          "laps": [
+            54.095838193694206,
+            52.161982332377804,
+            52.15916113311468
+          ],
+          "time": 158.4169816591867,
+          "build": [
+            "Armor"
+          ],
+          "rubber": 1,
+          "serviceLineMetres": 0
+        }
+      ]
+    }
+  ]
+}

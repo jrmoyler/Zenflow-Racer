@@ -11,12 +11,16 @@ const c={THREE,console,Math,document:{createElement:canvas},FALLBACK_GRAPHICS:tr
  game:{player:null,state:'roster'}};
 vm.createContext(c);const run=code=>vm.runInContext(code,c);
 run(read('core.js').slice(0,read('core.js').indexOf('function hexToRgb')));
-run(read('surface-detail.js'));run(read('maps.js'));run(read('world.js').slice(read('world.js').indexOf('const CTRL=')));run(read('immersion.js'));
+run(read('surface-detail.js'));run(read('circuit-extensions.js'));run(read('maps.js'));run(read('world.js').slice(read('world.js').indexOf('const CTRL=')));run(read('immersion.js'));
 assert.equal(typeof c.buildImmersion,'function');assert.equal(typeof c.updateImmersion,'function');assert.equal(typeof c.createImmersionWater,'function');
 const heroes=new Set();
 for(const id of ['cherry','stormforge','canopy']){
   assert.equal(run(`selectMap('${id}')`),true,id+' builds');
   const world=run('world');
+  assert.equal(world.userData.extensionLandmarks.length,3,id+': three authored extension moments');
+  assert.equal(!!world.userData.serviceRoute,id==='stormforge',id+': alternate line only on technical circuit');
+  if(id==='stormforge'){assert.ok(world.getObjectByName('turbine-service-apex-markings'));assert.ok(world.userData.serviceRoute.end>world.userData.serviceRoute.start);}
+  assert.ok(world.userData.extensionLandmarks.every(m=>Number.isFinite(m.u)&&m.u>0&&m.u<1),id+': finite geometry-derived anchors');
   const venue=world.getObjectByName('race-venue');
   assert.ok(venue,id+': authored race venue');
   assert.ok(venue.userData.districts>=16,id+': inhabited outer districts');

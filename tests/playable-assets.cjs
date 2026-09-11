@@ -6,7 +6,7 @@ vm.createContext(c);const run=s=>vm.runInContext(s,c);
 run(read('vendor/GLTFLoader.js'));
 const parseLoader=new THREE.GLTFLoader();
 THREE.GLTFLoader.prototype.loadAsync=async file=>{const buffer=fs.readFileSync(path.join(root,file));return new Promise((ok,fail)=>parseLoader.parse(buffer.buffer.slice(buffer.byteOffset,buffer.byteOffset+buffer.length),'',ok,fail));};
-run(read('core.js').split('function hexToRgb')[0]);run(read('kart-clips.js'));run(read('kart-materials.js'));run(read('vehicles.js').split('// ---------- Item / token pickups ----------')[0]);run(read('kart-assets.js'));
+run(read('core.js').split('function hexToRgb')[0]);run(read('kart-clips.js'));run(read('kart-materials.js'));run(read('vehicles.js').split('// ---------- Item / token pickups ----------')[0]);run(read('kart-assets.js'));run(read('economy.js'));run(read('progression.js'));run("var saved={builds:{},addonUpgradeLevels:{},appearance:{}};");
 // Weld positions conceptually so normal/UV splits do not look like open mesh edges.
 function assertClosedSkin(geometry,label){
  const p=geometry.attributes.position,ids=[],vertices=new Map(),edges=new Map();
@@ -73,6 +73,10 @@ function assertClosedSkin(geometry,label){
   const clone=a.clone(true);assert.ok(clone.getObjectByName('torso'),'ability ghost can clone GLB rig without circular userData');
   c.kart=a;run('for(let i=0;i<60;i++)animateShowroomKart(kart,i/60,1/60)');a.updateMatrixWorld(true);
   a.traverse(o=>{assert.ok(o.matrixWorld.elements.every(Number.isFinite),'finite animated GLB transforms');if(o.isMesh){const pos=o.geometry.attributes.position;assert.ok(pos.array.every(Number.isFinite));totalTriangles+=(o.geometry.index?.count||pos.count)/3;}});
+  c.buildRacer={div,isPlayer:true,mesh:a};run("saved.appearance[div.id]='satin';applyKartBuild(buildRacer,0)");
+  assert.equal(a.getObjectByName('helmet-shell').material.roughness,.65,div.id+': satin applies to loaded paint');
+  assert.notEqual(b.getObjectByName('helmet-shell').material.roughness,.65,div.id+': satin does not bleed into another racer');
+  assert.equal(a.getObjectByName('head-mesh').material.roughness,b.getObjectByName('head-mesh').material.roughness,div.id+': suit remains unchanged');
   let disposed=0;a.getObjectByName('torso').geometry.addEventListener('dispose',()=>disposed++);c.kart=a;run('disposeKart(kart)');assert.equal(disposed,0,'despawn retains cached GLB geometry');c.kart=b;run('disposeKart(kart)');
  }
  assert.ok(totalBytes<40*1024*1024,'whole roster download budget');
