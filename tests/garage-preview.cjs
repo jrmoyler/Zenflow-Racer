@@ -1,0 +1,37 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom'),THREE=require('three');
+const dom=new JSDOM('<section id="preview"><p class="garage-preview-note"></p></section>',{runScripts:'outside-only'}),w=dom.window;
+let frames=new Map(),id=0,renderers=[],models=[],disposed=0,environments=[];
+w.requestAnimationFrame=fn=>{frames.set(++id,fn);return id};w.cancelAnimationFrame=n=>frames.delete(n);w.matchMedia=()=>({matches:true});
+class Renderer{constructor({canvas}){this.domElement=canvas;renderers.push(this)}setPixelRatio(){}setSize(){}render(){}dispose(){this.disposed=true}forceContextLoss(){setTimeout(()=>this.domElement.dispatchEvent(new w.Event('webglcontextlost',{cancelable:true})),0)}}
+w.THREE={...THREE,WebGLRenderer:Renderer};w.KART_SHOWROOM_CAMERA=[5.5,2.9,-7.3];w.buildKart=r=>{const g=new THREE.Group();g.name=r.id;models.push(g);return g};w.disposeKart=g=>{disposed++;g.removeFromParent?.();if(g.parent)g.parent.remove(g)};w.animateShowroomKart=()=>{throw Error('reduced motion must not animate')};w.applyKartBuildVisuals=(kart,...args)=>kart.userData.build=args;w.createSurfaceEnvironmentTarget=()=>{const t={texture:{},dispose(){this.disposed=true}};environments.push(t);return t};
+w.eval(fs.readFileSync('garage-preview.js','utf8')+';window.createGaragePreview=createGaragePreview;');
+(async()=>{const host=w.document.querySelector('section'),p=w.createGaragePreview(host),save={builds:{a:['Motor']},appearance:{a:'satin'},addons:{a:'fire'},addonUpgradeLevels:{fire:2}};
+ assert.equal(p.open(),true);p.update({id:'a'},save);assert.equal(models.length,1);assert.deepEqual(JSON.parse(JSON.stringify(models[0].userData.build)),[['Motor'],'satin','fire',2]);p.update({id:'a'},save);assert.equal(models.length,1,'unchanged inventory must not rebuild');
+ const first=host.querySelector('canvas');first.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight'}));assert.equal(models[0].rotation.y,.55);save.builds.a=['Tires'];p.update({id:'a'},save);assert.equal(disposed,1);
+ [...frames.values()][0](100);p.dispose();assert.equal(host.querySelector('canvas'),null);assert.equal(renderers[0].disposed,true);assert.equal(environments[0].disposed,true);assert.equal(p.open(),true);p.update({id:'a'},save);const second=host.querySelector('canvas');assert.notEqual(first,second,'reopen creates a fresh WebGL canvas');
+ await new Promise(r=>setTimeout(r,5));assert.equal(host.querySelector('canvas'),second,'stale context-loss event cannot dispose reopened preview');
+ second.dispatchEvent(new w.Event('webglcontextlost',{cancelable:true}));assert.equal(host.querySelector('canvas'),null);assert.match(host.textContent,/Reopen/);
+ const targets=[];w.THREE.PMREMGenerator=class{fromScene(){const t={texture:{},dispose(){this.disposed=true}};targets.push(t);return t}dispose(){}};
+ w.eval(fs.readFileSync('surface-detail.js','utf8')+';window.makeRaceEnvironment=createSurfaceEnvironment;window.makePreviewEnvironment=createSurfaceEnvironmentTarget;');
+ const map={skyHorizon:0x334455,skyTop:0x223344};const raceTexture=w.makeRaceEnvironment({},map),previewTarget=w.makePreviewEnvironment({},map);previewTarget.dispose();assert.equal(targets[0].disposed,undefined,'showroom PMREM disposal must preserve race environment');assert.equal(raceTexture,targets[0].texture);w.makeRaceEnvironment({},map);assert.equal(targets[0].disposed,true,'race wrapper replaces only its own target');
+ // Exercise the real software rasterizer after observed WebGL allocation failure.
+ Object.defineProperty(w.document,'hidden',{value:false});
+ let blits=0,softwareRenderer,animationSteps=[];
+ w.HTMLCanvasElement.prototype.getContext=function(){return {canvas:this,save(){},restore(){},setTransform(){},beginPath(){},rect(){},clip(){},fillRect(){},createImageData(width,height){return {data:new Uint8ClampedArray(width*height*4),width,height};},putImageData(){},drawImage(){blits++;}};};
+ w.eval(fs.readFileSync('fallback-renderer.js','utf8')+';window.RealSoftwareRenderer=CanvasRaceRenderer;');
+ w.eval('CanvasRaceRenderer=class extends RealSoftwareRenderer {constructor(options){super(options);window.softwareInstance=this;}}');
+ w.THREE.WebGLRenderer=class{constructor(){throw Error('WebGL context allocation failed');}};
+ w.matchMedia=()=>({matches:false});w.animateShowroomKart=(kart,time,dt,yaw)=>{animationSteps.push({time,dt});kart.rotation.y=yaw;};
+ w.buildKart=r=>{const g=new THREE.Group();g.add(new THREE.Mesh(new THREE.BoxGeometry(1,1,2),new THREE.MeshStandardMaterial({color:0x00aaff})));models.push(g);return g;};
+ Object.defineProperty(host,'clientWidth',{value:320});Object.defineProperty(host,'clientHeight',{value:240});
+ const fallback=w.createGaragePreview(host);assert.equal(fallback.open(),true,'software path keeps showroom available');
+ fallback.update({id:'a'},save);softwareRenderer=w.softwareInstance;
+ assert.equal(host.querySelector('canvas').dataset.renderer,'software-3d');assert.ok(blits>0,'actual rasterizer presents geometry');
+ assert.ok(softwareRenderer.info.render.triangles>0,'real kart triangles are rasterized');
+ const pump=now=>{const current=[...frames.values()];frames.clear();current.forEach(fn=>fn(now));};
+ pump(1000);const count=blits;pump(1050);assert.equal(blits,count,'software preview is limited to ten frames per second');pump(1100);
+ assert.equal(blits,count+1);assert.ok(Math.abs(animationSteps.at(-1).dt-.1)<1e-8,'throttled animations advance actual elapsed time');
+ const modelCount=models.length;save.builds.a=['Armor'];fallback.update({id:'a'},save);assert.equal(models.length,modelCount+1,'upgrades rebuild same playable model under fallback');
+ fallback.dispose();assert.equal(host.querySelector('canvas'),null);assert.equal(frames.size,0,'closing stops software animation');
+ dom.window.close();console.log('PASS garage preview: shared build, idempotent refresh, rotation, reduced motion, disposal and stale context-loss protection');
+})().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});

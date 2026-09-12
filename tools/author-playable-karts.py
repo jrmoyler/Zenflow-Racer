@@ -165,6 +165,8 @@ for mat in bpy.data.materials:
 report=[]
 for root in [o for o in bpy.data.objects if o.get('zf_root')]:
     kart=root['zf_kart'];objects=[o for o in bpy.data.objects if o.get('zf_kart')==kart]
+    identity_baked=any(o.get('zf_node')=='division-rider-identity' for o in objects)
+    root['zf_rider_identity_baked']=identity_baked
     skin=material(kart+'-woven-race-suit','182532',.02,.78)
     enamel=material(kart+'-reference-bonnet-enamel','008AC2' if kart=='zenflow' else PALETTE[kart] if kart!='juris' else TRIM[kart],.55,.20)
     dish=material(kart+'-recessed-wheel-enamel','083649' if kart=='zenflow' else '132839',.65,.24)
@@ -173,7 +175,9 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
     for obj in objects:
         weld(obj);name=obj.get('zf_runtime_name',obj.get('zf_node',''))
         if obj.type!='MESH':continue
-        if name in ('torso','arm-l-mesh','arm-r-mesh','head-mesh'):
+        # Runtime identity pass already authors each tailored silhouette and tint.
+        # Do not replace it with the old shared envelope during export.
+        if name in ('torso','arm-l-mesh','arm-r-mesh','head-mesh') and not identity_baked:
             obj.data.materials.clear();obj.data.materials.append(skin)
             if name=='torso':
                 continuous_torso(obj);reconstruct_skin(obj,.014,torso=True)
@@ -183,6 +187,9 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
                 bmesh.ops.holes_fill(bm,edges=[e for e in bm.edges if e.is_boundary],sides=0)
                 bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(obj.data);bm.free()
                 for v in obj.data.vertices:v.co.x*=.94;v.co.y*=.95;v.co.z*=.94
+        if identity_baked and name in ('torso','arm-l-mesh','arm-r-mesh'):
+            # Union suit seams without resetting division-specific proportions or paint.
+            reconstruct_skin(obj,.014 if name=='torso' else .012,torso=name=='torso')
         if name=='coachwork-batch':
             dec=obj.modifiers.new('Mobile static coachwork LOD','DECIMATE');dec.ratio=.90;apply(obj,dec)
         if name=='recessed-colored-hub':wheel_dish(obj,dish)
@@ -227,6 +234,10 @@ for root in [o for o in bpy.data.objects if o.get('zf_root')]:
         operations=[x for x in operations if x not in ('conformal curved bonnet insert','variant-specific enclosed front fairings')]
         operations+=['Wave2 component inventory coachwork retained from live Three.js mesh scaffold','final measured triangle budget below 50000, preserving all named rig pivots']
         root['zf_author_operations']=json.dumps(operations)
+    if identity_baked:
+        ops=json.loads(root['zf_author_operations'])
+        ops += ['preserved individual division helmet, chest proportions and enamel suit tint','baked rider identity marker prevents duplicate runtime sculpt']
+        root['zf_author_operations']=json.dumps(ops)
     report.append({'id':kart,'operations':json.loads(root['zf_author_operations'])})
     print('AUTHORED',kart,flush=True)
 os.makedirs(os.path.dirname(target),exist_ok=True);bpy.ops.wm.save_as_mainfile(filepath=target,compress=True)

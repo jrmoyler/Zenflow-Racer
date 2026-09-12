@@ -37,7 +37,7 @@ function buildSurfaceTextures(){
 // A filtered reflection environment with visible softbox / sun highlights. The old
 // low-resolution pastel cube had no bright features for clearcoat to reflect.
 let surfaceEnvironmentTarget=null;
-function createSurfaceEnvironment(renderer,map){
+function createSurfaceEnvironmentTarget(renderer,map){
   if(typeof FALLBACK_GRAPHICS!=='undefined'&&FALLBACK_GRAPHICS)return null;
   const stage=new THREE.Scene();stage.background=new THREE.Color(map.skyHorizon).multiplyScalar(.5);
   const items=[];
@@ -47,8 +47,15 @@ function createSurfaceEnvironment(renderer,map){
   ]){const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:new THREE.Color(color).multiplyScalar(power),side:THREE.DoubleSide}));m.position.set(...position);m.scale.set(...scale);m.lookAt(0,0,0);stage.add(m);items.push(m);}
   const pmrem=new THREE.PMREMGenerator(renderer);let next;
   try{next=pmrem.fromScene(stage,.06,.1,30);}
-  catch(error){console.warn('Reflection environment unavailable',error);return surfaceEnvironmentTarget?.texture||null;}
+  catch(error){console.warn('Reflection environment unavailable',error);return null;}
   finally{pmrem.dispose();for(const m of items){m.geometry.dispose();m.material.dispose();}}
+  return next;
+}
+
+// Race renderer keeps its own target; showroom disposal cannot invalidate it.
+function createSurfaceEnvironment(renderer,map){
+  const next=createSurfaceEnvironmentTarget(renderer,map);
+  if(!next)return surfaceEnvironmentTarget?.texture||null;
   surfaceEnvironmentTarget?.dispose();surfaceEnvironmentTarget=next;
   return next.texture;
 }

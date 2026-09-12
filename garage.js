@@ -1,19 +1,24 @@
 'use strict';
 (()=>{
  const dialog=document.createElement('dialog');dialog.id='garage';dialog.setAttribute('aria-label','Garage');
- dialog.innerHTML='<header><p>PADDOCK / PROGRESSION</p><h2>Garage</h2><strong id="garage-wallet"></strong><button id="garage-close" class="btn">Back</button></header><label>Racer <select id="garage-racer"></select></label><nav aria-label="Garage categories"></nav><p id="garage-status" role="status"></p><div id="garage-inventory"></div>';
+ dialog.innerHTML='<header><p>PADDOCK / PROGRESSION</p><h2>Garage</h2><strong id="garage-wallet"></strong><button id="garage-close" class="btn">Back</button></header><label>Racer <select id="garage-racer"></select></label><section id="garage-preview" aria-label="Equipped kart showroom"><p class="garage-preview-note">Live kart preview</p></section><p id="garage-build-summary" role="status"></p><nav aria-label="Garage categories"></nav><p id="garage-status" role="status"></p><div id="garage-inventory"></div>';
  document.body.append(dialog);let padFrame=0,padHeld=false;
  let category='Add-Ons',racerId=selected?.id||ROSTER[0].id,opener=null,busy=false;
+ const preview=typeof createGaragePreview==='function'?createGaragePreview(dialog.querySelector('#garage-preview')):null;
  const select=dialog.querySelector('select'),list=dialog.querySelector('#garage-inventory'),status=dialog.querySelector('#garage-status');
  for(const racer of ROSTER){const option=document.createElement('option');option.value=racer.id;option.textContent=racer.name;select.append(option);}
  for(const name of ['Add-Ons','Kart Upgrades','Appearance','Owned / Locked']){const b=document.createElement('button');b.className='btn ghost';b.textContent=name;b.onclick=()=>{category=name;render();};dialog.querySelector('nav').append(b);}
  select.onchange=()=>{racerId=select.value;render();};
  function close(){cancelAnimationFrame(padFrame);dialog.close();opener?.focus();}
  function pollPad(){if(!dialog.open)return;const pad=Array.from(navigator.getGamepads?.()||[]).find(Boolean);if(pad){const pressed=i=>pad.buttons[i]?.pressed;const direction=pressed(13)||pressed(15)?1:pressed(12)||pressed(14)?-1:0;const active=direction||pressed(0)||pressed(1);if(active&&!padHeld){if(pressed(1)){close();return;}if(pressed(0)&&dialog.contains(document.activeElement))document.activeElement.click();if(direction&&document.activeElement===select&&(pressed(14)||pressed(15))){select.selectedIndex=(select.selectedIndex+direction+select.options.length)%select.options.length;select.onchange();}else if(direction){const controls=[...dialog.querySelectorAll('button:not(:disabled),select')];const at=controls.indexOf(document.activeElement);controls[(at+direction+controls.length)%controls.length]?.focus();}}padHeld=!!active;}padFrame=requestAnimationFrame(pollPad);}
- dialog.addEventListener('close',()=>{cancelAnimationFrame(padFrame);opener?.focus();});dialog.querySelector('#garage-close').onclick=close;
+ dialog.addEventListener('close',()=>{preview?.dispose();cancelAnimationFrame(padFrame);opener?.focus();});dialog.querySelector('#garage-close').onclick=close;
  function render(restoreFocus){
   const buildRacerId=racerId,focusKey=restoreFocus||document.activeElement?.dataset?.garageKey;
-  select.value=buildRacerId;dialog.querySelector('#garage-wallet').textContent=saved.wallet+' Zen Credits';list.replaceChildren();
+  select.value=buildRacerId;
+  const racer=ROSTER.find(r=>r.id===buildRacerId),build=saved.builds[buildRacerId]||[],addon=ADDONS.find(a=>a.id===saved.addons[buildRacerId]);
+  dialog.querySelector('#garage-build-summary').textContent=racer.name+' · '+(build.length?build.map(id=>Economy.BUILDS[id].name).join(' / '):'Factory setup')+' · '+(saved.appearance[buildRacerId]==='satin'?'Satin paint':'Factory livery')+' · '+(addon?addon.name:'No add-on equipped');
+  if(dialog.open)preview?.update(racer,saved);
+  dialog.querySelector('#garage-wallet').textContent=saved.wallet+' Zen Credits';list.replaceChildren();
   dialog.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===category)));
   const ids=ADDONS.map(a=>a.id);
   function card(name,type,effect,state,level,cost,action,callback){
@@ -38,7 +43,7 @@
   }
   if(focusKey&&dialog.open){const target=[...list.querySelectorAll('button')].find(b=>b.dataset.garageKey===focusKey&&!b.disabled);(target||dialog.querySelector('#garage-close')).focus({preventScroll:true});}
  }
- function entry(parent){if(!parent)return;const button=document.createElement('button');button.className='btn ghost';button.textContent='Garage';button.onclick=()=>{opener=button;racerId=selected?.id||racerId;status.textContent='Build changes apply on the next grid. Earn credits by finishing three-lap races.';render();dialog.showModal();padHeld=false;padFrame=requestAnimationFrame(pollPad);};parent.append(button);}
+ function entry(parent){if(!parent)return;const button=document.createElement('button');button.className='btn ghost';button.textContent='Garage';button.onclick=()=>{opener=button;racerId=selected?.id||racerId;status.textContent='Build changes apply on the next grid. Earn credits by finishing three-lap races.';render();dialog.showModal();preview?.open();preview?.update(ROSTER.find(r=>r.id===racerId),saved);padHeld=false;padFrame=requestAnimationFrame(pollPad);};parent.append(button);}
  entry(document.querySelector('.title-actions'));entry(document.querySelector('.loadout-dock'));entry(document.querySelector('#results .row'));
  const main=document.createElement('button');main.className='btn ghost';main.textContent='Main Menu';main.onclick=()=>{document.getElementById('results').classList.add('hidden');transitionScene('ZENFLOW RACER',()=>{openRoster();document.getElementById('title-screen').classList.remove('hidden');document.body.classList.add('title-open');raceSetup.step='title';document.getElementById('roster').inert=true;document.getElementById('title-start').focus();});};document.querySelector('#results .row').append(main);
  window.addEventListener('storage',e=>{if(e.key===SAVE_KEY){try{saved=Economy.migrate(JSON.parse(e.newValue||'{}'),ADDONS.map(a=>a.id));if(dialog.open)render();}catch{}}});

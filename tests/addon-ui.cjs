@@ -7,7 +7,7 @@ function element(tag='div'){
   style:{setProperty(k,v){this[k]=v;}},classList:{toggle(k,on){on?classes.add(k):classes.delete(k);},contains:k=>classes.has(k)},
   setAttribute(k,v){this.attributes[k]=String(v);},getAttribute(k){return this.attributes[k];},append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
   querySelectorAll(selector){return this.children.flatMap(n=>[...(selector==='button'&&n.tagName==='BUTTON'?[n]:[]),...n.querySelectorAll(selector)]);},
-  addEventListener(name,fn){(this.events[name]??=[]).push(fn);},fire(name,event={}){for(const fn of this.events[name]||[])fn({preventDefault(){},...event});},
+  addEventListener(name,fn){(this.events[name]??=[]).push(fn);},fire(name,event={}){for(const fn of this.events[name]||[])fn({preventDefault(){},currentTarget:this,...event});},
   showModal(){this.open=true;},close(){this.open=false;},focus(){this.focused=true;}};
 }
 function fixture(raw='{}'){
@@ -51,9 +51,10 @@ console.log('PASS malformed saved state: invalid JSON, primitives, arrays, unkno
 }
 {
  const f=fixture();f.context.r={addonId:'fire',addonCooldown:2.2,spin:0,vault:0,finished:false};f.run("game.state='race';updateAddonHUD(r)");assert.equal(f.el('addonHUD').hidden,false);assert.equal(f.el('addonHUD').disabled,true);assert.match(f.el('addonLabel').textContent,/3s/);
+ f.run('game.gamepadConnected=true;updateAddonHUD(r)');assert.equal(f.el('addonBinding').textContent,'RB / R1');f.run('game.gamepadConnected=false;updateAddonHUD(r)');assert.equal(f.el('addonBinding').textContent,'F');
  f.context.r.addonCooldown=0;f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').disabled,false);assert.equal(f.el('tA').classList.contains('ready'),true);
  for(const blocked of [{vault:1},{spin:1},{finished:true}]){Object.assign(f.context.r,{vault:0,spin:0,finished:false},blocked);f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').disabled,true,'racer status gates HUD');assert.equal(f.el('tA').disabled,true);}
- f.context.r.addonId='missing';f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').hidden,true);assert.equal(f.el('tA').hidden,true);
+ f.context.r.addonId='missing';f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').hidden,false);assert.equal(f.el('tA').hidden,false);assert.equal(f.el('tA').disabled,true);assert.match(f.el('tA').innerHTML,/EMPTY/);
  console.log('PASS add-on HUD: cooldown rounding, ready state, incapacitation and empty slot');
 }
 

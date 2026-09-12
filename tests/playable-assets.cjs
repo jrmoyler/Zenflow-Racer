@@ -27,7 +27,9 @@ function assertClosedSkin(geometry,label){
   const bytes=fs.readFileSync(path.join(root,'assets/models',div.id+'.glb'));totalBytes+=bytes.length;assert.equal(bytes.readUInt32LE(0),0x46546c67);assert.equal(bytes.readUInt32LE(4),2);assert.equal(bytes.readUInt32LE(8),bytes.length);
   const gltf=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString().trim());assert.equal(gltf.images?.length||0,0,'No reference images can enter playable meshes');assert.ok(bytes.length<4*1024*1024,'bounded uncompressed asset size');
   const triangles=(gltf.meshes||[]).reduce((sum,mesh)=>sum+mesh.primitives.reduce((n,p)=>n+gltf.accessors[p.indices===undefined?p.attributes.POSITION:p.indices].count/3,0),0);if(['ledger','terra','obsidian','civic','cognara','gaia','nomad','eon'].includes(div.id))assert.ok(triangles<50000,div.id+': under 50,000 triangle budget ('+triangles+')');
-  c.div=div;const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');
+  c.div=div;const template=run('KART_ASSETS.templates.get(div.id)');
+  const pristineSurfaces=['torso','helmet-shell'].map(name=>({name,positions:Array.from(template.getObjectByName(name).geometry.attributes.position.array)}));
+  const a=run('buildKart(div)'),b=run('buildKart(div)');assert.equal(a.userData.asset,'blender-glb');
   for(const [i,name] of ['wheel-fl','wheel-fr','wheel-rl','wheel-rr'].entries())assert.deepEqual(a.getObjectByName(name).position.toArray().map(v=>Math.round(v*100)/100),Array.from(run('KART_WHEEL_REST')[i]),div.id+': wheel '+name+' local pivot');
   for(const state of ['idle','drive','drift','boost','spinout','hit','victory','defeat']){c.clipKart=a;c.clipState=state;run('resetClipNodes(clipKart.userData);sampleKartClip(clipState,.25,1,clipKart.userData)');a.updateMatrixWorld(true);a.traverse(o=>assert.ok(o.matrixWorld.elements.every(Number.isFinite),div.id+': '+state+' transform'));}
   run('resetClipNodes(clipKart.userData)');a.updateMatrixWorld(true);
@@ -40,7 +42,17 @@ function assertClosedSkin(geometry,label){
   assert.equal(a.getObjectByName('helmet-shell').parent,a.userData.head,'helmet follows articulated head');
   assert.equal(a.getObjectByName('shift-paddle').parent,a.userData.steeringWheel,'paddles follow physical wheel');
   assert.notEqual(a.userData.body,b.userData.body);assert.notEqual(a.userData.exhaust[0].material,b.userData.exhaust[0].material);
-  assert.equal(a.getObjectByName('torso').geometry,b.getObjectByName('torso').geometry,'immutable meshes shared');
+  assert.notEqual(a.getObjectByName('torso').geometry,b.getObjectByName('torso').geometry,'sculpted torso geometry is instance-owned');
+  assert.notEqual(a.getObjectByName('helmet-shell').geometry,b.getObjectByName('helmet-shell').geometry,'sculpted helmet geometry is instance-owned');
+  assert.equal(a.getObjectByName('rounded-wheel-shell').geometry,b.getObjectByName('rounded-wheel-shell').geometry,'immutable wheel meshes shared');
+  assert.ok(a.getObjectByName('tailored-suit-inserts')&&a.getObjectByName('active-cooling-vanes'));
+  const collarBox=new THREE.Box3().setFromObject(a.getObjectByName('suit-raised-collar'));
+  const helmetBox=new THREE.Box3().setFromObject(a.getObjectByName('helmet-shell'));
+  const suitBox=new THREE.Box3().setFromObject(a.getObjectByName('torso'));
+  assert.ok(collarBox.min.y<=suitBox.max.y&&collarBox.max.y>=helmetBox.min.y,div.id+': neck seal connects suit to helmet');
+  assert.notEqual(a.getObjectByName('torso').material,a.getObjectByName('helmet-shell').material,div.id+': cloth and enamel use separate finishes');
+  assert.ok(a.getObjectByName('torso').material.roughness>=.9&&a.getObjectByName('torso').material.metalness===0,div.id+': torso remains matte cloth');
+  for(const w of a.userData.wheels){assert.equal(w.spin.getObjectByName('brake-and-spoke-hardware').children.length,1,'brake and spokes batched');assert.ok(w.spin.getObjectByName('rounded-wheel-shell').material.roughness>.8,'rubber tire shell');}
   a.updateMatrixWorld(true);const torsoBox=new THREE.Box3().setFromObject(a.getObjectByName('torso')),headBox=new THREE.Box3().setFromObject(a.getObjectByName('head-mesh')),torsoSize=torsoBox.getSize(new THREE.Vector3());
   assert.ok(torsoSize.y>1.4&&torsoSize.x>.65&&torsoSize.z>.65,div.id+': full torso, hips and legs survive Blender processing');
   assert.ok(torsoBox.max.y>=headBox.min.y-.08,div.id+': neck remains attached to head');
@@ -70,6 +82,7 @@ function assertClosedSkin(geometry,label){
   assert.equal(a.getObjectByName('cockpit-contact-hardware').children.length,2,'six cockpit components cost only two material draws');
   assert.ok(a.getObjectByName('seat-back-shell')&&a.getObjectByName('pedal-plate'),'cockpit has physical seat and pedal contacts');
   a.userData.exhaust[0].material.emissiveIntensity=9;assert.notEqual(b.userData.exhaust[0].material.emissiveIntensity,9);
+  for(const surface of pristineSurfaces)assert.deepEqual(Array.from(template.getObjectByName(surface.name).geometry.attributes.position.array),surface.positions,'finishing preserves cached '+surface.name);
   const clone=a.clone(true);assert.ok(clone.getObjectByName('torso'),'ability ghost can clone GLB rig without circular userData');
   c.kart=a;run('for(let i=0;i<60;i++)animateShowroomKart(kart,i/60,1/60)');a.updateMatrixWorld(true);
   a.traverse(o=>{assert.ok(o.matrixWorld.elements.every(Number.isFinite),'finite animated GLB transforms');if(o.isMesh){const pos=o.geometry.attributes.position;assert.ok(pos.array.every(Number.isFinite));totalTriangles+=(o.geometry.index?.count||pos.count)/3;}});
@@ -77,7 +90,7 @@ function assertClosedSkin(geometry,label){
   assert.equal(a.getObjectByName('helmet-shell').material.roughness,.65,div.id+': satin applies to loaded paint');
   assert.notEqual(b.getObjectByName('helmet-shell').material.roughness,.65,div.id+': satin does not bleed into another racer');
   assert.equal(a.getObjectByName('head-mesh').material.roughness,b.getObjectByName('head-mesh').material.roughness,div.id+': suit remains unchanged');
-  let disposed=0;a.getObjectByName('torso').geometry.addEventListener('dispose',()=>disposed++);c.kart=a;run('disposeKart(kart)');assert.equal(disposed,0,'despawn retains cached GLB geometry');c.kart=b;run('disposeKart(kart)');
+  let disposed=0,sharedDisposed=0;a.getObjectByName('torso').geometry.addEventListener('dispose',()=>disposed++);a.getObjectByName('rounded-wheel-shell').geometry.addEventListener('dispose',()=>sharedDisposed++);c.kart=a;run('disposeKart(kart)');assert.equal(disposed,1,'despawn releases owned sculpted geometry');assert.equal(sharedDisposed,0,'despawn retains immutable cached wheel geometry');c.kart=b;run('disposeKart(kart)');
  }
  assert.ok(totalBytes<40*1024*1024,'whole roster download budget');
  console.log(`PASS playable assets: ${run('ROSTER.length')} actual GLBs, independent live rigs/materials, shared geometry, animation, ghost cloning and disposal; ${(totalBytes/1048576).toFixed(2)} MiB, ${Math.round(totalTriangles)} triangles.`);

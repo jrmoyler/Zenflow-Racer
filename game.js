@@ -618,6 +618,7 @@ function frame(now){
   requestAnimationFrame(frame);
   if(typeof renderReconstructionReview==='function'&&renderReconstructionReview())return;
   if(document.hidden){last=now;return;}
+  if(document.getElementById('garage')?.open){last=now;staticFrameDirty=true;return;}
   reportFrameMetrics(now);
   if(typeof raceTelemetry!=='undefined')raceTelemetry.frame(now,game.state,game.raceTime);
   if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
@@ -703,17 +704,17 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){resetInput
 // Rescale the usable axis range to avoid a sudden steering jump at the deadzone.
 function analogAxis(value,deadzone=.12){const magnitude=Math.abs(value);if(!Number.isFinite(value)||magnitude<=deadzone)return 0;const t=clamp((magnitude-deadzone)/(1-deadzone),0,1);return Math.sign(value)*t*(.65+.35*t);}
 function steeringGain(speed,maxSpeed){return lerp(1.24,.78,clamp(Math.abs(speed)/Math.max(1,maxSpeed),0,1));}
-function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(p=>p&&p.connected!==false);if(!pad){padHeld.clear();padSteer=0;padPause=false;syncInput();return;}
+function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(p=>p&&p.connected!==false);game.gamepadConnected=!!pad;if(!pad){padHeld.clear();padSteer=0;padPause=false;syncInput();return;}
   const down=i=>!!pad.buttons[i]?.pressed;padSteer=analogAxis(pad.axes[0]||0);
-  padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4)||down(5))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(10))padHeld.add('addon');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
+  padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(5)||down(10))padHeld.add('addon');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
   if(down(9)&&!padPause){if(game.state==='paused')resume();else pause();}padPause=down(9);syncInput();}
 const touchEl=document.getElementById('touch');
 function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
   el.addEventListener('pointerdown',e=>{
-    if(!['race','countdown'].includes(game.state))return;e.preventDefault();audioInit();
+    if(el.disabled||el.hidden||!['race','countdown'].includes(game.state))return;e.preventDefault();audioInit();
     activeTouchPointers.set(e.pointerId,{key,el});el.setPointerCapture?.(e.pointerId);touchHeld.add(key);syncInput();el.classList.add('act');
   });
-  const off=e=>{activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
+  const off=e=>{if(activeTouchPointers.get(e.pointerId)?.el!==el)return;activeTouchPointers.delete(e.pointerId);if(![...activeTouchPointers.values()].some(p=>p.key===key)){touchHeld.delete(key);syncInput();if(['pointercancel','lostpointercapture'].includes(e.type)&&['item','special','addon'].includes(key)&&!input[key])input[key+'Edge']=false;}if(![...activeTouchPointers.values()].some(p=>p.el===el))el.classList.remove('act');};
   el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',off);
 }
 const steerPad=document.getElementById('tSteer');let steerPointer=null;
@@ -810,13 +811,16 @@ function updateSelectedPreview(d){
  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('racerselect',{detail:{division:d,ability:power}}));
  if(typeof THREE.Scene!=='function'||renderer.renderRosterPreview)return;
  disposePreview();if(!previewScene)buildPreviewStage();
- previewKart=buildKart(d);previewScene.add(previewKart);
+ previewKart=buildKart(d);
+ if(typeof applyKartBuildVisuals==='function')applyKartBuildVisuals(previewKart,saved.builds?.[d.id]||[],saved.appearance?.[d.id]||'factory');
+ previewScene.add(previewKart);
  const accent=new THREE.Color(d.id==='vector'?'#309DFF':d.acc);
 
  previewStage.userData.ring.material.color.copy(accent);
  previewStage.userData.disc.material.color.set(0x24272b);
  previewSpin.velocity=0;
 }
+addEventListener('garagechange',()=>{if(selected&&previewKart)updateSelectedPreview(selected);});
 function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previewSpin.velocity+delta*6,-9,9);}
 (()=>{const el=document.getElementById('kart-preview');if(!el||!el.addEventListener)return;
  el.addEventListener('pointerdown',e=>{if((e.button!==0&&e.pointerType==='mouse')||e.target?.closest?.('button'))return;previewSpin.dragging=true;previewSpin.pointer=e.pointerId;previewSpin.lastX=e.clientX;previewSpin.velocity=0;el.setPointerCapture?.(e.pointerId);el.classList.add('dragging');});

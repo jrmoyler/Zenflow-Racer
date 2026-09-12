@@ -29,6 +29,7 @@ function batchKartBody(group){
 }
 function disposeKart(root){
   if(!root)return;
+  if(typeof clearKartBuildVisuals==='function')clearKartBuildVisuals(root);
   const sharedGeometry=new Set(Object.values(KART_GEO));
   const sharedTextures=new Set(Object.values(TEX));
   const geometries=new Set(),materials=new Set(),textures=new Set();
@@ -438,14 +439,175 @@ const RIDER_FIT={
  ledger:[1.04,1.1,.95,1.07],terra:[1.14,.91,1.08,1.22],obsidian:[1.08,.95,1.12,1.18],civic:[1.01,1.09,1.03,.97],
  cognara:[.92,1.14,1.04,.94],gaia:[1.05,1.04,1.09,1.03],nomad:[1.07,.99,1.13,1.09],eon:[.96,1.13,.98,.95]
 };
+// Explicit profiles replace ordinal/modulo accessories. Coordinates remain in the
+// seated pilot's local frame; neck, shoulder and wheel-contact anchors never move.
+const RIDER_IDENTITY={
+ zenflow:   {family:'stream',width:1.02,depth:1.08,chest:1.03,mantle:.12,crown:.07},
+ collective:{family:'tourer',width:1.16,depth:1.02,chest:1.17,mantle:.20,crown:.04},
+ hybrid:    {family:'stream',width:.97,depth:1.12,chest:.98,mantle:.10,crown:.11},
+ nexus:     {family:'sensor',width:1.10,depth:1.00,chest:1.08,mantle:.17,crown:.14},
+ kinetic:   {family:'sprint',width:.98,depth:1.18,chest:.96,mantle:.09,crown:.04},
+ juris:     {family:'guard',width:1.18,depth:1.03,chest:1.20,mantle:.24,crown:.10},
+ signal:    {family:'sprint',width:.94,depth:1.22,chest:.93,mantle:.08,crown:.12},
+ loom:      {family:'sensor',width:1.00,depth:1.05,chest:1.00,mantle:.13,crown:.18},
+ vector:    {family:'sprint',width:1.08,depth:1.21,chest:1.10,mantle:.15,crown:.06},
+ aether:    {family:'tourer',width:1.13,depth:1.09,chest:1.06,mantle:.19,crown:.13},
+ animus:    {family:'guard',width:1.24,depth:1.08,chest:1.24,mantle:.27,crown:.06},
+ helix:     {family:'stream',width:.96,depth:1.03,chest:.97,mantle:.11,crown:.04},
+ ledger:    {family:'guard',width:1.08,depth:.98,chest:1.09,mantle:.17,crown:.17},
+ terra:     {family:'guard',width:1.26,depth:1.13,chest:1.26,mantle:.29,crown:.03},
+ obsidian:  {family:'sprint',width:1.12,depth:1.23,chest:1.16,mantle:.21,crown:.13},
+ civic:     {family:'tourer',width:1.06,depth:1.05,chest:1.02,mantle:.15,crown:.08},
+ cognara:   {family:'sensor',width:.96,depth:1.09,chest:.96,mantle:.11,crown:.21},
+ gaia:      {family:'stream',width:1.11,depth:1.10,chest:1.11,mantle:.18,crown:.09},
+ nomad:     {family:'tourer',width:1.19,depth:1.17,chest:1.15,mantle:.23,crown:.16},
+ eon:       {family:'sensor',width:1.02,depth:1.02,chest:1.01,mantle:.14,crown:.24}
+};
+function finishRiderIdentity(root){
+ const ud=root.userData,profile=RIDER_IDENTITY[ud.chassis];
+ // The marker survives glTF export/import, preventing a second sculpt on baked GLBs.
+ if(!profile||ud.zf_rider_identity_baked||root.getObjectByName('division-rider-identity'))return;
+ const div=ROSTER.find(d=>d.id===ud.chassis),head=ud.head,pilot=ud.pilot;
+ const marker=new THREE.Group();marker.name='division-rider-identity';pilot.add(marker);
+ marker.userData={division:ud.chassis,family:profile.family};
+ const paint=new THREE.MeshPhysicalMaterial({color:div.acc,metalness:.38,roughness:.28,clearcoat:.7,clearcoatRoughness:.24});
+ paint.name=div.id+'-identity-enamel';paint.userData.surface='paint';
+ // Loaded glTF factors are linear; the procedural export scaffold uses sRGB.
+ if(ud.asset==='blender-glb')paint.color.convertSRGBToLinear();
+ const fabric=new THREE.MeshStandardMaterial({color:paint.color.clone().multiplyScalar(.42),metalness:0,roughness:.92});
+ fabric.name=div.id+'-identity-woven-race-suit';
+ const trim=root.getObjectByName('helmet-crown-stripe').material;
+ const dark=new THREE.MeshStandardMaterial({color:0x151e29,metalness:.12,roughness:.66});
+ const add=(parent,name,g,m)=>{const mesh=new THREE.Mesh(g,m);mesh.name=name;mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);return mesh;};
+ const sculpt=(mesh,fn)=>{
+   const old=mesh.geometry,g=old.clone();delete g.userData.blenderShared;
+   const source=old.attributes.position,positions=new Float32Array(source.count*3);
+   for(let i=0;i<source.count;i++)positions.set(fn(source.getX(i),source.getY(i),source.getZ(i)),i*3);
+   g.setAttribute('position',new THREE.BufferAttribute(positions,3));g.deleteAttribute('normal');g.computeVertexNormals();g.computeBoundingSphere();mesh.geometry=g;
+   if(!old.userData.blenderShared&&!Object.values(KART_GEO).includes(old))old.dispose();
+ };
+ // A single connected surface changes the upper-body envelope. Legs, hips and the
+ // neck termination are held fixed to retain the original seated rig contract.
+ const torso=root.getObjectByName('torso');
+ sculpt(torso,(x,y,z)=>{const t=Math.sin(Math.PI*clamp((y-.27)/.98,0,1));return [x*(1+(profile.chest-1)*t),y,z*(1+.14*t)];});
+ torso.material=fabric;
+ for(const arm of ud.arms){const sleeve=arm.getObjectByName(arm.name+'-mesh');if(sleeve)sleeve.material=fabric;}
+ // A continuous tapered neck seal overlaps the suit and helmet base. The former
+ // exposed torus read as a separate spacer, making the helmet appear to float.
+ const collar=pilot.getObjectByName('suit-raised-collar');
+ if(collar){const old=collar.geometry;collar.geometry=bodyLoft([[1.045,.17,.14,.015],[1.105,.145,.125,.012],[1.19,.13,.115,.006],[1.265,.135,.12,0]],24);collar.position.set(0,0,0);collar.rotation.set(0,0,0);collar.scale.set(1,1,1);collar.material=dark;if(!old.userData.blenderShared&&!Object.values(KART_GEO).includes(old))old.dispose();}
+ // Move every helmet fitting with the envelope, so visor, jaw and locks stay joined.
+ for(const part of head.children){part.scale.x*=profile.width;part.scale.z*=profile.depth;part.position.x*=profile.width;part.position.z*=profile.depth;}
+ const shell=head.getObjectByName('helmet-shell');shell.material=paint;
+ // Broad jaws for defensive drivers, an elongated rear for sprint drivers, and
+ // elevated crowns for sensor drivers alter silhouette even in neutral material.
+ sculpt(shell,(x,y,z)=>{
+   const rear=clamp(z,0,1),top=clamp(y,0,1);
+   if(profile.family==='guard')return [x*(1+.10*(1-Math.abs(y))),y*.95,z];
+   if(profile.family==='sprint')return [x,y*(1-.12*rear),z+rear*rear*.28];
+   if(profile.family==='sensor')return [x*(1-.07*top),y+top*top*.13,z];
+   if(profile.family==='tourer')return [x,y*.96,z+.08*rear];
+   return [x,y,z+.10*rear*top];
+ });
+ // Close-fitting shoulder yoke. This is fitted equipment, not floating badges;
+ // its lower surfaces overlap the suit and its cap follows each shoulder joint.
+ for(const side of [-1,1]){
+   const arm=ud.arms[side<0?0:1],cap=arm.getObjectByName('suit-shoulder-pad');
+   if(cap){cap.scale.x*=1+profile.mantle;cap.scale.y*=1+profile.mantle*.65;cap.material=paint;}
+   const w=.25+profile.mantle*.23;
+   add(marker,'division-shoulder-yoke',limbSurface([[side*.10,1.04,.035],[side*w,1.015,.065],[side*(w+.09),.92,.075]],[.065,.075+profile.mantle*.10,.06]),paint);
+   // Upper chest panels form an engineered suit front, with smooth tapered edges.
+   add(marker,'division-chest-seam',limbSurface([[side*.075,1.00,-.17],[side*.20,.84,-.277],[side*.15,.56,-.255]],[.018,.025,.014]),trim);
+ }
+ const crown=new THREE.Group();crown.name='division-helmet-crown';head.add(crown);
+ if(profile.family==='guard'){
+   add(crown,'reinforced-brow',limbSurface([[-.22,.41,-.21],[0,.435,-.255],[.22,.41,-.21]],[.03,.045,.03]),trim);
+ }else if(profile.family==='sensor'){
+   for(const side of [-1,1])add(crown,'crown-sensor-rail',limbSurface([[side*.14,.46,.08],[side*.12,.57+profile.crown,.06],[side*.10,.52,.19]],[.034,.028,.032]),paint);
+ }else if(profile.family==='sprint'){
+   add(crown,'integrated-aero-keel',kartRibbon([[0,.51,.03],[0,.50,.22],[0,.35,.34+profile.crown]],.07,.024),paint);
+ }else if(profile.family==='tourer'){
+   add(crown,'touring-neck-roll',limbSurface([[-.20,.12,.05],[0,.10,.20],[.20,.12,.05]],[.054,.06,.054]),dark);
+ }else{
+   for(const side of [-1,1])add(crown,'stream-crown-channel',limbSurface([[side*.12,.47,-.11],[side*.12,.58,.06],[side*.10,.39,.26]],[.019,.025,.015]),trim);
+ }
+ batchKartBody(marker);batchKartBody(crown);
+ ud.zf_rider_identity_baked=true;
+}
 function finishRiderFit(root){
  const fit=RIDER_FIT[root.userData.chassis];if(!fit||root.userData.riderFit)return;root.userData.riderFit=true;
+ // Exported identity models already contain this fit, including visor transforms.
+ if(root.getObjectByName('division-rider-identity'))return;
  const scale=new THREE.Vector3(fit[0],fit[1],fit[2]);
  for(const child of root.userData.head.children){child.scale.multiply(scale);child.position.multiply(scale);}
  root.traverse(o=>{if(o.name==='suit-shoulder-pad')o.scale.x*=fit[3];});
+ finishRiderIdentity(root);
 }
+// Runtime finishing pass over the shipped rig. Only sculpted surfaces own new
+// vertex buffers; unchanged wheel geometry remains shared by the GLB cache.
+function refineRacingEquipment(root){
+  const ud=root.userData;if(ud.racingEquipment)return;
+  // Rehydrate animation handles from baked GLBs instead of adding another copy
+  // of the finishing geometry or deforming the already authored suit twice.
+  const bakedVents=root.getObjectByName('active-cooling-vanes');
+  if(bakedVents&&root.getObjectByName('division-rider-identity')){
+    ud.racingEquipment={wheelHardware:ud.wheels.map(w=>w.spin.getObjectByName('brake-and-spoke-hardware')).filter(Boolean),vents:bakedVents,restY:bakedVents.position.y};
+    return;
+  }
+  const index=Math.max(0,ROSTER.findIndex(d=>d.id===ud.chassis));
+  const trim=root.getObjectByName('helmet-crown-stripe').material;
+  const rubber=new THREE.MeshStandardMaterial({color:0x151a20,roughness:.86,metalness:.02});
+  const alloy=new THREE.MeshStandardMaterial({color:0x8b949e,roughness:.32,metalness:.85});
+  const sculpt=(mesh,edit)=>{
+    if(!mesh)return;
+    const source=mesh.geometry,g=source.clone();delete g.userData.blenderShared;
+    const attr=source.attributes.position,values=new Float32Array(attr.count*3);
+    for(let i=0;i<attr.count;i++)values.set(edit(attr.getX(i),attr.getY(i),attr.getZ(i)),i*3);
+    g.setAttribute('position',new THREE.BufferAttribute(values,3));g.deleteAttribute('normal');g.computeVertexNormals();g.computeBoundingSphere();
+    mesh.geometry=g;
+    if(!source.userData.blenderShared&&!Object.values(KART_GEO).includes(source))source.dispose();
+  };
+  // Flatten the helmet's cheeks and rear crown without changing neck articulation.
+  sculpt(root.getObjectByName('helmet-shell'),(x,y,z)=>[x*(1-.055*Math.max(0,-z)),y,z*(1-.04*Math.max(0,-y))]);
+  // Broaden the upper suit while preserving the hips, legs and shoulder pivots.
+  sculpt(root.getObjectByName('torso'),(x,y,z)=>{
+    const t=clamp((y-.35)/.40,0,1);return [x*(1+.10*t),y,z*(1+.12*t)];
+  });
+  const collar=root.getObjectByName('suit-raised-collar');
+  if(collar&&!root.getObjectByName('division-rider-identity')){const old=collar.geometry;collar.geometry=new THREE.TorusGeometry(.135,.06,10,32);collar.position.set(0,1.235,0);collar.rotation.set(Math.PI/2,0,0);collar.scale.set(1,1,1);collar.material=rubber;if(!old.userData.blenderShared&&!Object.values(KART_GEO).includes(old))old.dispose();}
+  const add=(parent,name,g,m,x=0,y=0,z=0)=>{const o=new THREE.Mesh(g,m);o.name=name;o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;parent.add(o);return o;};
+  const suit=new THREE.Group();suit.name='tailored-suit-inserts';ud.pilot.add(suit);
+  for(const side of [-1,1]){
+    add(suit,'chest-insert',limbSurface([[side*.07,.95,-.19],[side*.14,.85,-.26],[side*.13,.65,-.24]],[.025,.045,.025]),trim);
+    for(let i=0;i<3;i++)add(suit,'chest-vent',limbSurface([[side*.26,.76-i*.055,-.18],[side*.31,.74-i*.055,-.14]],[.012,.012]),rubber);
+  }
+  batchKartBody(suit);
+  const wheelHardware=[];
+  for(const w of ud.wheels){
+    for(const name of ['rounded-wheel-shell','translucent-tire-band']){const shell=w.spin.getObjectByName(name);if(shell)shell.material=rubber;}
+    const hardware=new THREE.Group();hardware.name='brake-and-spoke-hardware';w.spin.add(hardware);
+    const rotor=new THREE.CylinderGeometry(.275,.275,.025,32);rotor.rotateZ(Math.PI/2);
+    add(hardware,'ventilated-brake-rotor',rotor,alloy,w.side*.258);
+    for(let j=0;j<6;j++){
+      const a=j/6*Math.PI*2,indexed=a+.10*(index%3);
+      const spoke=new THREE.BoxGeometry(.027,.045,.21);spoke.translate(0,0,.155);spoke.rotateX(indexed);spoke.translate(w.side*.282,0,0);
+      add(hardware,'forged-wheel-spoke',spoke,alloy);
+    }
+    batchKartBody(hardware);hardware.children.forEach(o=>o.name='brake-rotor-and-spokes');wheelHardware.push(hardware);
+    add(w.pivot,'brake-caliper',new THREE.BoxGeometry(.085,.22,.11),trim,w.side*.265,.16,.15);
+  }
+  const vents=new THREE.Group();vents.name='active-cooling-vanes';ud.body.add(vents);
+  for(const side of [-1,1])for(let i=0;i<3;i++){
+    const vane=add(vents,'cooling-vane',new THREE.BoxGeometry(.20,.025,.11),alloy,side*.70,.94,.82+i*.145);vane.rotation.z=side*.12;
+  }
+  // Material batches keep this finishing pass within a small draw-call budget.
+  batchKartBody(vents);
+  ud.racingEquipment={wheelHardware,vents,restY:vents.position.y};
+}
+
 function finishKartCockpit(root){
-  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;finishRiderFit(root);
+  const ud=root.userData;if(ud.cockpitFinished)return;ud.cockpitFinished=true;refineRacingEquipment(root);finishRiderFit(root);
+  if(!root.getObjectByName('cockpit-contact-hardware')){
   const fabric=new THREE.MeshStandardMaterial({color:0x192029,roughness:.91,metalness:0});
   const trim=new THREE.MeshStandardMaterial({color:0x434b54,roughness:.34,metalness:.7});
   const cockpit=new THREE.Group();cockpit.name='cockpit-contact-hardware';ud.body.add(cockpit);
@@ -459,6 +621,7 @@ function finishKartCockpit(root){
   // All six static pieces share two material batches: two draws per racer.
   batchKartBody(cockpit);
   for(const mesh of cockpit.children)mesh.name=mesh.material===fabric?'seat-back-shell':'pedal-plate';
+  }
   // Shipping GLBs do not carry the procedural fallback's shadow footprint.
   // Share its texture so tyres remain grounded on low-shadow mobile presets too.
   if(typeof TEX!=='undefined'&&TEX.contactShadow&&!root.getObjectByName('contact-shadow')){
@@ -470,6 +633,11 @@ function finishKartCockpit(root){
 }
 
 // ---------- Kart rig animation ----------
+function animateRacingEquipment(ud,time,boost=0){
+  const gear=ud.racingEquipment;if(!gear)return;
+  gear.vents.rotation.x=Math.sin(time*1.4)*.012+Math.min(1,Math.max(0,boost))*.08;
+}
+
 // Procedural suspension/body/pilot motion, layered with additive Blender clips from KART_CLIPS.
 // Everything here is allocation-free per call and runs both in the browser and under the
 // headless test stubs (only Vector3-like {x,y,z} transforms and plain math are required).
@@ -604,6 +772,8 @@ function animateKart(r,dt,ag=0){
   // --- state clips (additive, crossfaded)
   const state=victory?'victory':defeat?'defeat':spinning?'spinout':hitting?'hit':boosting?'boost':r.drifting?'drift':idle?'idle':'drive';
   applyKartClips(ud,state,dt);
+  animateRacingEquipment(ud,a.t,boosting?1:0);
+  if(typeof animateKartBuildVisuals==='function')animateKartBuildVisuals(r.mesh,a.t,{speed:r.speed});
   if(typeof constrainKartHands==='function')constrainKartHands(r.mesh,state);
 }
 // Turntable presentation: heave, settling suspension, breathing pilot who follows the showroom camera.
@@ -628,6 +798,8 @@ function animateShowroomKart(kart,time,dt,yaw){
   if(ud.arms){ud.arms[0].rotation.set(-a.wheel*.28,0,0);ud.arms[1].rotation.set(a.wheel*.28,0,0);}
   ud.halo.rotation.y+=dt*2.5;ud.star.rotation.y+=dt*1.5;
   applyKartClips(ud,'idle',dt);
+  animateRacingEquipment(ud,time,0);
+  if(typeof animateKartBuildVisuals==='function')animateKartBuildVisuals(kart,time,{speed:0});
   if(typeof constrainKartHands==='function')constrainKartHands(kart,'idle');
 }
 

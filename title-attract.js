@@ -57,7 +57,7 @@ function buildFinishCeremony(){
   const texture=new THREE.CanvasTexture(plaque);texture.encoding=THREE.sRGBEncoding;
   const number=new THREE.Mesh(new THREE.PlaneGeometry(.7,.7),new THREE.MeshBasicMaterial({map:texture}));number.position.set(0,height*.5,-2.39);number.rotation.y=Math.PI;stand.add(number);
   const mount=new THREE.Group();mount.position.y=height;stand.add(mount);
-  const kart=buildKart(r.div);mount.add(kart);finishCeremony.karts.push(kart);
+  const kart=buildKart(r.div);if(typeof applyKartBuildVisuals==='function')applyKartBuildVisuals(kart,r.build||[],r.isPlayer?saved.appearance?.[r.div.id]||'factory':'factory');mount.add(kart);finishCeremony.karts.push(kart);
  });
  root.updateMatrixWorld(true);
 }
