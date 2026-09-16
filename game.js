@@ -302,8 +302,10 @@ function buildMineMesh(){if(typeof buildReferenceMine==='function')return buildR
 function buildMissileMesh(){if(typeof buildReferenceMissile==='function')return buildReferenceMissile();const g=new THREE.Group();const body=new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(0,-.9),new THREE.Vector2(.28,-.8),new THREE.Vector2(.3,.3),new THREE.Vector2(0,.95)],12),new THREE.MeshStandardMaterial({color:0xcbd5e1,metalness:.85,roughness:.3}));body.rotation.x=Math.PI/2;g.add(body);const fin=new THREE.Mesh(starGeo(.7,.08),new THREE.MeshStandardMaterial({color:0x0a1628,emissive:0xcbd5e1,emissiveIntensity:1}));fin.position.z=-.7;g.add(fin);return g;}
 function useItem(r){
   if(game.state!=='race'||!r.item||r.vault>0||r.spin>0||r.finished)return false;const k=r.item;
+  // A cluster shot still on its spacing cooldown is not a use; count only real ones.
+  if(k==='triple'&&r.tripleCd>0)return false;
   r.itemsUsed=(r.itemsUsed||0)+1;
-  if(k==='triple'){if(r.tripleCd>0)return false;if(!r.tripleLeft)r.tripleLeft=3;r.tripleLeft--;r.tripleCd=.28;applyBoost(r,1.0,1.34,.7);if(r.isPlayer)SFX.boost(2);if(r.tripleLeft>0)return true;}
+  if(k==='triple'){if(!r.tripleLeft)r.tripleLeft=3;r.tripleLeft--;r.tripleCd=.28;applyBoost(r,1.0,1.34,.7);if(r.isPlayer)SFX.boost(2);if(r.tripleLeft>0)return true;}
   else if(k==='burst'){applyBoost(r,1.35,1.4,1);if(r.isPlayer){SFX.boost(3);setToast('SIGNAL BURST','teal','',2);}}
   else if(k==='shield'){r.shield=7;if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS SHIELD','teal','',2);}}
   else if(k==='mine'){
