@@ -14,8 +14,15 @@ const card=name=>[...d.querySelectorAll('#garage article')].find(a=>a.querySelec
 (async()=>{
  const launches=[...d.querySelectorAll('button')].filter(b=>b.textContent==='Garage');assert.equal(launches.length,3,'title, loadout and results entries');launches[0].click();
  assert.equal(d.querySelector('#garage').open,true);assert.equal(previewOpened,1);assert.equal(previewBuild.racer,'zenflow');assert.equal(card('Elemental Fire').querySelector('button').disabled,true,'insufficient funds');
+ // P1.4: a locked card says what is missing instead of only greying its button out.
+ const lockedNote=card('Elemental Fire').querySelector('.garage-locked');
+ assert.ok(lockedNote,'an unaffordable card explains that it is locked');
+ assert.match(lockedNote.textContent,/^Locked · \d+ more Zen Credits needed$/,'and names the shortfall exactly');
  await w.economyTransaction(s=>({...s,wallet:2000}));d.querySelector('#garage-racer').dispatchEvent(new w.Event('change'));
+ assert.equal(card('Elemental Fire').querySelector('.garage-locked'),null,'the lock note clears once it is affordable');
  card('Elemental Fire').querySelector('button').click();await flush();assert.ok(w.saved.ownedAddons.includes('fire'));assert.equal(d.activeElement,card('Elemental Fire').querySelector('button'),'purchase retains actionable keyboard/controller focus');
+ // P1.4: a purchase confirms itself and reports the balance it left behind.
+ assert.match(d.querySelector('#garage-status').textContent,/Elemental Fire · bought for \d+ · \d+ Zen Credits left/,'purchases are confirmed with a receipt');
  card('Elemental Fire').querySelector('button').click();await flush();assert.equal(w.saved.addons.zenflow,'fire');
  card('Elemental Fire tuning').querySelector('button').click();await flush();assert.equal(w.saved.addonUpgradeLevels.fire,2);
  [...d.querySelectorAll('#garage nav button')].find(b=>b.textContent==='Kart Upgrades').click();card('Launch motor').querySelector('button').click();await flush();card('Launch motor').querySelector('button').click();await flush();assert.ok(w.saved.builds.zenflow.includes('Motor'));
@@ -24,5 +31,5 @@ const card=name=>[...d.querySelectorAll('#garage article')].find(a=>a.querySelec
  assert.equal(d.activeElement,card('Launch motor').querySelector('button'),'equipping retains focus');
  const restored=w.Economy.migrate(JSON.parse(w.localStorage.getItem(w.SAVE_KEY)),w.ADDONS.map(a=>a.id));assert.equal(restored.wallet,w.saved.wallet);assert.equal(restored.addons.zenflow,'fire');assert.equal(restored.addonUpgradeLevels.fire,2);
  d.querySelector('#garage-close').click();assert.equal(d.querySelector('#garage').open,false);assert.equal(previewDisposed,1);
- console.log('PASS Garage DOM: insufficient funds, buy/equip/upgrade, racer builds, persistence and exit');dom.window.close();
+ console.log('PASS Garage DOM: locked-state reasons, purchase receipts, buy/equip/upgrade, racer builds, persistence and exit');dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1;});

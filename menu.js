@@ -89,6 +89,13 @@
  document.getElementById('menu-settings').onclick=openSettings;
  document.getElementById('settings-close').onclick=()=>transitionScene(document.body.classList.contains('title-open')?'ZENFLOW RACER':'CHARACTER SELECT',()=>{settings.classList.add('hidden');title.inert=false;roster.inert=document.body.classList.contains('title-open');document.getElementById(roster.inert?'title-settings':'menu-settings').focus();});
  settings.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.getElementById('settings-close').click();}});
+ // The first-run coach is one-and-done, so Race settings keeps a way back to it.
+ const tutorialButton=document.getElementById('replay-tutorial'),tutorialState=document.getElementById('tutorial-state');
+ const syncTutorial=()=>{if(tutorialState)tutorialState.textContent=typeof onboardingShouldRun==='function'&&onboardingShouldRun(saved)?'SHOWS ON YOUR NEXT RACE':'ALREADY COMPLETED';};
+ if(tutorialButton){tutorialButton.onclick=()=>{delete saved.tutorial;persist();if(typeof stopOnboarding==='function')stopOnboarding();syncTutorial();SFX.ui();};}
+ document.getElementById('title-settings').addEventListener('click',syncTutorial);
+ document.getElementById('menu-settings').addEventListener('click',syncTutorial);
+ syncTutorial();
  document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');raceSetup.step='title';raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false;roster.inert=true;document.getElementById('title-start').focus();});
  const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: botanical gardens, spore-light and a rolling turquoise sea.'};
  const mapName=button=>MAPS.find(map=>map.id===button.dataset.map)?.name||button.textContent.trim();

@@ -1,0 +1,13 @@
+P1.2 reward pacing — modelled outcomes through the real economy rules
+
+Whole catalogue (every add-on, both tuning levels, six builds, satin): 21140 credits
+
+profile     diff  race1  early  late  →1st add-on  →build  →catalogue  skill share
+novice         0    173    188    93            2        7         >60        0.914
+improving      1    225    250   169            1        5         >60        0.949
+strong         2    310    290   223            1        4         >60        0.967
+
+Career credits by race:
+  novice      {"5":812,"10":1426,"25":2889,"60":6207}
+  improving   {"5":1081,"10":1874,"25":4085,"60":9678}
+  strong      {"5":1373,"10":2684,"25":6222,"60":14293}

@@ -183,6 +183,31 @@ test('Touch steering assist is optional and does not override deliberate steerin
 test('Touch drift holds charge a rocket start during the final countdown',()=>{
  racer();run("r.isPlayer=true;game.touch=true;game.state='countdown';game.countdown=.5;input.drift=true;for(let i=0;i<61;i++)simStep(1/120)");assert.equal(run('game.state'),'race');assert.ok(run('r.boost')>.8);run('game.touch=false;resetInput()');
 });
+// P1.5 camera feel. chaseCamera is pure, so the rig can be measured directly.
+test('Chase camera widens with speed, boost and drift, and eases back over airtime',()=>{
+ racer();
+ const rig=(over={})=>{run('camState.kick=0;camState.air='+(over.air||0));
+  return run(`chaseCamera(${JSON.stringify(Object.assign({speed:0,maxSpeedBase:40,boost:0,drifting:false,driftTier:0,u:0},over))},false)`);};
+ const idle=rig(),fast=rig({speed:40}),boosting=rig({speed:40,boost:1}),drifting=rig({speed:40,drifting:true,driftTier:3});
+ assert.ok(fast.fov>idle.fov,'speed opens the field of view');
+ assert.ok(fast.back>idle.back,'speed pulls the camera back');
+ assert.ok(boosting.fov>fast.fov,'boost kicks the field of view further');
+ assert.ok(drifting.fov>fast.fov,'a charged drift widens the shot');
+ const airborne=rig({speed:40,air:1});
+ assert.ok(airborne.back>fast.back&&airborne.height>fast.height,'airtime eases back and up');
+ assert.ok(airborne.lookAhead>fast.lookAhead,'and looks further ahead so the landing is in frame');
+});
+test('Reduced motion keeps the camera informative and removes the vestibular swing',()=>{
+ racer();
+ const fov=()=>{run('camState.kick=0;camState.air=0');return run('chaseCamera({speed:40,maxSpeedBase:40,boost:1,drifting:true,driftTier:3,u:0},false)');};
+ const full=fov();run('cameraComfort.motion=.25');const reduced=fov();
+ assert.ok(reduced.fov<full.fov,'the field-of-view swing shrinks');
+ assert.equal(reduced.back,full.back,'but the camera still follows from the same distance');
+ assert.equal(reduced.lookAhead,full.lookAhead,'and still looks as far through the corner');
+ assert.ok(run('CAMERA_SHAKE_METRES')<=.6,'impact shake has a hard ceiling');
+ assert.ok(run('CAMERA_MIN_ROAD_CLEARANCE')>0,'the rig is held clear of the road surface');
+ run('cameraComfort.motion=1');
+});
 require('./effects-regression.cjs')({test,assert});
 test('Disabling touch mode releases simultaneous steering, drift, item and power',()=>{
  racer();run('resetInput();game.touch=true');

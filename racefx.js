@@ -7,6 +7,28 @@
 // init(), advanced in update() with zero per-frame allocation, and torn down by clear().
 const raceFX=(()=>{
   const TAU=Math.PI*2;
+  /* P1.7 — one table owns every effect family's role, draw order and low-power budget.
+     role      what the effect is for
+       critical   the player must read it to play: boost, shields, impact telegraphs
+       readable   supports reading the race: skid marks, drift ribbons, impact debris
+       decorative texture only: dust, confetti, glints
+     order     paint order; higher paints later, so critical families sit on top of
+               decorative ones instead of being buried under confetti.
+     full/low  pool capacity at full power and on the reduced-effects path. Critical
+               families keep their whole budget on a phone; decorative ones give way. */
+  const VFX=Object.freeze({
+    skid:   {role:'readable',  order:2,   full:600, low:300},
+    puffs:  {role:'decorative',order:3,   full:220, low:100},
+    petals: {role:'decorative',order:4,   full:200, low:90},
+    glints: {role:'decorative',order:5,   full:160, low:80},
+    ribbon: {role:'readable',  order:6,   full:24,  low:14},
+    shards: {role:'readable',  order:7,   full:160, low:80},
+    flames: {role:'critical',  order:8,   full:24,  low:24},
+    rings:  {role:'critical',  order:9,   full:10,  low:10},
+    shells: {role:'critical',  order:10,  full:4,   low:4},
+    strips: {role:'critical',  order:11,  full:6,   low:6},
+    speed:  {role:'critical',  order:1000,full:1,   low:1}
+  });
   const TIER_COLORS=[0x66aaff,0x66aaff,0xffa040,0xff5fd0]; // matches sparksBlue/Orange/Pink pools
   const BOOST_COLOR=0x00d9b5,SHIELD_COLOR=0x00d9b5,GOLD=0xffd77a,HOT=0xff7a3a,DUST=0xb9a98a,SMOKE=0x6f7684;
   const HUD_CLASSES=['fx-tier1','fx-tier2','fx-tier3','fx-hit','fx-boost','fx-lap','fx-finish'];
@@ -21,6 +43,7 @@ const raceFX=(()=>{
       &&typeof THREE.Points==='function'&&typeof scene!=='undefined'&&scene&&typeof scene.add==='function';
   }
   const low=()=>(typeof MOBILEFX!=='undefined'&&!!MOBILEFX)||(typeof LOWFX!=='undefined'&&!!LOWFX);
+  const cap=(name)=>low()?VFX[name].low:VFX[name].full;
   const clamp01=(v)=>v<0?0:v>1?1:v;
   const lerpN=(a,b,t)=>a+(b-a)*t;
   const trackW=()=>typeof TRACK_W==='number'?TRACK_W:14;
@@ -266,33 +289,33 @@ float s=line*seg*smoothstep(start,start+.32,r)*intensity*.38*(.35+.65*rnd2);vec3
     for(const c of HUD_CLASSES){S.hudTimers[c]=0;S.hudOn[c]=false;}
     for(let i=0;i<6;i++)S.fountains.push({r:null,t:0,color:0xffffff,acc:0});
     // 1. skid marks: ring buffer of quads, age-faded in the vertex shader (no per-frame CPU work)
-    S.skidN=isLow?300:600;S.skidSpacing=.7;S.skidHead=0;S.skidDirty=false;S.skidPos=new Float32Array(S.skidN*12);S.skidBorn=new Float32Array(S.skidN*4).fill(-1e4);S.skidStr=new Float32Array(S.skidN*4);const side=new Float32Array(S.skidN*4);const si=new Uint16Array(S.skidN*6);
+    S.skidN=cap('skid');S.skidSpacing=.7;S.skidHead=0;S.skidDirty=false;S.skidPos=new Float32Array(S.skidN*12);S.skidBorn=new Float32Array(S.skidN*4).fill(-1e4);S.skidStr=new Float32Array(S.skidN*4);const side=new Float32Array(S.skidN*4);const si=new Uint16Array(S.skidN*6);
     for(let i=0;i<S.skidN;i++){side[i*4]=0;side[i*4+1]=1;side[i*4+2]=0;side[i*4+3]=1;const v=i*4,o=i*6;si[o]=v;si[o+1]=v+1;si[o+2]=v+2;si[o+3]=v+1;si[o+4]=v+3;si[o+5]=v+2;}
     {const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(S.skidPos,3));g.setAttribute('aSide',new THREE.BufferAttribute(side,1));g.setAttribute('aBorn',new THREE.BufferAttribute(S.skidBorn,1));g.setAttribute('aStr',new THREE.BufferAttribute(S.skidStr,1));g.setIndex(new THREE.BufferAttribute(si,1));
       const m=shader(SKID_VERT,SKID_FRAG,{time:S.uTime,color:{value:new THREE.Color(0x0b0d12)}},{blending:THREE.NormalBlending,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
-      S.skid=attachMesh(new THREE.Mesh(g,m),2);S.skid.name='fx-skid-marks';}
+      S.skid=attachMesh(new THREE.Mesh(g,m),VFX.skid.order);S.skid.name='fx-skid-marks';}
     // 2. drift ribbons: 12 racers x 2 rear wheels, rebuilt from per-racer ring buffers each frame
-    S.ribN=isLow?14:24;S.ribSpacing=.55;const rv=S.maxRacers*2*S.ribN*2;S.ribPos=new Float32Array(rv*3);S.ribCol=new Float32Array(rv*3);S.ribAlpha=new Float32Array(rv);S.ribUv=new Float32Array(rv*2);
+    S.ribN=cap('ribbon');S.ribSpacing=.55;const rv=S.maxRacers*2*S.ribN*2;S.ribPos=new Float32Array(rv*3);S.ribCol=new Float32Array(rv*3);S.ribAlpha=new Float32Array(rv);S.ribUv=new Float32Array(rv*2);
     for(let i=0;i<rv;i++)S.ribUv[i*2+1]=i%2;const ri=new Uint16Array(S.maxRacers*2*(S.ribN-1)*6);let o=0;
     for(let rb=0;rb<S.maxRacers*2;rb++)for(let i=0;i<S.ribN-1;i++){const b=rb*S.ribN*2+i*2;ri[o++]=b;ri[o++]=b+1;ri[o++]=b+2;ri[o++]=b+1;ri[o++]=b+3;ri[o++]=b+2;}
     {const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(S.ribPos,3));g.setAttribute('uv',new THREE.BufferAttribute(S.ribUv,2));g.setAttribute('aColor',new THREE.BufferAttribute(S.ribCol,3));g.setAttribute('aAlpha',new THREE.BufferAttribute(S.ribAlpha,1));g.setIndex(new THREE.BufferAttribute(ri,1));
-      S.ribbon=attachMesh(new THREE.Mesh(g,shader(RIBBON_VERT,RIBBON_FRAG,{time:S.uTime},{side:THREE.DoubleSide})),5);S.ribbon.name='fx-drift-ribbons';S.ribbon.visible=false;}
+      S.ribbon=attachMesh(new THREE.Mesh(g,shader(RIBBON_VERT,RIBBON_FRAG,{time:S.uTime},{side:THREE.DoubleSide})),VFX.ribbon.order);S.ribbon.name='fx-drift-ribbons';S.ribbon.visible=false;}
     // 3. boost flames: one instanced cone per exhaust (12 x 2)
     {const g=new THREE.CylinderGeometry(.05,.24,1,isLow?8:12,3,true);g.rotateX(Math.PI/2);g.translate(0,0,.5);const n=S.maxRacers*2;S.flameCol=new Float32Array(n*3);S.flameFade=new Float32Array(n);
       g.setAttribute('aColor',new THREE.InstancedBufferAttribute(S.flameCol,3));g.setAttribute('aFade',new THREE.InstancedBufferAttribute(S.flameFade,1));
-      S.flames=attachMesh(new THREE.InstancedMesh(g,shader(FLAME_VERT,FLAME_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),n),6);S.flames.name='fx-boost-flames';for(let i=0;i<n;i++){S.flames.setMatrixAt(i,S.zero);setColor(S.flameCol,i,BOOST_COLOR);}S.flames.visible=false;}
+      S.flames=attachMesh(new THREE.InstancedMesh(g,shader(FLAME_VERT,FLAME_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),n),VFX.flames.order);S.flames.name='fx-boost-flames';for(let i=0;i<n;i++){S.flames.setMatrixAt(i,S.zero);setColor(S.flameCol,i,BOOST_COLOR);}S.flames.visible=false;}
     // 4. camera-space speed lines + flash quad
     {const g=new THREE.PlaneGeometry(2,2);const m=shader(SPEED_VERT,SPEED_FRAG,{time:S.uTime,intensity:{value:0},flash:{value:0},aspect:{value:1.5},tint:{value:new THREE.Color(0x9ffff0)},flashColor:{value:new THREE.Color(0xffffff)}},{depthTest:false});
-      S.speed=attachMesh(new THREE.Mesh(g,m),1000);S.speed.name='fx-speed-lines';S.speed.visible=false;}
+      S.speed=attachMesh(new THREE.Mesh(g,m),VFX.speed.order);S.speed.name='fx-speed-lines';S.speed.visible=false;}
     // 5-7. burst pools
-    S.rings=new InstPool(new THREE.RingGeometry(.72,1,isLow?32:48,1),shader(INST_VERT,RING_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),10,'fx-shock-rings');attachMesh(S.rings.mesh,7);
-    S.shells=new InstPool(new THREE.SphereGeometry(1,isLow?16:22,isLow?10:14),shader(INST_VERT,SHELL_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),4,'fx-shield-shells');attachMesh(S.shells.mesh,8);
-    S.strips=new InstPool(new THREE.PlaneGeometry(1,1),shader(INST_VERT,STRIP_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),6,'fx-flash-strips');attachMesh(S.strips.mesh,9);
-    S.shards=new DebrisPool(new THREE.OctahedronGeometry(.13,0),shader(INST_VERT,SHARD_FRAG,{time:S.uTime}),isLow?80:160,'fx-shards',-16,.985,0);attachMesh(S.shards.mesh,10);
-    S.petals=new DebrisPool(new THREE.PlaneGeometry(.28,.17),shader(INST_VERT,PETAL_FRAG,{time:S.uTime},{blending:THREE.NormalBlending,side:THREE.DoubleSide}),isLow?90:200,'fx-confetti',-3.2,.93,2.4);attachMesh(S.petals.mesh,11);
-    S.puffs=new PointPool(isLow?100:220,false,'fx-smoke-dust');S.puffs.buoy=1.4;attachMesh(S.puffs.mesh,3);
-    S.glints=new PointPool(isLow?80:160,true,'fx-glints');S.glints.buoy=0;S.glints.drag=.985;attachMesh(S.glints.mesh,12);
-    budget.low=isLow;budget.meshes=S.meshes.length;budget.skidQuads=S.skidN;budget.ribbonSamples=S.ribN;budget.flames=S.maxRacers*2;budget.rings=10;budget.shells=4;budget.strips=6;budget.shards=S.shards.n;budget.petals=S.petals.n;budget.puffs=S.puffs.n;budget.glints=S.glints.n;
+    S.rings=new InstPool(new THREE.RingGeometry(.72,1,isLow?32:48,1),shader(INST_VERT,RING_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),cap('rings'),'fx-shock-rings');attachMesh(S.rings.mesh,VFX.rings.order);
+    S.shells=new InstPool(new THREE.SphereGeometry(1,isLow?16:22,isLow?10:14),shader(INST_VERT,SHELL_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),cap('shells'),'fx-shield-shells');attachMesh(S.shells.mesh,VFX.shells.order);
+    S.strips=new InstPool(new THREE.PlaneGeometry(1,1),shader(INST_VERT,STRIP_FRAG,{time:S.uTime},{side:THREE.DoubleSide}),cap('strips'),'fx-flash-strips');attachMesh(S.strips.mesh,VFX.strips.order);
+    S.shards=new DebrisPool(new THREE.OctahedronGeometry(.13,0),shader(INST_VERT,SHARD_FRAG,{time:S.uTime}),cap('shards'),'fx-shards',-16,.985,0);attachMesh(S.shards.mesh,VFX.shards.order);
+    S.petals=new DebrisPool(new THREE.PlaneGeometry(.28,.17),shader(INST_VERT,PETAL_FRAG,{time:S.uTime},{blending:THREE.NormalBlending,side:THREE.DoubleSide}),cap('petals'),'fx-confetti',-3.2,.93,2.4);attachMesh(S.petals.mesh,VFX.petals.order);
+    S.puffs=new PointPool(cap('puffs'),false,'fx-smoke-dust');S.puffs.buoy=1.4;attachMesh(S.puffs.mesh,VFX.puffs.order);
+    S.glints=new PointPool(cap('glints'),true,'fx-glints');S.glints.buoy=0;S.glints.drag=.985;attachMesh(S.glints.mesh,VFX.glints.order);
+    budget.low=isLow;budget.meshes=S.meshes.length;budget.skidQuads=S.skidN;budget.ribbonSamples=S.ribN;budget.flames=S.maxRacers*2;budget.rings=cap('rings');budget.shells=cap('shells');budget.strips=cap('strips');budget.shards=S.shards.n;budget.petals=S.petals.n;budget.puffs=S.puffs.n;budget.glints=S.glints.n;
   }
   function resetState(){
     S.tracked.length=0;S.stateOf=new WeakMap();S.skidHead=0;S.skidBorn.fill(-1e4);S.skidStr.fill(0);S.skidPos.fill(0);S.skidDirty=true;S.ribAlpha.fill(0);S.ribbon.visible=false;
@@ -318,7 +341,7 @@ float s=line*seg*smoothstep(start,start+.32,r)*intensity*.38*(.35+.65*rnd2);vec3
 
   // ---- public API -------------------------------------------------------------------------
   const api={
-    post,budget,
+    post,budget,VFX,
     get ready(){return ready();},
     init(){
       if(!hostOK())return false;

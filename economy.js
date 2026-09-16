@@ -28,9 +28,14 @@ const Economy=(()=>{
  function reward(r,s){
   const placement=[120,100,85,75,65,55,50,45,40,35,30,25][Math.max(0,Math.min(11,integer(r.position,12)-1))];
   const difficulty=Math.round(placement*[0,.2,.4][integer(r.difficulty,2)]);
-  const tokens=integer(r.tokens,60)*2,performance=r.personalBest?25:0,clean=integer(r.hits)===0?25:integer(r.hits)<=2?10:0;
+  const tokens=integer(r.tokens,60)*2,performance=r.personalBest?25:0;
+  // P1.2 pacing. Two fixed components keep a weaker driver's income from collapsing once
+  // the first-map and first-racer bonuses are spent, without touching the skill ladder:
+  // `finish` pays the same to everyone who completes the distance, and damage control
+  // now steps down instead of falling straight to zero after a third hit.
+  const hits=integer(r.hits),clean=hits===0?25:hits<=2?12:hits<=4?6:0,finish=20;
   const firstMap=s.careerStats.maps.includes(r.map)?0:60,diversity=s.careerStats.divisions.includes(r.division)?0:25;
-  return {placement,difficulty,tokens,performance,clean,firstMap,diversity,total:placement+difficulty+tokens+performance+clean+firstMap+diversity};
+  return {placement,difficulty,tokens,performance,clean,finish,firstMap,diversity,total:placement+difficulty+tokens+performance+clean+finish+firstMap+diversity};
  }
  function begin(s,id){return {...s,activeRewardRace:id};}
  function settle(s,r){

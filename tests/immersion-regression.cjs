@@ -18,9 +18,22 @@ for(const id of ['cherry','stormforge','canopy']){
   assert.equal(run(`selectMap('${id}')`),true,id+' builds');
   const world=run('world');
   assert.equal(world.userData.extensionLandmarks.length,3,id+': three authored extension moments');
-  assert.equal(!!world.userData.serviceRoute,id==='stormforge',id+': alternate line only on technical circuit');
-  if(id==='stormforge'){assert.ok(world.getObjectByName('turbine-service-apex-markings'));assert.ok(world.userData.serviceRoute.end>world.userData.serviceRoute.start);}
+  // P1.9: every circuit carries one marked, named alternate line on the existing deck.
+  const route=world.userData.serviceRoute;
+  assert.ok(route,id+': alternate line present');
+  assert.ok(route.name&&route.id&&route.cue,id+': alternate line is named and cued');
+  assert.ok(route.end>route.start,id+': alternate line spans real arc length');
+  assert.equal(route.checkpointBypass,false,id+': alternate line cannot bypass lap gates');
+  assert.ok(world.getObjectByName(route.id+'-markings'),id+': alternate line is painted on the road');
+  const painted=world.getObjectByName(route.id+'-markings').geometry.attributes.position.count;
+  assert.ok(painted>=16,id+': alternate line paints visible dashes ('+painted+' vertices)');
   assert.ok(world.userData.extensionLandmarks.every(m=>Number.isFinite(m.u)&&m.u>0&&m.u<1),id+': finite geometry-derived anchors');
+  // P1.8: the authored moments announce themselves once each, and survive the lap wrap.
+  const marks=world.userData.extensionLandmarks;
+  assert.equal(run(`circuitLandmarkCrossed(${marks[0].u+1e-4},${marks[0].u+2e-4})`),null,id+': no cue while inside a section');
+  assert.equal(run(`circuitLandmarkCrossed(${marks[1].u-1e-3},${marks[1].u+1e-3})`).name,marks[1].name,id+': entering a moment names it');
+  assert.equal(run(`circuitLandmarkCrossed(${1-1e-4},${marks[0].u+1e-4})`).name,marks[0].name,id+': the lap wrap still reports the first moment');
+  assert.equal(new Set(marks.map(m=>m.name)).size,3,id+': three distinct named moments');
   const venue=world.getObjectByName('race-venue');
   assert.ok(venue,id+': authored race venue');
   assert.ok(venue.userData.districts>=16,id+': inhabited outer districts');
