@@ -13,6 +13,7 @@
  *     about phone frame rates.
  *
  * Usage: node tools/p0-webgl-qa.cjs [--out docs/p0-webgl-qa] [--port 4178] [--racers 20]
+ *        [--only racers,circuits,race,screens,mobile]   re-run selected phases only
  */
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
@@ -25,6 +26,12 @@ const option = (name, fallback) => { const i = argv.indexOf('--' + name); return
 const OUT = path.resolve(ROOT, option('out', 'docs/p0-webgl-qa'));
 const PORT = Number(option('port', 4178));
 const RACER_LIMIT = Number(option('racers', 20));
+// Each capture phase can be run on its own, merging into the report already on disk, so a
+// single slow phase can be repeated without re-rendering everything that already passed.
+const PHASES = ['racers', 'circuits', 'race', 'screens', 'mobile'];
+const ONLY = (option('only', '') || '').split(',').map(v => v.trim()).filter(Boolean);
+for (const phase of ONLY) if (!PHASES.includes(phase)) { console.error(`unknown phase "${phase}"; expected one of ${PHASES.join(', ')}`); process.exit(2); }
+const runs = name => !ONLY.length || ONLY.includes(name);
 const CELL = { width: 420, height: 300 };
 // Software rasterisation composites a full circuit frame in tens of seconds, not milliseconds.
 const SHOT_TIMEOUT = 300000;
@@ -312,8 +319,13 @@ async function captureRace(browser, report) {
     // SwiftShader draws this scene at a few frames a second, so the countdown burns
     // real seconds. Wait on the simulation state, never on a fixed sleep.
     await page.waitForFunction(() => game.state === 'race', null, { timeout: 300000 });
+    // Nothing moves until somebody drives. Auto throttle is off by default on a desktop
+    // profile, so hold the accelerator the way a player would and let the kart get up to
+    // racing speed before the frame is captured.
+    await page.keyboard.down('KeyW');
     await page.waitForFunction(() => game.player && game.player.speed > 8, null, { timeout: 300000 });
     const shot = await page.screenshot({ type: 'png', timeout: SHOT_TIMEOUT });
+    await page.keyboard.up('KeyW');
     fs.writeFileSync(path.join(OUT, 'race', `${map}-chase.png`), shot);
     const state = await page.evaluate(() => ({
       racers: game.racers.length, laps: game.laps, state: game.state,
@@ -388,19 +400,43 @@ async function captureMobileFallback(browser, report) {
   fs.mkdirSync(OUT, { recursive: true });
   const server = await serve();
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox'] });
-  const report = { generated: new Date().toISOString(), renderer: null, views: VIEWS, racers: [], circuits: [], race: [], screens: null, mobile: null, consoleErrors: [] };
+  let report = { generated: new Date().toISOString(), renderer: null, views: VIEWS, racers: [], circuits: [], race: [], screens: null, mobile: null, consoleErrors: [] };
+  const existing = path.join(OUT, 'report.json');
+  if (ONLY.length && fs.existsSync(existing)) {
+    report = { ...JSON.parse(fs.readFileSync(existing, 'utf8')), generated: new Date().toISOString() };
+    for (const phase of ONLY) { if (phase === 'racers') report.racers = []; if (phase === 'circuits') report.circuits = []; if (phase === 'race') report.race = []; }
+    console.log(`Merging into the existing report; re-running: ${ONLY.join(', ')}`);
+  }
+  // The report is written after every phase. A later phase timing out then costs only
+  // that phase, not the hour of rendering that came before it.
+  const save = () => { fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 1)); };
   try {
-    console.log('Capturing twenty racers × ' + VIEWS.length + ' views through the real WebGL path…');
-    const sheets = await captureRacers(browser, report);
-    await composite(browser, sheets);
-    console.log('Capturing the nine named circuit moments…');
-    await captureCircuits(browser, report);
-    console.log('Capturing an in-race chase frame on every circuit…');
-    await captureRace(browser, report);
-    console.log('Capturing the Garage and the reward screen…');
-    await captureScreens(browser, report);
-    console.log('Capturing the emulated handset and reduced-effect paths…');
-    await captureMobileFallback(browser, report);
+    if (runs('racers')) {
+      console.log('Capturing twenty racers × ' + VIEWS.length + ' views through the real WebGL path…');
+      const sheets = await captureRacers(browser, report);
+      await composite(browser, sheets);
+      save();
+    }
+    if (runs('circuits')) {
+      console.log('Capturing the nine named circuit moments…');
+      await captureCircuits(browser, report);
+      save();
+    }
+    if (runs('race')) {
+      console.log('Capturing an in-race chase frame on every circuit…');
+      await captureRace(browser, report);
+      save();
+    }
+    if (runs('screens')) {
+      console.log('Capturing the Garage and the reward screen…');
+      await captureScreens(browser, report);
+      save();
+    }
+    if (runs('mobile')) {
+      console.log('Capturing the emulated handset and reduced-effect paths…');
+      await captureMobileFallback(browser, report);
+      save();
+    }
   } finally {
     await browser.close();
     server.kill();
