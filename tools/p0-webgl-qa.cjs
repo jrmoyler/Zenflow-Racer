@@ -137,21 +137,26 @@ const STRUCTURE_PROBE = `(() => {
   }
   if (detached) issues.push(detached + ' rider meshes outside the pilot envelope');
 
-  // Hands on the wheel: the shipping rig constrains gloves to the upper grips.
-  const wheel = root.getObjectByName('steering-wheel');
+  // Hands on the wheel, measured against the rig's own contract: each glove belongs on
+  // its grip point in steering-wheel space. Celebration deliberately releases the right
+  // hand and spinout releases both, so those are not gaps — they are the pose.
+  const wheel = ud.steeringWheel || root.getObjectByName('steering-wheel');
+  const rig = ud.contactRig;
   let handGap = null;
-  if (wheel && ud.arms) {
+  if (wheel && rig && rig.arms) {
     wheel.updateWorldMatrix(true, true);
-    const grip = new THREE.Vector3(); wheel.getWorldPosition(grip);
-    const gaps = ud.arms.map(arm => {
-      const glove = arm.getObjectByName('racing-glove') || arm.getObjectByName(arm.name + '-mesh');
+    const gaps = rig.arms.map((contact, i) => {
+      if (!contact) return null;
+      if (r.view === 'spinout' || (r.view === 'victory' && i === 1)) return null;
+      const glove = contact.arm.getObjectByName('racing-glove');
       if (!glove) return null;
-      const p = new THREE.Vector3(); glove.getWorldPosition(p);
-      return +p.distanceTo(grip).toFixed(4);
+      const actual = glove.getWorldPosition(new THREE.Vector3());
+      const expected = wheel.localToWorld(contact.grip.clone());
+      return +actual.distanceTo(expected).toFixed(4);
     }).filter(v => v !== null);
     if (gaps.length) {
       handGap = Math.max(...gaps);
-      if (handGap > 0.75) issues.push('hand-to-wheel gap ' + handGap.toFixed(3) + 'm exceeds 0.75m');
+      if (handGap > 0.02) issues.push('glove sits ' + handGap.toFixed(3) + 'm off its steering grip');
     }
   }
 
