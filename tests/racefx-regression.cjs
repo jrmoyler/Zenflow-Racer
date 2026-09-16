@@ -62,6 +62,38 @@ module.exports=function registerRaceFXTests({test,assert}){
   assert.equal(vm.runInContext('raceFX.init()',stub),false,'stub host cannot build GPU pools');stub.r={u:0,lat:0,speed:10,isPlayer:true,mesh:{}};stub.p=new Vec();
   for(const h of HOOKS)vm.runInContext(`raceFX.${h}(r,1)`,stub);vm.runInContext('raceFX.onToken(p,1);raceFX.onItemBox(p);raceFX.update(.016,r);raceFX.clear()',stub);
   for(const k of Object.keys(vm.runInContext('raceFX.post',stub)))assert.equal(vm.runInContext(`raceFX.post.${k}`,stub),0);});
+ // P1.7 — one table classifies every family, and the table is what the code actually uses.
+ test('Race FX families are classified, ordered so critical effects paint over decorative ones, and only decorative budgets shrink on reduced effects',()=>{
+  const desktop=fixture(),mobile=fixture({MOBILEFX:true});desktop.run('raceFX.init()');mobile.run('raceFX.init()');
+  const VFX=desktop.run('raceFX.VFX');
+  const roles=['critical','readable','decorative'];
+  for(const [name,def] of Object.entries(VFX)){
+   assert.ok(roles.includes(def.role),name+' has a declared role');
+   assert.ok(Number.isFinite(def.order),name+' has a paint order');
+   assert.ok(def.full>0&&def.low>0&&def.low<=def.full,name+' has a sane capacity pair');
+  }
+  // Readability rule: nothing decorative may be painted on top of a critical effect.
+  const worstCritical=Math.min(...Object.values(VFX).filter(v=>v.role==='critical').map(v=>v.order));
+  const loudestDecorative=Math.max(...Object.values(VFX).filter(v=>v.role==='decorative').map(v=>v.order));
+  assert.ok(loudestDecorative<worstCritical,`decorative particles paint under every critical effect (${loudestDecorative} < ${worstCritical})`);
+  const orders=Object.values(VFX).map(v=>v.order);
+  assert.equal(new Set(orders).size,orders.length,'every family has its own paint order');
+  // Degradation rule: a phone loses texture, never the effects it needs to read the race.
+  for(const [name,def] of Object.entries(VFX)){
+   if(def.role==='critical')assert.equal(def.low,def.full,name+' keeps its whole budget on reduced effects');
+   if(def.role==='decorative')assert.ok(def.low<=def.full*.6,name+' gives way on reduced effects');
+  }
+  // And the table is live: the built scene carries exactly these paint orders.
+  const byName={skid:'fx-skid-marks',ribbon:'fx-drift-ribbons',flames:'fx-boost-flames',speed:'fx-speed-lines',rings:'fx-shock-rings',shells:'fx-shield-shells',strips:'fx-flash-strips',shards:'fx-shards',petals:'fx-confetti',puffs:'fx-smoke-dust',glints:'fx-glints'};
+  for(const [key,meshName] of Object.entries(byName)){
+   const mesh=desktop.scene.getObjectByName(meshName);
+   assert.ok(mesh,meshName+' exists');
+   assert.equal(mesh.renderOrder,VFX[key].order,meshName+' uses its declared paint order');
+  }
+  assert.equal(desktop.run('raceFX.budget.skidQuads'),VFX.skid.full,'desktop skid budget comes from the table');
+  assert.equal(mobile.run('raceFX.budget.skidQuads'),VFX.skid.low,'reduced skid budget comes from the table');
+  assert.equal(mobile.run('raceFX.budget.rings'),VFX.rings.full,'impact telegraphs are never reduced');
+ });
  test('Race FX mobile profile halves pool budgets and keeps the same draw-call bound',()=>{const desktop=fixture(),mobile=fixture({MOBILEFX:true});desktop.run('raceFX.init()');mobile.run('raceFX.init()');
   const d=desktop.run('raceFX.budget'),m=mobile.run('raceFX.budget');assert.equal(m.low,true);for(const k of ['skidQuads','shards','petals','puffs','glints'])assert.ok(m[k]<=d[k]/2+1,`mobile ${k} halved: ${m[k]} vs ${d[k]}`);
   assert.equal(mobile.scene.children.length,desktop.scene.children.length);const racers=[rigged(mobile.ctx,.3,2,true)];fireAll(mobile.ctx,mobile.run,racers,40);assertFinite(mobile.scene);});

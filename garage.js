@@ -24,9 +24,25 @@
   function card(name,type,effect,state,level,cost,action,callback){
    const article=document.createElement('article'),h=document.createElement('h3'),p=document.createElement('p'),meta=document.createElement('p'),button=document.createElement('button');
    h.textContent=name;p.textContent=effect;meta.textContent=`${type} · ${state} · Level ${level} · ${cost?cost+' Zen Credits':'No cost'}`;
-   button.className='btn';button.dataset.garageKey=type+':'+name;button.textContent=action;button.disabled=busy||!callback||(cost>saved.wallet);
-   button.onclick=async()=>{if(busy)return;busy=true;render();try{await economyTransaction(callback);status.textContent=name+' · saved';SFX.ui();window.dispatchEvent(new Event('garagechange'));}catch(error){status.textContent=error.message;}finally{busy=false;render(type+':'+name);}};
-   article.append(h,p,meta,button);list.append(article);
+   const short=cost>saved.wallet?cost-saved.wallet:0;
+   // P1.4 locked state: say what is missing rather than only greying the control out.
+   article.dataset.state=state.toLowerCase().replace(/[^a-z]+/g,'-');
+   let need=null;
+   if(short){need=document.createElement('p');need.className='garage-locked';need.textContent=`Locked · ${short} more Zen Credits needed`;}
+   button.className='btn';button.dataset.garageKey=type+':'+name;button.textContent=busy?'Saving…':action;button.disabled=busy||!callback||!!short;
+   button.setAttribute('aria-pressed',String(state==='Equipped'));
+   if(short)button.setAttribute('aria-describedby','garage-status');
+   button.onclick=async()=>{
+    if(busy)return;busy=true;status.textContent=name+' · saving…';render();
+    try{
+     await economyTransaction(callback);
+     // Confirm what changed and what it left behind: a purchase is worth a receipt.
+     status.textContent=cost?`${name} · bought for ${cost} · ${saved.wallet} Zen Credits left`:`${name} · ${action==='EQUIP'?'equipped':'saved'}`;
+     SFX.ui();window.dispatchEvent(new Event('garagechange'));
+    }catch(error){status.textContent=error.message;}
+    finally{busy=false;render(type+':'+name);}
+   };
+   article.append(h,p,meta);if(need)article.append(need);article.append(button);list.append(article);
   }
   if(category==='Add-Ons'||category==='Owned / Locked')for(const a of ADDONS){
    const owned=saved.ownedAddons.includes(a.id),level=saved.addonUpgradeLevels[a.id]||0,equipped=saved.addons[buildRacerId]===a.id;

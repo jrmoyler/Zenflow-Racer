@@ -2,9 +2,12 @@
 // Each detour replaces the east-side approach before rejoining the original
 // control point 3. Original sections and the start/finish are retained.
 const CIRCUIT_EXTENSIONS={
- cherry:{names:['Lantern Sweep','Sky Temple Hairpin','Cloudfall Bridge'],points:[[255,8,15],[340,20,-30],[405,34,-145],[365,40,-250],[290,28,-275],[205,12,-195]]},
- stormforge:{names:['Turbine Chicane','Foundry Drop','Reactor Exit'],points:[[265,10,20],[325,22,-30],[295,29,-100],[365,34,-175],[325,20,-265],[260,10,-245],[220,7,-180]]},
- canopy:{names:['Cliffside Sweep','Canopy Descent','Sea Bridge'],points:[[265,18,15],[335,36,-55],[395,42,-200],[335,30,-280],[250,16,-275],[210,12,-220]]}
+ cherry:{names:['Lantern Sweep','Sky Temple Hairpin','Cloudfall Bridge'],points:[[255,8,15],[340,20,-30],[405,34,-145],[365,40,-250],[290,28,-275],[205,12,-195]],
+  route:{id:'temple-inside-line',name:'Temple Inside Line',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}},
+ stormforge:{names:['Turbine Chicane','Foundry Drop','Reactor Exit'],points:[[265,10,20],[325,22,-30],[295,29,-100],[365,34,-175],[325,20,-265],[260,10,-245],[220,7,-180]],
+  route:{id:'turbine-service-apex',name:'Turbine Service Apex',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}},
+ canopy:{names:['Cliffside Sweep','Canopy Descent','Sea Bridge'],points:[[265,18,15],[335,36,-55],[395,42,-200],[335,30,-280],[250,16,-275],[210,12,-220]],
+  route:{id:'root-cut-line',name:'Root Cut Line',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}}
 };
 function extendedCircuitControls(id,base){return [...base.slice(0,3),...CIRCUIT_EXTENSIONS[id].points.map(p=>p.slice()),...base.slice(3)];}
 function extendedCircuitKeys(id,keys){const count=CIRCUIT_EXTENSIONS[id].points.length;return keys.map(([i,v])=>[i>=3?i+count:i,v]);}
@@ -54,11 +57,15 @@ function buildExtensionLandmarks(){
  }
 }
 
-// Stormforge's marked service apex is a narrow alternate racing line on the
-// existing deck. Its shorter inner radius saves distance, not a speed bonus.
-// Both lines pass the same ordered lap gates; there is no progress jump.
+// Every circuit carries one marked alternate line on the existing deck. Its shorter
+// inner radius saves distance, not a speed bonus, and the paint only appears where the
+// road genuinely bends. Both lines pass the same ordered lap gates; there is no
+// progress jump, and the exit cannot award a lap or a finish.
 function configureCircuitRoutes(){
- track.serviceRoute=activeMap.id==='stormforge'&&CTRL.length>20?{name:'Turbine Service Apex',start:extensionAnchor(4),end:extensionAnchor(6)}:null;
+ const def=CIRCUIT_EXTENSIONS[activeMap.id];
+ track.serviceRoute=def&&def.route&&CTRL.length>20
+  ?{id:def.route.id,name:def.route.name,cue:def.route.cue,start:extensionAnchor(def.route.from),end:extensionAnchor(def.route.to)}
+  :null;
 }
 function serviceLaneMetric(u,lat){
  const route=track.serviceRoute;if(!route||u<=route.start||u>=route.end)return 1;
@@ -80,6 +87,20 @@ function buildServiceLane(){
  }
  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setIndex(indices);geo.computeVertexNormals();
  const mat=new THREE.MeshStandardMaterial({color:0xe4b66b,roughness:.9,side:THREE.DoubleSide});
- const markings=new THREE.Mesh(geo,mat);markings.name='turbine-service-apex-markings';markings.receiveShadow=true;world.add(markings);
+ const markings=new THREE.Mesh(geo,mat);markings.name=route.id+'-markings';markings.receiveShadow=true;world.add(markings);
  world.userData.serviceRoute={...route,width:1.6,metricRange:[.82,1.18],checkpointBypass:false};
+}
+
+// P1.8 — circuit identity. Each authored moment already has real geometry; this reports
+// the one a racer has just entered so the HUD can name it. Sections are ordered by
+// arc length, so a crossing is a plain interval test and never re-fires mid-section.
+function circuitLandmarkCrossed(lastU,u){
+ const marks=world.userData.extensionLandmarks;if(!marks||!Number.isFinite(lastU)||!Number.isFinite(u))return null;
+ // A lap wrap is the only backwards step worth following; everything else is noise.
+ const wrapped=u<lastU;
+ for(const mark of marks){
+  const crossed=wrapped?(lastU<mark.u||u>=mark.u):(lastU<mark.u&&u>=mark.u);
+  if(crossed)return mark;
+ }
+ return null;
 }

@@ -18,5 +18,14 @@ assert.equal(E.reward({...race,tokens:Infinity},s).tokens,0);
 assert.ok(E.reward({...race,tokens:99999},s).total<=600);
 console.log('PASS economy migration, persistence, reward bounds, incomplete race, restart/replay rejection, purchases and six builds');
 
-assert.equal(E.reward({...race,difficulty:2,tokens:60},E.migrate({},ids)).total,423);
-assert.equal(E.reward({...race,position:12,difficulty:0,tokens:0,hits:3,personalBest:false},s).total,25);
+// P1.2 pacing: the maximum configured payout, and the floor a last-place finisher keeps.
+assert.equal(E.reward({...race,difficulty:2,tokens:60},E.migrate({},ids)).total,443);
+assert.equal(E.reward({...race,position:12,difficulty:0,tokens:0,hits:3,personalBest:false},s).total,51);
+// Damage control steps down instead of dropping to nothing on a rough race.
+const damage=hits=>E.reward({...race,position:6,difficulty:1,tokens:0,hits,personalBest:false},s).clean;
+assert.deepEqual([0,1,2,3,4,5].map(damage),[25,12,12,6,6,0],'graded damage control');
+// Finishing pays the same flat amount to every finisher, so it cannot outrank placing well.
+const first=E.reward({...race,position:1,difficulty:1,tokens:0,hits:0,personalBest:false},s);
+const last=E.reward({...race,position:12,difficulty:1,tokens:0,hits:0,personalBest:false},s);
+assert.equal(first.finish,last.finish,'completion pay is placement-independent');
+assert.ok(first.total-last.total>first.finish*4,'placing well still dominates the payout');

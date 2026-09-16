@@ -22,9 +22,12 @@ Baseline: main at `5a09544` (merged PR #23). P1 was not started.
 Placement rewards for positions 1–12: **120, 100, 85, 75, 65, 55, 50, 45, 40, 35, 30, 25**.
 Difficulty bonus: **0%, 20%, 40% of placement**.
 Collected tokens: **2 credits each, capped at 60 rewarded pickups**.
-Personal best: **25**. Clean race: **25 with zero hits; 10 with one or two hits**.
+Personal best: **25**. Damage control: **25 with zero hits; 12 with one or two; 6 with three or four; 0 beyond that**.
+Race completed: **20**, paid flat to every finisher regardless of placement.
 First circuit completion: **60**. First finish with a racer: **25**.
-No streaks, random loot or paid currency. Example: first-place Standard, 19 collected tokens, no hits, personal best and new map/racer = **317 credits**. Maximum configured race payout: **423**.
+No streaks, random loot or paid currency. Example: first-place Standard, 19 collected tokens, no hits, personal best and new map/racer = **337 credits**. Maximum configured race payout: **443**.
+
+The flat completion payment and the graded damage-control steps are the P1.2 pacing change; see `docs/p1-release-polish/README.md` for the measurements behind them.
 
 | Content | Price | Effect |
 |---|---:|---|

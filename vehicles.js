@@ -858,7 +858,15 @@ let sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx;
 function buildParticles(){sparksBlue=new ParticlePool(600,0x66aaff,1.1);sparksOrange=new ParticlePool(600,0xffa040,1.25);sparksPink=new ParticlePool(600,0xff5fd0,1.5);boostFx=new ParticlePool(900,0x00d9b5,2.2);goldFx=new ParticlePool(300,0xffd77a,1.6);smokeFx=new ParticlePool(500,0x7a8090,2.4,false);hitFx=new ParticlePool(300,0xff5a3a,2);sparksBlue.gravity=sparksOrange.gravity=sparksPink.gravity=-14;goldFx.gravity=-8;smokeFx.gravity=1.5;smokeFx.color.opacity=.35;}
 
 // ---------- Procedural audio (Web Audio) ----------
-const AUDIO={ctx:null,on:true,master:null,voices:0,failed:false};
+/* P1.6 final mix. Everything audible goes through one of four named buses so no single
+   source can dominate: the continuous ones (engine, ambience) sit under the momentary
+   ones (gameplay effects), and menu sound sits under everything. A loud gameplay event
+   ducks the continuous buses for a beat so the hit, boost or power still reads clearly
+   over a full-throttle engine. Levels live in one table and are asserted by tests. */
+const AUDIO_MIX=Object.freeze({master:.42,engine:.82,ambience:.72,sfx:1,ui:.5});
+// Ducking: [depth, seconds]. Depth is the fraction of the continuous buses left audible.
+const AUDIO_DUCK=Object.freeze({hit:[.55,.45],boost:[.7,.3],power:[.6,.5],finish:[.6,.9]});
+const AUDIO={ctx:null,on:true,master:null,bus:null,voices:0,failed:false};
 function audioInit(){
   if(AUDIO.failed)return;
   if(AUDIO.ctx){if(['suspended','interrupted'].includes(AUDIO.ctx.state))AUDIO.ctx.resume().catch(()=>{});return;}
@@ -870,7 +878,10 @@ function audioInit(){
     // A safety limiter keeps stacked pickups, engine and collisions comfortable.
     const limiter=C.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=12;limiter.ratio.value=6;limiter.attack.value=.003;limiter.release.value=.18;
     master.connect(limiter);limiter.connect(C.destination);
-    const eng=C.createGain();eng.gain.value=0;eng.connect(master);
+    // Four buses, each a single gain stage under the master. Their levels are the mix.
+    const bus={};
+    for(const name of ['engine','ambience','sfx','ui']){const g=C.createGain();g.gain.value=AUDIO_MIX[name];g.connect(master);bus[name]=g;}
+    const eng=C.createGain();eng.gain.value=0;eng.connect(bus.engine);
     const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;lp.Q.value=.75;lp.connect(eng);
     const mk=(type,det)=>{const o=C.createOscillator();o.type=type;o.detune.value=det;o.connect(lp);o.start();return o;};
     const osc=[mk('sawtooth',0),mk('sawtooth',-9),mk('sine',0)];
@@ -879,53 +890,67 @@ function audioInit(){
     const noise=(type,frequency,volume,rate=1)=>{
       const source=C.createBufferSource();source.buffer=buf;source.loop=true;source.playbackRate.value=rate;
       const filter=C.createBiquadFilter();filter.type=type;filter.frequency.value=frequency;filter.Q.value=.7;
-      const gain=C.createGain();gain.gain.value=volume;source.connect(filter);filter.connect(gain);gain.connect(master);source.start();return {gain,filter};
+      const gain=C.createGain();gain.gain.value=volume;source.connect(filter);filter.connect(gain);gain.connect(bus.ambience);source.start();return {gain,filter};
     };
     const drift=noise('bandpass',1800,0),wind=noise('lowpass',400,0);
+    // Constant crowd and air bed. It is deliberately the quietest thing in the mix.
     noise('bandpass',600,.015,.5);
-    Object.assign(AUDIO,{ctx:C,master,osc,engGain:eng,lp,noiseGain:drift.gain,noiseBP:drift.filter,windGain:wind.gain});
+    Object.assign(AUDIO,{ctx:C,master,bus,osc,engGain:eng,lp,noiseGain:drift.gain,noiseBP:drift.filter,windGain:wind.gain});
     if(C.state==='suspended')C.resume().catch(()=>{});
   }catch(error){if(C)C.close().catch(()=>{});AUDIO.ctx=null;AUDIO.failed=true;}
 }
 function audioAllowed(){return AUDIO.ctx&&AUDIO.ctx.state!=='closed'&&AUDIO.on&&!document.hidden&&game.state!=='paused'&&AUDIO.voices<32;}
-function tone(f,dur,type='sine',vol=.25,slide=0,delay=0){
+// Pull the continuous buses down under a momentary one, then let them back up. Without
+// this a boost or an impact disappears into a wide-open engine at top speed.
+function audioDuck(kind){
+  const shape=AUDIO_DUCK[kind];if(!shape||!AUDIO.bus||!AUDIO.ctx)return false;
+  const [depth,seconds]=shape,t=AUDIO.ctx.currentTime;
+  for(const name of ['engine','ambience']){
+    const gain=AUDIO.bus[name].gain,level=AUDIO_MIX[name];
+    gain.cancelScheduledValues(t);gain.setValueAtTime(level*depth,t);
+    gain.setTargetAtTime(level,t+seconds*.35,Math.max(.05,seconds*.4));
+  }
+  return true;
+}
+function tone(f,dur,type='sine',vol=.25,slide=0,delay=0,bus='sfx'){
   if(!audioAllowed())return;
   const C=AUDIO.ctx,o=C.createOscillator(),g=C.createGain(),start=C.currentTime+Math.max(0,delay);dur=Math.max(.03,dur);
   o.type=type;o.frequency.setValueAtTime(Math.max(20,f),start);
   if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,f+slide),start+dur);
   g.gain.setValueAtTime(0,start);g.gain.linearRampToValueAtTime(vol,start+.012);g.gain.exponentialRampToValueAtTime(.0001,start+dur);
-  o.connect(g);g.connect(AUDIO.master);AUDIO.voices++;
+  o.connect(g);g.connect((AUDIO.bus&&AUDIO.bus[bus])||AUDIO.master);AUDIO.voices++;
   o.onended=()=>{o.disconnect();g.disconnect();AUDIO.voices=Math.max(0,AUDIO.voices-1);};
   o.start(start);o.stop(start+dur+.03);
 }
-function noiseHit(dur=.25,vol=.5,f=300){
+function noiseHit(dur=.25,vol=.5,f=300,bus='sfx'){
   if(!audioAllowed())return;
   const C=AUDIO.ctx,b=C.createBuffer(1,Math.max(1,Math.floor(C.sampleRate*dur)),C.sampleRate),d=b.getChannelData(0);
   for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
   const source=C.createBufferSource();source.buffer=b;
   const filter=C.createBiquadFilter();filter.type='lowpass';filter.frequency.value=f;
-  const gain=C.createGain();gain.gain.value=vol;source.connect(filter);filter.connect(gain);gain.connect(AUDIO.master);AUDIO.voices++;
+  const gain=C.createGain();gain.gain.value=vol;source.connect(filter);filter.connect(gain);gain.connect((AUDIO.bus&&AUDIO.bus[bus])||AUDIO.master);AUDIO.voices++;
   source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();AUDIO.voices=Math.max(0,AUDIO.voices-1);};source.start();
 }
 // Visibility events are synchronous even when animation frames stop in a hidden tab.
 document.addEventListener('visibilitychange',()=>{if(!AUDIO.master)return;const t=AUDIO.ctx.currentTime;AUDIO.master.gain.cancelScheduledValues(t);AUDIO.master.gain.setValueAtTime(0,t);});
+// Gameplay-critical calls duck the continuous buses; background texture never does.
 const SFX={
-  count:()=>tone(660,.18,'square',.22),go:()=>{tone(880,.5,'square',.25);tone(1320,.5,'square',.15,0,.02);},
+  count:()=>tone(660,.18,'square',.22),go:()=>{audioDuck('boost');tone(880,.5,'square',.25);tone(1320,.5,'square',.15,0,.02);},
   token:(n)=>{tone(1200+n*60,.09,'sine',.2,600);tone(1800+n*60,.12,'sine',.12,900,.05);},
   box:()=>{[0,1,2,3].forEach(i=>tone(520*Math.pow(1.26,i),.1,'triangle',.18,0,i*.06));},
-  boost:(lvl=1)=>{noiseHit(.5,.35,1600);tone(220,.55,'sawtooth',.18,700+lvl*200);},
+  boost:(lvl=1)=>{audioDuck('boost');noiseHit(.5,.35,1600);tone(220,.55,'sawtooth',.18,700+lvl*200);},
   driftTier:(lvl)=>tone(700+lvl*250,.12,'square',.14,300),
-  hit:()=>{noiseHit(.35,.7,500);tone(160,.4,'sawtooth',.3,-100);},
-  shieldBlock:()=>{tone(1500,.2,'sine',.3,-400);tone(2200,.3,'sine',.15,-1000,.05);},
+  hit:()=>{audioDuck('hit');noiseHit(.35,.7,500);tone(160,.4,'sawtooth',.3,-100);},
+  shieldBlock:()=>{audioDuck('power');tone(1500,.2,'sine',.3,-400);tone(2200,.3,'sine',.15,-1000,.05);},
   fire:()=>{noiseHit(.3,.4,3000);tone(400,.3,'sawtooth',.2,1200);},
-  pulse:()=>{tone(90,1.2,'sine',.5,900);noiseHit(.9,.3,800);},
+  pulse:()=>{audioDuck('power');tone(90,1.2,'sine',.5,900);noiseHit(.9,.3,800);},
   lap:()=>{[0,4,7,12].forEach((s,i)=>tone(440*Math.pow(2,s/12),.25,'triangle',.2,0,i*.09));},
-  finish:()=>{[0,4,7,12,16,19,24].forEach((s,i)=>tone(330*Math.pow(2,s/12),.5,'triangle',.22,0,i*.11));},
+  finish:()=>{audioDuck('finish');[0,4,7,12,16,19,24].forEach((s,i)=>tone(330*Math.pow(2,s/12),.5,'triangle',.22,0,i*.11));},
   wall:()=>noiseHit(.15,.35,900),
-  ui:()=>tone(1000,.06,'square',.08),
+  ui:()=>tone(1000,.06,'square',.08,0,0,'ui'),
 };
 function audioUpdate(dt,player,rms){ if(!AUDIO.ctx||AUDIO.ctx.state==='closed')return;const C=AUDIO.ctx;const t=C.currentTime;
-  const on=AUDIO.on&&!document.hidden&&game.state!=='paused';AUDIO.master.gain.setTargetAtTime(on?.42:0,t,.04);
+  const on=AUDIO.on&&!document.hidden&&game.state!=='paused';AUDIO.master.gain.setTargetAtTime(on?AUDIO_MIX.master:0,t,.04);
   const racing=game.state==='race'||game.state==='countdown'||game.state==='finish';
   const spd=player?player.speed:0,max=player?player.maxSpeed:40;const r=clamp(spd/Math.max(1,max),0,1.3);
   const gear=Math.floor(r*3.999),gr=(r*4)%1;const f=70+gr*95+gear*18+(player&&player.boost>0?40:0);

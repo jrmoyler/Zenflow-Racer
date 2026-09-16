@@ -76,6 +76,20 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'Raj
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #toast.gold{color:var(--gold)}
 #toast.teal{color:var(--teal)}
+#coach{position:fixed;left:calc(18px + var(--sa-l));bottom:calc(120px + var(--sa-b));z-index:40;width:min(330px,72vw);padding:14px 16px;background:rgba(6,17,27,.88);border:1px solid rgba(201,213,231,.22);border-left:3px solid var(--gold);border-radius:4px;color:var(--white);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#coach[hidden]{display:none}
+#coach .coach-step{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold2)}
+#coach h3{font-size:19px;letter-spacing:-.02em;margin:4px 0 6px}
+#coach p#coach-hint{font-size:13px;line-height:1.55;color:var(--silver)}
+#coach #coach-control{margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--gold)}
+#coach #coach-control[hidden]{display:none}
+#coach .coach-actions{margin-top:12px}
+#coach .coach-actions .btn{font-size:10px;padding:8px 12px;min-height:36px}
+@media(max-width:540px){#coach{width:min(300px,86vw);left:12px;bottom:calc(300px + var(--sa-b));padding:11px 12px}#coach h3{font-size:16px}#coach p#coach-hint{font-size:12px}}
+@media(max-height:560px) and (orientation:landscape){#coach{bottom:calc(96px + var(--sa-b));width:min(280px,46vw);padding:10px 12px}#coach h3{font-size:15px}}
+#landmark{position:absolute;left:50%;top:calc(104px + var(--sa-t));transform:translate(-50%,-6px);font-size:clamp(9px,1.4vw,13px);letter-spacing:.2em;text-transform:uppercase;color:var(--silver);background:rgba(5,10,24,.45);border:1px solid rgba(26,37,64,.8);border-left:2px solid var(--gold);padding:5px 12px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+#landmark.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){#landmark{transition:opacity .25s ease;transform:translate(-50%,0)}}
 #count{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-weight:800;font-size:clamp(90px,22vw,200px);color:var(--gold);letter-spacing:-.06em;text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(168,248,255,.35);opacity:0}
 #count.go{color:var(--teal);text-shadow:0 6px 0 rgba(0,0,0,.5),0 0 60px rgba(146,237,255,.45)}
 #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(146,237,255,.0) 100%);opacity:0;transition:opacity .2s}
@@ -197,7 +211,7 @@ html[data-touch="on"] #tS{display:none}
   </div>
 </div>
 
-<section id="settings-panel" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race settings"><div class="panel"><div class="panel-kicker">ZENFLOW RACER</div><h2>RACE SETTINGS</h2><p class="settings-label">CONTROLS</p><div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div><p class="settings-label">RACE DIFFICULTY</p><div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div><details><summary>How to race</summary><div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>F</kbd> add-on · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle; hold DRIFT on “1” for a rocket start; POWER button · Gamepad: triggers drive, LB/L1 drift, X item, Y power, RB/R1 or L3 add-on, rumble.</div></details><button id="settings-close" class="btn">Done</button></div></section>
+<section id="settings-panel" class="screen hidden" role="dialog" aria-modal="true" aria-label="Race settings"><div class="panel"><div class="panel-kicker">ZENFLOW RACER</div><h2>RACE SETTINGS</h2><p class="settings-label">CONTROLS</p><div class="race-options" aria-label="Race controls"><label><input type="checkbox" id="autothrottle"> Auto throttle</label><label><input type="checkbox" id="touchmode"> Touch controls</label><label><input type="checkbox" id="analogmode" checked> Drag steering</label><label><input type="checkbox" id="steerassist" checked> Steering assist</label><button id="fullscreen" type="button">Fullscreen ↗</button><span id="besttime" class="besttime"></span></div><p class="settings-label">RACE DIFFICULTY</p><div id="diff"><button data-d="0">SIMULATION</button><button data-d="1" class="on">STANDARD</button><button data-d="2">OVERSEER</button></div><details><summary>How to race</summary><div id="ctrlhint"><kbd>W</kbd>/<kbd>↑</kbd> throttle · <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Shift</kbd>/<kbd>Space</kbd> hop then hold to drift, release for boost · <kbd>E</kbd>/<kbd>Ctrl</kbd> item · <kbd>Q</kbd> zen power · <kbd>F</kbd> add-on · <kbd>S</kbd> brake · <kbd>Esc</kbd> pause · <kbd>R</kbd> restart · <kbd>M</kbd> sound. Tuck in behind a rival for a slipstream. Touch: auto throttle; hold DRIFT on “1” for a rocket start; POWER button · Gamepad: triggers drive, LB/L1 drift, X item, Y power, RB/R1 or L3 add-on, rumble.</div></details><p class="settings-label">FIRST RACE</p><div class="race-options"><button id="replay-tutorial" type="button">Replay tutorial</button><span id="tutorial-state" class="besttime"></span></div><button id="settings-close" class="btn">Done</button></div></section>
 
 <div id="hud" class="hidden">
   <div class="race-brand">ZENFLOW<span>RACER</span><small id="race-map-name">Cherry Blossom Skyway</small></div>
@@ -217,6 +231,7 @@ html[data-touch="on"] #tS{display:none}
   <div id="statusHUD" aria-live="off" aria-label="Active power effects"></div>
   <div id="driftmeter" hidden aria-live="off"></div>
   <div id="vig"></div>
+  <div id="landmark" class="mono" role="status" aria-live="polite"></div>
   <div id="toast" role="status" aria-live="polite"></div><div id="toastsub" class="mono" aria-hidden="true"></div>
   <div id="count"></div><div id="countmap" class="mono" aria-hidden="true"></div>
   <div id="wrong">WRONG WAY</div>
@@ -268,6 +283,7 @@ html[data-touch="on"] #tS{display:none}
 <script src="presentation.js"></script>
 <script src="economy.js"></script>
 <script src="progression.js"></script>
+<script src="onboarding.js"></script>
 <script src="game.js"></script>
 <script src="reconstruction-review.js"></script>
 <script src="title-attract.js"></script>

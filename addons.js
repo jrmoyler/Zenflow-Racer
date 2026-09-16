@@ -95,7 +95,7 @@ function addonBlast(e,radius=e.radius){for(const r of game.racers)if(r!==e.owner
 function useAddon(r){
  const a=addonDefinition(r.addonId);
  if(!a||game.state!=='race'||r.finished||r.vault>0||r.spin>0||r.addonCooldown>0)return false;
- r.addonCooldown=a.cooldown*(1-(Math.min(3,r.addonLevel||1)-1)*.02);
+ r.addonCooldown=a.cooldown*(1-(Math.min(3,r.addonLevel||1)-1)*.02);r.addonsUsed=(r.addonsUsed||0)+1;
  if(r.isPlayer&&typeof setToast==='function'){setToast(a.name.toUpperCase(),'teal');if(typeof SFX!=='undefined')SFX.ui();}
  switch(a.id){
  case 'ward':r.shield=Math.max(r.shield||0,6);addonZone(a.id,r,-5,6,{radius:4});addonBuff(r,1);break;
@@ -206,7 +206,7 @@ function stepAddons(dt){
  for(const r of game.racers){
   r.addonCooldown=Math.max(0,(r.addonCooldown||0)-dt);r.addonActive=Math.max(0,(r.addonActive||0)-dt);
   if(!r.finished&&r.addonId==='fire-boost'&&r.addonActive>0){r.addonPulse-=dt;if(r.addonPulse<=0){addonZone('fire-boost',r,-4,2,{radius:2.7});r.addonPulse=.35;}}
-  if(!r.isPlayer&&!r.finished){r.addonAI-=dt;if(r.addonAI<=0){if(addonAIWants(r))useAddon(r);r.addonAI=1.8+(typeof rng==='function'?rng():.5)*2;}}
+  if(!r.isPlayer&&!r.finished){r.addonAI-=dt;if(r.addonAI<=0){if(addonAIWants(r))useAddon(r);r.addonAI=(1.8+(typeof rng==='function'?rng():.5)*2)*[1.5,1,.7][game.diff];}}
  }
  // New entities are visible immediately but start simulating on the next step.
  const active=addonEntities.slice();

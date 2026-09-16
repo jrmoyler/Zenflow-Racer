@@ -6,6 +6,21 @@ const reconstructionReview=(()=>{
  if(!['kart','item','map','podium'].includes(mode))return null;
  return {mode,asset:q.get('asset')||(mode==='map'?'cherry':mode==='item'?'burst':'zenflow'),view:q.get('view')||'front',ready:false,scene:null,object:null};
 })();
+const RECONSTRUCTION_VIEWS={front:[0,2.7,-8],rear:[0,2.7,8],left:[-8,2.7,0],right:[8,2.7,0],side:[8,2.7,0],hero:[-5.6,4.5,-7],cockpit:[-1.8,3.6,-3.5],chase:[0,3.7,7]};
+function stageReconstructionSubject(r){
+ // Subject stage for a single kart or item. Rebuilt in place so one loaded page can
+ // walk the whole roster; the asset, materials and clip sampling are the shipping ones.
+ if(r.object){r.scene.remove(r.object);if(r.mode==='kart'&&typeof disposeKart==='function')disposeKart(r.object);r.object=null;}
+ r.object=r.mode==='kart'?buildKart(ROSTER.find(d=>d.id===r.asset)||ROSTER[0]):buildInventoryModel(r.asset);r.scene.add(r.object);
+ if(r.mode==='kart'){
+  const state=['idle','drive','drift','boost','hit','spinout','victory','defeat'].includes(r.view)?r.view:'idle';
+  resetClipNodes(r.object.userData);sampleKartClip(state,.4,1,r.object.userData);constrainKartHands(r.object,state);
+  // Destructive by design: a neutral capture strips colour maps from this instance only.
+  if(r.view==='neutral')r.object.traverse(o=>{for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m){m.color?.setHex(0x949494);m.emissive?.setHex(0);m.map=null;m.emissiveMap=null;}});
+ }
+ const pos=RECONSTRUCTION_VIEWS[r.view]||RECONSTRUCTION_VIEWS.hero;
+ camera.position.set(...pos).multiplyScalar(r.mode==='kart'?.88:.31);camera.lookAt(0,r.mode==='kart'?1.0:0,0);camera.fov=35;camera.updateProjectionMatrix();
+}
 function renderReconstructionReview(){
  const r=reconstructionReview;if(!r||game.state==='boot')return false;
  if(!r.ready){
@@ -29,16 +44,11 @@ function renderReconstructionReview(){
    r.scene=new THREE.Scene();r.scene.background=new THREE.Color(0xc7daeb);r.scene.environment=scene.environment;
    copyCircuitLights(r.scene);
    const fill=new THREE.DirectionalLight(0xb2eaff,.7);fill.position.set(5,3,1);r.scene.add(fill);
-   r.object=r.mode==='kart'?buildKart(ROSTER.find(d=>d.id===r.asset)||ROSTER[0]):buildInventoryModel(r.asset);r.scene.add(r.object);
    const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0xc4d8e9,roughness:.28,metalness:.18}));ground.rotation.x=-Math.PI/2;ground.position.y=r.mode==='kart'?-.025:-1;ground.receiveShadow=true;r.scene.add(ground);
-   const views={front:[0,2.7,-8],rear:[0,2.7,8],left:[-8,2.7,0],right:[8,2.7,0],side:[8,2.7,0],hero:[-5.6,4.5,-7],cockpit:[-1.8,3.6,-3.5],chase:[0,3.7,7]};
-   const pos=views[r.view]||views.hero;
-   if(r.mode==='kart'){
-    const state=['idle','drive','drift','boost','hit','spinout','victory','defeat'].includes(r.view)?r.view:'idle';
-    resetClipNodes(r.object.userData);sampleKartClip(state,.4,1,r.object.userData);constrainKartHands(r.object,state);
-    if(r.view==='neutral')r.object.traverse(o=>{for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m){m.color?.setHex(0x949494);m.emissive?.setHex(0);m.map=null;m.emissiveMap=null;}});
-   }
-   camera.position.set(...pos).multiplyScalar(r.mode==='kart'?.88:.31);camera.lookAt(0,r.mode==='kart'?1.0:0,0);camera.fov=35;camera.updateProjectionMatrix();
+   stageReconstructionSubject(r);
+   // Restaging a subject stays available to the capture harness, which walks twenty
+   // karts without paying the world boot cost twenty times.
+   r.retarget=(asset,view)=>{if(asset)r.asset=asset;if(view)r.view=view;stageReconstructionSubject(r);return {asset:r.asset,view:r.view};};
   }
   const gl=renderer.getContext?.(),debug=gl?.getExtension('WEBGL_debug_renderer_info');
   r.renderer=FALLBACK_GRAPHICS?'Canvas software rasterizer':debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'WebGL';
@@ -47,6 +57,7 @@ function renderReconstructionReview(){
  renderer.setViewport?.(0,0,innerWidth,innerHeight);renderer.setScissorTest?.(false);
  if(r.mode==='podium')tickFinishCeremony(0);
  renderer.render(r.scene,camera);
+ r.frames=(r.frames||0)+1;
  r.info.textContent=`${r.mode==='podium'?'STAGED INSPECTION · SAMPLE STANDINGS\n':''}ACTUAL ${r.mode.toUpperCase()} · ${r.asset} · ${r.view}\n${r.renderer}\n${renderer.info?.render?.triangles||0} triangles · ${renderer.info?.render?.calls||0} draws\nCamera: ${camera.position.toArray().map(n=>n.toFixed(2)).join(', ')} · FOV ${camera.fov}`;
  return true;
 }

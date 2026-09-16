@@ -1,0 +1,165 @@
+{
+ "method": "Solo deterministic AI on the extended circuits at 120 Hz. Pace is a clean three-lap run; recovery is the ground still lost to an unperturbed twin eight seconds after an identical scripted spin. No items, powers, opponents or rendering. Not a human benchmark and not device evidence.",
+ "cadence": {
+  "note": "Difficulty-scaled decision timing, from the shipping code.",
+  "signaturePowerReview": [
+   1.5,
+   1,
+   0.7
+  ],
+  "addonReview": [
+   1.5,
+   1,
+   0.7
+  ],
+  "itemReaction": [
+   1.6,
+   1,
+   0.7
+  ],
+  "opportunisticPowerIdleSeconds": [
+   22,
+   14,
+   9
+  ],
+  "lineRecoveryGain": [
+   0,
+   0.18,
+   0.36
+  ],
+  "postSpinThrottleHesitationSeconds": [
+   1.1,
+   0.5,
+   0
+  ]
+ },
+ "runs": [
+  {
+   "map": "cherry",
+   "difficulty": 0,
+   "meanLapSeconds": 50.302,
+   "bestLapSeconds": 50.065,
+   "lapSpreadSeconds": 0.69,
+   "metresLostAfterSpin": 105.42,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "cherry",
+   "difficulty": 1,
+   "meanLapSeconds": 48.714,
+   "bestLapSeconds": 48.468,
+   "lapSpreadSeconds": 0.73,
+   "metresLostAfterSpin": 80.44,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "cherry",
+   "difficulty": 2,
+   "meanLapSeconds": 47.731,
+   "bestLapSeconds": 47.479,
+   "lapSpreadSeconds": 0.746,
+   "metresLostAfterSpin": 59.45,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "stormforge",
+   "difficulty": 0,
+   "meanLapSeconds": 53.516,
+   "bestLapSeconds": 53.271,
+   "lapSpreadSeconds": 0.721,
+   "metresLostAfterSpin": 97.21,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "stormforge",
+   "difficulty": 1,
+   "meanLapSeconds": 50.325,
+   "bestLapSeconds": 50.067,
+   "lapSpreadSeconds": 0.772,
+   "metresLostAfterSpin": 74.5,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "stormforge",
+   "difficulty": 2,
+   "meanLapSeconds": 48.783,
+   "bestLapSeconds": 48.525,
+   "lapSpreadSeconds": 0.773,
+   "metresLostAfterSpin": 55.8,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "canopy",
+   "difficulty": 0,
+   "meanLapSeconds": 51.466,
+   "bestLapSeconds": 51.225,
+   "lapSpreadSeconds": 0.721,
+   "metresLostAfterSpin": 98.07,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "canopy",
+   "difficulty": 1,
+   "meanLapSeconds": 48.926,
+   "bestLapSeconds": 48.668,
+   "lapSpreadSeconds": 0.768,
+   "metresLostAfterSpin": 78.88,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  },
+  {
+   "map": "canopy",
+   "difficulty": 2,
+   "meanLapSeconds": 47.521,
+   "bestLapSeconds": 47.266,
+   "lapSpreadSeconds": 0.763,
+   "metresLostAfterSpin": 59.46,
+   "stats": {
+    "maxSpeedBase": 45.8,
+    "accel": 21.4,
+    "handling": 0.188,
+    "rubber": 1
+   }
+  }
+ ],
+ "failures": []
+}

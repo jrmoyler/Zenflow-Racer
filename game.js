@@ -35,7 +35,7 @@ class Racer{
     this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.totalTokensCollected=0;this.serviceLineMetres=0;this.hitsTaken=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
     this.spin=0;this.shield=0;this.hitCd=0;this.wallCd=0;this.finished=false;this.finishTime=0;this.rank=gridIdx+1;this.wheelRot=0;this.visualYaw=0;this.lean=0;this.wrongWay=false;
     // Grid-staggered reaction: front rows launch first so the pack fans out instead of piling into row one.
-    this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0};
+    this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0,recover:0};
     this.distance=this.u;this.progress=this.u;this.startHold=0;this.wheelspin=0;this.hop=0;this.lastU=this.u;this.rubber=1;
     // Boost surge (accel ramp instead of an instant multiplier), hop→drift commit window, wrong-way timer, triple spacing.
     this.boostTarget=1;this.surge=0;this.hopWindow=0;this.wrongT=0;this.tripleCd=0;
@@ -69,7 +69,8 @@ function spawnRace(playerDiv){
   resetInput();lastItemKey=null;simStep.lastN=null;acc=0;
   game.raceTime=0;game.countdown=3.6;game.state='countdown';game.finishTimer=0;game.trauma=0;
   if(typeof raceTelemetry!=='undefined')raceTelemetry.start({map:chosenMapId,division:playerDiv.id,racers:game.racers.length,laps:game.laps,sceneBuildMs:performance.now()-sceneBuildStarted});
-  camState.init=false;updateRanks(true);hud.item.querySelector('.ic').innerHTML='';hud.item.querySelector('.lbl').textContent='NO ITEM';setToast('');updateHUD.lastRank=0;
+  camState.init=false;updateRanks(true);hud.item.querySelector('.ic').innerHTML='';hud.item.querySelector('.lbl').textContent='NO ITEM';setToast('');clearLandmark();updateHUD.lastRank=0;
+  if(typeof startOnboarding==='function')startOnboarding();
   showTouch();
 }
 
@@ -193,7 +194,12 @@ function stepRacer(r,dt){
   advanceRaceDistance(r,r.speed*Math.cos(r.theta)*dt/(track.len*laneMetric),dt);
   if(typeof serviceLaneTarget==='function'){
     const target=serviceLaneTarget(r.u);if(target!==null&&Math.abs(r.lat-target)<.8)r.serviceLineMetres+=Math.max(0,r.speed*Math.cos(r.theta))*dt;
-    const route=track.serviceRoute;if(r.isPlayer&&route&&r.lastU<route.start&&r.u>=route.start&&r.u<route.end)setToast(route.name.toUpperCase(),'gold','GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',3);
+    const route=track.serviceRoute;if(r.isPlayer&&route&&r.lastU<route.start&&r.u>=route.start&&r.u<route.end)setToast(route.name.toUpperCase(),'gold',route.cue||'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',3);
+  }
+  // Each circuit's authored moments name themselves as the player reaches them. The cue
+  // is a quiet corner label, kept out of the toast lane so it never hides an item call.
+  if(r.isPlayer&&typeof circuitLandmarkCrossed==='function'){
+    const mark=circuitLandmarkCrossed(r.lastU,r.u);if(mark)showLandmark(mark.name);
   }
   // --- timers
   if(r.spin>0)r.spin-=dt;if(r.shield>0)r.shield-=dt;if(r.hitCd>0)r.hitCd-=dt;if(r.tripleCd>0)r.tripleCd-=dt;
@@ -296,7 +302,10 @@ function buildMineMesh(){if(typeof buildReferenceMine==='function')return buildR
 function buildMissileMesh(){if(typeof buildReferenceMissile==='function')return buildReferenceMissile();const g=new THREE.Group();const body=new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(0,-.9),new THREE.Vector2(.28,-.8),new THREE.Vector2(.3,.3),new THREE.Vector2(0,.95)],12),new THREE.MeshStandardMaterial({color:0xcbd5e1,metalness:.85,roughness:.3}));body.rotation.x=Math.PI/2;g.add(body);const fin=new THREE.Mesh(starGeo(.7,.08),new THREE.MeshStandardMaterial({color:0x0a1628,emissive:0xcbd5e1,emissiveIntensity:1}));fin.position.z=-.7;g.add(fin);return g;}
 function useItem(r){
   if(game.state!=='race'||!r.item||r.vault>0||r.spin>0||r.finished)return false;const k=r.item;
-  if(k==='triple'){if(r.tripleCd>0)return false;if(!r.tripleLeft)r.tripleLeft=3;r.tripleLeft--;r.tripleCd=.28;applyBoost(r,1.0,1.34,.7);if(r.isPlayer)SFX.boost(2);if(r.tripleLeft>0)return true;}
+  // A cluster shot still on its spacing cooldown is not a use; count only real ones.
+  if(k==='triple'&&r.tripleCd>0)return false;
+  r.itemsUsed=(r.itemsUsed||0)+1;
+  if(k==='triple'){if(!r.tripleLeft)r.tripleLeft=3;r.tripleLeft--;r.tripleCd=.28;applyBoost(r,1.0,1.34,.7);if(r.isPlayer)SFX.boost(2);if(r.tripleLeft>0)return true;}
   else if(k==='burst'){applyBoost(r,1.35,1.4,1);if(r.isPlayer){SFX.boost(3);setToast('SIGNAL BURST','teal','',2);}}
   else if(k==='shield'){r.shield=7;if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS SHIELD','teal','',2);}}
   else if(k==='mine'){
@@ -345,7 +354,7 @@ function aiWantsSpecial(r){
     case 'eon':want=r.spin>0||r.slow>0||r.speed<r.maxSpeed*.55;break;
   }
   // A power left unused for a long stretch is still worth spending when anyone is nearby.
-  if(!want&&r.ai.specialIdle>14&&(aiRivalAhead(r,40,9)||aiRivalBehind(r,40,9)))want=true;
+  if(!want&&r.ai.specialIdle>[22,14,9][game.diff]&&(aiRivalAhead(r,40,9)||aiRivalBehind(r,40,9)))want=true;
   return want;
 }
 // Items are held until they can do something: missiles want a target, mines want a chaser, shields wait for a threat.
@@ -385,7 +394,11 @@ function stepAI(r,dt){
   const lateral=r.speed*Math.sin(r.theta)-trackCurv(r.u)*r.speed*r.speed*.05;
   const err=target-r.lat-lateral*.22;
   const roadHold=trackCurv(r.u)*r.speed*.05/Math.max(.1,r.handling*steeringGain(r.speed,r.maxSpeedBase));
-  r.ai.steer=clamp(err/3.2*skill+roadHold,-1,1);
+  // P1.3 recovery: a sharper field re-acquires the racing line faster after a spin or a
+  // shove. This is steering authority the driver already has, applied only while it is a
+  // long way off line — no speed, acceleration or grip is granted at any difficulty.
+  const recovery=1+[0,.18,.36][game.diff]*clamp(Math.abs(err)/3.2-.35,0,1);
+  r.ai.steer=clamp(err/3.2*skill*recovery+roadHold,-1,1);
   // drifting
   const bigCurve=Math.abs(cA)>.02||Math.abs(cB)>.024;
   if(!r.drifting){if(bigCurve&&r.speed>r.maxSpeedBase*.6&&rng()<skill*dt*4){r.ai.drift=true;r.ai.driftHold=1.2+rng()*1.6+game.diff*.4;r.ai.steer=Math.sign(cA)*Math.max(.5,Math.abs(r.ai.steer));}}
@@ -394,19 +407,40 @@ function stepAI(r,dt){
   r.brake=false;
   // items
   if(r.ai.missileCd>0)r.ai.missileCd-=dt;
-  if(r.item){r.ai.itemHeld+=dt;r.ai.itemDelay-=dt;if(r.ai.itemDelay<=0&&aiWantsItem(r,cA)){useItem(r);r.ai.itemDelay=.6+rng()*1.2;}}
-  else{r.ai.itemDelay=.6+rng()*2;r.ai.itemHeld=0;}
+  // Reaction time to a good item window is part of decision quality, not a stat bonus.
+  const reaction=[1.6,1,.7][game.diff];
+  if(r.item){r.ai.itemHeld+=dt;r.ai.itemDelay-=dt;if(r.ai.itemDelay<=0&&aiWantsItem(r,cA)){useItem(r);r.ai.itemDelay=(.6+rng()*1.2)*reaction;}}
+  else{r.ai.itemDelay=(.6+rng()*2)*reaction;r.ai.itemHeld=0;}
   r.ai.specialIdle=r.specialCooldown>0?0:r.ai.specialIdle+dt;
   // Difficulty changes decisions and consistency; all racers obey their legal build.
   r.rubber=1;
   const corner=Math.max(Math.abs(cA),Math.abs(cB));
   const safeSpeed=r.maxSpeedBase*clamp(1-corner*(game.diff===0?7:game.diff===1?5:4),.58,1);
   if(!r.drifting&&r.speed>safeSpeed){r.throttle=false;r.brake=r.speed>safeSpeed+5;}
+  // P1.3 recovery, as a decision rather than a stat: a Simulation field dithers after a
+  // spin before getting back on the throttle; an Overseer field is straight back to work.
+  // Speed, acceleration and grip are untouched — the driver simply waits longer.
+  if(r.spin>0)r.ai.recover=[1.1,.5,0][game.diff];
+  else if(r.ai.recover>0){r.ai.recover-=dt;r.throttle=false;r.brake=false;}
 
 }
 
 // ---------- Camera ----------
-const camState={init:false,pos:new THREE.Vector3(),look:new THREE.Vector3(),up:new THREE.Vector3(0,1,0),fov:66,kick:0,boostPrev:0,roll:0,side:0};
+const camState={init:false,pos:new THREE.Vector3(),look:new THREE.Vector3(),up:new THREE.Vector3(0,1,0),fov:66,kick:0,boostPrev:0,roll:0,side:0,air:0};
+/* P1.5 camera comfort. Every motion the camera adds on top of following the kart —
+   impact shake, chassis roll, the drift lean and the boost field-of-view swing — is
+   scaled by one factor. A player who has asked their system for reduced motion keeps the
+   information (the camera still follows, still looks through corners) and loses the
+   vestibular noise. The media query is watched, so toggling it applies immediately. */
+const cameraComfort={motion:1};
+(()=>{
+  if(typeof matchMedia!=='function')return;
+  const query=matchMedia('(prefers-reduced-motion: reduce)');
+  const sync=()=>{cameraComfort.motion=query.matches?.25:1;};
+  sync();query.addEventListener?.('change',sync);
+})();
+// Hard ceiling on camera shake, independent of how much trauma accumulates.
+const CAMERA_SHAKE_METRES=.5,CAMERA_MIN_ROAD_CLEARANCE=1.05;
 // Chase rig: close and low so the livery and pilot read, pulling back and widening with speed, kicking FOV on boost,
 // leaning into drifts, looking through corners via trackCurv, and rolling gently with the chassis lean.
 function chaseCamera(p,portrait){
@@ -415,7 +449,13 @@ function chaseCamera(p,portrait){
   const height=(portrait?3.3:2.7)+spd*.25;
   const lookAhead=(portrait?4.6:5.5)+spd*.8;
   const curv=trackCurv(wrap01(p.u+0.012+spd*.012));
-  return {back,height,lookAhead,lookUp:portrait?1.5:1.0,lookSide:clamp(curv*95,-3.5,3.5),fov:66+spd*7+camState.kick*9+(p.boost>0?5:0)+(p.drifting?p.driftTier*1.2:0)+(portrait?4:0)};
+  // Airtime: ease back and up over a jump so the landing and the road beyond it stay in
+  // frame, instead of the kart filling the screen at the apex.
+  const air=camState.air;
+  const swing=cameraComfort.motion;
+  return {back:back+air*1.1,height:height+air*.75,lookAhead:lookAhead+air*1.4,
+    lookUp:(portrait?1.5:1.0)+air*.6,lookSide:clamp(curv*95,-3.5,3.5),
+    fov:66+(spd*7+camState.kick*9+(p.boost>0?5:0)+(p.drifting?p.driftTier*1.2:0))*swing+(portrait?4:0)};
 }
 function updateCamera(dt){
   const p=game.player;if(!p)return;
@@ -426,16 +466,22 @@ function updateCamera(dt){
     target=_p.clone().addScaledVector(fwd,Math.cos(a)*-dist).addScaledVector(_v3,Math.sin(a)*dist).addScaledVector(up,lerp(1.6,3.0,k));look=_p.clone().addScaledVector(fwd,1.5).addScaledVector(up,.6);fovT=62;camState.kick=0;camState.boostPrev=p.boost;}
   else{
     if(p.boost>camState.boostPrev+.25)camState.kick=1;camState.boostPrev=p.boost;camState.kick*=Math.exp(-dt*2.4);
+    // Airtime is tracked as its own eased value so the rig does not snap on touchdown.
+    camState.air=lerp(camState.air,p.hop>0?1:0,1-Math.exp(-dt*(p.hop>0?9:4)));
     const portrait=innerHeight>innerWidth*1.05,c=chaseCamera(p,portrait);
-    const sideT=p.drifting?-p.driftDir*.9:0;camState.side=lerp(camState.side,sideT,1-Math.exp(-dt*4));
+    const sideT=p.drifting?-p.driftDir*.9*cameraComfort.motion:0;camState.side=lerp(camState.side,sideT,1-Math.exp(-dt*4));
     target=_p.clone().addScaledVector(fwd,-c.back).addScaledVector(up,c.height).addScaledVector(_v3,p.visualYaw*-1.1+camState.side*.5);
     look=_p.clone().addScaledVector(fwd,c.lookAhead).addScaledVector(up,c.lookUp).addScaledVector(_v3,c.lookSide+camState.side);fovT=c.fov;}
   if(!camState.init){camState.pos.copy(target);camState.look.copy(look);camState.up.copy(up);camState.init=true;camState.roll=0;camState.side=0;}
   const k=1-Math.exp(-dt*(game.state==='countdown'?3:7.5));camState.pos.lerp(target,k);camState.look.lerp(look,1-Math.exp(-dt*11));camState.up.lerp(up,1-Math.exp(-dt*6)).normalize();
   // shake (trauma^2) and lean roll
-  game.trauma=Math.max(0,game.trauma-dt*1.5);const sh=game.trauma*game.trauma;const t=game.time*31;
-  camState.roll=lerp(camState.roll,game.state==='countdown'?0:(p.lean||0)*.55+(p.drifting?p.driftDir*.012:0),1-Math.exp(-dt*5));
-  camera.position.copy(camState.pos).addScaledVector(_v3,Math.sin(t)*sh*.5).addScaledVector(up,Math.cos(t*1.3)*sh*.35);
+  game.trauma=Math.max(0,game.trauma-dt*1.5);const sh=clamp(game.trauma*game.trauma,0,1)*cameraComfort.motion;const t=game.time*31;
+  camState.roll=lerp(camState.roll,game.state==='countdown'?0:((p.lean||0)*.55+(p.drifting?p.driftDir*.012:0))*cameraComfort.motion,1-Math.exp(-dt*5));
+  camera.position.copy(camState.pos).addScaledVector(_v3,Math.sin(t)*sh*CAMERA_SHAKE_METRES).addScaledVector(up,Math.cos(t*1.3)*sh*CAMERA_SHAKE_METRES*.7);
+  // Keep the rig above the road it is following. On crests and steep banking the eased
+  // chase position can otherwise sink through the deck and clip the circuit.
+  const clearance=camera.position.clone().sub(_p).dot(up);
+  if(clearance<CAMERA_MIN_ROAD_CLEARANCE)camera.position.addScaledVector(up,CAMERA_MIN_ROAD_CLEARANCE-clearance);
   camera.up.copy(camState.up);camera.lookAt(camState.look);camera.rotateZ(Math.sin(t*.9)*sh*.05+camState.roll);
   camState.fov=lerp(camState.fov,fovT,1-Math.exp(-dt*5));camera.fov=camState.fov;camera.updateProjectionMatrix();
   // shadows follow the player
@@ -444,8 +490,31 @@ function updateCamera(dt){
 }
 
 // ---------- HUD ----------
-const hud={};['pos','lap','tok','item','mini','speedo','speedbar','timer','toast','toastsub','count','countmap','vig','wrong','ranks','tP'].forEach(id=>hud[id]=document.getElementById(id));
+const hud={};['pos','lap','tok','item','mini','speedo','speedbar','timer','toast','toastsub','count','countmap','vig','wrong','ranks','tP','landmark'].forEach(id=>hud[id]=document.getElementById(id));
 const miniCtx=hud.mini.getContext('2d');let miniBounds=null;
+// Read-only snapshot for the first-run coach: what the player has actually done so far.
+function onboardingSignals(){
+  const p=game.player;
+  // Anything that is not a race or the results screen parks the lesson and hides its
+  // panel: it must never sit over the pause dialog, the menu or the title card.
+  return {
+    phase:['race','countdown','finish'].includes(game.state)?'race':game.state==='results'?'results':'away',
+    speed:p?p.speed:0,
+    steering:!!(input.left||input.right)||!!(p&&Math.abs(p.steer)>.25),
+    drifting:!!(p&&p.drifting),driftTier:p?p.driftTier||0:0,
+    itemsUsed:p?p.itemsUsed||0:0,specialsUsed:p?p.specialsUsed||0:0,addonsUsed:p?p.addonsUsed||0:0,
+    tokens:p?p.tokens||0:0,hasAddon:!!(p&&p.addonId)
+  };
+}
+// Corner names live in their own quiet lane so naming a section can never displace a
+// gameplay call-out. Repeating the same name is suppressed: laps revisit every corner.
+function showLandmark(name){
+  const el=hud.landmark;if(!el||!name||showLandmark.last===name)return false;
+  showLandmark.last=name;el.textContent=name;el.classList.add('show');
+  clearTimeout(showLandmark.t);showLandmark.t=setTimeout(()=>{el.classList.remove('show');showLandmark.last=null;},2200);
+  return true;
+}
+function clearLandmark(){const el=hud.landmark;clearTimeout(showLandmark.t);showLandmark.last=null;if(el){el.textContent='';el.classList.remove('show');}}
 // Toasts carry a priority: a lower-priority message (position changes) never replaces a lap split or item call-out that is still showing.
 function setToast(text,cls='',sub='',prio=1){
   if(text&&prio<(setToast.prio||0)&&game.raceTime<(setToast.until||0))return false;
@@ -623,6 +692,10 @@ function frame(now){
   if(typeof raceTelemetry!=='undefined')raceTelemetry.frame(now,game.state,game.raceTime);
   if(game.state!==lastFrameState){staticFrameDirty=true;lastFrameState=game.state;}
   const elapsed=(now-last)/1000;let dt=Math.min(.1,Math.max(0,elapsed));last=now;
+  // The first-run coach reads race state on every frame, including the results screen,
+  // where its last two steps live, and including the states where it must get out of the
+  // way. It runs before any early return below.
+  if(typeof tickOnboarding==='function')tickOnboarding(dt,onboardingSignals());
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
   if(typeof sceneCut!=='undefined'&&sceneCut.busy){renderRaceScene();if(game.state==='roster')renderSelectedPreview(0);return;}
   if(typeof tickFinishCeremony==='function'&&tickFinishCeremony(dt)){renderRaceScene();audioUpdate(dt,game.player);return;}

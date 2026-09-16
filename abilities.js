@@ -48,7 +48,7 @@ function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,
 function useSpecial(r){
  if(game.state!=='race'||r.finished||r.specialCooldown>0||r.spin>0&&!['helix','eon'].includes(r.div.id))return false;
  const power=ABILITIES[r.div.id];if(!power)return false;
- r.specialCooldown=power.cooldown*(r.powerCycle||1);abilityFX(r);powerOutcome.last='';
+ r.specialCooldown=power.cooldown*(r.powerCycle||1);abilityFX(r);powerOutcome.last='';r.specialsUsed=(r.specialsUsed||0)+1;
  switch(r.div.id){
  case 'zenflow':r.specialActive=4;r.specialSeen.clear();break;
  case 'collective':{
@@ -102,7 +102,9 @@ function stepAbilities(dt){
  // Decay first for the entire field: application durations never depend on roster order.
  for(const r of game.racers)for(const key of ['specialCooldown','phase','slow','ram','reflect','regen','vault','anchor','perimeter','civicDraft','predict'])r[key]=Math.max(0,(r[key]||0)-dt);
  for(const r of game.racers){
-  if(!r.isPlayer&&!r.finished){r.specialAI-=dt;if(r.specialAI<=0){if(typeof aiWantsSpecial!=='function'||aiWantsSpecial(r))useSpecial(r);r.specialAI=1.2+rng()*2.8;}}
+  // How often a rival re-evaluates its signature power is difficulty, not raw power:
+ // the cooldown, effect and targeting rules are identical at every level.
+ if(!r.isPlayer&&!r.finished){r.specialAI-=dt;if(r.specialAI<=0){if(typeof aiWantsSpecial!=='function'||aiWantsSpecial(r))useSpecial(r);r.specialAI=(1.2+rng()*2.8)*[1.5,1,.7][game.diff];}}
   if(r.finished){r.specialActive=0;continue;}
   if(!(r.specialActive>0))continue;
   const activeDt=Math.min(dt,r.specialActive);r.specialActive=Math.max(0,r.specialActive-dt);

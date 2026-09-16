@@ -141,7 +141,7 @@ function renderRewardSummary(){
  if(!game.reward){el.textContent=game.rewardError||'Saving race rewards…';return;}
  const r=game.reward,c=saved.careerStats;
  el.replaceChildren();const title=document.createElement('h3');title.textContent='+'+r.total+' Zen Credits';el.append(title);
- const text=document.createElement('p');text.textContent=`Placement ${r.placement} · Difficulty ${r.difficulty} · Tokens ${r.tokens} · Personal best ${r.performance} · Clean race ${r.clean} · First circuit ${r.firstMap} · New racer ${r.diversity}`;el.append(text);
+ const text=document.createElement('p');text.textContent=`Placement ${r.placement} · Difficulty ${r.difficulty} · Tokens ${r.tokens} · Race completed ${r.finish||0} · Personal best ${r.performance} · Damage control ${r.clean} · First circuit ${r.firstMap} · New racer ${r.diversity}`;el.append(text);
  const progress=document.createElement('p');progress.textContent=`${game.player.totalTokensCollected} tokens collected · ${c.races} career races · ${c.wins} wins · ${c.maps.length}/3 circuits · ${c.divisions.length}/20 racers · Wallet ${saved.wallet} Zen Credits`;el.append(progress);
  const next=ADDONS.find(a=>!saved.ownedAddons.includes(a.id));const unlock=document.createElement('p');unlock.textContent=next?`${saved.ownedAddons.length}/24 add-ons owned · ${next.name}: ${Math.min(saved.wallet,Economy.addonPrice(next.id,ADDONS.map(a=>a.id)))}/${Economy.addonPrice(next.id,ADDONS.map(a=>a.id))} credits`:'All 24 add-ons owned';el.append(unlock);
  const awards=[];if(r.firstMap)awards.push('First circuit completion');if(r.diversity)awards.push('First finish with '+game.player.div.name);if(r.performance)awards.push('New personal best');
