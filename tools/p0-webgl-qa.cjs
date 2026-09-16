@@ -82,7 +82,8 @@ const PIXEL_PROBE = `(() => {
   gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
   let sum = 0, min = 255, max = 0, nonBackground = 0, opaque = 0;
   const hist = new Set();
-  // The staged background is a flat sky colour; anything far from it is subject or ground.
+  // Ratio of pixels that differ from the staged background colour. The ground plane
+  // counts too, so this is a did-anything-draw check, not a measure of subject size.
   const bg = [199, 218, 235];
   let signature = 0;
   for (let i = 0; i < px.length; i += 4) {
@@ -98,7 +99,7 @@ const PIXEL_PROBE = `(() => {
     width: w, height: h,
     meanLuminance: +(sum / count).toFixed(3),
     minLuminance: min, maxLuminance: max,
-    subjectCoverage: +(nonBackground / count).toFixed(5),
+    nonBackgroundRatio: +(nonBackground / count).toFixed(5),
     opaqueRatio: +(opaque / count).toFixed(5),
     distinctColors: hist.size,
     signature
@@ -228,7 +229,7 @@ async function captureRacers(browser, report) {
       const shot = await page.screenshot({ type: 'png', timeout: SHOT_TIMEOUT });
       cells.push({ view, data: 'data:image/png;base64,' + shot.toString('base64') });
       entry.views[view] = { pixels, structure: { triangles: structure.triangles, drawCalls: structure.drawCalls, meshes: structure.meshes, handGap: structure.handGap, wheels: structure.wheels, issues: structure.issues } };
-      if (pixels.subjectCoverage < 0.02) entry.issues.push(`${view}: subject covers only ${(pixels.subjectCoverage * 100).toFixed(2)}% of the frame`);
+      if (pixels.nonBackgroundRatio < 0.02) entry.issues.push(`${view}: only ${(pixels.nonBackgroundRatio * 100).toFixed(2)}% of the frame differs from the nominal background colour`);
       if (pixels.distinctColors < 12) entry.issues.push(`${view}: frame has ${pixels.distinctColors} sampled colours (suspect blank render)`);
       for (const issue of structure.issues) entry.issues.push(`${view}: ${issue}`);
     }
@@ -330,7 +331,6 @@ async function captureRace(browser, report) {
     const state = await page.evaluate(() => ({
       racers: game.racers.length, laps: game.laps, state: game.state,
       speed: +game.player.speed.toFixed(2), lap: game.player.lap,
-      triangles: renderer.info.render.triangles, drawCalls: renderer.info.render.calls,
       shadowMap: renderer.shadowMap.enabled, fallback: FALLBACK_GRAPHICS
     }));
     report.race.push({ map, state, errors });
