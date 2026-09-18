@@ -10,6 +10,7 @@
  * anything that needs a physical phone (P0.12). Those remain human checks.
  *
  * Usage: node tools/p1-accessibility-audit.cjs [--port 4181] [--json]
+ *        [--devices desktop,handset-portrait] [--screens settings,garage]
  */
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
@@ -93,7 +94,10 @@ window.__a11y = (() => {
       const bg = backdrop(el);
       const size = parseFloat(style.fontSize), weight = Number(style.fontWeight) || 400;
       const large = size >= 24 || (size >= 18.66 && weight >= 700);
-      return { ratio: +ratio(over(fg, bg), bg).toFixed(2), large, size, color: style.color };
+      const box = el.getBoundingClientRect();
+      return { ratio: +ratio(over(fg, bg), bg).toFixed(2), large, size, color: style.color,
+        against: 'rgb(' + Math.round(bg.r) + ', ' + Math.round(bg.g) + ', ' + Math.round(bg.b) + ')',
+        box: [Math.round(box.width), Math.round(box.height)] };
     },
     focusRing(el) {
       el.focus();
@@ -103,14 +107,28 @@ window.__a11y = (() => {
       return { focused: document.activeElement === el, outline, shadow, style: s.outlineStyle };
     },
     clipped(el) {
-      // Only meaningful for elements that lay text out in a box of their own.
+      // Text is only clipped when the box actually clips it. Overflowing a box that
+      // paints outside itself (a display face whose glyphs exceed its line box, say)
+      // hides nothing and is not a defect. An inline box also reports clientWidth 0 by
+      // definition, so it would always look overflowed.
       const s = getComputedStyle(el);
-      if (s.overflow === 'auto' || s.overflow === 'scroll' || s.overflowY === 'auto') return false;
+      if (s.display === 'inline' || s.display === 'contents') return false;
+      const clips = v => v === 'hidden' || v === 'clip';
+      const cut = clips(s.overflowX) || clips(s.overflowY) || s.textOverflow === 'ellipsis';
+      if (!cut) return false;
       return el.scrollWidth > el.clientWidth + 2 || el.scrollHeight > el.clientHeight + 2;
+    },
+    operable(el) {
+      if (el.closest('[hidden]')) return false;
+      for (let n = el; n; n = n.parentElement) if (n.inert === true) return false;
+      // While a modal dialog is open the rest of the document is inert by definition.
+      const modal = [...document.querySelectorAll('dialog[open]')].find(d => d.matches(':modal') || d.open);
+      if (modal && !modal.contains(el)) return false;
+      return true;
     },
     interactive() {
       return [...document.querySelectorAll('button, [href], input, select, summary, [tabindex], .card, .map-card')]
-        .filter(el => visible(el) && !el.disabled && !el.closest('[inert]') && !el.closest('[hidden]'));
+        .filter(el => visible(el) && !el.disabled && this.operable(el));
     }
   };
 })();`;
@@ -147,9 +165,20 @@ const SCREENS = {
     await page.waitForFunction(() => document.getElementById('loadout-dialog').open, null, { timeout: 300000 });
   },
   coach: async page => {
-    // The first-run coach is a live panel during a race; audit it where it appears.
-    await page.evaluate(() => { startOnboarding(true); });
-    await page.waitForFunction(() => !document.getElementById('coach').hidden, null, { timeout: 30000 });
+    // The coach only exists inside a race — it parks itself anywhere else — so audit it
+    // where a player actually meets it, by entering a real race through the real UI.
+    const settled = () => page.waitForFunction(() => typeof sceneCut === 'undefined' || !sceneCut.busy, null, { timeout: 300000 });
+    await page.evaluate(() => { try { localStorage.removeItem('zenflow-racer-v2'); } catch (_) {} delete saved.tutorial; });
+    await page.click('#title-start'); await settled();
+    await page.waitForFunction(() => raceSetup.step === 'character', null, { timeout: 300000 });
+    await page.evaluate(() => document.querySelector('#grid .card').click());
+    await page.waitForFunction(() => !document.getElementById('confirm-racer').disabled, null, { timeout: 300000 });
+    await page.click('#confirm-racer'); await settled();
+    await page.waitForFunction(() => raceSetup.step === 'map', null, { timeout: 300000 });
+    await page.click('[data-map="cherry"]'); await settled();
+    await page.waitForFunction(() => raceSetup.mapConfirmed && !document.getElementById('go').disabled, null, { timeout: 300000 });
+    await page.click('#go'); await settled();
+    await page.waitForFunction(() => !document.getElementById('coach').hidden, null, { timeout: 300000 });
   }
 };
 
@@ -162,12 +191,20 @@ async function audit(browser, { name, viewport, isMobile = false, reducedMotion,
   await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'load', timeout: 180000 });
   await page.waitForFunction(() => typeof game !== 'undefined' && game.state !== 'boot', null, { timeout: 240000 });
   if (zoom !== 1) await page.addStyleTag({ content: `html{font-size:${Math.round(16 * zoom)}px}` });
-  await SCREENS[screen](page);
-  await page.addScriptTag({ content: HELPERS });
-  await wait(500);
-
   const findings = [];
   const add = (check, detail) => findings.push({ profile: name, screen, check, detail });
+  try {
+    await SCREENS[screen](page);
+  } catch (error) {
+    // A screen the audit cannot even open is itself a finding, and the rest of the run
+    // still has value, so it is recorded rather than thrown.
+    add('unreachable', `could not open this screen: ${error.message.split('\n')[0]}`);
+    await page.screenshot({ path: path.join(OUT, `a11y-${name}-${screen}-unreachable.png`), timeout: 300000 }).catch(() => {});
+    await context.close();
+    return { findings, errors, viewport, motion: null, overflow: null };
+  }
+  await page.addScriptTag({ content: HELPERS });
+  await wait(500);
 
   // --- Keyboard-only reach: every visible control must be focusable by the keyboard. ---
   const unreachable = await page.evaluate(() => window.__a11y.interactive()
@@ -183,6 +220,10 @@ async function audit(browser, { name, viewport, isMobile = false, reducedMotion,
   for (const entry of tabOrder) if (entry.tabIndex < 0) add('keyboard-reach', `"${entry.label}" is removed from the tab order`);
 
   // --- Visible focus on every control. ---
+  // :focus-visible follows the browser's input modality. The audit drives the UI with the
+  // mouse to reach each screen, which leaves Chromium in pointer modality and hides the
+  // very indicator being measured, so switch to keyboard modality first.
+  await page.keyboard.press('Tab');
   const noRing = await page.evaluate(() => window.__a11y.interactive()
     .map(el => ({ label: window.__a11y.label(el), ring: window.__a11y.focusRing(el) }))
     .filter(r => r.ring.focused && r.ring.outline < 1 && !r.ring.shadow)
@@ -199,11 +240,11 @@ async function audit(browser, { name, viewport, isMobile = false, reducedMotion,
       const c = window.__a11y.contrast(el);
       if (!c) continue;
       const need = c.large ? large : body;
-      if (c.ratio < need) out.push({ label: window.__a11y.label(el), ratio: c.ratio, need, size: c.size, color: c.color });
+      if (c.ratio < need) out.push({ label: window.__a11y.label(el), ratio: c.ratio, need, size: c.size, color: c.color, against: c.against, box: c.box });
     }
     return out;
   }, { body: CONTRAST_BODY, large: CONTRAST_LARGE });
-  for (const c of contrast) add('contrast', `"${c.label}" is ${c.ratio}:1 (needs ${c.need}:1 at ${c.size}px)`);
+  for (const c of contrast) add('contrast', `"${c.label}" is ${c.ratio}:1 (needs ${c.need}:1 at ${c.size}px) — ${c.color} on ${c.against}, box ${c.box[0]}×${c.box[1]}`);
 
   // --- Text clipping. ---
   const clipped = await page.evaluate(() => [...document.querySelectorAll('button, .card, .map-card, #pick, .btn, kbd, .circuit-name, #selected-name')]
@@ -258,6 +299,9 @@ async function audit(browser, { name, viewport, isMobile = false, reducedMotion,
   const mute = await page.evaluate(() => {
     const button = document.getElementById('mutebtn');
     if (!button) return { missing: true };
+    // The mute control belongs to the race HUD, which the menu screens hold inert on
+    // purpose. Only check it where a player can actually reach it.
+    if (!window.__a11y.operable(button) || !window.__a11y.visible(button)) return { unreachable: true };
     const before = button.textContent;
     button.click();
     const after = button.textContent;
@@ -265,7 +309,9 @@ async function audit(browser, { name, viewport, isMobile = false, reducedMotion,
     return { before, after, restored: button.textContent };
   });
   if (mute.missing) add('mute', 'no mute control');
+  else if (mute.unreachable) { /* held inert with the rest of the race HUD */ }
   else if (mute.before === mute.after) add('mute', 'the mute control does not report its state');
+  else if (mute.restored !== mute.before) add('mute', 'muting twice does not restore the original state');
 
   // --- Reduced motion must actually reach the camera comfort factor. ---
   const motion = await page.evaluate(() => ({
@@ -294,7 +340,13 @@ const DEVICES = [
   { name: 'handset-landscape', viewport: { width: 844, height: 390 }, isMobile: true, screens: ['title', 'circuit', 'garage'] },
   { name: 'small-android-portrait', viewport: { width: 360, height: 640 }, isMobile: true, screens: ['title', 'circuit', 'garage', 'coach'] }
 ];
-const PROFILES = DEVICES.flatMap(device => device.screens.map(screen => ({ ...device, screen })));
+const ONLY_DEVICES = (option('devices', '') || '').split(',').map(v => v.trim()).filter(Boolean);
+const ONLY_SCREENS = (option('screens', '') || '').split(',').map(v => v.trim()).filter(Boolean);
+const PROFILES = DEVICES
+  .filter(device => !ONLY_DEVICES.length || ONLY_DEVICES.includes(device.name))
+  .flatMap(device => device.screens
+    .filter(screen => !ONLY_SCREENS.length || ONLY_SCREENS.includes(screen))
+    .map(screen => ({ ...device, screen })));
 
 (async () => {
   const { chromium } = loadPlaywright();

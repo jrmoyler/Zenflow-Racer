@@ -1,0 +1,5831 @@
+{
+ "generated": "2026-09-16T17:51:45.830Z",
+ "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "views": [
+  "front",
+  "rear",
+  "left",
+  "right",
+  "hero",
+  "cockpit",
+  "chase",
+  "drift",
+  "boost",
+  "victory",
+  "hit"
+ ],
+ "racers": [
+  {
+   "id": "zenflow",
+   "name": "ZenFlow",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 211.546,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 228,
+      "signature": 4132748409,
+      "nonBackgroundRatio": 0.77454
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.108,
+      "minLuminance": 27.0612,
+      "maxLuminance": 252.43439999999998,
+      "opaqueRatio": 1,
+      "distinctColors": 255,
+      "signature": 3735441763,
+      "nonBackgroundRatio": 0.77722
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 210.388,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 265,
+      "signature": 455921701,
+      "nonBackgroundRatio": 0.77671
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.864,
+      "minLuminance": 9.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 256,
+      "signature": 3657040525,
+      "nonBackgroundRatio": 0.77833
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 223.087,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 216,
+      "signature": 2459571638,
+      "nonBackgroundRatio": 0.99152
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 195.076,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 320,
+      "signature": 1037960366,
+      "nonBackgroundRatio": 0.98913
+     },
+     "structure": {
+      "triangles": 79018,
+      "drawCalls": 89,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.088,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 252.85959999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 273,
+      "signature": 3827229275,
+      "nonBackgroundRatio": 0.99213
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 223.405,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 227,
+      "signature": 2920464883,
+      "nonBackgroundRatio": 0.99133
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 223.327,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 217,
+      "signature": 564450506,
+      "nonBackgroundRatio": 0.99161
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.801,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 227,
+      "signature": 1154463871,
+      "nonBackgroundRatio": 0.99135
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 223.16,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 220,
+      "signature": 1978950924,
+      "nonBackgroundRatio": 0.99136
+     },
+     "structure": {
+      "triangles": 84378,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/zenflow.png"
+  },
+  {
+   "id": "collective",
+   "name": "The Collective",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 198.591,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 436,
+      "signature": 4086452600,
+      "nonBackgroundRatio": 0.78052
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 199.17,
+      "minLuminance": 26.6272,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 395,
+      "signature": 4189130565,
+      "nonBackgroundRatio": 0.78016
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.525,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 402,
+      "signature": 1387039653,
+      "nonBackgroundRatio": 0.77952
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.049,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 414,
+      "signature": 34843528,
+      "nonBackgroundRatio": 0.78171
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 213.541,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 374,
+      "signature": 3738929300,
+      "nonBackgroundRatio": 0.99541
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 165.273,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 648,
+      "signature": 2727776552,
+      "nonBackgroundRatio": 0.99555
+     },
+     "structure": {
+      "triangles": 81422,
+      "drawCalls": 85,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 193.69,
+      "minLuminance": 26.6272,
+      "maxLuminance": 253,
+      "opaqueRatio": 1,
+      "distinctColors": 450,
+      "signature": 1212316894,
+      "nonBackgroundRatio": 0.9909
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 213.617,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 402,
+      "signature": 132655252,
+      "nonBackgroundRatio": 0.99537
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 213.912,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 379,
+      "signature": 2216761971,
+      "nonBackgroundRatio": 0.99541
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 213.04,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 390,
+      "signature": 584571920,
+      "nonBackgroundRatio": 0.99538
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 213.694,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 386,
+      "signature": 583895375,
+      "nonBackgroundRatio": 0.99517
+     },
+     "structure": {
+      "triangles": 87070,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/collective.png"
+  },
+  {
+   "id": "hybrid",
+   "name": "Hybrid Living",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 210.261,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 268,
+      "signature": 2990113019,
+      "nonBackgroundRatio": 0.77004
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.674,
+      "minLuminance": 27.0612,
+      "maxLuminance": 251.50659999999996,
+      "opaqueRatio": 1,
+      "distinctColors": 310,
+      "signature": 1213535670,
+      "nonBackgroundRatio": 0.77861
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.837,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 313,
+      "signature": 1002874088,
+      "nonBackgroundRatio": 0.78106
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.461,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 294,
+      "signature": 1252388266,
+      "nonBackgroundRatio": 0.78233
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.471,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 247,
+      "signature": 2104116236,
+      "nonBackgroundRatio": 0.99189
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 190.267,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 373,
+      "signature": 2950520575,
+      "nonBackgroundRatio": 0.99005
+     },
+     "structure": {
+      "triangles": 80026,
+      "drawCalls": 86,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.072,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 251.85959999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 345,
+      "signature": 840535354,
+      "nonBackgroundRatio": 0.99448
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.76,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 266,
+      "signature": 3060540129,
+      "nonBackgroundRatio": 0.99204
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.757,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 256,
+      "signature": 4021055766,
+      "nonBackgroundRatio": 0.99239
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.167,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 256,
+      "signature": 2337033850,
+      "nonBackgroundRatio": 0.99217
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.532,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 248,
+      "signature": 916118252,
+      "nonBackgroundRatio": 0.99221
+     },
+     "structure": {
+      "triangles": 86442,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/hybrid.png"
+  },
+  {
+   "id": "nexus",
+   "name": "Nexus Labs",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 208.869,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 331,
+      "signature": 2502114767,
+      "nonBackgroundRatio": 0.78229
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.052,
+      "minLuminance": 27.0612,
+      "maxLuminance": 252.35299999999998,
+      "opaqueRatio": 1,
+      "distinctColors": 329,
+      "signature": 340939518,
+      "nonBackgroundRatio": 0.78448
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.083,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 324,
+      "signature": 1931009952,
+      "nonBackgroundRatio": 0.78098
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 208.52,
+      "minLuminance": 8.9438,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 318,
+      "signature": 4064513736,
+      "nonBackgroundRatio": 0.78244
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.943,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 303,
+      "signature": 3152723283,
+      "nonBackgroundRatio": 0.99624
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 193.79,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 435,
+      "signature": 1073905102,
+      "nonBackgroundRatio": 0.99849
+     },
+     "structure": {
+      "triangles": 85338,
+      "drawCalls": 82,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.485,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.21259999999998,
+      "opaqueRatio": 1,
+      "distinctColors": 360,
+      "signature": 1333626969,
+      "nonBackgroundRatio": 0.99671
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.85,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 305,
+      "signature": 1711388596,
+      "nonBackgroundRatio": 0.99609
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.208,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 300,
+      "signature": 967782807,
+      "nonBackgroundRatio": 0.99637
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.568,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 301,
+      "signature": 3621188638,
+      "nonBackgroundRatio": 0.99626
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.995,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 311,
+      "signature": 24631379,
+      "nonBackgroundRatio": 0.99616
+     },
+     "structure": {
+      "triangles": 90698,
+      "drawCalls": 92,
+      "meshes": 92,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/nexus.png"
+  },
+  {
+   "id": "kinetic",
+   "name": "Kinetic Edge",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.941,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 330,
+      "signature": 1144526290,
+      "nonBackgroundRatio": 0.77795
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.876,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 317,
+      "signature": 2450701962,
+      "nonBackgroundRatio": 0.7771
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.193,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 316,
+      "signature": 3348826534,
+      "nonBackgroundRatio": 0.78299
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.846,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 323,
+      "signature": 3546866266,
+      "nonBackgroundRatio": 0.78231
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.316,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 289,
+      "signature": 3614048010,
+      "nonBackgroundRatio": 0.99738
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 176.043,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 461,
+      "signature": 1250499691,
+      "nonBackgroundRatio": 0.99652
+     },
+     "structure": {
+      "triangles": 77886,
+      "drawCalls": 87,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 199.774,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 345,
+      "signature": 2666929777,
+      "nonBackgroundRatio": 0.99302
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.501,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 284,
+      "signature": 1990370221,
+      "nonBackgroundRatio": 0.99726
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.595,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 291,
+      "signature": 3527227207,
+      "nonBackgroundRatio": 0.99728
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.086,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 298,
+      "signature": 4049098033,
+      "nonBackgroundRatio": 0.99693
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.602,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 289,
+      "signature": 4194222513,
+      "nonBackgroundRatio": 0.99698
+     },
+     "structure": {
+      "triangles": 85070,
+      "drawCalls": 99,
+      "meshes": 99,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/kinetic.png"
+  },
+  {
+   "id": "juris",
+   "name": "Juris Guard",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.925,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 319,
+      "signature": 1220953800,
+      "nonBackgroundRatio": 0.78321
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.628,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 283,
+      "signature": 2357890919,
+      "nonBackgroundRatio": 0.78571
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.67,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 302,
+      "signature": 2226574328,
+      "nonBackgroundRatio": 0.78028
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.86,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.85559999999998,
+      "opaqueRatio": 1,
+      "distinctColors": 301,
+      "signature": 1385961709,
+      "nonBackgroundRatio": 0.78179
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.513,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 299,
+      "signature": 1111305572,
+      "nonBackgroundRatio": 0.99523
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 167.902,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 443,
+      "signature": 2115558713,
+      "nonBackgroundRatio": 0.99853
+     },
+     "structure": {
+      "triangles": 81018,
+      "drawCalls": 85,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 197.909,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.0682,
+      "opaqueRatio": 1,
+      "distinctColors": 314,
+      "signature": 3578303840,
+      "nonBackgroundRatio": 0.99755
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.705,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 305,
+      "signature": 733683931,
+      "nonBackgroundRatio": 0.99459
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.67,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 296,
+      "signature": 3377432273,
+      "nonBackgroundRatio": 0.99505
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.067,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 315,
+      "signature": 519112459,
+      "nonBackgroundRatio": 0.99518
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.545,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 295,
+      "signature": 2675170453,
+      "nonBackgroundRatio": 0.99515
+     },
+     "structure": {
+      "triangles": 86234,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/juris.png"
+  },
+  {
+   "id": "signal",
+   "name": "Signal Velocity",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.498,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 302,
+      "signature": 1394664464,
+      "nonBackgroundRatio": 0.77864
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.735,
+      "minLuminance": 27.0612,
+      "maxLuminance": 251.063,
+      "opaqueRatio": 1,
+      "distinctColors": 317,
+      "signature": 875971774,
+      "nonBackgroundRatio": 0.77929
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.611,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 317,
+      "signature": 3259780139,
+      "nonBackgroundRatio": 0.7855
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.875,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 318,
+      "signature": 3599447318,
+      "nonBackgroundRatio": 0.78674
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.08,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 260,
+      "signature": 307573676,
+      "nonBackgroundRatio": 0.99776
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 181.763,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 415,
+      "signature": 3637664541,
+      "nonBackgroundRatio": 0.99723
+     },
+     "structure": {
+      "triangles": 72476,
+      "drawCalls": 90,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 196.976,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 250.8504,
+      "opaqueRatio": 1,
+      "distinctColors": 359,
+      "signature": 1641463664,
+      "nonBackgroundRatio": 0.997
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.122,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 268,
+      "signature": 2301574135,
+      "nonBackgroundRatio": 0.99753
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.446,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 267,
+      "signature": 3564795795,
+      "nonBackgroundRatio": 0.99768
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.825,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 270,
+      "signature": 2065285067,
+      "nonBackgroundRatio": 0.99758
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.335,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 267,
+      "signature": 3850633664,
+      "nonBackgroundRatio": 0.99764
+     },
+     "structure": {
+      "triangles": 77740,
+      "drawCalls": 100,
+      "meshes": 100,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/signal.png"
+  },
+  {
+   "id": "loom",
+   "name": "Binary Loom",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 210.083,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 276,
+      "signature": 2336585291,
+      "nonBackgroundRatio": 0.77983
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.647,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 276,
+      "signature": 4213238210,
+      "nonBackgroundRatio": 0.7816
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.045,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 297,
+      "signature": 3558299805,
+      "nonBackgroundRatio": 0.78187
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.7,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 276,
+      "signature": 1461389873,
+      "nonBackgroundRatio": 0.77942
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.876,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 246,
+      "signature": 4123442097,
+      "nonBackgroundRatio": 0.9969
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 186.768,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 371,
+      "signature": 371297036,
+      "nonBackgroundRatio": 0.99771
+     },
+     "structure": {
+      "triangles": 80630,
+      "drawCalls": 86,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.365,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 298,
+      "signature": 3647825194,
+      "nonBackgroundRatio": 0.99668
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.047,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 250,
+      "signature": 1948313507,
+      "nonBackgroundRatio": 0.99695
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.276,
+      "minLuminance": 9.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 245,
+      "signature": 4010989692,
+      "nonBackgroundRatio": 0.99698
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.543,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 246,
+      "signature": 3224624561,
+      "nonBackgroundRatio": 0.99675
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.048,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 240,
+      "signature": 959123855,
+      "nonBackgroundRatio": 0.99675
+     },
+     "structure": {
+      "triangles": 85990,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/loom.png"
+  },
+  {
+   "id": "vector",
+   "name": "Vector Shift",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.8,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 225,
+      "signature": 3012107229,
+      "nonBackgroundRatio": 0.76887
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.27,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 226,
+      "signature": 477663414,
+      "nonBackgroundRatio": 0.74062
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.306,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 237,
+      "signature": 1956632115,
+      "nonBackgroundRatio": 0.77203
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.537,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 232,
+      "signature": 3877156910,
+      "nonBackgroundRatio": 0.76899
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.226,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 204,
+      "signature": 3582760460,
+      "nonBackgroundRatio": 0.98864
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 184.8,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 285,
+      "signature": 1308280177,
+      "nonBackgroundRatio": 0.97335
+     },
+     "structure": {
+      "triangles": 76124,
+      "drawCalls": 92,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.359,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 246,
+      "signature": 1695427046,
+      "nonBackgroundRatio": 0.94283
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.085,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 220,
+      "signature": 2435957792,
+      "nonBackgroundRatio": 0.9879
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.462,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 207,
+      "signature": 604815702,
+      "nonBackgroundRatio": 0.98834
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.015,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 203,
+      "signature": 3890584557,
+      "nonBackgroundRatio": 0.9884
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.373,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 202,
+      "signature": 294957943,
+      "nonBackgroundRatio": 0.98806
+     },
+     "structure": {
+      "triangles": 80860,
+      "drawCalls": 101,
+      "meshes": 101,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/vector.png"
+  },
+  {
+   "id": "aether",
+   "name": "Aether Link",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.065,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 413,
+      "signature": 2105377425,
+      "nonBackgroundRatio": 0.78322
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.051,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 384,
+      "signature": 767113529,
+      "nonBackgroundRatio": 0.78501
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.884,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 382,
+      "signature": 3874799741,
+      "nonBackgroundRatio": 0.78288
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.179,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 387,
+      "signature": 3383117769,
+      "nonBackgroundRatio": 0.78429
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.386,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 356,
+      "signature": 784808632,
+      "nonBackgroundRatio": 0.99681
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 169.099,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 556,
+      "signature": 2845931452,
+      "nonBackgroundRatio": 0.99816
+     },
+     "structure": {
+      "triangles": 75362,
+      "drawCalls": 84,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 195.802,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 253.2126,
+      "opaqueRatio": 1,
+      "distinctColors": 449,
+      "signature": 2836788672,
+      "nonBackgroundRatio": 0.9979
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.468,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 368,
+      "signature": 1189143527,
+      "nonBackgroundRatio": 0.99681
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.764,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 342,
+      "signature": 1189665028,
+      "nonBackgroundRatio": 0.99692
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.013,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 352,
+      "signature": 1646317609,
+      "nonBackgroundRatio": 0.99677
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.539,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 347,
+      "signature": 858548193,
+      "nonBackgroundRatio": 0.99678
+     },
+     "structure": {
+      "triangles": 81218,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/aether.png"
+  },
+  {
+   "id": "animus",
+   "name": "Animus Prime",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 213.223,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 250,
+      "signature": 197636616,
+      "nonBackgroundRatio": 0.77379
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.655,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.57479999999998,
+      "opaqueRatio": 1,
+      "distinctColors": 269,
+      "signature": 201398883,
+      "nonBackgroundRatio": 0.78275
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.873,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 274,
+      "signature": 1004418225,
+      "nonBackgroundRatio": 0.78107
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.205,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.7874,
+      "opaqueRatio": 1,
+      "distinctColors": 255,
+      "signature": 572045121,
+      "nonBackgroundRatio": 0.78255
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.788,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 219,
+      "signature": 2413012959,
+      "nonBackgroundRatio": 0.99275
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 195.918,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 334,
+      "signature": 3103482492,
+      "nonBackgroundRatio": 0.98967
+     },
+     "structure": {
+      "triangles": 87961,
+      "drawCalls": 87,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.901,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.7874,
+      "opaqueRatio": 1,
+      "distinctColors": 294,
+      "signature": 2434691601,
+      "nonBackgroundRatio": 0.99087
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.402,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 222,
+      "signature": 1886649335,
+      "nonBackgroundRatio": 0.99218
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.976,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 226,
+      "signature": 1045159648,
+      "nonBackgroundRatio": 0.99244
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.382,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 239,
+      "signature": 196113495,
+      "nonBackgroundRatio": 0.99254
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.882,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 227,
+      "signature": 1542492986,
+      "nonBackgroundRatio": 0.99239
+     },
+     "structure": {
+      "triangles": 92793,
+      "drawCalls": 97,
+      "meshes": 97,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/animus.png"
+  },
+  {
+   "id": "helix",
+   "name": "Vital Helix",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.219,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 390,
+      "signature": 1003366030,
+      "nonBackgroundRatio": 0.7762
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.704,
+      "minLuminance": 27.0612,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 354,
+      "signature": 484646699,
+      "nonBackgroundRatio": 0.77825
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.897,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 365,
+      "signature": 2888885639,
+      "nonBackgroundRatio": 0.77902
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.825,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.92779999999996,
+      "opaqueRatio": 1,
+      "distinctColors": 343,
+      "signature": 2645624064,
+      "nonBackgroundRatio": 0.77992
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.878,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 333,
+      "signature": 4022962695,
+      "nonBackgroundRatio": 0.99444
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 189.724,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 533,
+      "signature": 1364755096,
+      "nonBackgroundRatio": 0.99212
+     },
+     "structure": {
+      "triangles": 82166,
+      "drawCalls": 84,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.992,
+      "minLuminance": 28.848599999999998,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 396,
+      "signature": 1429536157,
+      "nonBackgroundRatio": 0.99447
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.879,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 332,
+      "signature": 438074939,
+      "nonBackgroundRatio": 0.99421
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.218,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 330,
+      "signature": 492295697,
+      "nonBackgroundRatio": 0.99475
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.47,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 330,
+      "signature": 1595914054,
+      "nonBackgroundRatio": 0.99412
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 220.003,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 336,
+      "signature": 2167306654,
+      "nonBackgroundRatio": 0.99431
+     },
+     "structure": {
+      "triangles": 87526,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/helix.png"
+  },
+  {
+   "id": "ledger",
+   "name": "Quantum Ledger",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.783,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 307,
+      "signature": 3194129178,
+      "nonBackgroundRatio": 0.78057
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.676,
+      "minLuminance": 16.4784,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 287,
+      "signature": 936304053,
+      "nonBackgroundRatio": 0.7824
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.205,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 287,
+      "signature": 1465792139,
+      "nonBackgroundRatio": 0.78075
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.622,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 283,
+      "signature": 3729945030,
+      "nonBackgroundRatio": 0.78068
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.157,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 251,
+      "signature": 3074772731,
+      "nonBackgroundRatio": 0.99547
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 178.944,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 368,
+      "signature": 1825156840,
+      "nonBackgroundRatio": 0.99732
+     },
+     "structure": {
+      "triangles": 49989,
+      "drawCalls": 100,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.308,
+      "minLuminance": 21.4062,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 319,
+      "signature": 858204883,
+      "nonBackgroundRatio": 0.99524
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.123,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 272,
+      "signature": 188017336,
+      "nonBackgroundRatio": 0.99529
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.469,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 256,
+      "signature": 2227933175,
+      "nonBackgroundRatio": 0.99537
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.777,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 253,
+      "signature": 2073959255,
+      "nonBackgroundRatio": 0.99519
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 218.329,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 254,
+      "signature": 3809087043,
+      "nonBackgroundRatio": 0.99536
+     },
+     "structure": {
+      "triangles": 54361,
+      "drawCalls": 125,
+      "meshes": 125,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/ledger.png"
+  },
+  {
+   "id": "terra",
+   "name": "Terra Axis",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.567,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 248,
+      "signature": 1771984458,
+      "nonBackgroundRatio": 0.76884
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.39,
+      "minLuminance": 24.631999999999998,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 283,
+      "signature": 1782110404,
+      "nonBackgroundRatio": 0.77459
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.38,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 299,
+      "signature": 3679976157,
+      "nonBackgroundRatio": 0.77041
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 202.793,
+      "minLuminance": 9.2286,
+      "maxLuminance": 254.7874,
+      "opaqueRatio": 1,
+      "distinctColors": 303,
+      "signature": 3822584439,
+      "nonBackgroundRatio": 0.77227
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.998,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 240,
+      "signature": 416464285,
+      "nonBackgroundRatio": 0.98698
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 174.173,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 332,
+      "signature": 388320624,
+      "nonBackgroundRatio": 0.97787
+     },
+     "structure": {
+      "triangles": 50700,
+      "drawCalls": 86,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 196.507,
+      "minLuminance": 26.848599999999998,
+      "maxLuminance": 254.0722,
+      "opaqueRatio": 1,
+      "distinctColors": 307,
+      "signature": 957512587,
+      "nonBackgroundRatio": 0.98502
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.972,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 252,
+      "signature": 3730907079,
+      "nonBackgroundRatio": 0.98636
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.345,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 254,
+      "signature": 3482882235,
+      "nonBackgroundRatio": 0.98692
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.52,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 249,
+      "signature": 455130134,
+      "nonBackgroundRatio": 0.98701
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.167,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 250,
+      "signature": 3317986703,
+      "nonBackgroundRatio": 0.98674
+     },
+     "structure": {
+      "triangles": 54428,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/terra.png"
+  },
+  {
+   "id": "obsidian",
+   "name": "Obsidian Arc",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.165,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 400,
+      "signature": 2242000459,
+      "nonBackgroundRatio": 0.78163
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.723,
+      "minLuminance": 16.4784,
+      "maxLuminance": 253.28079999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 354,
+      "signature": 3195754577,
+      "nonBackgroundRatio": 0.78317
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.296,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 354,
+      "signature": 3144017093,
+      "nonBackgroundRatio": 0.78566
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.592,
+      "minLuminance": 9.9438,
+      "maxLuminance": 254.0722,
+      "opaqueRatio": 1,
+      "distinctColors": 371,
+      "signature": 2343187558,
+      "nonBackgroundRatio": 0.78696
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.388,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 348,
+      "signature": 381994205,
+      "nonBackgroundRatio": 0.99762
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 166.87,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 592,
+      "signature": 1035518795,
+      "nonBackgroundRatio": 0.99835
+     },
+     "structure": {
+      "triangles": 50842,
+      "drawCalls": 88,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 196.425,
+      "minLuminance": 21.4062,
+      "maxLuminance": 251.63379999999998,
+      "opaqueRatio": 1,
+      "distinctColors": 405,
+      "signature": 2638966243,
+      "nonBackgroundRatio": 0.99784
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.388,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 361,
+      "signature": 1325080690,
+      "nonBackgroundRatio": 0.99752
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.746,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 362,
+      "signature": 4063546641,
+      "nonBackgroundRatio": 0.99759
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.126,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 364,
+      "signature": 1361511256,
+      "nonBackgroundRatio": 0.99746
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.628,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 340,
+      "signature": 2097695386,
+      "nonBackgroundRatio": 0.99746
+     },
+     "structure": {
+      "triangles": 54788,
+      "drawCalls": 98,
+      "meshes": 98,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/obsidian.png"
+  },
+  {
+   "id": "civic",
+   "name": "Civic Core",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 217.272,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 184,
+      "signature": 2116535330,
+      "nonBackgroundRatio": 0.7365
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 210.181,
+      "minLuminance": 16.4784,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 226,
+      "signature": 2364326744,
+      "nonBackgroundRatio": 0.74067
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 212.885,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 211,
+      "signature": 945136274,
+      "nonBackgroundRatio": 0.73652
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 212.439,
+      "minLuminance": 8.9438,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 204,
+      "signature": 2928003242,
+      "nonBackgroundRatio": 0.73816
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 225.362,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 178,
+      "signature": 1934705076,
+      "nonBackgroundRatio": 0.95833
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.902,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 249,
+      "signature": 4098262893,
+      "nonBackgroundRatio": 0.88552
+     },
+     "structure": {
+      "triangles": 51027,
+      "drawCalls": 85,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 209.971,
+      "minLuminance": 21.4062,
+      "maxLuminance": 254.0722,
+      "opaqueRatio": 1,
+      "distinctColors": 225,
+      "signature": 2354659568,
+      "nonBackgroundRatio": 0.93444
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 224.851,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 176,
+      "signature": 23249833,
+      "nonBackgroundRatio": 0.96061
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 225.415,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 168,
+      "signature": 2852066540,
+      "nonBackgroundRatio": 0.95951
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 224.978,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 174,
+      "signature": 40171936,
+      "nonBackgroundRatio": 0.95846
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 225.266,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 181,
+      "signature": 2417379023,
+      "nonBackgroundRatio": 0.95916
+     },
+     "structure": {
+      "triangles": 54373,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/civic.png"
+  },
+  {
+   "id": "cognara",
+   "name": "Cognara Mind",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.627,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 330,
+      "signature": 3070345616,
+      "nonBackgroundRatio": 0.78138
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 200.832,
+      "minLuminance": 16.4784,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 349,
+      "signature": 1050007496,
+      "nonBackgroundRatio": 0.7831
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.868,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 338,
+      "signature": 1996126698,
+      "nonBackgroundRatio": 0.78525
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 201.032,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.7874,
+      "opaqueRatio": 1,
+      "distinctColors": 345,
+      "signature": 2402414681,
+      "nonBackgroundRatio": 0.78652
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.182,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 280,
+      "signature": 1512573981,
+      "nonBackgroundRatio": 0.99649
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 171.546,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 438,
+      "signature": 602779167,
+      "nonBackgroundRatio": 0.9984
+     },
+     "structure": {
+      "triangles": 50188,
+      "drawCalls": 83,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 195.754,
+      "minLuminance": 21.4062,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 373,
+      "signature": 92902108,
+      "nonBackgroundRatio": 0.99725
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.265,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 300,
+      "signature": 2735778160,
+      "nonBackgroundRatio": 0.99643
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.575,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 279,
+      "signature": 1333305414,
+      "nonBackgroundRatio": 0.99656
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 215.803,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 276,
+      "signature": 3079759502,
+      "nonBackgroundRatio": 0.99656
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 216.302,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 285,
+      "signature": 2806062475,
+      "nonBackgroundRatio": 0.99658
+     },
+     "structure": {
+      "triangles": 54908,
+      "drawCalls": 95,
+      "meshes": 95,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/cognara.png"
+  },
+  {
+   "id": "gaia",
+   "name": "Gaia Synthesis",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 208.379,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.7874,
+      "opaqueRatio": 1,
+      "distinctColors": 328,
+      "signature": 2095830153,
+      "nonBackgroundRatio": 0.78121
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.237,
+      "minLuminance": 16.4784,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 330,
+      "signature": 412854229,
+      "nonBackgroundRatio": 0.7837
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.187,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.0722,
+      "opaqueRatio": 1,
+      "distinctColors": 351,
+      "signature": 3805157459,
+      "nonBackgroundRatio": 0.78245
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.288,
+      "minLuminance": 9.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 336,
+      "signature": 2766090517,
+      "nonBackgroundRatio": 0.7842
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.67,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 290,
+      "signature": 2844449835,
+      "nonBackgroundRatio": 0.99607
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 189.056,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 471,
+      "signature": 1964678672,
+      "nonBackgroundRatio": 0.99696
+     },
+     "structure": {
+      "triangles": 50585,
+      "drawCalls": 85,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 204.187,
+      "minLuminance": 21.4062,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 357,
+      "signature": 3737623502,
+      "nonBackgroundRatio": 0.99601
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.511,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 308,
+      "signature": 2707367974,
+      "nonBackgroundRatio": 0.99583
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.97,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 311,
+      "signature": 1167476179,
+      "nonBackgroundRatio": 0.99578
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.274,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 310,
+      "signature": 4232104978,
+      "nonBackgroundRatio": 0.99606
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 219.709,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 298,
+      "signature": 832381552,
+      "nonBackgroundRatio": 0.996
+     },
+     "structure": {
+      "triangles": 54887,
+      "drawCalls": 96,
+      "meshes": 96,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/gaia.png"
+  },
+  {
+   "id": "nomad",
+   "name": "Nomad Nexus",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 211.99,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 374,
+      "signature": 2185027748,
+      "nonBackgroundRatio": 0.78259
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.181,
+      "minLuminance": 13.2968,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 371,
+      "signature": 1712185354,
+      "nonBackgroundRatio": 0.78413
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 208.968,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 363,
+      "signature": 1843076519,
+      "nonBackgroundRatio": 0.78458
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 208.475,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 349,
+      "signature": 1654631422,
+      "nonBackgroundRatio": 0.7858
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.234,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 303,
+      "signature": 1081705572,
+      "nonBackgroundRatio": 0.99671
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 197.446,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 495,
+      "signature": 1044646514,
+      "nonBackgroundRatio": 0.99945
+     },
+     "structure": {
+      "triangles": 51592,
+      "drawCalls": 143,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 203.779,
+      "minLuminance": 13.2968,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 417,
+      "signature": 1116258345,
+      "nonBackgroundRatio": 0.998
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.209,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 306,
+      "signature": 1136100927,
+      "nonBackgroundRatio": 0.99673
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.406,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 304,
+      "signature": 1867992195,
+      "nonBackgroundRatio": 0.99673
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.825,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 306,
+      "signature": 1692423742,
+      "nonBackgroundRatio": 0.99672
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 222.076,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 307,
+      "signature": 1851038637,
+      "nonBackgroundRatio": 0.99675
+     },
+     "structure": {
+      "triangles": 54498,
+      "drawCalls": 169,
+      "meshes": 169,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/nomad.png"
+  },
+  {
+   "id": "eon",
+   "name": "Eon Core",
+   "views": {
+    "front": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 211.883,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 267,
+      "signature": 1818665190,
+      "nonBackgroundRatio": 0.76671
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "rear": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.836,
+      "minLuminance": 16.4784,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 274,
+      "signature": 1310972233,
+      "nonBackgroundRatio": 0.77902
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "left": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 207.362,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 281,
+      "signature": 1012604877,
+      "nonBackgroundRatio": 0.77787
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "right": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 206.746,
+      "minLuminance": 9.1564,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 277,
+      "signature": 4157448554,
+      "nonBackgroundRatio": 0.7786
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hero": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.658,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 227,
+      "signature": 2200855947,
+      "nonBackgroundRatio": 0.98881
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "cockpit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 192.468,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 329,
+      "signature": 1222994717,
+      "nonBackgroundRatio": 0.98195
+     },
+     "structure": {
+      "triangles": 50432,
+      "drawCalls": 83,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "chase": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 205.613,
+      "minLuminance": 21.4062,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 288,
+      "signature": 2242011102,
+      "nonBackgroundRatio": 0.99077
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "drift": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.364,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 242,
+      "signature": 2039630756,
+      "nonBackgroundRatio": 0.98933
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "boost": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.868,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 224,
+      "signature": 944517957,
+      "nonBackgroundRatio": 0.98934
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "victory": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.255,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 239,
+      "signature": 2678958996,
+      "nonBackgroundRatio": 0.98898
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    },
+    "hit": {
+     "pixels": {
+      "width": 420,
+      "height": 300,
+      "meanLuminance": 221.64,
+      "minLuminance": 8.2286,
+      "maxLuminance": 254.99999999999997,
+      "opaqueRatio": 1,
+      "distinctColors": 243,
+      "signature": 480189008,
+      "nonBackgroundRatio": 0.98966
+     },
+     "structure": {
+      "triangles": 54870,
+      "drawCalls": 94,
+      "meshes": 94,
+      "handGap": 0,
+      "wheels": {
+       "count": 4,
+       "heightSpread": 0,
+       "trackSpread": 0
+      },
+      "issues": []
+     }
+    }
+   },
+   "issues": [],
+   "sheet": "racers/eon.png"
+  }
+ ],
+ "circuits": [
+  {
+   "map": "cherry",
+   "view": "extension-1",
+   "landmark": {
+    "name": "Lantern Sweep",
+    "u": 0.16650755923573127
+   },
+   "errors": []
+  },
+  {
+   "map": "cherry",
+   "view": "extension-2",
+   "landmark": {
+    "name": "Sky Temple Hairpin",
+    "u": 0.27264463620178014
+   },
+   "errors": []
+  },
+  {
+   "map": "cherry",
+   "view": "extension-3",
+   "landmark": {
+    "name": "Cloudfall Bridge",
+    "u": 0.42707990182786876
+   },
+   "errors": []
+  },
+  {
+   "map": "stormforge",
+   "view": "extension-1",
+   "landmark": {
+    "name": "Turbine Chicane",
+    "u": 0.13661319150048623
+   },
+   "errors": []
+  },
+  {
+   "map": "stormforge",
+   "view": "extension-2",
+   "landmark": {
+    "name": "Foundry Drop",
+    "u": 0.2179690349552261
+   },
+   "errors": []
+  },
+  {
+   "map": "stormforge",
+   "view": "extension-3",
+   "landmark": {
+    "name": "Reactor Exit",
+    "u": 0.39769420899716873
+   },
+   "errors": []
+  },
+  {
+   "map": "canopy",
+   "view": "extension-1",
+   "landmark": {
+    "name": "Cliffside Sweep",
+    "u": 0.14210755116036514
+   },
+   "errors": []
+  },
+  {
+   "map": "canopy",
+   "view": "extension-2",
+   "landmark": {
+    "name": "Canopy Descent",
+    "u": 0.2781111894026808
+   },
+   "errors": []
+  },
+  {
+   "map": "canopy",
+   "view": "extension-3",
+   "landmark": {
+    "name": "Sea Bridge",
+    "u": 0.41418703389631006
+   },
+   "errors": []
+  }
+ ],
+ "race": [
+  {
+   "map": "cherry",
+   "state": {
+    "racers": 12,
+    "laps": 3,
+    "state": "race",
+    "speed": 28.1,
+    "lap": 1,
+    "shadowMap": true,
+    "fallback": false
+   },
+   "errors": []
+  },
+  {
+   "map": "stormforge",
+   "state": {
+    "racers": 12,
+    "laps": 3,
+    "state": "race",
+    "speed": 32.51,
+    "lap": 1,
+    "shadowMap": true,
+    "fallback": false
+   },
+   "errors": []
+  },
+  {
+   "map": "canopy",
+   "state": {
+    "racers": 12,
+    "laps": 3,
+    "state": "race",
+    "speed": 34.88,
+    "lap": 1,
+    "shadowMap": true,
+    "fallback": false
+   },
+   "errors": []
+  }
+ ],
+ "screens": {
+  "garage": {
+   "wallet": 0,
+   "cards": 25,
+   "locked": 24,
+   "previewRenderer": "canvas present"
+  },
+  "results": {
+   "resultsVisible": true,
+   "rewardSummary": "Saving race rewards\u2026"
+  }
+ },
+ "mobile": {
+  "emulatedHandset": {
+   "mobileFx": true,
+   "lowFx": false,
+   "fallback": false,
+   "shadowMap": false,
+   "pixelRatio": 1.15
+  },
+  "lowFx": {
+   "lowFx": true,
+   "pixelRatio": 0.7,
+   "shadowMap": false
+  }
+ },
+ "consoleErrors": [],
+ "issueCount": 0
+}

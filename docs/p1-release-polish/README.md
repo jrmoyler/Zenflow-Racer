@@ -220,19 +220,47 @@ ordered gates, progress per physical step stays bounded to 0.82–1.18, and
 ## P1.10 Accessibility / platform — `tools/p1-accessibility-audit.cjs`
 
 A real-browser audit over six device profiles × up to seven screens (title, race settings,
-character select, circuit select, Garage, add-on loadout, first-run coach), measuring:
-keyboard reach, visible focus, WCAG AA text contrast against the composited backdrop,
-200% text scaling, horizontal overflow, 44px touch targets, safe-area insets, both
-orientations, text clipping, hover-only affordances, mute state reporting, and whether
-reduced motion actually reaches the camera.
+character select, circuit select, Garage, add-on loadout, first-run coach) — **30 audited
+combinations** — measuring keyboard reach, visible focus, WCAG AA text contrast against the
+composited backdrop, 200% text scaling, horizontal overflow, 44px touch targets, safe-area
+insets, both orientations, text clipping, hover-only affordances, mute state reporting, and
+whether reduced motion actually reaches the camera.
 
-The first run found one real class of defect, 48 instances of it: interactive elements had
-`:hover` emphasis with no `:focus-visible` equivalent, so a keyboard user got an outline
-but not the same emphasis on buttons, map cards, the preview navigation, the menu tools and
-the loadout launcher. Fixed in `polish.css`, `presentation.css` and `addon-ui.css` by
-mirroring each hover rule onto focus.
+**Final result: 0 findings and 0 console errors across all 30.** Full data in
+`accessibility-report.json`, with a screenshot per profile and screen.
 
-Results are in `accessibility-report.json`, with a screenshot per profile and screen.
+Getting there took two rounds, and both are worth recording.
+
+**Round one — the title screen, six profiles.** One class of defect, 48 instances:
+interactive elements had `:hover` emphasis with no `:focus-visible` equivalent, so a
+keyboard user got an outline but not the same emphasis on buttons, map cards, the preview
+navigation, the menu tools and the loadout launcher. Fixed across `polish.css`,
+`presentation.css` and `addon-ui.css`.
+
+**Round two — every screen, not just the title.** 85 raw findings. Four of them were real:
+
+| Defect | Measured | Fix |
+|---|---|---|
+| Pause-panel key hints unreadable | 3.57:1 against a 4.5:1 requirement | Two stale dark-chip overrides in `polish.css` beat the current light-panel treatment on specificity, leaving near-white text on a translucent chip over paper. They now match the panel. The settings hint chips had the same defect, unseen only because that disclosure starts collapsed. |
+| The coach's Skip button unreadable | 1.25:1 — `rgb(25,32,43)` on `rgb(40,49,62)` | It was relying on a `.btn.ghost` cascade that resolved to dark-on-dark. It now carries an explicit light chip scoped to the panel. |
+| The coach's Skip button too small to tap | 88×36px on a 360×640 Android | Raised to a 44px minimum at every size, including short landscape. |
+| Equipped add-on choices | hover emphasis, no focus equivalent | Mirrored onto `:focus-visible`. |
+
+The remaining 81 were the audit measuring the wrong thing. Each check was corrected rather
+than the game, because in each case the game was already right:
+
+- Elements behind an open modal dialog, and the race HUD the menus hold `inert` on purpose,
+  were counted as unreachable controls. Both are correct browser and product behaviour.
+- `:focus-visible` follows the browser's input modality, and the audit reaches each screen
+  by *clicking*, which left Chromium in pointer modality and hid the very indicator being
+  measured. It now switches to keyboard modality before measuring.
+- Mute was being exercised on screens where it is deliberately inert or hidden.
+- Overflow was reported as clipping even where the box does not clip and the text is fully
+  readable, and inline boxes report `clientWidth` 0 by definition so they always looked
+  overflowed.
+
+The audit also drives a real race to reach the coach panel (it parks itself anywhere else),
+and records a screen it cannot open as a finding instead of ending the run.
 
 **Not claimed:** screen-reader output on real assistive technology, and anything requiring
 a physical device.

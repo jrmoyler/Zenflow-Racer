@@ -1,0 +1,312 @@
+{
+ "generated": "2026-09-16T19:35:09.974Z",
+ "thresholds": {
+  "CONTRAST_BODY": 4.5,
+  "CONTRAST_LARGE": 3,
+  "TOUCH_TARGET": 44
+ },
+ "profiles": [
+  {
+   "name": "desktop",
+   "screen": "title",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop",
+   "screen": "settings",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop",
+   "screen": "character",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop",
+   "screen": "circuit",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop",
+   "screen": "garage",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop",
+   "screen": "loadout",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop",
+   "screen": "coach",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "title",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "settings",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "character",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "circuit",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "garage",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "loadout",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-200pct-text",
+   "screen": "coach",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-reduced-motion",
+   "screen": "title",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "desktop-reduced-motion",
+   "screen": "coach",
+   "viewport": {
+    "width": 1440,
+    "height": 900
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "title",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "settings",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "character",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "circuit",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "garage",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "loadout",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-portrait",
+   "screen": "coach",
+   "viewport": {
+    "width": 390,
+    "height": 844
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-landscape",
+   "screen": "title",
+   "viewport": {
+    "width": 844,
+    "height": 390
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-landscape",
+   "screen": "circuit",
+   "viewport": {
+    "width": 844,
+    "height": 390
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "handset-landscape",
+   "screen": "garage",
+   "viewport": {
+    "width": 844,
+    "height": 390
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "small-android-portrait",
+   "screen": "title",
+   "viewport": {
+    "width": 360,
+    "height": 640
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "small-android-portrait",
+   "screen": "circuit",
+   "viewport": {
+    "width": 360,
+    "height": 640
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "small-android-portrait",
+   "screen": "garage",
+   "viewport": {
+    "width": 360,
+    "height": 640
+   },
+   "findings": 0,
+   "errors": 0
+  },
+  {
+   "name": "small-android-portrait",
+   "screen": "coach",
+   "viewport": {
+    "width": 360,
+    "height": 640
+   },
+   "findings": 0,
+   "errors": 0
+  }
+ ],
+ "findings": [],
+ "consoleErrors": []
+}
