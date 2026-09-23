@@ -4,7 +4,9 @@
    Scene and bloom buffers remain linear HDR until that final display transform. */
 let raceComposer=null,raceBloom=null,raceGrade=null,racePostAttempted=false;
 const RACE_POST_ZERO={bloom:0,vignette:0,chroma:0,hit:0,flash:0};
-const RACE_BLOOM_BASE={strength:.3,radius:.4,threshold:.9};
+// Only HDR light blooms: power effects, lamps and emissives. Lit scenery tops out below 1, so
+// pale circuits stay crisp instead of hazing over whenever a boost or power fires.
+const RACE_BLOOM_BASE={strength:.42,radius:.42,threshold:1};
 const RaceGradeShader={
   uniforms:{tDiffuse:{value:null},vignette:{value:0},chroma:{value:0},hit:{value:0},flash:{value:0},aspect:{value:1.5},toneMappingExposure:{value:1}},
   vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -51,7 +53,7 @@ function renderRaceScene() {
   if (raceComposer) {
     const post=(typeof raceFX!=='undefined'&&raceFX&&raceFX.post)||RACE_POST_ZERO;
     const b=post.bloom>0?Math.min(1,post.bloom):0;
-    raceBloom.strength=RACE_BLOOM_BASE.strength+b*.28;raceBloom.radius=RACE_BLOOM_BASE.radius+b*.1;raceBloom.threshold=RACE_BLOOM_BASE.threshold-b*.1;
+    raceBloom.strength=RACE_BLOOM_BASE.strength+b*.4;raceBloom.radius=RACE_BLOOM_BASE.radius+b*.1;raceBloom.threshold=RACE_BLOOM_BASE.threshold;
     const u=raceGrade.uniforms;u.vignette.value=post.vignette>0?Math.min(1,post.vignette):0;u.chroma.value=post.chroma>0?Math.min(1,post.chroma):0;u.hit.value=post.hit>0?Math.min(1,post.hit):0;u.flash.value=post.flash>0?Math.min(1,post.flash):0;u.aspect.value=innerHeight>0?innerWidth/innerHeight:1.5;
     u.toneMappingExposure.value=renderer.toneMappingExposure;
     const toneMapping=renderer.toneMapping,encoding=renderer.outputEncoding;

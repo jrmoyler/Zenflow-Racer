@@ -346,13 +346,15 @@ float s=line*seg*smoothstep(start,start+.32,r)*intensity*.38*(.35+.65*rnd2);vec3
     init(){
       if(!hostOK())return false;
       if(S){resetState();return true;}
+      if(typeof powerVFX!=='undefined')powerVFX.init();
       try{build();resetState();}catch(e){if(S){try{teardown();}catch(_){}}S=null;if(typeof console!=='undefined')console.warn('raceFX disabled:',e&&e.message);return false;}
       return true;
     },
-    reset(){if(S)resetState();},
-    clear(){if(!S)return;teardown();},
+    reset(){if(typeof powerVFX!=='undefined')powerVFX.clear();if(S)resetState();},
+    clear(){if(typeof powerVFX!=='undefined')powerVFX.clear();if(!S)return;teardown();},
     dispose(){api.clear();},
     update(dt,player){
+      if(typeof powerVFX!=='undefined')powerVFX.update(Math.max(0,Math.min(.1,+dt||0)));
       if(!S)return;dt=Math.max(0,Math.min(.1,+dt||0));S.time+=dt;S.uTime.value=S.time;
       if(typeof innerHeight==='number')S.uScale.value=innerHeight*.5;if(typeof innerWidth==='number'&&typeof innerHeight==='number'&&innerHeight>0)S.speed.material.uniforms.aspect.value=innerWidth/innerHeight;
       // racer-attached pieces: flames and ribbons
@@ -417,11 +419,13 @@ float s=line*seg*smoothstep(start,start+.32,r)*intensity*.38*(.35+.65*rnd2);vec3
       puff(S.p,SMOKE,S.low?4:7,2.2,3.6,.55,1.1,1.2,1.4);
       S.s.set(.4,.4,.4);S.s2.set(2.6,2.6,2.6);S.q.identity();S.shells.spawn(S.p,S.q,S.s,S.s2,.28,0xffb070,1.6);
       if(r.isPlayer){S.hit=1;S.flash=Math.max(S.flash,.5);hudClass('fx-hit',.4);}
+      if(typeof powerVFX!=='undefined'){const id=String(source||'').replace(/^addon-/,''),palette=typeof ADDON_FX_COLORS!=='undefined'?ADDON_FX_COLORS:{};powerVFX.impact(r,palette[id]||(typeof referencePowerColors!=='undefined'&&referencePowerColors[{sonic:'signal',reflection:'juris'}[id]||id])||'#ff9a55',1.15);}
     },
     onShieldBlock(r){
       if(!S||!r)return;kartPos(r,.9,S.p);S.s.set(2.2,2.2,2.2);S.s2.set(3.6,3.6,3.6);S.q.identity();S.shells.spawn(S.p,S.q,S.s,S.s2,.5,SHIELD_COLOR,1.1);
       kartPos(r,.3,S.p);groundRing(r.u||0,S.p,1.5,5,.4,SHIELD_COLOR,1.2);sparks(S.p,S.low?6:12,SHIELD_COLOR,8,6,1.2,.5,.8);
       if(r.isPlayer)S.flash=Math.max(S.flash,.3);
+      if(typeof powerVFX!=='undefined')powerVFX.impact(r,'#7ff5e4',.8);
     },
     onWall(r,side){
       if(!S||!r)return;const sg=side<0?-1:1,W=trackW()/2,u=r.u||0;trackPoint(u,sg*(W+.28),.55,S.p);trackTan(u,S.t);if(S.t.lengthSq()<1e-6)S.t.set(0,0,-1);trackRight(u,S.rt);if(S.rt.lengthSq()<1e-6)S.rt.set(sg,0,0);
@@ -454,7 +458,8 @@ float s=line*seg*smoothstep(start,start+.32,r)*intensity*.38*(.35+.65*rnd2);vec3
     onSpecial(r,kind){
       if(!S||!r)return;const hex=powerColor(r,kind);S.color.set(hex);const h=S.color.getHex();kartPos(r,.3,S.p);groundRing(r.u||0,S.p,.8,9.5,.62,h,1.1);
       kartPos(r,.8,S.p2);S.q.identity();S.s.set(.6,.6,.6);S.s2.set(3.2,3.2,3.2);S.shells.spawn(S.p2,S.q,S.s,S.s2,.35,h,1.4);sparks(S.p2,S.low?6:12,h,7,6,1,.55,.9);
-      if(r.isPlayer)S.flash=Math.max(S.flash,.22);
+      if(r.isPlayer)S.flash=Math.max(S.flash,.08);
+      if(typeof powerVFX!=='undefined'&&!/-pulse$/.test(kind||''))powerVFX.cast(r,hex);
     },
   };
   return api;

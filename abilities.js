@@ -47,6 +47,7 @@ function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,
  const fresh=!(r.slow>0);r.slow=Math.max(r.slow||0,duration);
  // Being snared is a race-changing event; the driver hears about it once per
  // effect rather than on every step of a sustained field.
+ if(fresh&&typeof powerVFX!=='undefined')powerVFX.touch(r,(attacker&&typeof referencePowerColors!=='undefined'&&referencePowerColors[attacker.div?.id])||'#9ad7ff');
  if(fresh&&r.isPlayer&&typeof setToast==='function')setToast('SNARED','',(attacker&&attacker!==r&&attacker.div?attacker.div.name.toUpperCase()+' FIELD':'HOSTILE FIELD'),2);
  return true;}
 function useSpecial(r){

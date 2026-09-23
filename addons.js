@@ -109,6 +109,7 @@ function useAddon(r){
  if(!a||game.state!=='race'||r.finished||r.vault>0||r.spin>0||r.addonCooldown>0)return false;
  r.addonCooldown=a.cooldown*(1-(Math.min(3,r.addonLevel||1)-1)*.02);r.addonsUsed=(r.addonsUsed||0)+1;
  if(r.isPlayer&&typeof setToast==='function'){setToast(a.name.toUpperCase(),'teal');if(typeof SFX!=='undefined')SFX.ui();}
+ if(typeof powerVFX!=='undefined'&&typeof ADDON_FX_COLORS!=='undefined')powerVFX.cast(r,ADDON_FX_COLORS[a.id]||'#ffffff',{scale:.85});
  switch(a.id){
  case 'ward':r.shield=Math.max(r.shield||0,6);addonZone(a.id,r,-5,6,{radius:4});addonBuff(r,1);break;
  case 'acid':addonAimedZone(a.id,r,24,5,{radius:5.5,arm:.35});break;
