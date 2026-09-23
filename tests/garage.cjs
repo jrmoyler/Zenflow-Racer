@@ -2,7 +2,7 @@ const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert
 const html=fs.readFileSync('index.html','utf8');const dom=new JSDOM(html,{url:'https://test.invalid',runScripts:'outside-only'}),w=dom.window,d=w.document;
 w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
 w.requestAnimationFrame=()=>0;w.cancelAnimationFrame=()=>{};w.navigator.locks={request:async(k,fn)=>fn()};
-w.eval(fs.readFileSync('core.js','utf8').split('function hexToRgb')[0]+';window.ROSTER=ROSTER;');
+w.eval(fs.readFileSync('core.js','utf8').split('function hexToRgb')[0]+';window.ROSTER=ROSTER;window.KART_TIERS=KART_TIERS;');
 w.eval(fs.readFileSync('addons.js','utf8')+';window.ADDONS=ADDONS;');
 w.eval(fs.readFileSync('economy.js','utf8')+';window.Economy=Economy;');
 w.eval("var SAVE_KEY='zenflow-test',saved=Economy.migrate({},ADDONS.map(a=>a.id)),selected=ROSTER[0],game={state:'roster'},SFX={ui(){}},raceSetup={};function openRoster(){};function transitionScene(label,fn){fn();}");
@@ -13,7 +13,17 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
 const card=name=>[...d.querySelectorAll('#garage article')].find(a=>a.querySelector('h3').textContent===name);
 (async()=>{
  const launches=[...d.querySelectorAll('button')].filter(b=>b.textContent==='Garage');assert.equal(launches.length,3,'title, loadout and results entries');launches[0].click();
- assert.equal(d.querySelector('#garage').open,true);assert.equal(previewOpened,1);assert.equal(previewBuild.racer,'zenflow');assert.equal(card('Elemental Fire').querySelector('button').disabled,true,'insufficient funds');
+ assert.equal(d.querySelector('#garage').open,true);assert.equal(previewOpened,1);assert.equal(previewBuild.racer,'zenflow');
+ // Chassis tiers open first: Factory equipped, Nightfall priced, Apex gated behind Nightfall.
+ const tiers=[...d.querySelectorAll('#garage article.garage-tier')];assert.deepEqual(tiers.map(a=>a.dataset.tier),['factory','dark','final']);
+ assert.equal(tiers[0].dataset.state,'equipped');assert.match(tiers[2].querySelector('.garage-locked').textContent,/Requires Nightfall Spec/);assert.equal(tiers[1].querySelector('button').disabled,true,'Nightfall unaffordable at zero credits');
+ await w.economyTransaction(s=>({...s,wallet:700}));d.querySelector('#garage-racer').dispatchEvent(new w.Event('change'));
+ d.querySelector('article[data-tier="dark"] button').click();await flush();
+ assert.equal(JSON.stringify(w.saved.chassisOwned.zenflow),'["dark"]');assert.equal(w.saved.chassis.zenflow,'dark');assert.equal(w.saved.wallet,50);
+ assert.match(d.querySelector('article[data-tier="final"] .garage-locked').textContent,/Career milestone: 8 more finished races and 2 more wins/);
+ d.querySelector('article[data-tier="factory"] button').click();await flush();assert.equal(w.saved.chassis.zenflow,undefined,'factory is always available');
+ await w.economyTransaction(s=>({...s,wallet:0}));
+ [...d.querySelectorAll('#garage nav button')].find(b=>b.textContent==='Add-Ons').click();assert.equal(card('Elemental Fire').querySelector('button').disabled,true,'insufficient funds');
  // P1.4: a locked card says what is missing instead of only greying its button out.
  const lockedNote=card('Elemental Fire').querySelector('.garage-locked');
  assert.ok(lockedNote,'an unaffordable card explains that it is locked');
@@ -31,5 +41,5 @@ const card=name=>[...d.querySelectorAll('#garage article')].find(a=>a.querySelec
  assert.equal(d.activeElement,card('Launch motor').querySelector('button'),'equipping retains focus');
  const restored=w.Economy.migrate(JSON.parse(w.localStorage.getItem(w.SAVE_KEY)),w.ADDONS.map(a=>a.id));assert.equal(restored.wallet,w.saved.wallet);assert.equal(restored.addons.zenflow,'fire');assert.equal(restored.addonUpgradeLevels.fire,2);
  d.querySelector('#garage-close').click();assert.equal(d.querySelector('#garage').open,false);assert.equal(previewDisposed,1);
- console.log('PASS Garage DOM: locked-state reasons, purchase receipts, buy/equip/upgrade, racer builds, persistence and exit');dom.window.close();
+ console.log('PASS Garage DOM: chassis tiers (buy, equip, milestone lock), locked-state reasons, purchase receipts, buy/equip/upgrade, racer builds, persistence and exit');dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1;});

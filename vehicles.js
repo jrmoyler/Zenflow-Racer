@@ -35,7 +35,8 @@ function disposeKart(root){
   const geometries=new Set(),materials=new Set(),textures=new Set();
   root.traverse(obj=>{if(obj.geometry&&!obj.geometry.userData?.blenderShared&&!sharedGeometry.has(obj.geometry))geometries.add(obj.geometry);
     if(obj.material)(Array.isArray(obj.material)?obj.material:[obj.material]).forEach(m=>materials.add(m));});
-  materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture&&!sharedTextures.has(v))textures.add(v);});m.dispose();});
+  // Fitted chassis templates share their textured material across every instance.
+  materials.forEach(m=>{if(m.userData?.tierShared)return;Object.values(m).forEach(v=>{if(v?.isTexture&&!sharedTextures.has(v)&&!(typeof KART_TIER_ASSETS!=='undefined'&&KART_TIER_ASSETS.textures.has(v)))textures.add(v);});m.dispose();});
   geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());if(root.parent)root.parent.remove(root);
 }
 const KART_GEO={};
@@ -326,7 +327,15 @@ function dressRacePilot(div,pilot,head,arms,add,{white,dark,panel,metal}){
   else {tube('helmet-rear-spoiler',head,panel,[[-.24,.44,.21],[0,.49,.27],[.24,.44,.21]],.035);}
 }
 
-function buildKart(div){
+// tier: 'factory' | 'dark' | 'final'. Omitted, the player's equipped chassis for this
+// division is used. A tier that is not downloaded yet falls back to the factory kart
+// and starts the download; 'karttierready' then lets showrooms rebuild.
+function buildKart(div,tier){
+  if(tier===undefined)tier=typeof equippedKartTier==='function'?equippedKartTier(div.id):'factory';
+  if(tier&&tier!=='factory'&&typeof createTierKart==='function'){
+    const fitted=createTierKart(div,tier);if(fitted)return fitted;
+    if(typeof loadKartTier==='function')loadKartTier(div.id,tier);
+  }
   if(typeof createLoadedKart==='function'){const model=createLoadedKart(div);if(model)return model;}
   const root=new THREE.Group();root.name=div.name+' Reference Chassis';
   const {white,dark,panel,glow,skin,metal,tyre}=kartMaterials(div);

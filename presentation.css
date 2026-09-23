@@ -159,3 +159,8 @@ button:disabled{cursor:not-allowed;opacity:.5}button:not(:disabled):active{trans
 #roster .selector-heading,#roster .menu-tools,#roster .head,#roster #footer{flex-shrink:0}
 #grid .portrait{pointer-events:none}
 @media(min-width:601px){#roster[data-step="character"] .showroom{grid-template-rows:auto}#roster[data-step="character"] #kart-preview{min-height:380px}}
+/* Chassis tier under the racer name: ink for Factory, lavender for Nightfall, coral for Apex. */
+.preview-caption .preview-tier{display:inline-block;margin:4px 0 2px;padding:2px 8px;font:700 10px/1.4 var(--body);letter-spacing:.14em;color:var(--ink);background:#e7e2d6;border-left:3px solid var(--ink)}
+.preview-caption .preview-tier[data-tier="dark"]{background:#c9bce9;border-left-color:#19202b}
+.preview-caption .preview-tier[data-tier="final"]{background:var(--ink);color:#f4f1e8;border-left-color:var(--coral)}
+@media(max-width:600px) and (orientation:portrait){.preview-caption .preview-tier{font-size:8px;margin:2px 0 0}}

@@ -5,3 +5,6 @@
 #garage article[data-state=equipped]{border-left-color:#87e8ff}
 #garage article[data-state=locked]{border-left-color:#7a6a4c}
 #garage-status:empty{display:none}
+/* Chassis tier cards reuse the garage card states; Apex Pearl carries a coral mark. */
+#garage article.garage-tier h3{letter-spacing:.02em}
+#garage article.garage-tier[data-tier="final"] h3::after{content:" ◆";color:#ef765e}

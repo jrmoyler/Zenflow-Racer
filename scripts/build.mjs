@@ -25,10 +25,12 @@ async function walk(dir){for(const e of await readdir(dir,{withFileTypes:true}))
 await walk(out);assets.sort();
 const hash=createHash('sha256');for(const f of assets){hash.update(f);hash.update(await readFile(path.join(out,f)));}
 const cache='zenflow-racer-'+hash.digest('hex').slice(0,14);
-const shell=['./',...assets.filter(f=>/\.(js|css|html|webmanifest|png|jpg|jpeg|webp|glb|ttf|woff2)$/.test(f)).map(f=>'./'+f)];
+// Chassis tier models download when a player owns or previews them; they are
+// cached on first use rather than forced into every install.
+const shell=['./',...assets.filter(f=>/\.(js|css|html|webmanifest|png|jpg|jpeg|webp|glb|ttf|woff2)$/.test(f)&&!f.startsWith('assets/models/tiers/')).map(f=>'./'+f)];
 await writeFile(path.join(out,'sw.js'),`const CACHE=${JSON.stringify(cache)};const SHELL=${JSON.stringify(shell)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE_UPDATE')self.skipWaiting();});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('zenflow-racer-')&&k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.open(CACHE).then(cache=>cache.match(e.request,{ignoreSearch:e.request.mode==='navigate'})).then(c=>c||fetch(e.request)));});\n`);
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;const lazy=new URL(e.request.url).pathname.includes('/assets/models/tiers/');e.respondWith(caches.open(CACHE).then(cache=>cache.match(e.request,{ignoreSearch:e.request.mode==='navigate'}).then(c=>c||fetch(e.request).then(r=>{if(lazy&&r.ok)cache.put(e.request,r.clone());return r;}))));});\n`);
 console.log('Static game built in dist/');

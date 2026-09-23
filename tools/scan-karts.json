@@ -1,0 +1,54 @@
+{
+ "note": "Per-division inputs for tools/fit-scan-kart.py. Accent HEX from the reference packs' REPLICATE.md. Optional per-tier overrides: front (+x/-x/+z/-z), flip, noWheels.",
+ "accent": {
+  "zenflow": "#7C3AED",
+  "collective": "#D4A843",
+  "hybrid": "#F59E0B",
+  "nexus": "#DC2626",
+  "kinetic": "#16A34A",
+  "juris": "#6366F1",
+  "signal": "#F43F5E",
+  "loom": "#00D9B5",
+  "vector": "#CBD5E1",
+  "aether": "#34D399",
+  "animus": "#22D3EE",
+  "helix": "#14B8A6",
+  "ledger": "#8B5CF6",
+  "terra": "#2563EB",
+  "obsidian": "#EA580C",
+  "civic": "#7DD3FC",
+  "cognara": "#E0267E",
+  "gaia": "#22C55E",
+  "nomad": "#FBBF24",
+  "eon": "#06B6D4"
+ },
+ "overrides": {
+  "dark-collective": {
+   "noWheels": true
+  },
+  "dark-eon": {
+   "noWheels": true
+  },
+  "dark-juris": {
+   "noWheels": true
+  },
+  "dark-cognara": {
+   "noWheels": true
+  },
+  "dark-civic": {
+   "noWheels": true
+  },
+  "dark-obsidian": {
+   "noWheels": true
+  },
+  "dark-nomad": {
+   "noWheels": true
+  },
+  "dark-signal": {
+   "noWheels": true
+  },
+  "dark-vector": {
+   "noWheels": true
+  }
+ }
+}

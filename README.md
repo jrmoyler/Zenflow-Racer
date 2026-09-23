@@ -74,6 +74,15 @@ Blender 4.5.0 (installed by `bash tools/setup-blender.sh` into the gitignored `.
 
 Blender 4.5.0 ran successfully headless in this implementation environment (see `docs/kart-review/README.md` and `render-manifest.json` for the engine, samples and timings). The renders are geometry and animation evidence, not WebGL-identical shading. The older `tools/export-kart-meshes.cjs` / `tools/import-karts-blender.py` pair still exports a flattened world-space mesh lineup for material review. `tests/kart-clips-regression.cjs` guards the generated clip file against the rig contract.
 
+## Chassis tiers
+
+Each of the 20 divisions has three chassis. **Factory** (Tier I) is available from the start.
+**Nightfall Spec** (Tier II) costs 650 Zen Credits. **Apex Pearl** (Tier III) unlocks after Nightfall
+plus a career of 8 finished races and 2 wins, and costs 1,400 Zen Credits. Buy and equip them in the
+Garage's **Chassis** tab. The 40 new models are reconstructed from their reference images and fitted
+to the live kart rig. See [chassis tiers](docs/chassis-tiers.md) for the pipeline, the evidence and
+the known limits.
+
 ## Wave 2 and equippable add-ons
 
 Select any of **20 divisions** for a twelve-kart race. Quantum Ledger, Terra Axis, Obsidian Arc, Civic Core, Cognara Mind, Gaia Synthesis, Nomad Nexus and Eon Core each have a distinct chassis, dressed pilot and signature power.

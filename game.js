@@ -23,11 +23,21 @@ function persist(){
  if(typeof Economy!=='undefined'&&navigator.locks?.request){const snapshot={...saved};return navigator.locks.request(SAVE_KEY,()=>{try{const fresh=Economy.migrate(JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'),ADDONS.map(a=>a.id));for(const key of Economy.FIELDS)snapshot[key]=fresh[key];localStorage.setItem(SAVE_KEY,JSON.stringify(snapshot));}catch{}});}
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(saved));}catch{}
 }
+// The player's equipped chassis tier for a division, only once its model is on hand.
+function equippedKartTier(id){
+ const tier=saved.chassis?.[id]||'factory';
+ return tier!=='factory'&&(saved.chassisOwned?.[id]||[]).includes(tier)?tier:'factory';
+}
+function preloadEquippedTiers(){
+ if(typeof loadKartTier!=='function')return Promise.resolve();
+ return Promise.all(Object.keys(saved.chassis||{}).map(id=>loadKartTier(id,equippedKartTier(id))));
+}
 const input={throttle:false,brake:false,left:false,right:false,drift:false,item:false,itemEdge:false,special:false,specialEdge:false,addon:false,addonEdge:false};
 
 class Racer{
   constructor(div,isPlayer,gridIdx){
-    this.div=div;this.isPlayer=isPlayer;this.mesh=buildKart(div);scene.add(this.mesh);
+    // Rivals race the factory chassis; the player drives whichever tier is equipped.
+    this.div=div;this.isPlayer=isPlayer;this.tier=isPlayer?equippedKartTier(div.id):'factory';this.mesh=buildKart(div,this.tier);scene.add(this.mesh);
     const [sp,ac,ha,we]=div.stats;
     this.maxSpeedBase=37+sp*2.2;this.accel=11+ac*2.6;this.handling=.14+ha*.012;this.weight=1+we*.28;
     this.u=-(0.007+Math.floor(gridIdx/2)*0.0068);this.lat=gridIdx%2?2.3:-2.3;this.speed=0;this.theta=0;this.steer=0;this.throttle=false;this.brake=false;
@@ -845,6 +855,7 @@ function startRace(){if(!selected)return false;if(['boot','roster','title'].incl
 async function boot(){
  try{
   await loadKartAssets((done,total)=>{document.getElementById('loading-status').textContent='ASSEMBLING RACERS · '+done+' / '+total;const progress=document.getElementById('loading-progress');progress.max=total;progress.value=done;});
+  await Promise.race([preloadEquippedTiers(),new Promise(done=>setTimeout(done,8000))]);
   buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
@@ -883,6 +894,8 @@ function updateSelectedPreview(d){
 
  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('racerselect',{detail:{division:d,ability:power}}));
  if(typeof THREE.Scene!=='function'||renderer.renderRosterPreview)return;
+ const tierBadge=document.getElementById('preview-tier'),tierInfo=typeof KART_TIERS!=='undefined'&&KART_TIERS.find(t=>t.id===equippedKartTier(d.id));
+ if(tierBadge&&tierInfo){tierBadge.textContent=(tierInfo.short+' · '+tierInfo.name).toUpperCase();tierBadge.dataset.tier=tierInfo.id;}
  disposePreview();if(!previewScene)buildPreviewStage();
  previewKart=buildKart(d);
  if(typeof applyKartBuildVisuals==='function')applyKartBuildVisuals(previewKart,saved.builds?.[d.id]||[],saved.appearance?.[d.id]||'factory');
@@ -894,6 +907,8 @@ function updateSelectedPreview(d){
  previewSpin.velocity=0;
 }
 addEventListener('garagechange',()=>{if(selected&&previewKart)updateSelectedPreview(selected);});
+// A tier model that finished downloading replaces the factory stand-in on the turntable.
+addEventListener('karttierready',()=>{directorPortraits.clear();renderer.portraits?.clear?.();if(selected&&previewKart&&(previewKart.userData.tier||'factory')!==equippedKartTier(selected.id))updateSelectedPreview(selected);});
 function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previewSpin.velocity+delta*6,-9,9);}
 (()=>{const el=document.getElementById('kart-preview');if(!el||!el.addEventListener)return;
  el.addEventListener('pointerdown',e=>{if((e.button!==0&&e.pointerType==='mouse')||e.target?.closest?.('button'))return;previewSpin.dragging=true;previewSpin.pointer=e.pointerId;previewSpin.lastX=e.clientX;previewSpin.velocity=0;el.setPointerCapture?.(e.pointerId);el.classList.add('dragging');});
