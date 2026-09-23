@@ -19,10 +19,10 @@ Use Q, gamepad Y, or the on-screen SPECIAL button. Each ability starts ready; co
 | ledger | VAULT LOCK | 18s | A 4-second field freezes rivals’ token gains and item use within 16 metres. Existing tokens stay protected from theft. |
 | terra | ANCHOR SPAN | 19s | Become an immovable span for 3.5 seconds. Bumps no longer shove you; momentum stays near your speed at activation. |
 | obsidian | HARD PERIMETER | 18s | A 4-second shield blocks one hit; its perimeter also shoves and slows touching rivals. |
-| civic | SHARED LANE | 17s | For 5 seconds the nearest unfinished racer within 14 metres and four lateral metres inherits your slipstream. |
+| civic | SHARED LANE | 17s | For 5 seconds you ride a shared draft (stronger when a racer is within 14 metres and four lateral metres), and that racer inherits your slipstream too. |
 | cognara | PREDICTIVE LINE | 16s | A 4-second racing line. Steering responds 35% faster and corner scrub drops 30%. |
 | gaia | ROOT NET | 18s | Lay a 5-second root ribbon that slows crossings and reduces your edge speed penalty by 65%. |
-| nomad | WAYPOINT HOP | 13s | Blink six metres forward with 0.6 seconds of collision immunity. Distance and lap crossings remain accurate. |
+| nomad | WAYPOINT HOP | 13s | Blink fourteen metres forward with 0.6 seconds of collision immunity. Distance and lap crossings remain accurate. |
 | eon | SECOND WIND | 18s | Cleanse spin and slow, resist slows for 5 seconds, and surge. Lost tokens stay lost. |
 
 ## What a slow actually costs

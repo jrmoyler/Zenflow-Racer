@@ -187,7 +187,7 @@ html[data-touch="on"] #tS{display:none}
       <div class="panel-kicker">CHARACTER SELECT</div><h2 id="selected-name">ZenFlow</h2><div id="selected-code">ZF-01 · Central Nervous System</div>
       <div id="selected-stats"></div><div class="power-caption">ZEN POWER</div><div class="power-head"><span id="selected-power-icon" class="power-glyph" aria-hidden="true"></span><h3 id="selected-power">Flow Stream</h3></div><p id="selected-description">Create a stream of focused energy and accelerate beyond the pack.</p><div class="power-key"><kbd>Q</kbd> Activate your racer’s power</div><button id="open-loadout" type="button" class="loadout-launch"><span>ADD-ON LOADOUT</span><strong id="equipped-addon">None equipped</strong><span aria-hidden="true">↗</span></button><button id="confirm-racer" class="btn" disabled>Confirm racer →</button>
     </section>
-    <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
+    <div id="kart-preview" aria-label="Selected racer and kart preview, rotating 360 degrees. Drag to spin."><button type="button" class="preview-nav prev" id="dir-prev" aria-label="Previous racer">◀</button><button type="button" class="preview-nav next" id="dir-next" aria-label="Next racer">▶</button><div class="preview-caption"><span>CHOOSE YOUR RACER</span><strong id="preview-name">ZENFLOW</strong><span id="preview-tier" class="preview-tier" data-tier="factory">TIER I · FACTORY</span><em class="preview-hint">360° SHOWROOM · DRAG TO SPIN</em></div></div>
     <section class="track-panel race-panel" hidden aria-label="Track selection"><div class="panel-kicker">CHOOSE YOUR CIRCUIT</div><div id="map-choices" role="group" aria-label="Select racing map">
       <button class="map-card" data-map="cherry" aria-label="Cherry Blossom Skyway" aria-pressed="false">
         <span class="circuit-art"><img src="assets/map-cards/cherry.webp" width="1536" height="1024" alt="" decoding="async"><span class="circuit-number" aria-hidden="true">01</span><span class="circuit-selected" aria-hidden="true">✓ SELECTED</span></span>
@@ -273,6 +273,7 @@ html[data-touch="on"] #tS{display:none}
 <script src="vehicles.js"></script>
 <script src="item-models.js"></script>
 <script src="item-art.js"></script>
+<script src="power-vfx.js"></script>
 <script src="racefx.js"></script>
 <script src="power-icons.js"></script>
 <script src="effects.js"></script>

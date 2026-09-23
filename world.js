@@ -106,12 +106,12 @@ gl_FragColor=vec4(sky,1.);
 // ---------- Track definition: the Synergy Circuit ----------
 // Control points (x, y, z). Anti-gravity barrel roll from P8 -> P14.
 const CTRL=[
-  [ 20,  0,   0],[ 90,  0,   0],[150,  0, -40],[150,  3,-110],[100,  6,-150],[ 30, 10,-140],[-15, 15, -95],[-60, 16, -40],
-  [-120,20, -20],[-170,32,-70],[-180,50,-150],[-140,58,-215],[-70,46,-240],[  0,32,-235],[ 50,20,-210],[  0, 8,-195],
+  [ 20,  0,   0],[ 90,  0,   0],[150,  0, -40],[158,  3,-121],[100,  6,-150],[ 30, 10,-140],[-15, 15, -95],[-60, 16, -40],
+  [-120,20, -20],[-170,32,-70],[-180,50,-150],[-140,58,-215],[-70,46,-240],[  0,32,-235],[ 47,24,-233],[ 55,20,-212],[ 40,14,-197],[  0, 8,-195],
   [-45,  2,-150],[-30,  0, -70],[-25,  0, -45],[-20, 0, -15]
 ];
-const ROLL_KEYS  =[[0,0],[8,0],[9,35],[10,110],[11,200],[12,290],[13,340],[14,360],[19,360],[20,360]]; // [ctrl index, degrees]
-const AG_KEYS    =[[0,0],[7.6,0],[8.6,1],[13.6,1],[14.8,0],[20,0]];
+const ROLL_KEYS  =[[0,0],[8,0],[9,35],[10,110],[11,200],[12,290],[13,340],[14,360],[21,360],[22,360]]; // [ctrl index, degrees]
+const AG_KEYS    =[[0,0],[7.6,0],[8.6,1],[13.6,1],[16.8,0],[22,0]];
 const CHERRY_CONTROL=CTRL.map(p=>p.slice()),CHERRY_ROLL=ROLL_KEYS.map(p=>p.slice()),CHERRY_AG=AG_KEYS.map(p=>p.slice());
 const TRACK_W=14, N_SAMP=1800;
 const track={pos:[],tan:[],up:[],right:[],curv:[],ag:[],roll:[],len:0,u:[]};
@@ -144,9 +144,24 @@ function buildTrackFrames(){
   // close the frame: distribute angular drift so sample N == sample 0
   const nEnd=nArr[N_SAMP], nStart=nArr[0], T=track.tan[0];
   let err=Math.atan2(nEnd.clone().cross(nStart).dot(T),nEnd.dot(nStart));
+  // A carried frame drifts on climbing turns (up to 37° of unauthored bank), so ordinary road is
+  // referenced to gravity and only anti-gravity / barrel-roll sections keep the carried frame,
+  // blended over RAMP metres. twist = carried normal's angle from the gravity normal about T.
+  const RAMP=40,wrapPi=a=>Math.atan2(Math.sin(a),Math.cos(a)),grav=[],twist=[],zone=[];
   for(let i=0;i<=N_SAMP;i++){
-    const q=new THREE.Quaternion().setFromAxisAngle(track.tan[i],err*(i/N_SAMP)+track.roll[i]);
-    const up=nArr[i].clone().applyQuaternion(q).normalize();
+    const Ti=track.tan[i],g=new THREE.Vector3(0,1,0).addScaledVector(Ti,-Ti.y).normalize(),c=nArr[i].clone().applyAxisAngle(Ti,err*(i/N_SAMP));
+    grav.push(g);twist.push(Math.atan2(g.clone().cross(c).dot(Ti),g.dot(c)));zone.push(track.ag[i]>1e-3||Math.abs(wrapPi(track.roll[i]))>Math.PI/4);
+  }
+  const step=track.len/N_SAMP,reach=Math.ceil(RAMP/step),weight=new Array(N_SAMP+1).fill(0);
+  for(let i=0;i<N_SAMP;i++)if(zone[i])for(let d=-reach;d<=reach;d++){const j=(i+d+N_SAMP)%N_SAMP;weight[j]=Math.max(weight[j],smooth(Math.max(0,1-Math.abs(d)*step/RAMP)));}
+  weight[N_SAMP]=weight[0];
+  const free=weight.indexOf(0);
+  if(free<0||free===N_SAMP)weight.fill(1);
+  // Unwrap the twist around the lap from a fully gravity-framed sample so the blend never jumps by 2π.
+  else for(let k=1;k<N_SAMP;k++){const i=(free+k)%N_SAMP,p=(free+k-1)%N_SAMP;twist[i]=twist[p]+wrapPi(twist[i]-twist[p]);}
+  for(let i=0;i<=N_SAMP;i++){
+    const q=new THREE.Quaternion().setFromAxisAngle(track.tan[i],weight[i]*twist[i]+track.roll[i]);
+    const up=grav[i].clone().applyQuaternion(q).normalize();
     const right=new THREE.Vector3().crossVectors(track.tan[i],up).normalize();
     track.up.push(up);track.right.push(right);
   }

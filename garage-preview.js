@@ -44,7 +44,8 @@ function createGaragePreview(host){
   }catch(error){dispose();if(note)note.textContent='3D preview is unavailable. Your garage controls remain ready.';return false;}
  }
  function update(racer,save){if(!gpu)return;const build=save.builds[racer.id]||[],appearance=save.appearance[racer.id]||'factory',addon=save.addons[racer.id]||null,level=save.addonUpgradeLevels[addon]||1;
-  const next=JSON.stringify([racer.id,build,appearance,addon,level]);if(next===signature)return;
+  const tier=typeof equippedKartTier==='function'?equippedKartTier(racer.id):'factory',ready=typeof kartTierReady!=='function'||kartTierReady(racer.id,tier);
+  const next=JSON.stringify([racer.id,tier,ready,build,appearance,addon,level]);if(next===signature)return;
   if(kart){if(typeof clearKartBuildVisuals==='function')clearKartBuildVisuals(kart);disposeKart(kart);}kart=buildKart(racer);
   if(typeof applyKartBuildVisuals==='function')applyKartBuildVisuals(kart,build,appearance,addon,level);
   kart.rotation.y=yaw;view.add(kart);signature=next;draw();

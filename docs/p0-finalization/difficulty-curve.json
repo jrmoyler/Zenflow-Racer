@@ -1,5 +1,5 @@
 {
- "method": "Solo deterministic AI on the extended circuits at 120 Hz. Pace is a clean three-lap run; recovery is the ground still lost to an unperturbed twin eight seconds after an identical scripted spin. No items, powers, opponents or rendering. Not a human benchmark and not device evidence.",
+ "method": "Solo deterministic AI on the extended circuits at 120 Hz. Pace is a clean three-lap run; recovery is the ground still lost to an unperturbed twin eight seconds after an identical scripted spin. No items, powers, opponents or rendering. The random stream is a constant in this harness, so lapSpreadSeconds records standing-start variation within a run and is NOT a measure of consistency under noise; the full-field run in tools/p0-field-balance.cjs covers contested racing. Not a human benchmark and not device evidence.",
  "cadence": {
   "note": "Difficulty-scaled decision timing, from the shipping code.",
   "signaturePowerReview": [
@@ -37,10 +37,10 @@
   {
    "map": "cherry",
    "difficulty": 0,
-   "meanLapSeconds": 50.302,
-   "bestLapSeconds": 50.065,
-   "lapSpreadSeconds": 0.69,
-   "metresLostAfterSpin": 105.42,
+   "meanLapSeconds": 51.003,
+   "bestLapSeconds": 50.776,
+   "lapSpreadSeconds": 0.682,
+   "metresLostAfterSpin": 105.06,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -51,10 +51,10 @@
   {
    "map": "cherry",
    "difficulty": 1,
-   "meanLapSeconds": 48.714,
-   "bestLapSeconds": 48.468,
-   "lapSpreadSeconds": 0.73,
-   "metresLostAfterSpin": 80.44,
+   "meanLapSeconds": 48.916,
+   "bestLapSeconds": 48.671,
+   "lapSpreadSeconds": 0.727,
+   "metresLostAfterSpin": 79.85,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -65,10 +65,10 @@
   {
    "map": "cherry",
    "difficulty": 2,
-   "meanLapSeconds": 47.731,
-   "bestLapSeconds": 47.479,
+   "meanLapSeconds": 47.808,
+   "bestLapSeconds": 47.558,
    "lapSpreadSeconds": 0.746,
-   "metresLostAfterSpin": 59.45,
+   "metresLostAfterSpin": 58.19,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -79,10 +79,10 @@
   {
    "map": "stormforge",
    "difficulty": 0,
-   "meanLapSeconds": 53.516,
-   "bestLapSeconds": 53.271,
-   "lapSpreadSeconds": 0.721,
-   "metresLostAfterSpin": 97.21,
+   "meanLapSeconds": 53.56,
+   "bestLapSeconds": 53.325,
+   "lapSpreadSeconds": 0.705,
+   "metresLostAfterSpin": 95.9,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -93,10 +93,10 @@
   {
    "map": "stormforge",
    "difficulty": 1,
-   "meanLapSeconds": 50.325,
-   "bestLapSeconds": 50.067,
-   "lapSpreadSeconds": 0.772,
-   "metresLostAfterSpin": 74.5,
+   "meanLapSeconds": 50.38,
+   "bestLapSeconds": 50.129,
+   "lapSpreadSeconds": 0.741,
+   "metresLostAfterSpin": 74.82,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -107,10 +107,10 @@
   {
    "map": "stormforge",
    "difficulty": 2,
-   "meanLapSeconds": 48.783,
-   "bestLapSeconds": 48.525,
-   "lapSpreadSeconds": 0.773,
-   "metresLostAfterSpin": 55.8,
+   "meanLapSeconds": 48.81,
+   "bestLapSeconds": 48.554,
+   "lapSpreadSeconds": 0.769,
+   "metresLostAfterSpin": 56.34,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -121,10 +121,10 @@
   {
    "map": "canopy",
    "difficulty": 0,
-   "meanLapSeconds": 51.466,
-   "bestLapSeconds": 51.225,
-   "lapSpreadSeconds": 0.721,
-   "metresLostAfterSpin": 98.07,
+   "meanLapSeconds": 48.149,
+   "bestLapSeconds": 47.909,
+   "lapSpreadSeconds": 0.713,
+   "metresLostAfterSpin": 97.81,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -135,10 +135,10 @@
   {
    "map": "canopy",
    "difficulty": 1,
-   "meanLapSeconds": 48.926,
-   "bestLapSeconds": 48.668,
-   "lapSpreadSeconds": 0.768,
-   "metresLostAfterSpin": 78.88,
+   "meanLapSeconds": 45.607,
+   "bestLapSeconds": 45.353,
+   "lapSpreadSeconds": 0.756,
+   "metresLostAfterSpin": 78.38,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -149,10 +149,10 @@
   {
    "map": "canopy",
    "difficulty": 2,
-   "meanLapSeconds": 47.521,
-   "bestLapSeconds": 47.266,
-   "lapSpreadSeconds": 0.763,
-   "metresLostAfterSpin": 59.46,
+   "meanLapSeconds": 44.261,
+   "bestLapSeconds": 44.005,
+   "lapSpreadSeconds": 0.762,
+   "metresLostAfterSpin": 58.1,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,

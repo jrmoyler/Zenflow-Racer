@@ -23,11 +23,21 @@ function persist(){
  if(typeof Economy!=='undefined'&&navigator.locks?.request){const snapshot={...saved};return navigator.locks.request(SAVE_KEY,()=>{try{const fresh=Economy.migrate(JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'),ADDONS.map(a=>a.id));for(const key of Economy.FIELDS)snapshot[key]=fresh[key];localStorage.setItem(SAVE_KEY,JSON.stringify(snapshot));}catch{}});}
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(saved));}catch{}
 }
+// The player's equipped chassis tier for a division, only once its model is on hand.
+function equippedKartTier(id){
+ const tier=saved.chassis?.[id]||'factory';
+ return tier!=='factory'&&(saved.chassisOwned?.[id]||[]).includes(tier)?tier:'factory';
+}
+function preloadEquippedTiers(){
+ if(typeof loadKartTier!=='function')return Promise.resolve();
+ return Promise.all(Object.keys(saved.chassis||{}).map(id=>loadKartTier(id,equippedKartTier(id))));
+}
 const input={throttle:false,brake:false,left:false,right:false,drift:false,item:false,itemEdge:false,special:false,specialEdge:false,addon:false,addonEdge:false};
 
 class Racer{
   constructor(div,isPlayer,gridIdx){
-    this.div=div;this.isPlayer=isPlayer;this.mesh=buildKart(div);scene.add(this.mesh);
+    // Rivals race the factory chassis; the player drives whichever tier is equipped.
+    this.div=div;this.isPlayer=isPlayer;this.tier=isPlayer?equippedKartTier(div.id):'factory';this.mesh=buildKart(div,this.tier);scene.add(this.mesh);
     const [sp,ac,ha,we]=div.stats;
     this.maxSpeedBase=37+sp*2.2;this.accel=11+ac*2.6;this.handling=.14+ha*.012;this.weight=1+we*.28;
     this.u=-(0.007+Math.floor(gridIdx/2)*0.0068);this.lat=gridIdx%2?2.3:-2.3;this.speed=0;this.theta=0;this.steer=0;this.throttle=false;this.brake=false;
@@ -35,7 +45,7 @@ class Racer{
     this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.totalTokensCollected=0;this.serviceLineMetres=0;this.hitsTaken=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
     this.spin=0;this.shield=0;this.hitCd=0;this.wallCd=0;this.finished=false;this.finishTime=0;this.rank=gridIdx+1;this.wheelRot=0;this.visualYaw=0;this.lean=0;this.wrongWay=false;
     // Grid-staggered reaction: front rows launch first so the pack fans out instead of piling into row one.
-    this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0,recover:0};
+    this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,driftSide:1,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0,recover:0};
     this.distance=this.u;this.progress=this.u;this.startHold=0;this.wheelspin=0;this.hop=0;this.lastU=this.u;this.rubber=1;
     // Boost surge (accel ramp instead of an instant multiplier), hop→drift commit window, wrong-way timer, triple spacing.
     this.boostTarget=1;this.surge=0;this.hopWindow=0;this.wrongT=0;this.tripleCd=0;
@@ -53,6 +63,7 @@ class Racer{
 function disposeProjectile(mesh){scene.remove(mesh);if(mesh.userData?.projectileDisposed)return;if(mesh.userData)mesh.userData.projectileDisposed=true;const geometries=new Set(),materials=new Set();mesh.traverse?.(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}
 function clearProjectiles(){mines.forEach(m=>disposeProjectile(m.mesh));missiles.forEach(m=>disposeProjectile(m.mesh));mines=[];missiles=[];}
 function spawnRace(playerDiv){
+  game.dnfTimer=0;
   if(typeof beginRewardRace==='function')beginRewardRace();
   const sceneBuildStarted=performance.now();
   disposePreview();if(typeof clearAbilities==='function')clearAbilities();if(typeof clearAddons==='function')clearAddons();
@@ -188,7 +199,9 @@ function stepRacer(r,dt){
       trackPoint(r.u,r.lat,.4,_p);trackTan(r.u,_v1);for(let i=0;i<10;i++){_v2.set(-_v1.x*8+(rng()-.5)*6,4+rng()*5,-_v1.z*8+(rng()-.5)*6);sparksOrange.emit(_p,_v2,.35+rng()*.3,.4);}}
     else{r.speed*=1-.9*dt*edgeGrip;if(r.spin<=0)r.theta-=side*.6*dt;}}  // scraping: mild drag and a nudge back onto the road
   r.wallCd-=dt;
-  if(r.anchor>0&&r.spin<=0)r.speed=clamp(r.speed,r.anchorSpeed-2,r.anchorSpeed+2);
+  // Anchor Span holds the speed it was cast at as a floor (capped by the current top speed),
+  // so it cannot pin a slow kart down or override a slow field.
+  if(r.anchor>0&&r.spin<=0)r.speed=Math.max(r.speed,Math.min(r.anchorSpeed,max)-2);
   // --- advance along track
   const laneMetric=typeof serviceLaneMetric==='function'?serviceLaneMetric(r.u,r.lat):1;
   advanceRaceDistance(r,r.speed*Math.cos(r.theta)*dt/(track.len*laneMetric),dt);
@@ -241,22 +254,27 @@ function advanceRaceDistance(r,du,dt){
 // ---------- Collisions & pickups ----------
 function du_dist(a,b){let d=b-a;if(d>.5)d-=1;if(d<-.5)d+=1;return d*track.len;}
 function hitRacer(r,source,attacker=null){
+  if(r.phase>0||r.hitCd>0||r.finished)return;// immune already: keep any mirror or shield for a real hit
   if(typeof powerProtected==='function'&&powerProtected(r,attacker,source!=='reflection'))return;
-  if(r.hitCd>0||r.finished)return;
   if(r.shield>0){r.shield=0;if(typeof spawnAddonContact==='function'&&!String(source).startsWith('addon-'))spawnAddonContact(r.perimeter>0?'obsidian':'shield',r.u,r.lat,r);if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);if(r.isPlayer){SFX.shieldBlock();setToast('AEGIS BLOCK','teal');}return;}
   r.hitsTaken=(r.hitsTaken||0)+1;r.spin=1.1*(r.spinDuration||1);r.hitCd=1.6;r.drifting=false;r.driftTier=0;r.boost=0;r.boostMult=1;r.boostTarget=1;r.surge=0;r.hopWindow=0;if(r.slipOn){r.slipOn=false;r.slipT=0;r.slipBonus=0;}if(typeof raceFX!=='undefined')raceFX.onHit(r,source);
   if(typeof spawnAddonContact==='function'&&!String(source).startsWith('addon-'))spawnAddonContact(['ram','sonic','reflection'].includes(source)?(attacker?.div?.id||source):source,r.u,r.lat,attacker||r);
-  const lost=Math.min(3,r.tokens);r.tokens-=lost;r.lastLostTokens=lost;trackPoint(r.u,r.lat,1,_p);
+  const lost=Math.min(3,r.tokens);r.tokens-=lost;r.lastLostTokens=lost;r.lastLostAt=game.raceTime;
+  if(attacker&&attacker.isPlayer&&attacker!==r){setToast('HIT','teal',String(r.div?.name||'RIVAL').toUpperCase()+(lost?' · −'+lost+' TOKEN'+(lost===1?'':'S'):''),2);SFX.ui();}trackPoint(r.u,r.lat,1,_p);
   for(let i=0;i<14+lost*4;i++){_v1.set((rng()-.5)*14,6+rng()*8,(rng()-.5)*14);(i<lost*4?goldFx:hitFx).emit(_p,_v1,.5+rng()*.5,.6);}
   if(r.isPlayer){SFX.hit();game.trauma=Math.min(1,game.trauma+.6);hud.vig.className='hit';setTimeout(()=>hud.vig.className='',350);rumble(1,.7,340);haptic(70);}
 }
 function stepWorld(dt){
   const R=game.racers;
   // kart vs kart
-  for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0||a.finished||b.finished)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
+  for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0||a.finished&&b.finished)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
     if(Math.abs(ds)<2.6&&Math.abs(dl)<1.9){if(a.ram>0)hitRacer(b,'ram',a);if(b.ram>0)hitRacer(a,'ram',b);const push=1.9-Math.abs(dl),sgn=dl>=0?1:-1;
       const invA=a.anchor>0?0:1/a.weight,invB=b.anchor>0?0:1/b.weight,total=invA+invB;
-      if(total>0){a.lat-=sgn*push*invA/total;b.lat+=sgn*push*invB/total;}
+      // Resolve along the shallower overlap: a nose-to-tail tap parks the chaser on the bumper
+      // instead of teleporting both karts a metre sideways inside one tick.
+      const tail=2.6-Math.abs(ds),rear=ds>=0?a:b;
+      if(tail<push){if(!(rear.anchor>0)){rear.distance-=tail/track.len;rear.u=wrap01(rear.distance);rear.progress=rear.distance;}}
+      else if(total>0){a.lat-=sgn*push*invA/total;b.lat+=sgn*push*invB/total;}
       const boundary=TRACK_W/2-.9;
       a.lat=clamp(a.lat,-boundary,boundary);b.lat=clamp(b.lat,-boundary,boundary);
       if(a.perimeter>0){if(!(b.anchor>0))b.lat=clamp(b.lat+sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(b,.5,a);}
@@ -284,7 +302,9 @@ function stepWorld(dt){
   // missiles
   for(let i=missiles.length-1;i>=0;i--){const m=missiles[i];m.life-=dt;m.u+=m.speed*dt/track.len;if(m.u>=1)m.u-=1;
     let target=null,best=1e9;for(const r of R){if(r===m.owner||r.phase>0||r.finished)continue;const d=du_dist(m.u,r.u);if(d>0&&d<best){best=d;target=r;}}
-    if(target&&best<70)m.lat=lerp(m.lat,target.lat,1-Math.exp(-dt*(best<20?6:2)));
+    // Steering rate scales with closing speed over range, so a point-blank shot into the
+    // next lane still converges before it reaches the target.
+    if(target&&best<70){const closing=Math.max(1,m.speed-(target.speed||0)),rate=Math.max(best<20?6:2,2.2*closing/Math.max(best,1));m.lat=lerp(m.lat,target.lat,1-Math.exp(-dt*rate));}
     m.lat=clamp(m.lat,-TRACK_W/2+1,TRACK_W/2-1);orientOnTrack(m.mesh,m.u,m.lat,.9,0);m.mesh.rotateZ(game.time*14);
     trackPoint(m.u,m.lat,.9,_p);trackTan(m.u,_v1);_v1.multiplyScalar(-4);boostFx.emit(_p,_v1,.25,.2);
     let hit=null;for(const r of R){if(r===m.owner||r.phase>0||r.finished)continue;if(Math.abs(du_dist(m.u,r.u))<2&&Math.abs(r.lat-m.lat)<1.7){hit=r;break;}}
@@ -370,7 +390,10 @@ function aiWantsItem(r,curvNear){
   return true;
 }
 function stepAI(r,dt){
-  if(r.finished){r.throttle=true;r.ai.steer=lerp(r.ai.steer,-r.lat*.3,dt*2);r.ai.drift=false;return;}
+  // A finished kart lifts to a cool-down pace and pulls to the nearer wall, still solid, so the
+  // racing line stays clear for the karts still on their last lap.
+  if(r.finished){const side=r.ai.finishSide||(r.ai.finishSide=r.lat>=0?1:-1),hold=trackCurv(r.u)*r.speed*.05/Math.max(.1,r.handling*steeringGain(r.speed,r.maxSpeedBase));
+    r.throttle=r.speed<r.maxSpeedBase*.55;r.brake=false;r.ai.drift=false;r.ai.steer=lerp(r.ai.steer,clamp((side*(TRACK_W/2-1.6)-r.lat)*.3+hold,-1,1),1-Math.exp(-dt*4));return;}
   if(game.state==='countdown'){r.throttle=false;r.ai.steer=0;r.ai.drift=false;return;}
   r.ai.throttleHold+=dt;r.throttle=r.ai.throttleHold>r.ai.startDelay;
   const look=(12+r.speed*.4)/track.len;const cA=trackCurv(r.u+look),cB=trackCurv(r.u+look*2.2);
@@ -401,9 +424,22 @@ function stepAI(r,dt){
   r.ai.steer=clamp(err/3.2*skill*recovery+roadHold,-1,1);
   // drifting
   const bigCurve=Math.abs(cA)>.02||Math.abs(cB)>.024;
-  if(!r.drifting){if(bigCurve&&r.speed>r.maxSpeedBase*.6&&rng()<skill*dt*4){r.ai.drift=true;r.ai.driftHold=1.2+rng()*1.6+game.diff*.4;r.ai.steer=Math.sign(cA)*Math.max(.5,Math.abs(r.ai.steer));}}
-  else{r.ai.driftHold-=dt;if(r.ai.driftHold<=0||(!bigCurve&&Math.abs(trackCurv(r.u+look*.5))<.006))r.ai.drift=false;else r.ai.steer=clamp(r.ai.steer+r.driftDir*.35,-1,1);}
-  if(!r.drifting&&r.ai.driftHold<=0)r.ai.drift=false;
+  if(!r.drifting){
+    // Hold the chosen side through the hop so the slide can commit; a hop that did not commit
+    // (or never left the ground) releases the button, otherwise the held key blocks every later hop.
+    if(r.ai.drift&&r.hopWindow>0)r.ai.steer=r.ai.driftSide*Math.max(.5,Math.abs(r.ai.steer));
+    else if(r.ai.drift&&r.driftKey){r.ai.drift=false;r.ai.driftHold=0;}
+    else if(bigCurve&&r.speed>r.maxSpeedBase*.6&&rng()<skill*dt*4){r.ai.drift=true;r.ai.driftHold=1.2+rng()*1.6+game.diff*.4;r.ai.driftSide=Math.sign(cA)||1;r.ai.steer=r.ai.driftSide*Math.max(.5,Math.abs(r.ai.steer));}}
+  else{r.ai.driftHold-=dt;
+    // Carry a slide a moment past its plan when the next mini-turbo tier is a beat away.
+    const nextTier=r.driftTier<DRIFT_TIERS.length&&DRIFT_TIERS[r.driftTier]-r.driftTime<.3&&r.ai.driftHold>-.6;
+    if((r.ai.driftHold<=0||(!bigCurve&&Math.abs(trackCurv(r.u+look*.5))<.006))&&!nextTier)r.ai.drift=false;
+    else{
+      // Tuck into the slide only while there is room: the drift already angles the kart inward,
+      // so a constant inward bias runs it into the apex wall.
+      const room=TRACK_W/2-.9-r.lat*r.driftDir;
+      r.ai.steer=clamp(r.ai.steer+r.driftDir*(room>2.2?.35:room>1.4?0:-.5),-1,1);}}
+  if(!r.drifting&&r.ai.driftHold<=0&&r.hopWindow<=0)r.ai.drift=false;
   r.brake=false;
   // items
   if(r.ai.missileCd>0)r.ai.missileCd-=dt;
@@ -416,7 +452,8 @@ function stepAI(r,dt){
   r.rubber=1;
   const corner=Math.max(Math.abs(cA),Math.abs(cB));
   const safeSpeed=r.maxSpeedBase*clamp(1-corner*(game.diff===0?7:game.diff===1?5:4),.58,1);
-  if(!r.drifting&&r.speed>safeSpeed){r.throttle=false;r.brake=r.speed>safeSpeed+5;}
+  // A slide sheds no corner scrub, so a drifting AI still lifts for the corner; it only skips the brake.
+  if(r.speed>safeSpeed){r.throttle=false;r.brake=!r.drifting&&r.speed>safeSpeed+5;}
   // P1.3 recovery, as a decision rather than a stat: a Simulation field dithers after a
   // spin before getting back on the throttle; an Overseer field is straight back to work.
   // Speed, acceleration and grip are untouched — the driver simply waits longer.
@@ -457,9 +494,15 @@ function chaseCamera(p,portrait){
     lookUp:(portrait?1.5:1.0)+air*.6,lookSide:clamp(curv*95,-3.5,3.5),
     fov:66+(spd*7+camState.kick*9+(p.boost>0?5:0)+(p.drifting?p.driftTier*1.2:0))*swing+(portrait?4:0)};
 }
+// Karts and the chase camera are drawn between the last two 120 Hz steps (alpha = time past the
+// latest step), so uneven step counts per display frame do not show as judder at 60/90/144 Hz.
+const renderAlpha={v:1};
+function kartRenderU(r){const a=r.posePrev,b=r.pose;return a&&b?wrap01(a.u+du_dist(a.u,b.u)/track.len*renderAlpha.v):r.u;}
+function kartRenderLat(r){const a=r.posePrev,b=r.pose;return a&&b?lerp(a.lat,b.lat,renderAlpha.v):r.lat;}
+function placeRacersForRender(){const t=renderAlpha.v;for(const r of game.racers){const a=r.posePrev,b=r.pose;if(a&&b&&r.mesh)orientOnTrack(r.mesh,kartRenderU(r),kartRenderLat(r),lerp(a.h,b.h,t),lerp(a.yaw,b.yaw,t));}}
 function updateCamera(dt){
   const p=game.player;if(!p)return;
-  trackPoint(p.u,p.lat,0.9,_p);trackTan(p.u,_v1);trackUp(p.u,_v2);trackRight(p.u,_v3);
+  const pu=kartRenderU(p),pl=kartRenderLat(p);trackPoint(pu,pl,0.9,_p);trackTan(pu,_v1);trackUp(pu,_v2);trackRight(pu,_v3);
   const fwd=_v1.clone().applyAxisAngle(_v2,p.visualYaw*.35),up=_v2.clone();
   let target,look,fovT;
   if(game.state==='countdown'){const k=clamp(1-game.countdown/3.6,0,1);const a=lerp(Math.PI*.75,0,smooth(k));const dist=lerp(9,7.6,k);
@@ -523,10 +566,11 @@ function setToast(text,cls='',sub='',prio=1){
   setToast.prio=prio;setToast.until=game.raceTime+1.3;
   requestAnimationFrame(()=>hud.toast.classList.add('show'));clearTimeout(setToast.t);setToast.t=setTimeout(()=>hud.toast.classList.remove('show'),sub?1900:1400);return true;
 }
-function fmtTime(t){const m=Math.floor(t/60),s=t-m*60;return `${String(m).padStart(2,'0')}:${s.toFixed(2).padStart(5,'0')}`;}
+// Round to the displayed precision first, then split: 59.996 s reads 01:00.00, never 00:60.00.
+function fmtTime(t){const cs=Math.round(t*100),m=Math.floor(cs/6000),s=(cs-m*6000)/100;return `${String(m).padStart(2,'0')}:${s.toFixed(2).padStart(5,'0')}`;}
 // Signed split, e.g. "−0:01.3" (one decimal) or "+0:02.31" (two decimals for results/PB).
-function fmtDelta(d,decimals=1){const sign=d<0?'−':'+';d=Math.abs(d);const m=Math.floor(d/60),s=d-m*60;return sign+m+':'+s.toFixed(decimals).padStart(decimals+3,'0');}
-function raceOrder(a,b){return a.finished&&b.finished?a.finishTime-b.finishTime:a.finished?-1:b.finished?1:b.progress-a.progress;}
+function fmtDelta(d,decimals=1){const sign=d<0?'−':'+',unit=10**decimals,q=Math.round(Math.abs(d)*unit),m=Math.floor(q/(60*unit)),s=(q-m*60*unit)/unit;return sign+m+':'+s.toFixed(decimals).padStart(decimals+3,'0');}
+function raceOrder(a,b){return a.finished&&b.finished?(a.finishTime-b.finishTime||b.distance-a.distance):a.finished?-1:b.finished?1:b.progress-a.progress;}
 // Time gap to the racer ahead (or to the chaser when leading), estimated from track distance at the player's pace.
 function gapText(sorted,p){
   const i=sorted.indexOf(p);if(i<0||sorted.length<2||p.finished)return '';
@@ -623,24 +667,32 @@ function onPlayerFinish(){
   if(typeof clearAddons==='function')clearAddons();if(typeof clearAbilities==='function')clearAbilities();
   if(typeof raceTelemetry!=='undefined'){raceTelemetry.event('lap-timing',{circuitRevision:'p0',map:chosenMapId,playerLapSeconds:game.player.lapTimes.slice(),aiLaps:game.racers.filter(r=>!r.isPlayer).map(r=>({division:r.div.id,lapSeconds:r.lapTimes.slice()})),tokensCollected:game.player.totalTokensCollected,serviceLineMetres:game.player.serviceLineMetres});raceTelemetry.finish(game.player.finishTime);}
   updateRanks(true);const p=game.player,key=raceRecordKey(p.div.id,game.diff);const old=saved[key];
-  game.newBest=!Number.isFinite(old)||p.finishTime<old;game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
+  game.newBest=!p.dnf&&(!Number.isFinite(old)||p.finishTime<old);game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
   if(game.newBest){saved[key]=p.finishTime;persist();}
   if(typeof settleRewardRace==='function')settleRewardRace();
   game.state='finish';SFX.finish();rumble(.6,.8,400);
   const pb=game.newBest?(Number.isFinite(old)?'PB '+fmtDelta(game.pbDelta,2):'NEW PERSONAL BEST'):'';
-  setToast(p.rank===1?'VICTORY':'FINISH','gold',pb,4);game.finishTimer=3.2;hideTouch();
+  setToast(p.dnf?'DID NOT FINISH':p.rank===1?'VICTORY':'FINISH',p.dnf?'':'gold',pb,4);game.finishTimer=3.2;hideTouch();
 }
 function showResults(){
   const sorted=game.racers.slice().sort(raceOrder);const leader=sorted[0];
-  const p=game.player;document.getElementById('rtitle').innerHTML=p.rank===1?'Circuit <span>Champion</span>':p.rank<=3?'Podium <span>Finish</span>':'Race <span>Complete</span>';
+  const p=game.player;document.getElementById('rtitle').innerHTML=p.dnf?'Race <span>Closed</span>':p.rank===1?'Circuit <span>Champion</span>':p.rank<=3?'Podium <span>Finish</span>':'Race <span>Complete</span>';
   const pb=game.newBest?(Number.isFinite(game.pbDelta)?' · PB '+fmtDelta(game.pbDelta,2):' · PERSONAL BEST'):'';
-  document.getElementById('rsub').textContent=`${p.div.name.toUpperCase()} · ${ordinal(p.rank).toUpperCase()==='ST'?'1ST':p.rank+ordinal(p.rank).toUpperCase()} · ${fmtTime(p.finishTime)}${pb} · ${['SIMULATION','STANDARD','OVERSEER'][game.diff]}${typeof activeMap!=='undefined'&&activeMap?' · '+activeMap.name.toUpperCase():''}`;
+  document.getElementById('rsub').textContent=`${p.div.name.toUpperCase()} · ${p.dnf?'DID NOT FINISH':p.rank+ordinal(p.rank).toUpperCase()} · ${p.dnf?'DNF':fmtTime(p.finishTime)}${pb} · ${['SIMULATION','STANDARD','OVERSEER'][game.diff]}${typeof activeMap!=='undefined'&&activeMap?' · '+activeMap.name.toUpperCase():''}`;
   let fastest=0;for(const r of sorted)if(r.bestLap>0&&(!fastest||r.bestLap<fastest))fastest=r.bestLap;
   const board=document.getElementById('board');
+  // Rivals still on track get a projected time from their own average pace, marked with ~.
+  // A rival's own lap pace is used once it has run a meaningful distance; before that the
+  // leader's average lap stands in. A projection never lands ahead of the leader.
+  const leaderTime=leader&&leader.finished?leader.finishTime:game.raceTime||0;
+  const estimate=r=>{if(r.finished)return r.finishTime;const done=clamp(Number.isFinite(r.distance)?r.distance:(r.progress||0),0,game.laps);
+    const lap=done>.3&&game.raceTime>10?game.raceTime/done:Math.max(1,leaderTime)/game.laps;
+    return Math.max(leaderTime,game.raceTime||0)+Math.max(0,game.laps-done)*lap;};
   board.innerHTML='<div class="hd"><b>#</b><span>DIRECTOR</span><i>TIME</i><i class="bl">BEST LAP</i><i class="gp">GAP</i></div>'+sorted.map((r,i)=>{
-    const gap=!r.finished?'':r===leader?'LEADER':leader&&leader.finished?fmtDelta(r.finishTime-leader.finishTime,2):'';
-    return `<div class="${r.isPlayer?'me':''}" style="--c:${r.div.acc}"><b>${i+1}</b><span><em></em>${r.div.name}</span><i>${r.finished?fmtTime(r.finishTime):'RACING · LAP '+Math.min(r.lap,game.laps)}</i><i class="bl${r.bestLap>0&&r.bestLap===fastest?' fastest':''}">${r.bestLap>0?fmtTime(r.bestLap):'—'}</i><i class="gp">${gap}</i></div>`;}).join('');
-  document.getElementById('hud').classList.add('hidden');
+    const time=r.dnf?'DNF':r.finished?fmtTime(r.finishTime):'~'+fmtTime(estimate(r));
+    const gap=r.dnf?'':r===leader?'LEADER':leader&&leader.finished?(r.finished?'':'~')+fmtDelta(estimate(r)-leader.finishTime,2):'';
+    return `<div class="${r.isPlayer?'me':''}" style="--c:${r.div.acc}"><b>${i+1}</b><span><em></em>${r.div.name}</span><i>${time}</i><i class="bl${r.bestLap>0&&r.bestLap===fastest?' fastest':''}">${r.bestLap>0?fmtTime(r.bestLap):'—'}</i><i class="gp">${gap}</i></div>`;}).join('');
+  document.getElementById('hud').classList.add('hidden');dialogHeldKeys.clear();heldKeys.forEach(code=>dialogHeldKeys.add(code));
   document.getElementById('results').classList.remove('hidden');game.state='results';if(typeof renderRewardSummary==='function')renderRewardSummary();
 }
 // Results → Next Circuit: cycle to the following MAPS entry and restart with the same director and difficulty.
@@ -701,11 +753,13 @@ function frame(now){
   if(typeof tickFinishCeremony==='function'&&tickFinishCeremony(dt)){renderRaceScene();audioUpdate(dt,game.player);return;}
   if(typeof tickTitleAttract==='function'&&tickTitleAttract(dt)){renderRaceScene();return;}
   if(game.state==='paused')pollGamepad();
+  if(game.state==='paused'||game.state==='results')pollMenuPad();
   if(game.state==='paused'||game.state==='boot'||game.state==='roster'||game.state==='results'){ if(game.state!=='boot'&&game.state!=='roster'&&staticFrameDirty){(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));staticFrameDirty=false;}if(game.state==='roster'){rosterOrbit(dt);(typeof renderRaceScene==='function'?renderRaceScene():renderer.render(scene,camera));renderSelectedPreview(dt);}audioUpdate(dt,game.player);return;}
   if(typeof updateMapScenery==='function')updateMapScenery(dt);
   pollGamepad();game.time+=dt;acc+=dt;let steps=0;
   while(acc>=STEP&&steps<12&&['countdown','race','finish'].includes(game.state)){simStep(STEP);acc-=STEP;steps++;}
   if(steps===12)acc=0;
+  renderAlpha.v=clamp(acc/STEP,0,1);placeRacersForRender();
   [sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx].forEach(p=>p.update(dt));if(typeof raceFX!=='undefined')raceFX.update(dt,game.player);
   updateCamera(dt);updateHUD(dt);
   world.traverse(o=>{if(o.userData.spin)o.rotation.z+=o.userData.spin*dt*(o.geometry&&o.geometry.type==='TorusGeometry'?1:0),o.rotation.y+=o.userData.spin*dt;});
@@ -723,7 +777,9 @@ function simStep(dt){
         // start boost / wheelspin judgment
         if(p.startHold>0&&p.startHold<.9){applyBoost(p,1.0,1.3,.8);SFX.boost(2);setToast('ROCKET START','teal','',3);}else if(p.startHold>=1.6){p.wheelspin=.9;setToast('WHEELSPIN','','',3);haptic(30);}}}
     if(c<=0){game.state='race';game.racers.forEach(r=>{if(!r.isPlayer)r.ai.throttleHold=0;});}
-    else{if(input.throttle||(game.touch&&input.drift))p.startHold+=dt;else p.startHold=0;game.racers.forEach(r=>{if(!r.isPlayer)stepAI(r,dt);r.throttle=false;stepRacer(r,dt);});return;}
+    else{// Power, add-on and item presses during the countdown are ignored rather than queued for GO.
+      input.itemEdge=input.specialEdge=input.addonEdge=false;
+      if(input.throttle||(game.touch&&input.drift))p.startHold+=dt;else p.startHold=0;game.racers.forEach(r=>{if(!r.isPlayer)stepAI(r,dt);r.throttle=false;stepRacer(r,dt);});return;}
   }
   game.raceTime+=dt;
   p.throttle=(input.throttle||game.touch||game.autoThrottle)&&!input.brake;p.brake=input.brake;
@@ -738,6 +794,12 @@ function simStep(dt){
   updateRanks(false);
   if(game.state==='race')stepPositionToasts(p,dt);
   if(p.finished&&game.state==='race')onPlayerFinish();
+  // Once every rival is home the player gets 30 s to finish; after that the race closes
+  // as a DNF so the results screen always arrives. A DNF earns no record or reward.
+  if(game.state==='race'&&!p.finished&&game.racers.every(r=>r.isPlayer||r.finished)){
+    if(!(game.dnfTimer>0)){game.dnfTimer=30;setToast('30 SECONDS TO FINISH','','',3);}
+    else{game.dnfTimer-=dt;if(game.dnfTimer<=0){p.finished=true;p.dnf=true;p.finishTime=game.raceTime;onPlayerFinish();}}
+  }
   stepWorld(dt);
   if(game.state==='finish'){game.finishTimer-=dt;if(game.finishTimer<=0)showResults();}
 }
@@ -748,7 +810,7 @@ function rosterOrbit(dt){if(matchMedia('(prefers-reduced-motion: reduce)').match
 
 // ---------- Input ----------
 const KEYS={KeyW:'throttle',ArrowUp:'throttle',KeyS:'brake',ArrowDown:'brake',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',ShiftLeft:'drift',ShiftRight:'drift',Space:'drift',KeyE:'item',ControlLeft:'item',ControlRight:'item',KeyQ:'special',KeyF:'addon'};
-const heldKeys=new Set(),touchHeld=new Set(),padHeld=new Set();let padSteer=0,padPause=false,touchSteer=0;
+const heldKeys=new Set(),touchHeld=new Set(),padHeld=new Set(),dialogHeldKeys=new Set();let padSteer=0,padPause=false,touchSteer=0;
 const activeTouchPointers=new Map();
 game.analogSteering=saved.analogSteering!==false;game.steeringAssist=saved.steeringAssist!==false;
 function syncInput(){for(const key of ['throttle','brake','left','right','drift','item','special','addon']){const on=touchHeld.has(key)||padHeld.has(key)||[...heldKeys].some(code=>KEYS[code]===key);if(key==='item'&&on&&!input.item)input.itemEdge=true;if(key==='special'&&on&&!input.special)input.specialEdge=true;if(key==='addon'&&on&&!input.addon)input.addonEdge=true;input[key]=on;}}
@@ -766,12 +828,17 @@ bindControlsProbe();
 function resetInput(){heldKeys.clear();touchHeld.clear();padHeld.clear();padSteer=0;touchSteer=0;steerPointer=null;activeTouchPointers.clear();const pad=document.getElementById('tSteer');if(pad){pad.style.setProperty('--steer','0px');pad.setAttribute?.('aria-valuenow','0');}for(const k of Object.keys(input))input[k]=false;document.querySelectorAll('#touch .act').forEach(el=>el.classList.remove('act'));}
 // Key events that originate inside a text field never drive the kart or the menus.
 function typingTarget(e){const t=e&&e.target;if(!t||!t.tagName)return false;const tag=String(t.tagName).toUpperCase();return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||t.isContentEditable===true;}
-addEventListener('keydown',e=>{if(typingTarget(e))return;const k=KEYS[e.code];if(k&&['race','countdown','finish'].includes(game.state)){heldKeys.add(e.code);syncInput();if(e.preventDefault)e.preventDefault();audioInit();}
+// Mapped keys are tracked in every state so a key held through pause still drives after
+// resume (OS auto-repeat moves to Esc and never re-announces it). They only drive in play.
+addEventListener('keydown',e=>{if(typingTarget(e))return;const k=KEYS[e.code];if(k)heldKeys.add(e.code);
+  if(k&&['race','countdown','finish'].includes(game.state)){syncInput();if(e.preventDefault)e.preventDefault();audioInit();}
+  // A drift key held into the pause or results dialog must not repeat-press its focused button.
+  else if(k&&(e.repeat||dialogHeldKeys.has(e.code))&&['paused','results'].includes(game.state)&&e.preventDefault)e.preventDefault();
   if(e.repeat)return;
   if(e.code==='Escape'){if(game.state==='race'||game.state==='countdown')pause();else if(game.state==='paused')resume();}
   else if(e.code==='KeyR'){if(restartRace()&&e.preventDefault)e.preventDefault();}
   else if(e.code==='KeyM'){if(['race','countdown','finish','paused','results'].includes(game.state)){toggleMute();if(e.preventDefault)e.preventDefault();}}});
-addEventListener('keyup',e=>{if(KEYS[e.code]){heldKeys.delete(e.code);syncInput();}});
+addEventListener('keyup',e=>{if(KEYS[e.code]){heldKeys.delete(e.code);syncInput();if(dialogHeldKeys.delete(e.code)&&e.preventDefault)e.preventDefault();}});
 addEventListener('blur',()=>{resetInput();pause();if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt('blur');});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){resetInput();pause();audioUpdate(0,game.player);}if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt(document.hidden?'hidden':'visible');});
 // Rescale the usable axis range to avoid a sudden steering jump at the deadzone.
@@ -781,6 +848,22 @@ function pollGamepad(){const pad=Array.from(navigator.getGamepads?.()||[]).find(
   const down=i=>!!pad.buttons[i]?.pressed;padSteer=analogAxis(pad.axes[0]||0);
   padHeld.clear();if(down(7)||down(0))padHeld.add('throttle');if(down(6)||down(1))padHeld.add('brake');if(down(4))padHeld.add('drift');if(down(2))padHeld.add('item');if(down(3))padHeld.add('special');if(down(5)||down(10))padHeld.add('addon');if(down(14))padHeld.add('left');if(down(15))padHeld.add('right');
   if(down(9)&&!padPause){if(game.state==='paused')resume();else pause();}padPause=down(9);syncInput();}
+// Pause and results dialogs are fully drivable from a pad: D-pad moves focus through the
+// visible buttons, A presses, B resumes from pause, Start retries from results.
+const menuPad={prev:[]};
+function pollMenuPad(){
+  const pad=Array.from(navigator.getGamepads?.()||[]).find(p=>p&&p.connected!==false);if(!pad){menuPad.prev=[];return;}
+  if(document.querySelector('dialog[open]'))return;// the garage runs its own pad loop
+  const now=pad.buttons.map(b=>!!b?.pressed),edge=i=>now[i]&&!menuPad.prev[i];menuPad.prev=now;
+  const root=document.getElementById(game.state==='paused'?'pause':'results');if(!root)return;
+  const buttons=[...root.querySelectorAll('button')].filter(b=>!b.disabled&&!b.hidden&&b.offsetParent!==null);
+  if(!buttons.length)return;
+  const at=buttons.indexOf(document.activeElement),step=edge(13)||edge(15)?1:edge(12)||edge(14)?-1:0;
+  if(step){buttons[(at+step+buttons.length)%buttons.length].focus();SFX.ui?.();}
+  else if(edge(0)){(at>=0?buttons[at]:buttons[0]).click();}
+  else if(edge(1)&&game.state==='paused')resume();
+  else if(edge(9)&&game.state==='results')document.getElementById('rematch')?.click();
+}
 const touchEl=document.getElementById('touch');
 function bindTouch(id,key){const el=document.getElementById(id);if(!el)return;
   el.addEventListener('pointerdown',e=>{
@@ -813,8 +896,10 @@ if(autoThrottleToggle){autoThrottleToggle.checked=game.autoThrottle;autoThrottle
 const fullscreenButton=document.getElementById('fullscreen');
 if(fullscreenButton){fullscreenButton.hidden=!document.documentElement?.requestFullscreen;fullscreenButton.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{setToast('FULLSCREEN UNAVAILABLE');}};document.addEventListener('fullscreenchange',()=>{fullscreenButton.textContent=document.fullscreenElement?'EXIT FULLSCREEN':'FULLSCREEN';});}
 function updateBestTime(){const el=document.getElementById('besttime');if(el&&selected)el.textContent=Number.isFinite(saved[raceRecordKey(selected.id,game.diff)])?'BEST '+fmtTime(saved[raceRecordKey(selected.id,game.diff)]):'SET YOUR FIRST RECORD';}
-function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';staticFrameDirty=true;resetInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
-function resume(){if(game.state!=='paused')return;resetInput();audioInit();game.state=game.prevState;document.getElementById('pause').classList.add('hidden');last=performance.now();acc=0;if(typeof resetRenderBudget==='function')resetRenderBudget();if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt('resume');showTouch();}
+// Pausing stops the kart but remembers physically held keys; touch and pad re-poll on resume.
+function releaseDriveInput(){touchHeld.clear();padHeld.clear();padSteer=0;touchSteer=0;steerPointer=null;activeTouchPointers.clear();for(const k of Object.keys(input))input[k]=false;document.querySelectorAll('#touch .act').forEach(el=>el.classList.remove('act'));}
+function pause(){if(game.state!=='race'&&game.state!=='countdown')return;game.prevState=game.state;game.state='paused';staticFrameDirty=true;dialogHeldKeys.clear();heldKeys.forEach(code=>dialogHeldKeys.add(code));releaseDriveInput();acc=0;document.getElementById('pause').classList.remove('hidden');hideTouch();}
+function resume(){if(game.state!=='paused')return;releaseDriveInput();audioInit();game.state=game.prevState;syncInput();input.itemEdge=input.specialEdge=input.addonEdge=false;document.getElementById('pause').classList.add('hidden');last=performance.now();acc=0;if(typeof resetRenderBudget==='function')resetRenderBudget();if(typeof raceTelemetry!=='undefined')raceTelemetry.interrupt('resume');showTouch();}
 document.getElementById('pausebtn').onclick=()=>{if(game.state==='paused')resume();else pause();};
 document.getElementById('resume').onclick=resume;
 document.getElementById('mutebtn').onclick=toggleMute;
@@ -823,7 +908,8 @@ if(saved.muted===true&&typeof AUDIO!=='undefined'){AUDIO.on=false;for(const id o
 document.getElementById('quit').onclick=()=>{document.getElementById('pause').classList.add('hidden');openRoster();};
 document.getElementById('again').onclick=()=>{document.getElementById('results').classList.add('hidden');openRoster();};
 document.getElementById('rematch').onclick=()=>{document.getElementById('results').classList.add('hidden');audioInit();startRace();};
-document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));b.classList.add('on');game.diff=+b.dataset.d;SFX.ui();updateBestTime();});
+document.querySelectorAll('#diff button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));b.classList.add('on');game.diff=+b.dataset.d;saved.diff=game.diff;persist();SFX.ui();updateBestTime();});
+if([0,1,2].includes(saved.diff)){game.diff=saved.diff;document.querySelectorAll('#diff button').forEach(b=>b.classList.toggle('on',+b.dataset.d===game.diff));}
 addEventListener('resize',()=>{resetInput();staticFrameDirty=true;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(typeof raceTelemetry!=='undefined')raceTelemetry.event('resize',{width:innerWidth,height:innerHeight});});
 
 // ---------- Roster screen ----------
@@ -845,7 +931,12 @@ function startRace(){if(!selected)return false;if(['boot','roster','title'].incl
 async function boot(){
  try{
   await loadKartAssets((done,total)=>{document.getElementById('loading-status').textContent='ASSEMBLING RACERS · '+done+' / '+total;const progress=document.getElementById('loading-progress');progress.max=total;progress.value=done;});
-  buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
+  await Promise.race([preloadEquippedTiers(),new Promise(done=>setTimeout(done,8000))]);
+  buildTextures();game.skyMat=buildSky();
+  // Build the chosen circuit through selectMap: the bare world.js controls are cherry without its detour,
+  // and selectMap skips an unchanged map, so a first-session cherry race used to run the short layout.
+  if(typeof selectMap==='function'){activeMap=null;selectMap(chosenMapId);}else{buildTrackFrames();buildTrackMeshes();buildEnvironment();}
+  kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
   if(typeof raceTelemetry!=='undefined')raceTelemetry.ready();
@@ -883,6 +974,8 @@ function updateSelectedPreview(d){
 
  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('racerselect',{detail:{division:d,ability:power}}));
  if(typeof THREE.Scene!=='function'||renderer.renderRosterPreview)return;
+ const tierBadge=document.getElementById('preview-tier'),tierInfo=typeof KART_TIERS!=='undefined'&&KART_TIERS.find(t=>t.id===equippedKartTier(d.id));
+ if(tierBadge&&tierInfo){tierBadge.textContent=(tierInfo.short+' · '+tierInfo.name).toUpperCase();tierBadge.dataset.tier=tierInfo.id;}
  disposePreview();if(!previewScene)buildPreviewStage();
  previewKart=buildKart(d);
  if(typeof applyKartBuildVisuals==='function')applyKartBuildVisuals(previewKart,saved.builds?.[d.id]||[],saved.appearance?.[d.id]||'factory');
@@ -894,6 +987,8 @@ function updateSelectedPreview(d){
  previewSpin.velocity=0;
 }
 addEventListener('garagechange',()=>{if(selected&&previewKart)updateSelectedPreview(selected);});
+// A tier model that finished downloading replaces the factory stand-in on the turntable.
+addEventListener('karttierready',()=>{directorPortraits.clear();renderer.portraits?.clear?.();if(selected&&previewKart&&(previewKart.userData.tier||'factory')!==equippedKartTier(selected.id))updateSelectedPreview(selected);});
 function spinPreview(delta){previewAngle+=delta;previewSpin.velocity=clamp(previewSpin.velocity+delta*6,-9,9);}
 (()=>{const el=document.getElementById('kart-preview');if(!el||!el.addEventListener)return;
  el.addEventListener('pointerdown',e=>{if((e.button!==0&&e.pointerType==='mouse')||e.target?.closest?.('button'))return;previewSpin.dragging=true;previewSpin.pointer=e.pointerId;previewSpin.lastX=e.clientX;previewSpin.velocity=0;el.setPointerCapture?.(e.pointerId);el.classList.add('dragging');});

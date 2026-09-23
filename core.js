@@ -29,6 +29,13 @@ const ROSTER = [
   {id:'eon',      name:'Eon Core',       role:'Longevity Science',      code:'EC-01', acc:'#06B6D4', acc2:'#ECFEFF', base:'#061418', stats:[2,5,4,3], mark:'infinity'},
 ];
 const STAT_NAMES = ['Speed','Accel','Handling','Weight'];
+// Chassis tiers every division can progress through (models in assets/models/tiers).
+const KART_TIERS=[
+ {id:'factory',rank:1,name:'Factory',short:'Tier I',blurb:'The division chassis every director starts with.'},
+ {id:'dark',rank:2,name:'Nightfall Spec',short:'Tier II',blurb:'Blacked-out coachwork with the division light running through it.'},
+ {id:'final',rank:3,name:'Apex Pearl',short:'Tier III',blurb:'The finished pearl race chassis. Unlocked after Nightfall and a proven career.'}
+];
+
 
 // ---------- Small utils ----------
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t, smooth=(t)=>t*t*(3-2*t);

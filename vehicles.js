@@ -35,7 +35,8 @@ function disposeKart(root){
   const geometries=new Set(),materials=new Set(),textures=new Set();
   root.traverse(obj=>{if(obj.geometry&&!obj.geometry.userData?.blenderShared&&!sharedGeometry.has(obj.geometry))geometries.add(obj.geometry);
     if(obj.material)(Array.isArray(obj.material)?obj.material:[obj.material]).forEach(m=>materials.add(m));});
-  materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture&&!sharedTextures.has(v))textures.add(v);});m.dispose();});
+  // Fitted chassis templates share their textured material across every instance.
+  materials.forEach(m=>{if(m.userData?.tierShared)return;Object.values(m).forEach(v=>{if(v?.isTexture&&!sharedTextures.has(v)&&!(typeof KART_TIER_ASSETS!=='undefined'&&KART_TIER_ASSETS.textures.has(v)))textures.add(v);});m.dispose();});
   geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());if(root.parent)root.parent.remove(root);
 }
 const KART_GEO={};
@@ -326,7 +327,15 @@ function dressRacePilot(div,pilot,head,arms,add,{white,dark,panel,metal}){
   else {tube('helmet-rear-spoiler',head,panel,[[-.24,.44,.21],[0,.49,.27],[.24,.44,.21]],.035);}
 }
 
-function buildKart(div){
+// tier: 'factory' | 'dark' | 'final'. Omitted, the player's equipped chassis for this
+// division is used. A tier that is not downloaded yet falls back to the factory kart
+// and starts the download; 'karttierready' then lets showrooms rebuild.
+function buildKart(div,tier){
+  if(tier===undefined)tier=typeof equippedKartTier==='function'?equippedKartTier(div.id):'factory';
+  if(tier&&tier!=='factory'&&typeof createTierKart==='function'){
+    const fitted=createTierKart(div,tier);if(fitted)return fitted;
+    if(typeof loadKartTier==='function')loadKartTier(div.id,tier);
+  }
   if(typeof createLoadedKart==='function'){const model=createLoadedKart(div);if(model)return model;}
   const root=new THREE.Group();root.name=div.name+' Reference Chassis';
   const {white,dark,panel,glow,skin,metal,tyre}=kartMaterials(div);
@@ -721,7 +730,10 @@ function animateKart(r,dt,ag=0){
   const driftYaw=r.drifting?r.driftDir*.55+r.steer*.15:r.steer*.12;
   r.visualYaw=lerp(r.visualYaw,driftYaw,1-Math.exp(-dt*8));
   if(r.hop>0)r.hop-=dt;const hopH=r.hop>0?Math.sin((r.hop/.28)*Math.PI)*.5:0;
-  orientOnTrack(r.mesh,r.u,r.lat,0.02+hopH,r.visualYaw+spinYaw+r.theta*.6);
+  // Keep this and the previous step's root pose (two reused records) so the renderer can
+  // interpolate between 120 Hz simulation steps; the simulation itself never reads them.
+  const pose=r.posePrev||{};r.posePrev=r.pose;r.pose=pose;pose.u=r.u;pose.lat=r.lat;pose.h=.02+hopH;pose.yaw=r.visualYaw+spinYaw+r.theta*.6;
+  orientOnTrack(r.mesh,pose.u,pose.lat,pose.h,pose.yaw);
   // --- loads: lateral from steer/drift, longitudinal from the speed delta
   const sf=clamp(Math.abs(speed)/22,0,1);
   const rawAccel=dt>1e-6?clamp((speed-a.prevSpeed)/dt,-40,40):0;a.prevSpeed=speed;a.accel=ease(a.accel,rawAccel,dt,6);
@@ -825,16 +837,23 @@ function itemIconSVG(key){
 }
 let itemBoxes=[],tokens=[],mines=[],missiles=[];
 const pickupGroup=new THREE.Group();scene.add(pickupGroup);
+// Rows and token arcs sit at authored fractions of each lap; the defaults suit no single circuit,
+// so each map may give its own (same counts) to keep them off hairpins and anti-gravity entries.
+const PICKUP_LAYOUT={rows:[0.11,0.30,0.47,0.64,0.80,0.93],arcs:[0.06,0.2,0.38,0.55,0.72,0.86]},PICKUP_LANES=[-5,-1.7,1.7,5],PICKUP_ARCS=[[-3,1],[3,-1],[-4,.5],[0,0],[4,-.5],[-2,1]];
+function placePickups(){
+  const layout=typeof activeMap!=='undefined'&&activeMap?.pickups||PICKUP_LAYOUT;
+  itemBoxes.forEach((b,i)=>{b.u=layout.rows[Math.floor(i/PICKUP_LANES.length)];b.lat=PICKUP_LANES[i%PICKUP_LANES.length];});
+  tokens.forEach((t,i)=>{const a=Math.floor(i/6),k=i%6,[lat0,dir]=PICKUP_ARCS[a];t.u=layout.arcs[a]+k*0.0045;t.lat=lat0+Math.sin(k*.9)*dir*2.2;});
+}
 function buildPickups(){
   const boxG=new THREE.BoxGeometry(1.45,1.45,.32);const boxMat=new THREE.MeshPhysicalMaterial({color:0x66e8ff,metalness:.25,roughness:.1,emissive:0x00bfff,emissiveIntensity:.25,transparent:true,opacity:.72,depthWrite:false,clearcoat:1});
   const coreG=starGeo(.44,.38);const coreMat=new THREE.MeshStandardMaterial({color:0xc4ffff,emissive:0x39dcff,emissiveIntensity:1.1});
-  const rows=[0.11,0.30,0.47,0.64,0.80,0.93];
-  rows.forEach(u=>{[-5,-1.7,1.7,5].forEach(lat=>{const g=new THREE.Group();const m=new THREE.Mesh(boxG,boxMat);m.castShadow=true;g.add(m);const cc=new THREE.Mesh(coreG,coreMat);g.add(cc);pickupGroup.add(g);itemBoxes.push({u,lat,mesh:g,star:m,core:cc,t:0});});});
+  PICKUP_LAYOUT.rows.forEach(u=>{PICKUP_LANES.forEach(lat=>{const g=new THREE.Group();const m=new THREE.Mesh(boxG,boxMat);m.castShadow=true;g.add(m);const cc=new THREE.Mesh(coreG,coreMat);g.add(cc);pickupGroup.add(g);itemBoxes.push({u,lat,mesh:g,star:m,core:cc,t:0});});});
   // tokens: round gold coins in arcs
   const tokG=new THREE.CylinderGeometry(.5,.5,.12,32);tokG.rotateX(Math.PI/2);const tokMat=new THREE.MeshPhysicalMaterial({color:0xd4a843,metalness:.9,roughness:.2,emissive:0xd4a843,emissiveIntensity:.35,clearcoat:.8});
   const embG=starGeo(.24,.06);const embMat=new THREE.MeshStandardMaterial({color:0x2a1a04,roughness:.5,metalness:.4});
-  const arcs=[[0.06,-3,1],[0.2,3,-1],[0.38,-4,.5],[0.55,0,0],[0.72,4,-.5],[0.86,-2,1]];
-  arcs.forEach(([u0,lat0,dir])=>{for(let k=0;k<6;k++){const u=u0+k*0.0045,lat=lat0+Math.sin(k*.9)*dir*2.2;const g=new THREE.Group();g.add(new THREE.Mesh(tokG,tokMat));const e=new THREE.Mesh(embG,embMat);e.position.z=.07;g.add(e);const e2=e.clone();e2.position.z=-.07;g.add(e2);pickupGroup.add(g);tokens.push({u,lat,mesh:g,t:0});}});
+  PICKUP_LAYOUT.arcs.forEach((u0,a)=>{const [lat0,dir]=PICKUP_ARCS[a];for(let k=0;k<6;k++){const u=u0+k*0.0045,lat=lat0+Math.sin(k*.9)*dir*2.2;const g=new THREE.Group();g.add(new THREE.Mesh(tokG,tokMat));const e=new THREE.Mesh(embG,embMat);e.position.z=.07;g.add(e);const e2=e.clone();e2.position.z=-.07;g.add(e2);pickupGroup.add(g);tokens.push({u,lat,mesh:g,t:0});}});
+  placePickups();
 }
 const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_m=new THREE.Matrix4();
 function orientOnTrack(obj,u,lat,h,yaw=0){trackPoint(u,lat,h,obj.position);trackTan(u,_v1);trackUp(u,_v2);trackRight(u,_v3);

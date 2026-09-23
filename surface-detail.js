@@ -46,7 +46,9 @@ function createSurfaceEnvironmentTarget(renderer,map){
     [[-4,6,-3],[5,3,1],0xfff3df,5],[[5,3,1],[2,7,1],0xc0efff,3],[[0,5,5],[7,2,1],0xffffff,2]
   ]){const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:new THREE.Color(color).multiplyScalar(power),side:THREE.DoubleSide}));m.position.set(...position);m.scale.set(...scale);m.lookAt(0,0,0);stage.add(m);items.push(m);}
   const pmrem=new THREE.PMREMGenerator(renderer);let next;
-  try{next=pmrem.fromScene(stage,.06,.1,30);}
+  // r128 PMREM blurs with at most 20 taps at this size; .038 is the widest sigma it
+  // renders without clipping (and warning on every environment build).
+  try{next=pmrem.fromScene(stage,.038,.1,30);}
   catch(error){console.warn('Reflection environment unavailable',error);return null;}
   finally{pmrem.dispose();for(const m of items){m.geometry.dispose();m.material.dispose();}}
   return next;

@@ -24,7 +24,9 @@ function addonSurface(color,mode=0){
  else if(mode==4.){float filament=pow(.5+.5*sin(vUv.x*60.+n*9.-time*7.),14.);c=tint*(.6+filament)+vec3(.8)*filament;a=.03+rim*.5+filament*.5;}
  else if(mode==5.){c=mix(tint*.12,tint,n);a=pow(n,2.)*facing*.45;}
  else{c=mix(tint*.25,tint,rim)+tint*pow(n,5.)*3.;a=.08+rim*.7;}
- if(fade<.98&&noise(vP*20.)>fade)discard;gl_FragColor=vec4(c,a*fade);}`});
+ if(mode!=1.&&mode!=3.){a=clamp(a*1.7+.04,0.,1.);float l=dot(c,vec3(.299,.587,.114));c=max(mix(vec3(l),c,1.5),0.)*1.15;}
+ float edge=noise(vP*20.);if(fade<.98&&edge>fade)discard;c+=tint*2.*smoothstep(fade,fade+.08,edge+.08)*step(fade,.98);
+ gl_FragColor=vec4(c,a*fade);}`});
 }
 function addonPart(root,geometry,material,name,x=0,y=0,z=0){const m=new THREE.Mesh(geometry,material);m.name=name;m.position.set(x,y,z);root.add(m);return m;}
 function addonStone(color='#474950'){return new THREE.MeshStandardMaterial({color,roughness:.89,metalness:.09,transparent:true});}
@@ -131,11 +133,14 @@ function spawnAddonEffect(id,u,lat,owner,options={}){
  const mesh=new THREE.Group();mesh.name='addon-'+id;
  if(options.phase==='projectile'&&['growth','cascade','monolith','earth-spire'].includes(id))buildAddonProjectileSignature(mesh,id,ADDON_FX_COLORS[id]);else buildAddonSignature(mesh,id,ADDON_FX_COLORS[id]);
  const duration=options.duration??2.4,fx={id,u,lat,owner,mesh,life:duration,duration,follow:!!options.follow,entity:options.entity,phase:options.phase||'cast',contact:false};if(options.radius&&options.phase!=='projectile'){const base={acid:3.8,pyre:3,kraken:3.7,astral:4.1,rend:3.2,ward:3.1,growth:2.8,ink:3.6,venom:2.8,monolith:3.5}[id]||3;mesh.scale.set(options.radius/base,1,options.radius/base);mesh.userData.effectRadius=options.radius;if(id==='pyre')mesh.userData.safeRadius=options.radius*.5;}
+ // Hazards on the road carry a ground sigil at their true footprint, readable at distance.
+ if(fx.phase==='zone'&&options.radius&&!options.visualOnly&&typeof addSigil==='function'){const sig=addSigil(mesh,ADDON_FX_COLORS[id],options.radius,({acid:5,pyre:7,kraken:8,electrical:6,astral:9,ink:5,rend:4,ward:6})[id]||6);sig.position.y=-.96;}
  scene.add(mesh);orientOnTrack(mesh,u,lat,1,0);addonEffects.push(fx);return fx;
 }
 // Public contact entry point: invoke after a collision/slow/blocked hit resolves.
 // Normal item collisions use their item key, so missiles/mines share the standard.
 function spawnAddonContact(id,u,lat,owner){
+ if(typeof powerVFX!=='undefined')powerVFX.touch({u,lat},ADDON_FX_COLORS[id]||(typeof referencePowerColors!=='undefined'&&referencePowerColors[id])||'#fff4cb');
  if(!reserveAddonEffect())return null;
  const color=ADDON_FX_COLORS[id]||referencePowerColors[id]||'#fff4cb',mesh=new THREE.Group();mesh.name='contact-'+id;
  const ring=addonRing(mesh,color,1, -.6,'contact-shock');ring.scale.setScalar(.2);
@@ -152,6 +157,8 @@ function stepAddonEffects(dt){
   const age=f.duration-f.life,clock=age*(powerReduced?.25:1);
   if(f.entity){f.u=f.entity.u;f.lat=f.entity.lat;}else if(f.follow&&f.owner){f.u=f.owner.u;f.lat=f.owner.lat;}
   orientOnTrack(f.mesh,f.u,f.lat,1,0);
+  // Live hazards light the road beneath them in their own colour.
+  if(f.entity&&!f.contact&&typeof powerVFX!=='undefined')powerVFX.sustain(f,out=>out.copy(f.mesh.position),ADDON_FX_COLORS[f.id]||'#ffffff',2.4,12);
   let fade=Math.min(1,age*7+.15,f.life*3);
   if(f.entity)fade=Math.max(.35,fade);
   if(f.contact){if(f.timeline)f.timeline.seek(age*1000);else{const t=Math.min(1,age/.65),e=1-Math.pow(1-t,3);f.envelope.spread=.15+e*(powerReduced?1.65:3.65);f.envelope.lift=e*(powerReduced?.3:1.8);f.envelope.fade=1-e;}

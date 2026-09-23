@@ -36,7 +36,7 @@ test('Paused animation frames freeze physics and race clock',()=>{racer();run('g
 test('Paused circuit redraws once, then sleeps while controls remain responsive',()=>{racer();let draws=0;context.renderer.render=()=>draws++;run('pause();frame(2100);frame(2200);frame(2300)');assert.equal(draws,1);context.renderer.render=noop;});
 test('Hidden tabs perform no rendering or simulation work',()=>{racer();let draws=0;context.renderer.render=()=>draws++;context.document.hidden=true;run('frame(5000)');assert.equal(draws,0);assert.equal(run('game.raceTime'),0);context.document.hidden=false;context.renderer.render=noop;});
 test('Window blur pauses active races and releases controls',()=>{racer();run('input.left=true;input.item=true');listeners.blur();assert.equal(run('game.state'),'paused');assert.equal(run('input.left'),false);assert.equal(run('input.item'),false);});
-test('Results distinguish unfinished racers from recorded finish times',()=>{racer();run(`r.finished=true;r.finishTime=99;r.progress=4;r.rank=1;game.racers.push({progress:2.5,finished:false,lap:2,rank:2,div:{name:'Opponent',acc:'#ccc'}});showResults()`);assert.equal(run('game.state'),'results');assert.match(element('board').innerHTML,/01:39.00/);assert.match(element('board').innerHTML,/RACING · LAP 2/);});
+test('Results distinguish unfinished racers from recorded finish times',()=>{racer();run(`r.finished=true;r.finishTime=99;r.progress=4;r.rank=1;game.racers.push({progress:2.5,finished:false,lap:2,rank:2,div:{name:'Opponent',acc:'#ccc'}});showResults()`);assert.equal(run('game.state'),'results');assert.match(element('board').innerHTML,/01:39.00/);assert.match(element('board').innerHTML,/<i>~0[0-9]:[0-9]{2}\.[0-9]{2}<\/i>/,'unfinished rivals show a projected time');});
 function opponent(id='zenflow',offset=.01){run(`globalThis.o=new Racer(ROSTER.find(d=>d.id==='${id}'),false,1);o.specialAI=Infinity;o.u=wrap01(r.u+${offset});o.lat=r.lat;o.speed=40;game.racers.push(o);`);}
 test('Every division has a separately named, documented power',()=>{assert.equal(run('ROSTER.length'),20);assert.equal(run('Object.keys(ABILITIES).length'),20);assert.equal(run('new Set(ROSTER.map(d=>ABILITIES[d.id].name)).size'),20);assert.ok(run('ROSTER.every(d=>ABILITIES[d.id].description.length>20&&ABILITIES[d.id].cooldown>0)'));});
 test('All twenty powers activate once and reject cooldown spam',()=>{for(const d of roster){racer(d.id);assert.equal(run('useSpecial(r)'),true,d.id);const cooldown=run('r.specialCooldown');assert.ok(cooldown>0,d.id);assert.equal(run('useSpecial(r)'),false,d.id);assert.equal(run('r.specialCooldown'),cooldown,d.id);}});
@@ -127,7 +127,7 @@ test('Grid slots stagger the start reaction so the front rows launch first',()=>
 test('Item weighting keeps Overseer Pulse from the leader and arms the tail with missiles and clusters',()=>{racer();run('game.racers=Array.from({length:12},(_,i)=>({rank:i+1}))');const original=context.rng;const sample=(rank)=>{const out={};for(let i=0;i<200;i++){context.rng=()=>(i+.5)/200;const k=run(`pickItem({rank:${rank}})`);out[k]=(out[k]||0)+1;}return out;};const lead=sample(1),tail=sample(12);context.rng=original;assert.equal(lead.pulse||0,0,'leader never rolls pulse');assert.ok((lead.shield||0)>(tail.shield||0));assert.ok(((tail.missile||0)+(tail.triple||0))>100,'tail favours missile/cluster: '+JSON.stringify(tail));assert.ok((tail.pulse||0)>0);});
 test('Live mines are capped at six per race, retiring the oldest first',()=>{racer();context.disposalCounts={geometries:0,materials:0};run('buildMineMesh=()=>makeProjectileMesh();for(let i=0;i<8;i++){r.item="mine";r.u=wrap01(.1+i*.01);useItem(r);}');assert.equal(run('mines.length'),6);assert.ok(Math.abs(run('mines[0].u')-run('wrap01(.12-3.5/track.len)'))<1e-9,'the two oldest were retired');assert.equal(context.disposalCounts.geometries,2,'retired mines release their geometry');run('clearProjectiles()');});
 test('Node Cluster bursts are spaced by a short cooldown and each burst is a surge',()=>{racer();run('r.item="triple";useItem(r);useItem(r)');assert.equal(run('r.tripleLeft'),2,'second press inside the spacing window is ignored');assert.ok(run('r.surge')>0);run('for(let i=0;i<40;i++)stepRacer(r,1/120);useItem(r)');assert.equal(run('r.tripleLeft'),1);run('for(let i=0;i<40;i++)stepRacer(r,1/120);useItem(r)');assert.equal(run('r.item'),null);assert.equal(run('r.tripleLeft'),0);});
-test('Results board lists finish time, best lap and gap to the leader, and the sub-line carries the PB delta',()=>{racer();run(`r.finished=true;r.finishTime=99;r.progress=4;r.rank=1;r.bestLap=31.5;game.racers.push({progress:4,finished:true,finishTime:101.25,lap:4,rank:2,bestLap:32.1,div:{name:'Opponent',acc:'#ccc'}},{progress:2.5,finished:false,lap:2,rank:3,div:{name:'Trailer',acc:'#ccc'}});game.newBest=true;game.pbDelta=-2.31;showResults()`);const html=element('board').innerHTML;assert.match(html,/BEST LAP/);assert.match(html,/fastest">00:31.50/,'fastest lap highlighted');assert.match(html,/00:32.10/);assert.match(html,/\+0:02.25/,'gap to leader');assert.match(html,/LEADER/);assert.match(html,/RACING · LAP 2/);assert.match(html,/>—</,'no best lap for an unfinished racer without one');assert.match(element('rsub').textContent,/PB −0:02.31/);});
+test('Results board lists finish time, best lap and gap to the leader, and the sub-line carries the PB delta',()=>{racer();run(`r.finished=true;r.finishTime=99;r.progress=4;r.rank=1;r.bestLap=31.5;game.racers.push({progress:4,finished:true,finishTime:101.25,lap:4,rank:2,bestLap:32.1,div:{name:'Opponent',acc:'#ccc'}},{progress:2.5,finished:false,lap:2,rank:3,div:{name:'Trailer',acc:'#ccc'}});game.newBest=true;game.pbDelta=-2.31;showResults()`);const html=element('board').innerHTML;assert.match(html,/BEST LAP/);assert.match(html,/fastest">00:31.50/,'fastest lap highlighted');assert.match(html,/00:32.10/);assert.match(html,/\+0:02.25/,'gap to leader');assert.match(html,/LEADER/);assert.match(html,/<i>~0[0-9]:[0-9]{2}\.[0-9]{2}<\/i>/);assert.match(html,/>—</,'no best lap for an unfinished racer without one');assert.match(element('rsub').textContent,/PB −0:02.31/);});
 test('Next Circuit cycles the map list only from the results screen and restarts with the same director',()=>{
  context.MAPS=[{id:'cherry',name:'Cherry'},{id:'stormforge',name:'Storm'},{id:'canopy',name:'Canopy'}];context.FALLBACK_GRAPHICS=true;
  racer();run("selected=ROSTER[0];game.state='race'");assert.equal(run('nextCircuit()'),false,'not from a live race');assert.equal(run('game.state'),'race');
@@ -304,6 +304,35 @@ test('RB/R1 fires add-on independently while LB/L1 holds drift',()=>{
 });
 require('./circuit-physics.cjs')({test,assert,run,racer,opponent,context});
 require('./division-powers.cjs')({test,assert,run,racer,opponent,context});
+// Core logic hardening.
+test('Race clock rounds before splitting minutes so it never reads :60',()=>{
+ assert.equal(run('fmtTime(59.996)'),'01:00.00');assert.equal(run('fmtTime(119.999)'),'02:00.00');assert.equal(run('fmtTime(61.234)'),'01:01.23');
+ assert.equal(run('fmtDelta(59.97,1)'),'+1:00.0');assert.equal(run('fmtDelta(-2.314,2)'),'−0:02.31');
+});
+test('Power, add-on and item presses during the countdown are not queued for GO',()=>{
+ racer();run("world.userData=world.userData||{};r.isPlayer=true;game.state='countdown';game.countdown=.2;input.specialEdge=true;input.addonEdge=true;input.itemEdge=true;simStep(1/120)");
+ assert.equal(run('input.specialEdge||input.addonEdge||input.itemEdge'),false);run('for(let i=0;i<40;i++)simStep(1/120)');assert.equal(run('game.state'),'race');assert.equal(run('r.specialCooldown'),0,'the power is still ready at GO');
+});
+test('A key held through pause keeps driving after resume, but pause itself stops the kart',()=>{
+ racer();run('resetInput()');const key=(type,code,extra={})=>listeners[type]({code,target:{tagName:'BODY'},preventDefault:noop,...extra});
+ key('keydown','KeyW');assert.equal(run('input.throttle'),true);run('pause()');assert.equal(run('input.throttle'),false);
+ run('resume()');assert.equal(run('input.throttle'),true,'W still held');key('keyup','KeyW');assert.equal(run('input.throttle'),false);
+ run('pause()');key('keydown','KeyW');assert.equal(run('input.throttle'),false,'no driving while paused');run('resume()');assert.equal(run('input.throttle'),true,'pressed during pause');key('keyup','KeyW');
+ run('pause()');key('keydown','KeyQ');run('resume()');assert.equal(run('input.specialEdge'),false,'a power pressed while paused does not fire on resume');key('keyup','KeyQ');
+});
+test('Space held into the pause dialog cannot press its focused button',()=>{
+ racer();run('resetInput()');let prevented=0;const key=(type,extra={})=>listeners[type]({code:'Space',target:{tagName:'BODY'},preventDefault:()=>prevented++,...extra});
+ key('keydown');run('pause()');prevented=0;key('keydown',{repeat:true});key('keyup');assert.equal(prevented,2,'repeat and release are swallowed');run('resume()');
+});
+test('Once every rival finishes the player has 30 seconds, then the race closes as a DNF with no record',()=>{
+ racer();run(`world.userData=world.userData||{};r.isPlayer=true;globalThis.o=new Racer(ROSTER[1],false,1);o.finished=true;o.finishTime=70;game.racers.push(o);game.dnfTimer=0;game.state='race';r.speed=0;`);
+ const key=run('raceRecordKey(r.div.id,game.diff)');run(`delete saved['${key}']`);
+ run('for(let i=0;i<120*31;i++){if(game.state!=="race")break;simStep(1/120);r.speed=0;}');
+ assert.equal(run('r.dnf'),true);assert.equal(run('game.state'),'finish');assert.equal(run('game.newBest'),false);assert.equal(run(`saved['${key}']`),undefined,'a DNF is never a record');
+});
+test('Finish-time ties are broken by distance covered, not array order',()=>{
+ assert.ok(run('raceOrder({finished:true,finishTime:50,distance:3.01},{finished:true,finishTime:50,distance:3.02})')>0);
+});
 require('./kart-materials-regression.cjs')({test,assert});
 require('./racefx-regression.cjs')({test,assert});
 require('./kart-clips-regression.cjs')({test,assert});

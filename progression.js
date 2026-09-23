@@ -15,7 +15,7 @@ function beginRewardRace(){
 }
 async function settleRewardRace(){
  const p=game.player,id=game.rewardRaceId;
- const report={id,finished:p.finished,laps:game.laps,completedLaps:p.lapTimes.length,position:p.rank,difficulty:game.diff,tokens:p.totalTokensCollected,hits:p.hitsTaken,time:p.finishTime,bestLap:p.bestLap,map:chosenMapId,division:p.div.id,personalBest:game.newBest};
+ const report={id,finished:p.finished,laps:game.laps,completedLaps:p.lapTimes.length,position:p.rank,difficulty:game.diff,tokens:p.totalTokensCollected,hits:p.hitsTaken,time:p.finishTime,bestLap:p.bestLap,map:chosenMapId,division:p.div.id,personalBest:game.newBest&&Number.isFinite(game.pbDelta)};
  try{
   if(!await game.rewardReady)return;
   let receipt=null;
@@ -44,6 +44,9 @@ function clearKartBuildVisuals(mesh){
 }
 function applyKartBuildVisuals(mesh,build=[],appearance='factory'){
  if(!mesh||typeof THREE==='undefined')return;
+ // Nightfall and Apex chassis already carry their hardware in the sculpt; the
+ // build still changes handling, but no bolt-ons are hung on a finished body.
+ if(mesh.userData?.asset==='fitted-glb')return;
  const categories=[...new Set(build)].filter(category=>Object.hasOwn(Economy.BUILDS,category)).sort();
  const key=JSON.stringify([categories,appearance]);
  if(mesh.userData.buildVisuals?.key===key)return mesh.userData.buildVisuals;
@@ -146,6 +149,15 @@ function renderRewardSummary(){
  const next=ADDONS.find(a=>!saved.ownedAddons.includes(a.id));const unlock=document.createElement('p');unlock.textContent=next?`${saved.ownedAddons.length}/24 add-ons owned · ${next.name}: ${Math.min(saved.wallet,Economy.addonPrice(next.id,ADDONS.map(a=>a.id)))}/${Economy.addonPrice(next.id,ADDONS.map(a=>a.id))} credits`:'All 24 add-ons owned';el.append(unlock);
  const awards=[];if(r.firstMap)awards.push('First circuit completion');if(r.diversity)awards.push('First finish with '+game.player.div.name);if(r.performance)awards.push('New personal best');
  if(awards.length){const achieved=document.createElement('p');achieved.className='reward-achievements';achieved.textContent='ACHIEVED · '+awards.join(' · ');el.append(achieved);}
+ // Chassis ladder for the racer just driven: the next tier and what still stands in the way.
+ if(typeof KART_TIERS!=='undefined'&&Economy.TIERS){
+  const id=game.player.div.id,owned=saved.chassisOwned?.[id]||[],nextTier=KART_TIERS.find(t=>t.id!=='factory'&&!owned.includes(t.id));
+  const line=document.createElement('p');line.className='reward-chassis';
+  if(!nextTier)line.textContent=`${game.player.div.name} · every chassis tier owned`;
+  else{const lock=Economy.tierLock(saved,id,nextTier.id),price=Economy.TIERS[nextTier.id].price;
+   line.textContent=`NEXT CHASSIS · ${nextTier.short} ${nextTier.name} · `+(lock||(saved.wallet>=price?'ready to buy in the Garage':`${saved.wallet}/${price} Zen Credits`));}
+  el.append(line);
+ }
  const affordable=ADDONS.filter(a=>!saved.ownedAddons.includes(a.id)&&Economy.addonPrice(a.id,ADDONS.map(a=>a.id))<=saved.wallet);
  if(affordable.length){const available=document.createElement('p');available.textContent='READY TO UNLOCK · '+affordable.length+' add-ons within budget. Choose yours in the Garage.';el.append(available);}
  // Count once, when results actually become visible; settlement may finish earlier.

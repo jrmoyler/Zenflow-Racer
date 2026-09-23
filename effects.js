@@ -32,7 +32,10 @@ else if(mode==5.){a=pow(max(0.,sin(vUv.y*3.14159)),2.)*(.4+.6*pow(.5+.5*sin(vUv.
 else if(mode==6.){float charge=noise(vUv*vec2(24.,4.)-vec2(time*3.,0.));a=(.28+charge*.5)*sin(vUv.y*3.14159);}
 else if(mode==7.){float filament=pow(.5+.5*cos(vUv.y*28.+sin(vUv.x*21.-time*4.)),5.);a=sin(vUv.y*3.14159)*(.3+filament*.6);color=mix(tint,vec3(1.),filament*.45);}
 else if(mode==9.){float light=max(0.,dot(normalize(vNormal),normalize(vec3(-.4,.8,.6))));a=.98;color=mix(tint*.4,tint,light)+vec3(1.,.86,.55)*pow(rim,3.)*.6;}
-else{float light=.5+.5*abs(dot(normalize(vNormal),normalize(vec3(-.4,.8,.6))));a=.85;color=tint*light+vec3(.2)*rim;}gl_FragColor=vec4(color,a*fade);}`});}
+else{float light=.5+.5*abs(dot(normalize(vNormal),normalize(vec3(-.4,.8,.6))));a=.85;color=tint*light+vec3(.2)*rim;}
+// Energy surfaces are lifted into HDR with a firmer body so they carry on bright circuits and
+// feed the bloom pass; solid hardware (8, 9 and the default) keeps its lit, opaque read.
+if(mode<7.5){a=clamp(a*(mode==2.?1.1:1.85)+(mode==2.?0.:.05),0.,1.);float l=dot(color,vec3(.299,.587,.114));color=max(mix(vec3(l),color,1.55),0.)*1.2;}gl_FragColor=vec4(color,a*fade);}`});}
 function addPowerPart(root,geometry,color,mode,name){const mesh=new THREE.Mesh(geometry,powerShader(color,mode));mesh.name=name;root.add(mesh);return mesh;}
 function silhouetteGeometry(){return cachedPowerGeometry('human',()=>{const s=new THREE.Shape();const pts=[[-.18,1.65],[-.3,1.48],[-.55,1.38],[-.83,.65],[-.66,.58],[-.39,1.04],[-.3,.55],[-.4,-.3],[-.16,-.3],[0,.38],[.16,-.3],[.4,-.3],[.3,.55],[.39,1.04],[.66,.58],[.83,.65],[.55,1.38],[.3,1.48],[.18,1.65]];s.moveTo(...pts[0]);pts.slice(1).forEach(p=>s.lineTo(...p));s.absellipse(0,1.89,.27,.31,-Math.PI/2,Math.PI*1.5,false);return new THREE.ExtrudeGeometry(s,{depth:.16,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.05,bevelThickness:.05});});}
 function addPowerInstances(root,color,kind,count){const geo=cachedPowerGeometry('petal',()=>{const shape=new THREE.Shape();shape.moveTo(0,-.6);shape.bezierCurveTo(.42,-.1,.3,.4,0,.65);shape.bezierCurveTo(-.3,.4,-.42,-.1,0,-.6);return new THREE.ShapeGeometry(shape,6);});const mesh=new THREE.InstancedMesh(geo,powerShader(color,8),count);mesh.name=kind;mesh.frustumCulled=false;root.add(mesh);return mesh;}
@@ -49,7 +52,7 @@ function spawnPowerEffect(kind,u,lat,color,owner){
  if(powerEffects.length>=POWER_CAP)removePowerEffect(powerEffects.shift());
  color=referencePowerColors[kind]||color;
  const mesh=new THREE.Group(),duration={zenflow:4,hybrid:3.5,nexus:8,kinetic:4,juris:4,loom:5,aether:5,animus:4,helix:5,'animus-pulse':.9,ledger:4,terra:3.5,obsidian:4,civic:5,cognara:4,gaia:5,nomad:1.2,eon:5}[kind]||1.2;
- if(kind==='zenflow'){const dome=addPowerPart(mesh,cachedPowerGeometry('dome',()=>new THREE.SphereGeometry(1,24,12,0,Math.PI*2,0,Math.PI*.62)),color,0,'time-dome');dome.scale.set(8,3,8);dome.position.y=-1;addPowerInstances(mesh,color,'clock-fragments',powerLow?12:24);for(let n=0;n<3;n++)addClock(mesh,n);for(let n=0;n<3;n++){const ring=powerRing(mesh,7-n*.6,color);ring.rotation.x=Math.PI/2;ring.position.y=n*.85-.6;}}
+ if(kind==='zenflow'){const dome=addPowerPart(mesh,cachedPowerGeometry('dome',()=>new THREE.SphereGeometry(1,24,12,0,Math.PI*2,0,Math.PI*.62)),color,0,'time-dome');dome.scale.set(8,3,14);dome.position.y=-1;addPowerInstances(mesh,color,'clock-fragments',powerLow?12:24);for(let n=0;n<3;n++)addClock(mesh,n);for(let n=0;n<3;n++){const ring=powerRing(mesh,7-n*.6,color);ring.rotation.x=Math.PI/2;ring.position.y=n*.85-.6;}}
  else if(kind==='hybrid'){kartProjection(mesh,owner,color,1,'phase-ghost');kartProjection(mesh,owner,'#ffc67e',1,'phase-echo',3);for(let i=0;i<3;i++){const veil=addPowerPart(mesh,ribbonGeometry('phase-veil-'+i,.4,1.3+i*.25,7,.24),color,1,'veil');veil.rotation.z=i*2.1;}}
  else if(kind==='nexus'){if(!kartProjection(mesh,owner,color,2,'hologram-kart'))addPowerPart(mesh,silhouetteGeometry(),color,2,'hologram-human');const sheet=addPowerPart(mesh,cachedPowerGeometry('scan-sheet',()=>new THREE.PlaneGeometry(4,4,1,24)),color,2,'scan-sheet');sheet.position.z=.5;sheet.position.y=1;const ring=powerRing(mesh,2.2,color);ring.rotation.x=Math.PI/2;ring.position.y=-.9;}
  else if(kind==='kinetic'){for(let i=0;i<3;i++){const flame=addPowerPart(mesh,ribbonGeometry('flame-'+i,.25+i*.15,.35+i*.1,6+i*1.5,.42),i===1?'#fff1ba':color,3,'flame');flame.position.set((i-1)*.7,-.5,1.3);}}
@@ -64,6 +67,7 @@ function spawnPowerEffect(kind,u,lat,color,owner){
  else if(kind==='helix'){for(let i=0;i<2;i++){const strand=addPowerPart(mesh,ribbonGeometry('dna-strand',2,1.25,4,.11),i?'#eeffff':color,7,'dna-strand');strand.rotation.x=-Math.PI/2;strand.rotation.z=i*Math.PI;strand.position.y=-1;}addPowerInstances(mesh,'#ffb4e3','healing-petals',powerLow?16:30);const ring=powerRing(mesh,2,color);ring.rotation.x=Math.PI/2;ring.position.y=-.8;}
  addWaveTwoPower(mesh,kind,color,owner);
  addPowerMechanism(mesh,kind,color);
+ stagePower(mesh,kind,color,owner);
  scene.add(mesh);powerEffects.push({kind,u,lat,owner,mesh,life:duration,duration});
 }
 function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=powerEffects[i];
@@ -72,7 +76,10 @@ function stepPowerEffects(dt){for(let i=powerEffects.length-1;i>=0;i--){const f=
  f.life-=dt;if(f.life<=0){removePowerEffect(f);powerEffects.splice(i,1);continue;}
  const age=f.duration-f.life,motion=powerReduced?.25:1,clock=age*motion,follow=!['nexus','loom','signal','collective','vector','gaia','nomad'].includes(f.kind);if(follow&&f.owner){f.u=f.owner.u;f.lat=f.owner.lat;}
  orientOnTrack(f.mesh,f.u,f.lat,1.1,0);
+ // Active signature fields cast their colour onto the road and nearby karts.
+ if(typeof powerVFX!=='undefined'&&!/-pulse$/.test(f.kind))powerVFX.sustain(f,out=>out.copy(f.mesh.position),referencePowerColors[f.kind]||'#ffffff',2.6,13);
  stepWaveTwoGeometry(f,dt,clock);
+ stepPowerStaging(f,clock);
  f.mesh.traverse(p=>{if(p.material?.uniforms){p.material.uniforms.time.value=clock;p.material.uniforms.fade.value=Math.min(1,f.life*2,age*5+.2);}
   if(p.isInstancedMesh&&!p.userData.staticPowerDetail){for(let n=0;n<p.count;n++){const t=n/p.count,a=t*Math.PI*2+clock*1.6;let radius=2,up=0;powerDummy.rotation.set(clock+n,clock*.7+n,0);powerDummy.scale.setScalar(.16);
    if(f.kind==='helix'||f.kind==='eon'){radius=1.4;up=((clock+n*.19)%3.8)-.8;powerDummy.scale.set(.14,.3,.14);}
@@ -181,4 +188,95 @@ function stepWaveTwoGeometry(f,dt,clock){
  for(let i=0;i<a.count;i++){const t=i/(a.count-1),u=((f.owner.u+distance*t/track.len)%1+1)%1,lat=target?f.owner.lat+(target.lat-f.owner.lat)*t:f.owner.lat*(1-t*.7);
   trackPoint(u,lat,target?.7+Math.sin(t*Math.PI):.13,v);v.applyMatrix4(inverse);a.setXYZ(i,v.x,v.y,v.z);}
  a.needsUpdate=true;
+}
+
+// ---------- Signature staging ----------
+// Every signature is grounded by a rotating sigil in its own colour and geometry (it carries
+// the power's identity on pale and dark circuits alike), then built up from a small set of
+// authored primitives: a fresnel field dome, a volumetric beam and a light pillar.
+const STAGE_SAT=`vec3 sat(vec3 c,float k){float l=dot(c,vec3(.299,.587,.114));return max(mix(vec3(l),c,k),0.);}`;
+const STAGE_NOISE=`float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1.,0.)),f.x),mix(h1(i+vec2(0.,1.)),h1(i+1.),f.x),f.y);}`;
+function sigilMaterial(color,sides){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,
+ uniforms:{time:{value:0},fade:{value:1},tint:{value:new THREE.Color(color)},sides:{value:sides}},
+ vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+ fragmentShader:`uniform vec3 tint;uniform float time;uniform float fade;uniform float sides;varying vec2 vP;${STAGE_SAT}
+float band(float d,float w){return smoothstep(w,0.,abs(d));}
+void main(){float r=length(vP);if(r>1.)discard;float a=atan(vP.y,vP.x),tau=6.28318;
+ float reveal=step(fract(a/tau+.5),clamp(time*2.6,0.,1.));
+ float outer=band(r-.955,.03)+band(r-.9,.008)*.8;
+ float ticks=band(r-.84,.04)*step(.5,fract(a*sides*3./tau+time*.35));
+ float k=tau/sides,ang=a+time*.55,poly=cos(k*.5)/cos(mod(ang,k)-k*.5),polygon=band(r-.66*poly,.014);
+ float ang2=a-time*.8,poly2=cos(k*.5)/cos(mod(ang2+k*.5,k)-k*.5),polygon2=band(r-.5*poly2,.01)*.8;
+ float inner=band(r-.34,.012)+band(r-.3,.025)*step(.5,fract(a*sides/tau-time*.9));
+ float s=abs(fract(a*sides/tau)-.5)*r;float spokes=smoothstep(.012,0.,s)*smoothstep(.34,.5,r)*smoothstep(.84,.7,r)*.7;
+ float lines=(outer+ticks+polygon+polygon2+inner+spokes)*reveal;
+ float wave=smoothstep(.08,0.,abs(r-fract(time*.9)))*.5;
+ float glow=smoothstep(1.,0.,r)*.035+wave*.2*smoothstep(1.,.3,r);
+ float shade=smoothstep(.62,1.,r)*.12;// darkened rim bed: the glyphs keep contrast on pale roads
+ float ink=clamp(lines*(.8+.2*sin(time*7.-r*12.)),0.,1.);
+ vec3 hue=sat(tint,1.8);vec3 c=mix(hue*.22,hue*1.25,clamp(ink+glow*2.,0.,1.));c=mix(c,vec3(1.),clamp(ink-.75,0.,1.)*.8);
+ gl_FragColor=vec4(c,clamp(max(ink,glow)+shade*reveal,0.,1.)*fade);}`});}
+function domeMaterial(color){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,
+ uniforms:{time:{value:0},fade:{value:1},tint:{value:new THREE.Color(color)}},
+ vertexShader:`varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){vP=position;vec4 v=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-v.xyz);gl_Position=projectionMatrix*v;}`,
+ fragmentShader:`uniform vec3 tint;uniform float time;uniform float fade;varying vec3 vN;varying vec3 vV;varying vec3 vP;${STAGE_SAT}
+void main(){float f=1.-abs(dot(normalize(vN),normalize(vV))),rim=pow(f,3.2);
+ float lon=atan(vP.z,vP.x)*4.,lat=vP.y*9.;vec2 g=vec2(lon+mod(floor(lat),2.)*.5,lat);vec2 c=abs(fract(g)-.5);float cell=smoothstep(.43,.5,max(c.x,c.y));
+ float scan=smoothstep(.07,0.,abs(fract(vP.y*.45-time*.4)-.5));float grow=clamp(time*2.2,0.,1.);
+ float a=(rim*.75+cell*.08*rim+scan*.08*rim)*fade*grow;vec3 hue=sat(tint,1.8);gl_FragColor=vec4(mix(hue*.9,vec3(1.),rim*rim*.35+scan*.25),a);}`});}
+function beamMaterial(color){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,
+ uniforms:{time:{value:0},fade:{value:1},tint:{value:new THREE.Color(color)}},
+ vertexShader:`varying vec3 vN;varying vec3 vV;varying vec2 vUv;void main(){vUv=uv;vec4 v=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-v.xyz);gl_Position=projectionMatrix*v;}`,
+ fragmentShader:`uniform vec3 tint;uniform float time;uniform float fade;varying vec3 vN;varying vec3 vV;varying vec2 vUv;${STAGE_NOISE}${STAGE_SAT}
+void main(){float f=abs(dot(normalize(vN),normalize(vV))),core=pow(f,5.),body=pow(f,1.3);
+ float flow=n2(vec2(vUv.x*7.,vUv.y*40.-time*26.)),bolt=pow(n2(vec2(vUv.x*3.,vUv.y*14.-time*40.)),6.);
+ float taper=smoothstep(0.,.05,vUv.y)*smoothstep(1.,.7,vUv.y);
+ float a=clamp(body*.6+core*.7+flow*.3*body+bolt*.6,0.,1.)*taper*fade;gl_FragColor=vec4(mix(sat(tint,1.9)*1.3,vec3(1.),core*.7+bolt*.4),a);}`});}
+function pillarMaterial(color){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,
+ uniforms:{time:{value:0},fade:{value:1},tint:{value:new THREE.Color(color)}},
+ vertexShader:`varying vec3 vN;varying vec3 vV;varying vec2 vUv;void main(){vUv=uv;vec4 v=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-v.xyz);gl_Position=projectionMatrix*v;}`,
+ fragmentShader:`uniform vec3 tint;uniform float time;uniform float fade;varying vec3 vN;varying vec3 vV;varying vec2 vUv;${STAGE_NOISE}${STAGE_SAT}
+void main(){float f=abs(dot(normalize(vN),normalize(vV))),body=pow(f,1.6);float rise=n2(vec2(vUv.x*9.,vUv.y*6.-time*3.));
+ float h=pow(1.-vUv.y,1.6);float a=clamp(body*.42+rise*.3*body,0.,1.)*h*fade*clamp(time*4.,0.,1.);gl_FragColor=vec4(mix(sat(tint,1.9)*1.2,vec3(1.),body*h*.35),a);}`});}
+function stagePart(root,geometry,material,name){const m=new THREE.Mesh(geometry,material);m.name=name;m.frustumCulled=false;root.add(m);return m;}
+function addSigil(root,color,radius,sides){const s=stagePart(root,cachedPowerGeometry('stage-sigil',()=>new THREE.PlaneGeometry(2,2)),sigilMaterial(color,sides),'power-sigil');s.rotation.x=-Math.PI/2;s.position.y=-1.06;s.scale.setScalar(radius);s.renderOrder=1140;return s;}
+function addDome(root,color,sx,sy,sz){const d=stagePart(root,cachedPowerGeometry('stage-dome',()=>new THREE.SphereGeometry(1,40,20,0,Math.PI*2,0,Math.PI*.55)),domeMaterial(color),'power-dome');d.scale.set(sx,sy,sz);d.position.y=-1.05;return d;}
+function addBeam(root,color,length,radius,name='power-beam'){const g=new THREE.Group();g.name=name;root.add(g);
+ const geo=cachedPowerGeometry('stage-beam',()=>{const c=new THREE.CylinderGeometry(1,1,1,20,1,true);c.translate(0,.5,0);c.rotateX(-Math.PI/2);return c;});
+ const sheath=stagePart(g,geo,beamMaterial(color),'beam-sheath');sheath.scale.set(radius,radius,length);
+ const core=stagePart(g,geo,beamMaterial('#ffffff'),'beam-core');core.scale.set(radius*.32,radius*.32,length);g.userData.radius=radius;return g;}
+function addPillar(root,color,height,radius,x=0,z=0){const p=stagePart(root,cachedPowerGeometry('stage-pillar',()=>{const c=new THREE.CylinderGeometry(1,1,1,24,1,true);c.translate(0,.5,0);return c;}),pillarMaterial(color),'power-pillar');p.scale.set(radius,height,radius);p.position.set(x,-1.05,z);return p;}
+const POWER_STAGING={
+ zenflow:{sigil:[7.2,12],dome:[8,3.2,14]},collective:{sigil:[4,8],pillar:[4,1.4]},hybrid:{sigil:[2.8,5],dome:[2.4,2.4,3.2]},nexus:{sigil:[3,6],pillar:[4,1.1]},
+ kinetic:{sigil:[2.6,3],dome:[2.3,2.1,3.3]},juris:{sigil:[3.3,6],dome:[3.2,2.8,3.4]},signal:{sigil:[2.4,3],beam:[70,1.15]},loom:{sigil:[3.6,6]},
+ vector:{sigil:[2.4,4],blink:'lateral'},aether:{sigil:[6.2,10],pillar:[3,1.2]},animus:{sigil:[2.8,6]},helix:{sigil:[2.8,8],pillar:[4.5,1.6]},
+ ledger:{sigil:[3.4,6],dome:[3.3,3,3.3]},terra:{sigil:[2.8,4],pylons:true},obsidian:{sigil:[3.3,6],dome:[3.1,2.6,3.1]},civic:{sigil:[3,8]},
+ cognara:{sigil:[2.6,5]},gaia:{sigil:[3.6,7]},nomad:{sigil:[2.4,4],blink:'forward'},eon:{sigil:[3,8],pillar:[4.5,1.8]}
+};
+function stagePower(root,kind,color,owner){
+ const plan=POWER_STAGING[kind];if(!plan)return;
+ // The old flat scan card read as a billboard: the hologram is carried by its light column.
+ const sheet=root.getObjectByName('scan-sheet');if(sheet)root.remove(sheet);
+ const oldDome=root.getObjectByName('time-dome');if(oldDome)oldDome.visible=false;
+ if(plan.sigil)addSigil(root,color,plan.sigil[0],plan.sigil[1]);
+ if(plan.dome)addDome(root,color,...plan.dome);
+ if(plan.pillar)addPillar(root,color,...plan.pillar);
+ if(plan.pylons)for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2;addPillar(root,color,3.6,.42,Math.sin(a)*2,Math.cos(a)*2);}
+ if(plan.beam){let length=plan.beam[0];
+  // The lance runs to the rival it will strike, so the beam and the hit read as one event.
+  if(owner&&typeof game!=='undefined'&&typeof du_dist==='function'){let best=length;for(const o of game.racers){const d=du_dist(owner.u,o.u);if(o!==owner&&!o.finished&&d>0&&d<best&&Math.abs(owner.lat-o.lat)<3)best=d;}length=best+1;}
+  const beam=addBeam(root,color,length,plan.beam[1],'sonic-lance');beam.position.set(0,.2,-1.6);}
+ if(plan.blink==='forward'){const beam=addBeam(root,color,14,.9,'blink-streak');beam.position.set(0,-.2,0);}
+ if(plan.blink==='lateral'){const beam=addBeam(root,color,4,.8,'blink-streak');beam.position.set(0,-.2,0);beam.userData.lateral=true;}
+}
+// Staged parts animate on top of the shared uniform clock set in stepPowerEffects.
+function stepPowerStaging(f,age){
+ f.mesh.traverse(p=>{
+  if(p.name==='power-sigil'){const grow=1-Math.pow(1-Math.min(1,age*3.2),3);p.userData.base??=p.scale.x;p.scale.setScalar(p.userData.base*(.55+.45*grow));}
+  else if(p.name==='sonic-lance'){const k=Math.max(0,1-age/.75),w=p.userData.radius*(.35+1.4*Math.pow(k,.6));for(const c of p.children)c.scale.x=c.scale.y=(c.name==='beam-core'?.32:1)*w;p.visible=k>0;}
+  else if(p.name==='blink-streak'){const k=Math.max(0,1-age/.5);p.visible=k>0;for(const c of p.children)c.scale.x=c.scale.y=(c.name==='beam-core'?.32:1)*p.userData.radius*k;
+   if(p.userData.lateral&&f.owner){const d=f.owner.lat-f.lat;p.rotation.y=d>=0?-Math.PI/2:Math.PI/2;for(const c of p.children)c.scale.z=Math.max(.1,Math.abs(d));}}
+  else if(p.name==='power-pillar'){p.userData.h??=p.scale.y;p.scale.y=p.userData.h*(.2+.8*Math.min(1,age*3));}
+ });
 }

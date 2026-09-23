@@ -3,11 +3,11 @@
  const dialog=document.createElement('dialog');dialog.id='garage';dialog.setAttribute('aria-label','Garage');
  dialog.innerHTML='<header><p>PADDOCK / PROGRESSION</p><h2>Garage</h2><strong id="garage-wallet"></strong><button id="garage-close" class="btn">Back</button></header><label>Racer <select id="garage-racer"></select></label><section id="garage-preview" aria-label="Equipped kart showroom"><p class="garage-preview-note">Live kart preview</p></section><p id="garage-build-summary" role="status"></p><nav aria-label="Garage categories"></nav><p id="garage-status" role="status"></p><div id="garage-inventory"></div>';
  document.body.append(dialog);let padFrame=0,padHeld=false;
- let category='Add-Ons',racerId=selected?.id||ROSTER[0].id,opener=null,busy=false;
+ let category='Chassis',racerId=selected?.id||ROSTER[0].id,opener=null,busy=false;
  const preview=typeof createGaragePreview==='function'?createGaragePreview(dialog.querySelector('#garage-preview')):null;
  const select=dialog.querySelector('select'),list=dialog.querySelector('#garage-inventory'),status=dialog.querySelector('#garage-status');
  for(const racer of ROSTER){const option=document.createElement('option');option.value=racer.id;option.textContent=racer.name;select.append(option);}
- for(const name of ['Add-Ons','Kart Upgrades','Appearance','Owned / Locked']){const b=document.createElement('button');b.className='btn ghost';b.textContent=name;b.onclick=()=>{category=name;render();};dialog.querySelector('nav').append(b);}
+ for(const name of ['Chassis','Add-Ons','Kart Upgrades','Appearance','Owned / Locked']){const b=document.createElement('button');b.className='btn ghost';b.textContent=name;b.onclick=()=>{category=name;render();};dialog.querySelector('nav').append(b);}
  select.onchange=()=>{racerId=select.value;render();};
  function close(){cancelAnimationFrame(padFrame);dialog.close();opener?.focus();}
  function pollPad(){if(!dialog.open)return;const pad=Array.from(navigator.getGamepads?.()||[]).find(Boolean);if(pad){const pressed=i=>pad.buttons[i]?.pressed;const direction=pressed(13)||pressed(15)?1:pressed(12)||pressed(14)?-1:0;const active=direction||pressed(0)||pressed(1);if(active&&!padHeld){if(pressed(1)){close();return;}if(pressed(0)&&dialog.contains(document.activeElement))document.activeElement.click();if(direction&&document.activeElement===select&&(pressed(14)||pressed(15))){select.selectedIndex=(select.selectedIndex+direction+select.options.length)%select.options.length;select.onchange();}else if(direction){const controls=[...dialog.querySelectorAll('button:not(:disabled),select')];const at=controls.indexOf(document.activeElement);controls[(at+direction+controls.length)%controls.length]?.focus();}}padHeld=!!active;}padFrame=requestAnimationFrame(pollPad);}
@@ -16,7 +16,8 @@
   const buildRacerId=racerId,focusKey=restoreFocus||document.activeElement?.dataset?.garageKey;
   select.value=buildRacerId;
   const racer=ROSTER.find(r=>r.id===buildRacerId),build=saved.builds[buildRacerId]||[],addon=ADDONS.find(a=>a.id===saved.addons[buildRacerId]);
-  dialog.querySelector('#garage-build-summary').textContent=racer.name+' · '+(build.length?build.map(id=>Economy.BUILDS[id].name).join(' / '):'Factory setup')+' · '+(saved.appearance[buildRacerId]==='satin'?'Satin paint':'Factory livery')+' · '+(addon?addon.name:'No add-on equipped');
+  const tierName=(KART_TIERS.find(t=>t.id===(saved.chassis?.[buildRacerId]||'factory'))||KART_TIERS[0]).name;
+  dialog.querySelector('#garage-build-summary').textContent=racer.name+' · '+tierName+' chassis · '+(build.length?build.map(id=>Economy.BUILDS[id].name).join(' / '):'Factory setup')+' · '+(saved.appearance[buildRacerId]==='satin'?'Satin paint':'Factory livery')+' · '+(addon?addon.name:'No add-on equipped');
   if(dialog.open)preview?.update(racer,saved);
   dialog.querySelector('#garage-wallet').textContent=saved.wallet+' Zen Credits';list.replaceChildren();
   dialog.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===category)));
@@ -44,6 +45,34 @@
    };
    article.append(h,p,meta);if(need)article.append(need);article.append(button);list.append(article);
   }
+  if(category==='Chassis'||category==='Owned / Locked')for(const tier of KART_TIERS){
+   const ownedList=saved.chassisOwned?.[buildRacerId]||[],equippedTier=saved.chassis?.[buildRacerId]||'factory';
+   const owned=tier.id==='factory'||ownedList.includes(tier.id),equipped=equippedTier===tier.id;
+   const lock=owned?null:Economy.tierLock(saved,buildRacerId,tier.id),rule=Economy.TIERS[tier.id];
+   const article=document.createElement('article'),h=document.createElement('h3'),p=document.createElement('p'),meta=document.createElement('p'),button=document.createElement('button');
+   article.className='garage-tier';article.dataset.tier=tier.id;article.dataset.state=equipped?'equipped':owned?'owned':'locked';
+   h.textContent=tier.short+' · '+tier.name;p.textContent=tier.blurb;
+   meta.textContent=`Chassis · ${equipped?'Equipped':owned?'Owned':'Locked'} · ${owned||!rule?'No cost':rule.price+' Zen Credits'}`;
+   article.append(h,p,meta);
+   const short=!owned&&!lock&&rule.price>saved.wallet?rule.price-saved.wallet:0;
+   if(lock||short){const need=document.createElement('p');need.className='garage-locked';need.textContent='Locked · '+(lock||short+' more Zen Credits needed');article.append(need);}
+   button.className='btn';button.dataset.garageKey='chassis:'+tier.id;
+   button.textContent=busy?'Saving…':equipped?'EQUIPPED':owned?'EQUIP':'BUY';
+   button.disabled=busy||equipped||!!lock||!!short;button.setAttribute('aria-pressed',String(equipped));
+   button.onclick=async()=>{
+    if(busy)return;busy=true;status.textContent=tier.name+' · saving…';render();
+    try{
+     await economyTransaction(s=>owned?Economy.equipChassis(s,buildRacerId,tier.id):Economy.purchase(s,'chassis',{racer:buildRacerId,tier:tier.id},ids));
+     status.textContent=owned?`${tier.name} equipped on ${racer.name}`:`${tier.name} · bought for ${rule.price} · ${saved.wallet} Zen Credits left`;
+     if(tier.id!=='factory'&&typeof loadKartTier==='function'){status.textContent+=' · loading chassis…';await loadKartTier(buildRacerId,tier.id);status.textContent=status.textContent.replace(' · loading chassis…','');}
+     SFX.ui();window.dispatchEvent(new Event('garagechange'));
+    }catch(error){status.textContent=error.message;}
+    finally{busy=false;render('chassis:'+tier.id);}
+   };
+   article.append(button);list.append(article);
+   // Owned tiers are fetched ahead so switching is instant.
+   if(owned&&tier.id!=='factory'&&typeof loadKartTier==='function')loadKartTier(buildRacerId,tier.id);
+  }
   if(category==='Add-Ons'||category==='Owned / Locked')for(const a of ADDONS){
    const owned=saved.ownedAddons.includes(a.id),level=saved.addonUpgradeLevels[a.id]||0,equipped=saved.addons[buildRacerId]===a.id;
    card(a.name,a.type,a.description+` · ${a.cooldown*(1-Math.max(0,level-1)*.02)}s cooldown.`,owned?(equipped?'Equipped':'Owned'):'Locked',level,owned?0:Economy.addonPrice(a.id,ids),owned?(equipped?'EQUIPPED':'EQUIP'):'BUY',equipped?null:s=>owned?{...s,addons:{...s.addons,[buildRacerId]:s.ownedAddons.includes(a.id)?a.id:null}}:Economy.purchase(s,'addon',a.id,ids));
@@ -62,5 +91,6 @@
  function entry(parent){if(!parent)return;const button=document.createElement('button');button.className='btn ghost';button.textContent='Garage';button.onclick=()=>{opener=button;racerId=selected?.id||racerId;status.textContent='Build changes apply on the next grid. Earn credits by finishing three-lap races.';render();dialog.showModal();preview?.open();preview?.update(ROSTER.find(r=>r.id===racerId),saved);padHeld=false;padFrame=requestAnimationFrame(pollPad);};parent.append(button);}
  entry(document.querySelector('.title-actions'));entry(document.querySelector('.loadout-dock'));entry(document.querySelector('#results .row'));
  const main=document.createElement('button');main.className='btn ghost';main.textContent='Main Menu';main.onclick=()=>{document.getElementById('results').classList.add('hidden');transitionScene('ZENFLOW RACER',()=>{openRoster();document.getElementById('title-screen').classList.remove('hidden');document.body.classList.add('title-open');raceSetup.step='title';document.getElementById('roster').inert=true;document.getElementById('title-start').focus();});};document.querySelector('#results .row').append(main);
+ window.addEventListener('karttierready',()=>{if(dialog.open)preview?.update(ROSTER.find(r=>r.id===racerId),saved);});
  window.addEventListener('storage',e=>{if(e.key===SAVE_KEY){try{saved=Economy.migrate(JSON.parse(e.newValue||'{}'),ADDONS.map(a=>a.id));if(dialog.open)render();}catch{}}});
 })();
