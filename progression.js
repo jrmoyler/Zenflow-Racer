@@ -15,7 +15,7 @@ function beginRewardRace(){
 }
 async function settleRewardRace(){
  const p=game.player,id=game.rewardRaceId;
- const report={id,finished:p.finished,laps:game.laps,completedLaps:p.lapTimes.length,position:p.rank,difficulty:game.diff,tokens:p.totalTokensCollected,hits:p.hitsTaken,time:p.finishTime,bestLap:p.bestLap,map:chosenMapId,division:p.div.id,personalBest:game.newBest};
+ const report={id,finished:p.finished,laps:game.laps,completedLaps:p.lapTimes.length,position:p.rank,difficulty:game.diff,tokens:p.totalTokensCollected,hits:p.hitsTaken,time:p.finishTime,bestLap:p.bestLap,map:chosenMapId,division:p.div.id,personalBest:game.newBest&&Number.isFinite(game.pbDelta)};
  try{
   if(!await game.rewardReady)return;
   let receipt=null;

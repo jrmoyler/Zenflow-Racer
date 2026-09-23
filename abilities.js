@@ -39,7 +39,11 @@ function powerProtected(r,attacker,reflectable=true){
  return false;
 }
 // Mirrors answer hits only. A perimeter's shield is also reserved for hits.
-function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,false))return false;if(r.shield>0&&!(r.perimeter>0)){r.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);return false;}
+// A shield that blocks a slow keeps blocking that same field while the kart stays in it
+// (sustained fields re-apply every step; one block must not last a single tick).
+function powerSlow(r,duration,attacker){if(r.regen>0||powerProtected(r,attacker,false))return false;
+ if(r.slowImmune>0){r.slowImmune=Math.max(r.slowImmune,.35);return false;}
+ if(r.shield>0&&!(r.perimeter>0)){r.shield=0;r.slowImmune=Math.max(1.2,duration+.2);if(typeof raceFX!=='undefined')raceFX.onShieldBlock(r);if(r.isPlayer&&typeof setToast==='function')setToast('AEGIS BLOCK','teal','SLOW FIELD DEFLECTED',2);return false;}
  const fresh=!(r.slow>0);r.slow=Math.max(r.slow||0,duration);
  // Being snared is a race-changing event; the driver hears about it once per
  // effect rather than on every step of a sustained field.
@@ -53,20 +57,21 @@ function useSpecial(r){
  case 'zenflow':r.specialActive=4;r.specialSeen.clear();break;
  case 'collective':{
   const nearby=game.racers.filter(o=>o!==r&&!o.finished&&o.tokens>0&&!(o.vault>0)&&Math.abs(du_dist(r.u,o.u))<35).sort((a,b)=>Math.abs(du_dist(r.u,a.u))-Math.abs(du_dist(r.u,b.u)));
-  let taken=0;for(const o of nearby){if(r.tokens>=10||r.vault>0||taken>=3)break;if(powerProtected(o,r,false))continue;if(o.shield>0&&!(o.perimeter>0)){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);r.tokens++;r.totalTokensCollected=(r.totalTokensCollected||0)+1;taken++;}
+  let taken=0;for(const o of nearby){if(r.tokens>=10||r.vault>0||taken>=3)break;if(powerProtected(o,r,false))continue;if(o.shield>0&&!(o.perimeter>0)){o.shield=0;if(typeof raceFX!=='undefined')raceFX.onShieldBlock(o);continue;}o.tokens--;o.lastLostTokens=Math.max(o.lastLostTokens||0,1);o.lastLostAt=game.raceTime;r.tokens++;r.totalTokensCollected=(r.totalTokensCollected||0)+1;taken++;}
   // A siphon that finds nothing to take still converts the reserve into speed:
   // the cooldown is committed either way, so the activation must never be inert.
   if(taken)powerOutcome(r,'+'+taken+' TOKEN'+(taken===1?'':'S'));
   else {applyBoost(r,1,1.12,.4);powerOutcome(r,'NO RESERVES · SIPHON VENTED');}
   break;}
  case 'hybrid':r.phase=3.5;r.specialActive=3.5;break;
- case 'nexus':abilityZones.push({kind:'decoy',owner:r,u:r.u,lat:r.lat,life:8});r.specialActive=8;break;
+ case 'nexus':abilityZones.push({kind:'decoy',owner:r,u:wrap01(r.u-6/track.len),lat:r.lat,life:8,trail:true});r.specialActive=8;break;
  case 'kinetic':r.ram=4;r.specialActive=4;break;
  case 'juris':r.reflect=4;r.specialActive=4;break;
- case 'signal':{let target=null,best=70;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&d>0&&d<best&&Math.abs(r.lat-o.lat)<3){target=o;best=d;}}
+ case 'signal':{let target=null,best=70;for(const o of game.racers){const d=du_dist(r.u,o.u);if(o!==r&&!o.finished&&!(o.phase>0)&&!(o.hitCd>0)&&d>0&&d<best&&Math.abs(r.lat-o.lat)<3){target=o;best=d;}}
   // The cast stays committed on a miss, but the lance is never wasted: with no
   // rival in the lane the charge vents backwards as thrust.
-  if(target){hitRacer(target,'sonic',r);abilityFX(target,'signal');powerOutcome(r,'DIRECT HIT · '+Math.round(best)+'M');}
+  if(target){const before=target.spin,shielded=target.shield>0,mirrored=target.reflect>0;hitRacer(target,'sonic',r);abilityFX(target,'signal');
+   powerOutcome(r,target.spin>before?'DIRECT HIT · '+Math.round(best)+'M':mirrored?'REFLECTED':shielded?'BLOCKED BY SHIELD':'NO EFFECT');}
   else {applyBoost(r,1.1,1.14,.5);powerOutcome(r,'NO TARGET · CHARGE VENTED');}
   break;}
  case 'loom':abilityZones.push({kind:'snare',owner:r,u:wrap01(r.u-5/track.len),lat:r.lat,life:5});r.specialActive=5;break;
@@ -78,14 +83,15 @@ function useSpecial(r){
   r.lat=clamp(r.lat+side*4,-bound,bound);r.phase=.5;r.specialActive=.5;r.theta=0;r.steer=0;break;}
  case 'aether':r.specialActive=5;break;
  case 'animus':r.specialActive=4;r.specialElapsed=0;r.specialPulses=0;r.specialPulse=0;break;
- case 'helix':{const recovered=r.vault>0?0:Math.min(10-r.tokens,r.lastLostTokens||0);r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;if(!(r.vault>0))r.tokens=Math.min(10,r.tokens+(r.lastLostTokens||0));r.lastLostTokens=0;powerOutcome(r,recovered?'CLEANSED · +'+recovered+' RECOVERED':'CLEANSED');break;}
+ case 'helix':{if(Number.isFinite(r.lastLostAt)&&game.raceTime-r.lastLostAt>8)r.lastLostTokens=0;// only losses from the last 8 s
+  const recovered=r.vault>0?0:Math.min(10-r.tokens,r.lastLostTokens||0);r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;if(!(r.vault>0))r.tokens=Math.min(10,r.tokens+(r.lastLostTokens||0));r.lastLostTokens=0;powerOutcome(r,recovered?'CLEANSED · +'+recovered+' RECOVERED':'CLEANSED');break;}
  case 'ledger':r.specialActive=4;break;
  case 'terra':r.anchor=3.5;r.anchorSpeed=r.speed;r.specialActive=3.5;break;
  case 'obsidian':r.shield=Math.max(r.shield,4);r.perimeter=4;r.specialActive=4;powerOutcome(r,'PERIMETER UP');break;
  case 'civic':r.specialActive=5;break;
  case 'cognara':r.predict=4;r.specialActive=4;break;
  case 'gaia':r.specialActive=5;abilityZones.push({kind:'roots',owner:r,u:wrap01(r.u-4/track.len),lat:r.lat,life:5});break;
- case 'nomad':r.phase=.6;r.specialActive=.6;r.theta=0;r.steer=0;advanceRaceDistance(r,6/track.len,0);break;
+ case 'nomad':r.phase=.6;r.specialActive=.6;r.theta=0;r.steer=0;advanceRaceDistance(r,14/track.len,0);break;
  case 'eon':r.spin=0;r.slow=0;r.wheelspin=0;r.hitCd=Math.max(r.hitCd,1);r.regen=5;r.specialActive=5;applyBoost(r,1.2,1.18,.8);powerOutcome(r,'CLEANSED · SURGE');break;
  }
  if(r.isPlayer){setToast(power.name,'teal',powerOutcome.last||power.description,2);SFX.ui();}
@@ -98,9 +104,12 @@ function powerReport(r,title,detail){
  powerReport.key=key;powerReport.until=game.raceTime+1.2;if(typeof setToast==='function')setToast(title,'teal',detail,2);
 }
 function stepAbilities(dt){
- if(game.state!=='race'||!(dt>0))return;
+ // Timers keep running in the finish run-out so a rival slowed or anchored as the player
+ // crosses the line recovers normally; no power is cast or applied outside 'race'.
+ if(!['race','finish'].includes(game.state)||!(dt>0))return;
  // Decay first for the entire field: application durations never depend on roster order.
- for(const r of game.racers)for(const key of ['specialCooldown','phase','slow','ram','reflect','regen','vault','anchor','perimeter','civicDraft','predict'])r[key]=Math.max(0,(r[key]||0)-dt);
+ for(const r of game.racers)for(const key of ['specialCooldown','phase','slow','slowImmune','ram','reflect','regen','vault','anchor','perimeter','civicDraft','predict'])r[key]=Math.max(0,(r[key]||0)-dt);
+ if(game.state!=='race')return;
  for(const r of game.racers){
   // How often a rival re-evaluates its signature power is difficulty, not raw power:
  // the cooldown, effect and targeting rules are identical at every level.
@@ -108,11 +117,11 @@ function stepAbilities(dt){
   if(r.finished){r.specialActive=0;continue;}
   if(!(r.specialActive>0))continue;
   const activeDt=Math.min(dt,r.specialActive);r.specialActive=Math.max(0,r.specialActive-dt);
-  if(r.div.id==='zenflow'){let caught=0;for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<18){const first=!r.specialSeen.has(o);if(powerSlow(o,first?1.2:.6,r))caught++;r.specialSeen.add(o);}}
+  if(r.div.id==='zenflow'){let caught=0;for(const o of game.racers){const along=du_dist(r.u,o.u)/14,across=(o.lat-r.lat)/8;if(o!==r&&along*along+across*across<1){const first=!r.specialSeen.has(o);if(powerSlow(o,first?1.2:.6,r))caught++;r.specialSeen.add(o);}}
    if(caught&&r.isPlayer)powerReport(r,'DILATION FIELD',powerLanded(r.specialSeen.size,'RIVAL')+' CAUGHT');}
   if(r.div.id==='ledger'){let locked=0;for(const o of game.racers){if(o!==r&&Math.abs(du_dist(r.u,o.u))<16&&!powerProtected(o,r,false)){o.vault=Math.max(o.vault,r.specialActive);locked++;}}
    if(locked&&r.isPlayer)powerReport(r,'VAULT LOCK',powerLanded(locked,'RIVAL')+' LOCKED');}
-  if(r.div.id==='civic'){let target=null,best=14;for(const o of game.racers){const d=Math.abs(du_dist(r.u,o.u));if(o!==r&&!o.finished&&!(o.phase>0)&&d<best&&Math.abs(r.lat-o.lat)<4){target=o;best=d;}}if(target)target.civicDraft=Math.max(target.civicDraft,.4);}
+  if(r.div.id==='civic'){let target=null,best=14;for(const o of game.racers){const d=Math.abs(du_dist(r.u,o.u));if(o!==r&&!o.finished&&!(o.phase>0)&&d<best&&Math.abs(r.lat-o.lat)<4){target=o;best=d;}}if(target)target.civicDraft=Math.max(target.civicDraft,.4);r.civicDraft=Math.max(r.civicDraft,target?.6:.4);}
   if(r.div.id==='aether'&&r.spin<=0&&!(r.phase>0)&&!(r.vault>0))for(const t of tokens){if(t.t<=0&&r.tokens<10&&Math.abs(du_dist(r.u,t.u))<24){t.t=9;t.mesh.visible=false;r.tokens++;r.totalTokensCollected=(r.totalTokensCollected||0)+1;if(r.isPlayer)SFX.token(r.tokens);}}
   if(r.div.id==='animus'){
    r.specialElapsed+=activeDt;
@@ -122,7 +131,7 @@ function stepAbilities(dt){
  }
  for(let i=abilityZones.length-1;i>=0;i--){const z=abilityZones[i];z.life-=dt;if(z.life<=0){abilityZones.splice(i,1);continue;}
   if(z.kind==='snare'||z.kind==='roots'){const roots=z.kind==='roots';for(const r of game.racers)if(r!==z.owner&&Math.abs(du_dist(z.u,r.u))<(roots?8:7)&&Math.abs(z.lat-r.lat)<(roots?2.6:2.4))powerSlow(r,.8,z.owner);}
-  else if(z.kind==='decoy')for(let j=missiles.length-1;j>=0;j--){const m=missiles[j];if(m.owner!==z.owner&&Math.abs(du_dist(z.u,m.u))<10&&Math.abs(z.lat-m.lat)<3){if(typeof disposeProjectile==='function')disposeProjectile(m.mesh);else scene.remove(m.mesh);missiles.splice(j,1);abilityZones.splice(i,1);abilityFX(z.owner,'nexus');break;}}
+  else if(z.kind==='decoy'){if(z.trail&&!z.owner.finished){z.u=wrap01(z.owner.u-6/track.len);z.lat=z.owner.lat;}for(let j=missiles.length-1;j>=0;j--){const m=missiles[j];if(m.owner!==z.owner&&Math.abs(du_dist(z.u,m.u))<10&&Math.abs(z.lat-m.lat)<3){if(typeof disposeProjectile==='function')disposeProjectile(m.mesh);else scene.remove(m.mesh);missiles.splice(j,1);abilityZones.splice(i,1);abilityFX(z.owner,'nexus');if(z.owner.isPlayer&&typeof setToast==='function')setToast('DECOY TOOK THE HIT','teal','',2);break;}}}
  }
  if(typeof stepPowerEffects==='function')stepPowerEffects(dt);
 }

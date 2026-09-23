@@ -74,6 +74,18 @@ function addonSpawn(id,owner,phase,u,lat,life,extra={}){
  addonEntities.push(e);addonEffect(id,e.u,e.lat,owner,{duration:life,phase,radius:e.radius,entity:e});return e;
 }
 function addonZone(id,r,distance,life,extra={}){return addonSpawn(id,r,'zone',r.u+distance/track.len,r.lat,life,extra);}
+// Thrown zones land where the nearest rival ahead will be when the zone arms, not where
+// that rival was at cast time. With no rival ahead they fall at their default distance.
+function addonAimedZone(id,r,distance,life,extra={}){
+ const t=addonTarget(r,r.u,r.lat,60,TRACK_W);
+ if(!t)return addonZone(id,r,distance,life,extra);
+ const lead=clamp(du_dist(r.u,t.u)+(t.speed||0)*(extra.lead??extra.arm??0),6,120);
+ // Kraken alternates sides: open on the side the targeted rival is on.
+ if(id==='kraken'){const first=t.lat>=r.lat?1:0;extra={...extra,slams:first,firstSlams:first};}
+ // Pyre's centre is hollow: set the crown beside the rival's line so it drives through the fire.
+ if(extra.inner){const side=t.lat>=0?-1:1,ring=(extra.inner+extra.radius)/2,bound=TRACK_W/2-1;return addonSpawn(id,r,'zone',r.u+lead/track.len,clamp(t.lat+side*ring,-bound,bound),life,extra);}
+ return addonSpawn(id,r,'zone',r.u+lead/track.len,extra.keepLane?r.lat:t.lat,life,extra);
+}
 function addonProjectile(id,r,extra={}){return addonSpawn(id,r,'projectile',r.u+2/track.len,r.lat,3,{speed:92,range:100,travel:0,radius:2,...extra});}
 function addonBuff(r,duration){r.addonActive=duration;r.addonPulse=0;addonEffect(r.addonId,r.u,r.lat,r,{duration,phase:'buff',follow:true});}
 // Side effects only follow an accepted hit/slow: shields, reflection and phase
@@ -99,23 +111,23 @@ function useAddon(r){
  if(r.isPlayer&&typeof setToast==='function'){setToast(a.name.toUpperCase(),'teal');if(typeof SFX!=='undefined')SFX.ui();}
  switch(a.id){
  case 'ward':r.shield=Math.max(r.shield||0,6);addonZone(a.id,r,-5,6,{radius:4});addonBuff(r,1);break;
- case 'acid':addonZone(a.id,r,24,5,{radius:5.5,arm:.35});break;
+ case 'acid':addonAimedZone(a.id,r,24,5,{radius:5.5,arm:.35});break;
  case 'growth':addonZone(a.id,r,22,5.5,{radius:4,shots:3,arm:.45});break;
  case 'cyber':addonProjectile(a.id,r,{homing:true,speed:105});break;
  case 'venom':addonProjectile(a.id,r,{radius:2.6,range:62,pierce:3,speed:110});break;
  case 'monolith':addonProjectile(a.id,r,{range:42,speed:85});break;
- case 'ink':addonZone(a.id,r,25,4,{radius:7,arm:.4});break;
- case 'astral':addonZone(a.id,r,30,2.2,{radius:8,arm:.35,detonate:1.6});break;
+ case 'ink':addonAimedZone(a.id,r,25,4,{radius:7,arm:.4,keepLane:true});break;
+ case 'astral':addonAimedZone(a.id,r,30,2.2,{radius:8,arm:.35,detonate:1.6,lead:1.6,keepLane:true});break;
  case 'cascade':addonZone(a.id,r,18,4,{radius:4,shots:3,arm:.45});break;
- case 'rend':addonZone(a.id,r,32,1.7,{radius:7,arm:1.1});break;
- case 'pyre':addonZone(a.id,r,25,4.5,{radius:7,inner:3.5,arm:.4});break;
- case 'kraken':addonZone(a.id,r,26,4.5,{radius:7,arm:.6,slams:0});break;
- case 'electrical':addonZone(a.id,r,20,4,{radius:8,arm:.45});break;
+ case 'rend':addonAimedZone(a.id,r,32,1.7,{radius:7,arm:1.1});break;
+ case 'pyre':addonAimedZone(a.id,r,25,4.5,{radius:7,inner:3.5,arm:.4});break;
+ case 'kraken':addonAimedZone(a.id,r,26,4.5,{radius:7,arm:.6,slams:0,keepLane:true});break;
+ case 'electrical':addonAimedZone(a.id,r,20,4,{radius:8,arm:.45});break;
  case 'earth-spire':addonProjectile(a.id,r,{range:35,speed:72,radius:2.5});break;
- case 'verdant-gate':case 'tide-ring':case 'fire-portal':addonZone(a.id,r,12,7,{radius:3,arm:.2});break;
- case 'electric-boost':applyBoost(r,1.4,1.38,.95);addonBuff(r,1.4);{const o=addonTarget(r,r.u,r.lat,12,6);if(o)addonSlow({id:a.id,owner:r},o,1);}break;
- case 'magic-boost':r.slow=0;r.regen=Math.max(r.regen||0,4);applyBoost(r,4,1.16,.3);addonBuff(r,4);break;
- case 'fire-boost':applyBoost(r,3,1.23,.65);addonBuff(r,3);break;
+ case 'verdant-gate':case 'tide-ring':case 'fire-portal':addonZone(a.id,r,Math.max(12,(r.speed||0)*.35),7,{radius:3,arm:.2});break;
+ case 'electric-boost':applyBoost(r,1.3,1.3,.8);addonBuff(r,1.4);{const o=addonTarget(r,r.u,r.lat,12,6);if(o)addonSlow({id:a.id,owner:r},o,1);}break;
+ case 'magic-boost':r.slow=0;r.regen=Math.max(r.regen||0,3);applyBoost(r,3,1.14,.3);addonBuff(r,3);break;
+ case 'fire-boost':applyBoost(r,2.2,1.18,.55);addonBuff(r,2.2);break;
  case 'fire':addonProjectile(a.id,r,{speed:102,range:90});break;
  case 'water':addonProjectile(a.id,r,{speed:82,range:75,radius:3.5,pierce:8});break;
  case 'earth':for(let n=0;n<4;n++)addonZone(a.id,r,-5-n*4,5,{radius:3,arm:n*.12});break;
@@ -169,14 +181,19 @@ function stepAddonZone(e,dt){
  }
  if(e.id==='verdant-gate'||e.id==='tide-ring'||e.id==='fire-portal'){
   for(const r of game.racers){if(r.finished||(e.id!=='tide-ring'&&r!==e.owner)||!addonCrossedGate(e,r,dt))continue;
-   addonOnce(e,r,()=>{if(e.id==='verdant-gate'){r.shield=Math.max(r.shield||0,4);applyBoost(r,1.6,1.31,.7);}
-    else if(e.id==='tide-ring'){r.slow=0;applyBoost(r,1.7,r===e.owner?1.3:1.13,.55);}
-    else {r.phase=Math.max(r.phase||0,.9);applyBoost(r,2,1.36,.8);addonSpawn('fire-boost',r,'zone',e.u+18/track.len,e.lat,3,{radius:3});}
+   addonOnce(e,r,()=>{if(e.id==='verdant-gate'){r.shield=Math.max(r.shield||0,4);applyBoost(r,1.4,1.26,.6);}
+    else if(e.id==='tide-ring'){r.slow=0;applyBoost(r,1.5,r===e.owner?1.25:1.13,.5);}
+    else {r.phase=Math.max(r.phase||0,.9);applyBoost(r,1.6,1.28,.65);addonSpawn('fire-boost',r,'zone',e.u+18/track.len,e.lat,3,{radius:3});}
     addonContact(e.id,r,e.owner);return true;});
   }return;
  }
  if(e.id==='rend'){if(!e.detonated){e.detonated=true;addonBlast(e);addonEffect(e.id,e.u,e.lat,e.owner,{duration:.6,phase:'burst',radius:e.radius});}return;}
  if(e.id==='astral'&&e.age>=e.detonate){if(!e.detonated){e.detonated=true;e.contacts.clear();addonBlast(e);addonEffect(e.id,e.u,e.lat,e.owner,{duration:.6,phase:'burst',radius:e.radius});}return;}
+ // Kraken and Electrical pulse for show, but a kart that crosses between pulses is still
+ // caught the first time it enters: a zone that is drawn must be able to land.
+ if(e.id==='kraken'||e.id==='electrical'||e.id==='pyre')for(const r of game.racers){if(r===e.owner||r.finished||r.phase>0||e.contacts.has(r)||!addonNear(e.u,e.lat,r,e.radius))continue;
+  if(e.id==='pyre'){if(Math.hypot(du_dist(e.u,r.u),r.lat-e.lat)>=e.inner)addonOnce(e,r,()=>addonSlow(e,r,1.2),.54);continue;}
+  if(e.id==='kraken'){const side=(e.slams===(e.firstSlams||0)?e.slams+1:e.slams)%2;if(e.life>.9&&((side===0&&r.lat<e.lat)||(side===1&&r.lat>=e.lat)))continue;addonOnce(e,r,()=>addonHit(e,r),1.65);}else addonOnce(e,r,()=>addonSlow(e,r,1.1),.9);}
  e.pulse-=dt;if(e.pulse>0)return;e.pulse=e.id==='kraken'?.85:e.id==='electrical'?.9:.55;
  if(e.id==='electrical'){
   let u=e.u,lat=e.lat;const struck=new Set();
@@ -202,7 +219,8 @@ function addonAIWants(r){
  return !!addonTarget(r,r.u,r.lat,55,10);
 }
 function stepAddons(dt){
- if(game.state!=='race'||!(dt>0)||!Number.isFinite(dt))return;
+ if(!['race','finish'].includes(game.state)||!(dt>0)||!Number.isFinite(dt))return;
+ if(game.state==='finish'){for(const r of game.racers){r.addonCooldown=Math.max(0,(r.addonCooldown||0)-dt);r.addonActive=Math.max(0,(r.addonActive||0)-dt);}return;}
  for(const r of game.racers){
   r.addonCooldown=Math.max(0,(r.addonCooldown||0)-dt);r.addonActive=Math.max(0,(r.addonActive||0)-dt);
   if(!r.finished&&r.addonId==='fire-boost'&&r.addonActive>0){r.addonPulse-=dt;if(r.addonPulse<=0){addonZone('fire-boost',r,-4,2,{radius:2.7});r.addonPulse=.35;}}
