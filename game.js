@@ -45,7 +45,7 @@ class Racer{
     this.lap=1;this.highestLap=1;this.checkpoint=false;this.progress=0;this.tokens=0;this.totalTokensCollected=0;this.serviceLineMetres=0;this.hitsTaken=0;this.item=null;this.roulette=0;this.rouletteTick=0;this.tripleLeft=0;
     this.spin=0;this.shield=0;this.hitCd=0;this.wallCd=0;this.finished=false;this.finishTime=0;this.rank=gridIdx+1;this.wheelRot=0;this.visualYaw=0;this.lean=0;this.wrongWay=false;
     // Grid-staggered reaction: front rows launch first so the pack fans out instead of piling into row one.
-    this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0,recover:0};
+    this.ai={steer:0,drift:false,offset:(rng()-.5)*4.2,skill:.75+rng()*.25,itemDelay:0,driftHold:0,driftSide:1,startDelay:.08+Math.floor(gridIdx/2)*.07+rng()*.2,throttleHold:0,missileCd:0,itemHeld:0,specialIdle:0,recover:0};
     this.distance=this.u;this.progress=this.u;this.startHold=0;this.wheelspin=0;this.hop=0;this.lastU=this.u;this.rubber=1;
     // Boost surge (accel ramp instead of an instant multiplier), hop→drift commit window, wrong-way timer, triple spacing.
     this.boostTarget=1;this.surge=0;this.hopWindow=0;this.wrongT=0;this.tripleCd=0;
@@ -267,10 +267,14 @@ function hitRacer(r,source,attacker=null){
 function stepWorld(dt){
   const R=game.racers;
   // kart vs kart
-  for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0||a.finished||b.finished)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
+  for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.phase>0||b.phase>0||a.finished&&b.finished)continue;const ds=du_dist(a.u,b.u),dl=b.lat-a.lat;
     if(Math.abs(ds)<2.6&&Math.abs(dl)<1.9){if(a.ram>0)hitRacer(b,'ram',a);if(b.ram>0)hitRacer(a,'ram',b);const push=1.9-Math.abs(dl),sgn=dl>=0?1:-1;
       const invA=a.anchor>0?0:1/a.weight,invB=b.anchor>0?0:1/b.weight,total=invA+invB;
-      if(total>0){a.lat-=sgn*push*invA/total;b.lat+=sgn*push*invB/total;}
+      // Resolve along the shallower overlap: a nose-to-tail tap parks the chaser on the bumper
+      // instead of teleporting both karts a metre sideways inside one tick.
+      const tail=2.6-Math.abs(ds),rear=ds>=0?a:b;
+      if(tail<push){if(!(rear.anchor>0)){rear.distance-=tail/track.len;rear.u=wrap01(rear.distance);rear.progress=rear.distance;}}
+      else if(total>0){a.lat-=sgn*push*invA/total;b.lat+=sgn*push*invB/total;}
       const boundary=TRACK_W/2-.9;
       a.lat=clamp(a.lat,-boundary,boundary);b.lat=clamp(b.lat,-boundary,boundary);
       if(a.perimeter>0){if(!(b.anchor>0))b.lat=clamp(b.lat+sgn*1.2,-TRACK_W/2+1,TRACK_W/2-1);powerSlow(b,.5,a);}
@@ -386,7 +390,10 @@ function aiWantsItem(r,curvNear){
   return true;
 }
 function stepAI(r,dt){
-  if(r.finished){r.throttle=true;r.ai.steer=lerp(r.ai.steer,-r.lat*.3,dt*2);r.ai.drift=false;return;}
+  // A finished kart lifts to a cool-down pace and pulls to the nearer wall, still solid, so the
+  // racing line stays clear for the karts still on their last lap.
+  if(r.finished){const side=r.ai.finishSide||(r.ai.finishSide=r.lat>=0?1:-1),hold=trackCurv(r.u)*r.speed*.05/Math.max(.1,r.handling*steeringGain(r.speed,r.maxSpeedBase));
+    r.throttle=r.speed<r.maxSpeedBase*.55;r.brake=false;r.ai.drift=false;r.ai.steer=lerp(r.ai.steer,clamp((side*(TRACK_W/2-1.6)-r.lat)*.3+hold,-1,1),1-Math.exp(-dt*4));return;}
   if(game.state==='countdown'){r.throttle=false;r.ai.steer=0;r.ai.drift=false;return;}
   r.ai.throttleHold+=dt;r.throttle=r.ai.throttleHold>r.ai.startDelay;
   const look=(12+r.speed*.4)/track.len;const cA=trackCurv(r.u+look),cB=trackCurv(r.u+look*2.2);
@@ -417,9 +424,22 @@ function stepAI(r,dt){
   r.ai.steer=clamp(err/3.2*skill*recovery+roadHold,-1,1);
   // drifting
   const bigCurve=Math.abs(cA)>.02||Math.abs(cB)>.024;
-  if(!r.drifting){if(bigCurve&&r.speed>r.maxSpeedBase*.6&&rng()<skill*dt*4){r.ai.drift=true;r.ai.driftHold=1.2+rng()*1.6+game.diff*.4;r.ai.steer=Math.sign(cA)*Math.max(.5,Math.abs(r.ai.steer));}}
-  else{r.ai.driftHold-=dt;if(r.ai.driftHold<=0||(!bigCurve&&Math.abs(trackCurv(r.u+look*.5))<.006))r.ai.drift=false;else r.ai.steer=clamp(r.ai.steer+r.driftDir*.35,-1,1);}
-  if(!r.drifting&&r.ai.driftHold<=0)r.ai.drift=false;
+  if(!r.drifting){
+    // Hold the chosen side through the hop so the slide can commit; a hop that did not commit
+    // (or never left the ground) releases the button, otherwise the held key blocks every later hop.
+    if(r.ai.drift&&r.hopWindow>0)r.ai.steer=r.ai.driftSide*Math.max(.5,Math.abs(r.ai.steer));
+    else if(r.ai.drift&&r.driftKey){r.ai.drift=false;r.ai.driftHold=0;}
+    else if(bigCurve&&r.speed>r.maxSpeedBase*.6&&rng()<skill*dt*4){r.ai.drift=true;r.ai.driftHold=1.2+rng()*1.6+game.diff*.4;r.ai.driftSide=Math.sign(cA)||1;r.ai.steer=r.ai.driftSide*Math.max(.5,Math.abs(r.ai.steer));}}
+  else{r.ai.driftHold-=dt;
+    // Carry a slide a moment past its plan when the next mini-turbo tier is a beat away.
+    const nextTier=r.driftTier<DRIFT_TIERS.length&&DRIFT_TIERS[r.driftTier]-r.driftTime<.3&&r.ai.driftHold>-.6;
+    if((r.ai.driftHold<=0||(!bigCurve&&Math.abs(trackCurv(r.u+look*.5))<.006))&&!nextTier)r.ai.drift=false;
+    else{
+      // Tuck into the slide only while there is room: the drift already angles the kart inward,
+      // so a constant inward bias runs it into the apex wall.
+      const room=TRACK_W/2-.9-r.lat*r.driftDir;
+      r.ai.steer=clamp(r.ai.steer+r.driftDir*(room>2.2?.35:room>1.4?0:-.5),-1,1);}}
+  if(!r.drifting&&r.ai.driftHold<=0&&r.hopWindow<=0)r.ai.drift=false;
   r.brake=false;
   // items
   if(r.ai.missileCd>0)r.ai.missileCd-=dt;
@@ -432,7 +452,8 @@ function stepAI(r,dt){
   r.rubber=1;
   const corner=Math.max(Math.abs(cA),Math.abs(cB));
   const safeSpeed=r.maxSpeedBase*clamp(1-corner*(game.diff===0?7:game.diff===1?5:4),.58,1);
-  if(!r.drifting&&r.speed>safeSpeed){r.throttle=false;r.brake=r.speed>safeSpeed+5;}
+  // A slide sheds no corner scrub, so a drifting AI still lifts for the corner; it only skips the brake.
+  if(r.speed>safeSpeed){r.throttle=false;r.brake=!r.drifting&&r.speed>safeSpeed+5;}
   // P1.3 recovery, as a decision rather than a stat: a Simulation field dithers after a
   // spin before getting back on the throttle; an Overseer field is straight back to work.
   // Speed, acceleration and grip are untouched — the driver simply waits longer.
@@ -473,9 +494,15 @@ function chaseCamera(p,portrait){
     lookUp:(portrait?1.5:1.0)+air*.6,lookSide:clamp(curv*95,-3.5,3.5),
     fov:66+(spd*7+camState.kick*9+(p.boost>0?5:0)+(p.drifting?p.driftTier*1.2:0))*swing+(portrait?4:0)};
 }
+// Karts and the chase camera are drawn between the last two 120 Hz steps (alpha = time past the
+// latest step), so uneven step counts per display frame do not show as judder at 60/90/144 Hz.
+const renderAlpha={v:1};
+function kartRenderU(r){const a=r.posePrev,b=r.pose;return a&&b?wrap01(a.u+du_dist(a.u,b.u)/track.len*renderAlpha.v):r.u;}
+function kartRenderLat(r){const a=r.posePrev,b=r.pose;return a&&b?lerp(a.lat,b.lat,renderAlpha.v):r.lat;}
+function placeRacersForRender(){const t=renderAlpha.v;for(const r of game.racers){const a=r.posePrev,b=r.pose;if(a&&b&&r.mesh)orientOnTrack(r.mesh,kartRenderU(r),kartRenderLat(r),lerp(a.h,b.h,t),lerp(a.yaw,b.yaw,t));}}
 function updateCamera(dt){
   const p=game.player;if(!p)return;
-  trackPoint(p.u,p.lat,0.9,_p);trackTan(p.u,_v1);trackUp(p.u,_v2);trackRight(p.u,_v3);
+  const pu=kartRenderU(p),pl=kartRenderLat(p);trackPoint(pu,pl,0.9,_p);trackTan(pu,_v1);trackUp(pu,_v2);trackRight(pu,_v3);
   const fwd=_v1.clone().applyAxisAngle(_v2,p.visualYaw*.35),up=_v2.clone();
   let target,look,fovT;
   if(game.state==='countdown'){const k=clamp(1-game.countdown/3.6,0,1);const a=lerp(Math.PI*.75,0,smooth(k));const dist=lerp(9,7.6,k);
@@ -732,6 +759,7 @@ function frame(now){
   pollGamepad();game.time+=dt;acc+=dt;let steps=0;
   while(acc>=STEP&&steps<12&&['countdown','race','finish'].includes(game.state)){simStep(STEP);acc-=STEP;steps++;}
   if(steps===12)acc=0;
+  renderAlpha.v=clamp(acc/STEP,0,1);placeRacersForRender();
   [sparksBlue,sparksOrange,sparksPink,boostFx,goldFx,smokeFx,hitFx].forEach(p=>p.update(dt));if(typeof raceFX!=='undefined')raceFX.update(dt,game.player);
   updateCamera(dt);updateHUD(dt);
   world.traverse(o=>{if(o.userData.spin)o.rotation.z+=o.userData.spin*dt*(o.geometry&&o.geometry.type==='TorusGeometry'?1:0),o.rotation.y+=o.userData.spin*dt;});
@@ -904,7 +932,11 @@ async function boot(){
  try{
   await loadKartAssets((done,total)=>{document.getElementById('loading-status').textContent='ASSEMBLING RACERS · '+done+' / '+total;const progress=document.getElementById('loading-progress');progress.max=total;progress.value=done;});
   await Promise.race([preloadEquippedTiers(),new Promise(done=>setTimeout(done,8000))]);
-  buildTextures();game.skyMat=buildSky();buildTrackFrames();buildTrackMeshes();buildEnvironment();kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
+  buildTextures();game.skyMat=buildSky();
+  // Build the chosen circuit through selectMap: the bare world.js controls are cherry without its detour,
+  // and selectMap skips an unchanged map, so a first-session cherry race used to run the short layout.
+  if(typeof selectMap==='function'){activeMap=null;selectMap(chosenMapId);}else{buildTrackFrames();buildTrackMeshes();buildEnvironment();}
+  kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
   if(typeof raceTelemetry!=='undefined')raceTelemetry.ready();

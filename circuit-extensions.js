@@ -7,10 +7,12 @@ const CIRCUIT_EXTENSIONS={
  stormforge:{names:['Turbine Chicane','Foundry Drop','Reactor Exit'],points:[[265,10,20],[325,22,-30],[295,29,-100],[365,34,-175],[325,20,-265],[260,10,-245],[220,7,-180]],
   route:{id:'turbine-service-apex',name:'Turbine Service Apex',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}},
  canopy:{names:['Cliffside Sweep','Canopy Descent','Sea Bridge'],points:[[265,18,15],[335,36,-55],[395,42,-200],[335,30,-280],[250,16,-275],[210,12,-220]],
-  route:{id:'root-cut-line',name:'Root Cut Line',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}}
+  route:{id:'root-cut-line',name:'Root Cut Line',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6},
+  // The detour arrives heading north, so rejoining old control 3 folded a 4 m hairpin; it rejoins control 4.
+  drop:1}
 };
-function extendedCircuitControls(id,base){return [...base.slice(0,3),...CIRCUIT_EXTENSIONS[id].points.map(p=>p.slice()),...base.slice(3)];}
-function extendedCircuitKeys(id,keys){const count=CIRCUIT_EXTENSIONS[id].points.length;return keys.map(([i,v])=>[i>=3?i+count:i,v]);}
+function extendedCircuitControls(id,base){const def=CIRCUIT_EXTENSIONS[id];return [...base.slice(0,3),...def.points.map(p=>p.slice()),...base.slice(3+(def.drop||0))];}
+function extendedCircuitKeys(id,keys){const def=CIRCUIT_EXTENSIONS[id],shift=def.points.length-(def.drop||0);return keys.map(([i,v])=>[i>=3?i+shift:i,v]);}
 
 // Arc-length anchors are derived from authored controls, not percentages of the
 // old circuit: changing a detour cannot leave its landmark on another section.
@@ -63,7 +65,8 @@ function buildExtensionLandmarks(){
 // progress jump, and the exit cannot award a lap or a finish.
 function configureCircuitRoutes(){
  const def=CIRCUIT_EXTENSIONS[activeMap.id];
- track.serviceRoute=def&&def.route&&CTRL.length>20
+ const first=def&&def.points[0],extended=!!first&&CTRL.some(p=>p[0]===first[0]&&p[1]===first[1]&&p[2]===first[2]);
+ track.serviceRoute=extended&&def.route
   ?{id:def.route.id,name:def.route.name,cue:def.route.cue,start:extensionAnchor(def.route.from),end:extensionAnchor(def.route.to)}
   :null;
 }
