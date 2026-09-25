@@ -2,7 +2,7 @@
 // pickups: item-box rows / token-arc starts as lap fractions, kept off hairpins and the anti-gravity entry.
 const SOLAR_DIRECTION=new THREE.Vector3(-90,140,-60).normalize();
 const MAPS = [
-  {id:'cherry',name:'Cherry Blossom Skyway',theme:'Sanctuary in the clouds',difficulty:'Flowing',road:0x6b60b8,edge:0x70f4ff,trim:0xe4b7ef,skyTop:0x6f86d6,skyHorizon:0xf4bcd6,fog:0xb9b3e2,sun:0xffe5df,
+  {id:'cherry',name:'Cherry Blossom Skyway',theme:'Sanctuary in the clouds',difficulty:'Flowing',road:0x6b60b8,edge:0x70f4ff,trim:0xb85a8e,skyTop:0x414a8e,skyHorizon:0xd48aa3,fog:0x8a7aa4,sun:0xffd4ba,
     pickups:{rows:[0.11,0.30,0.498,0.656,0.80,0.93],arcs:[0.126,0.2,0.38,0.55,0.72,0.886]}},
   {id:'stormforge',name:'Nexus Stormforge',theme:'Race the turbine foundry',difficulty:'Technical',road:0x525f78,edge:0x58efff,trim:0xffbb54,skyTop:0x667694,skyHorizon:0xffc99a,fog:0xadb6d1,sun:0xffce9a,
     pickups:{rows:[0.11,0.30,0.424,0.64,0.80,0.878],arcs:[0.032,0.236,0.38,0.55,0.72,0.918]},
@@ -31,15 +31,18 @@ function selectMap(id){
 }
 function applyMapAtmosphere(){
   scene.fog.color.setHex(activeMap.fog);
-  scene.fog.near=activeMap.id==='stormforge'?200:activeMap.id==='canopy'?300:260;
-  scene.fog.far=activeMap.id==='canopy'?1180:activeMap.id==='stormforge'?860:980;
-  sun.color.setHex(activeMap.sun);hemi.color.setHex(activeMap.skyTop);hemi.groundColor.setHex(activeMap.id==='canopy'?0x537b60:activeMap.id==='stormforge'?0x4a5368:0x8272a0);
-  hemi.intensity=activeMap.id==='stormforge'?.58:.72;
+  // Cherry dusk: mauve aerial perspective starts closer so outer islands recede in value while the lane stays clear.
+  // Stormforge / Canopy: haze begins before the offshore skyline (340-410 m) so it layers in depth.
+  scene.fog.near=scene.fog.baseNear=activeMap.id==='stormforge'?170:activeMap.id==='canopy'?230:150;
+  scene.fog.far=activeMap.id==='canopy'?1150:activeMap.id==='stormforge'?900:900;
+  sun.color.setHex(activeMap.sun);hemi.color.setHex(activeMap.id==='cherry'?0x7880c4:activeMap.skyTop);hemi.groundColor.setHex(activeMap.id==='canopy'?0x537b60:activeMap.id==='stormforge'?0x4a5368:0x4e3c5c);
+  hemi.intensity=activeMap.id==='stormforge'?.58:activeMap.id==='cherry'?.66:.72;
   sun.intensity=activeMap.id==='canopy'?1.2:activeMap.id==='stormforge'?1.05:1.15;
-  if(typeof rim!=='undefined'){rim.color.setHex(activeMap.id==='stormforge'?0x8bcaff:activeMap.id==='canopy'?0xb6f6ff:0xaecaff);rim.intensity=.55;}
+  // Cherry keeps a stronger cool back-rim so kart silhouettes separate from the darker sanctuary.
+  if(typeof rim!=='undefined'){rim.color.setHex(activeMap.id==='stormforge'?0x8bcaff:activeMap.id==='canopy'?0xb6f6ff:0xb9d6ff);rim.intensity=activeMap.id==='cherry'?.74:.55;}
   if(typeof renderer!=='undefined')renderer.toneMappingExposure=activeMap.id==='stormforge'?.88:.94;
   if(typeof game!=='undefined'&&game.skyMat?.uniforms.skyTop){game.skyMat.uniforms.skyTop.value.setHex(activeMap.skyTop);game.skyMat.uniforms.skyHorizon.value.setHex(activeMap.skyHorizon);}
-  if(typeof game!=='undefined'&&game.skyMat?.uniforms.storm){game.skyMat.uniforms.storm.value=activeMap.id==='stormforge'?1:0;game.skyMat.uniforms.cloudCover.value=activeMap.id==='stormforge'?.77:activeMap.id==='canopy'?.54:.63;}
+  if(typeof game!=='undefined'&&game.skyMat?.uniforms.storm){game.skyMat.uniforms.storm.value=activeMap.id==='stormforge'?1:0;game.skyMat.uniforms.cloudCover.value=activeMap.id==='stormforge'?.77:activeMap.id==='canopy'?.54:activeMap.id==='cherry'?.46:.63;} // Cherry: thinner white decks so the dusk gradient, not bright cloud, frames the lane
   if(typeof refreshMapEnvironment==='function')refreshMapEnvironment();
 }
 function updateMapScenery(dt){

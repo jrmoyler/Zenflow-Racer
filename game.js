@@ -242,7 +242,8 @@ function advanceRaceDistance(r,du,dt){
     if(lapTime>1){r.lastLap=lapTime;r.lapTimes.push(lapTime);if(!r.bestLap||lapTime<r.bestLap)r.bestLap=lapTime;}
     if(nextLap<=game.laps&&typeof raceFX!=='undefined')raceFX.onLap(r,nextLap);
     if(r.isPlayer&&nextLap<=game.laps){SFX.lap();const n=r.lapTimes.length,prev=n>=2?r.lapTimes[n-2]:0;
-      setToast(nextLap===game.laps?'FINAL LAP':'LAP '+nextLap,'gold',r.lastLap?fmtTime(r.lastLap)+(prev?' ('+fmtDelta(r.lastLap-prev)+')':''):'',3);}
+      setToast(nextLap===game.laps?'FINAL LAP':'LAP '+nextLap,'gold',r.lastLap?fmtTime(r.lastLap)+(prev?' ('+fmtDelta(r.lastLap-prev)+')':''):'',3);
+      if(nextLap===game.laps&&typeof cinematicSting==='function')cinematicSting('FINAL LAP',r.rank+ordinal(r.rank).toUpperCase()+' · '+(typeof activeMap!=='undefined'&&activeMap?activeMap.name.toUpperCase():''));}
   }
   r.lap=nextLap;r.checkpoint=r.u>.5;r.wrongWay=r.speed<-2;r.wrongT=r.wrongWay?r.wrongT+dt:0;r.progress=r.distance;
   if(!r.finished&&before<game.laps&&r.distance>=game.laps){
@@ -541,7 +542,8 @@ function onboardingSignals(){
   // Anything that is not a race or the results screen parks the lesson and hides its
   // panel: it must never sit over the pause dialog, the menu or the title card.
   return {
-    phase:['race','countdown','finish'].includes(game.state)?'race':game.state==='results'?'results':'away',
+    // A cutscene parks the coach too: its patience timers must not run out while it is hidden.
+    phase:typeof cinematicActive==='function'&&cinematicActive()?'away':['race','countdown','finish'].includes(game.state)?'race':game.state==='results'?'results':'away',
     speed:p?p.speed:0,
     steering:!!(input.left||input.right)||!!(p&&Math.abs(p.steer)>.25),
     drifting:!!(p&&p.drifting),driftTier:p?p.driftTier||0:0,
@@ -749,6 +751,8 @@ function frame(now){
   // way. It runs before any early return below.
   if(typeof tickOnboarding==='function')tickOnboarding(dt,onboardingSignals());
   if(typeof updateRenderBudget==='function'&&['race','countdown'].includes(game.state))updateRenderBudget(elapsed*1000);
+  // A cutscene owns the camera and returns before any simulation step: the race clock never advances under it.
+  if(typeof tickCinematic==='function'&&tickCinematic(dt)){renderRaceScene();audioUpdate(dt,game.player);return;}
   if(typeof sceneCut!=='undefined'&&sceneCut.busy){renderRaceScene();if(game.state==='roster')renderSelectedPreview(0);return;}
   if(typeof tickFinishCeremony==='function'&&tickFinishCeremony(dt)){renderRaceScene();audioUpdate(dt,game.player);return;}
   if(typeof tickTitleAttract==='function'&&tickTitleAttract(dt)){renderRaceScene();return;}
@@ -924,8 +928,8 @@ function buildRosterUI(){
   const initial=ROSTER.findIndex(d=>d.id===saved.selected);grid.querySelectorAll('.card')[Math.max(0,initial)]?.click();
   document.getElementById('go').onclick=()=>{if(!selected||!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map')return;audioInit();SFX.go();startRace();};
 }
-function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster);if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();if(typeof clearAddons==='function')clearAddons();resetInput();updateBestTime();game.state='roster';if(typeof window.resetRaceSetup==='function')window.resetRaceSetup();if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
-function startRace(){if(!selected)return false;if(['boot','roster','title'].includes(game.state)&&(!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map'))return false;if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace);if(typeof clearFinishCeremony==='function')clearFinishCeremony();if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
+function openRoster(){if(typeof sceneCut!=='undefined'&&!sceneCut.committing&&!['boot','roster'].includes(game.state))return transitionScene('CHARACTER SELECT',openRoster,{cinematic:'roster'});if(typeof clearFinishCeremony==='function')clearFinishCeremony();clearProjectiles();if(typeof raceFX!=='undefined')raceFX.reset?.();if(typeof clearAbilities==='function')clearAbilities();if(typeof clearAddons==='function')clearAddons();resetInput();updateBestTime();game.state='roster';if(typeof window.resetRaceSetup==='function')window.resetRaceSetup();if(typeof selectMap==='function'&&selectMap(chosenMapId))miniBounds=null;document.getElementById('roster').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');hideTouch();game.racers.forEach(r=>{scene.remove(r.mesh);if(typeof disposeKart==='function')disposeKart(r.mesh);});game.racers=[];game.player=null;if(selected)updateSelectedPreview(selected);}
+function startRace(){if(!selected)return false;if(['boot','roster','title'].includes(game.state)&&(!raceSetup.racerConfirmed||!raceSetup.mapConfirmed||raceSetup.step!=='map'))return false;if(typeof sceneCut!=='undefined'&&!sceneCut.committing)return transitionScene('ENTERING THE GRID',startRace,{cinematic:'grid',quick:['results','paused'].includes(game.state)});if(typeof clearFinishCeremony==='function')clearFinishCeremony();if(typeof clearTitleAttract==='function')clearTitleAttract();document.getElementById('roster').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');spawnRace(selected);last=performance.now();}
 
 // ---------- Boot ----------
 async function boot(){
@@ -939,6 +943,7 @@ async function boot(){
   kartGeos();buildPickups();buildParticles();applyMapAtmosphere();if(typeof raceFX!=='undefined'&&!FALLBACK_GRAPHICS)raceFX.init();
   renderer.setSize(innerWidth,innerHeight);buildRosterUI();
   document.getElementById('loading').classList.add('hidden');openRoster();
+  if(typeof playCinematic==='function')playCinematic('intro');
   if(typeof raceTelemetry!=='undefined')raceTelemetry.ready();
   requestAnimationFrame(frame);
  }catch(error){console.error('3D asset loading failed',error);graphicsNotice('The 3D racers could not load. Reload to try again.',true);}

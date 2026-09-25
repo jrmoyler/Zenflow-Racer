@@ -13,4 +13,5 @@ for(const map of run('MAPS')){
  assert.ok(clearance>14,map.id+' nonadjacent track clearance '+clearance);
  report.push({map:map.id,beforeMetres:beforeLength,afterMetres:afterLength,addedMetres:afterLength-beforeLength,referenceSpeed:47,geometricSeconds:(afterLength-beforeLength)/47,minCenterClearance:clearance,humanLapSeconds:null,aiLapSeconds:null,certified:false});
 }
+{const g=run('vineLeafGeometry([[0,0,0,3],[1,2,0,2]],7)');assert.equal(g.attributes.position.count,5*12,'12 vertices per leaf blade');assert.ok(g.attributes.position.array.every(Number.isFinite)&&g.attributes.normal&&g.attributes.uv,'leaf blades carry normals/uvs for static batching');g.dispose();}
 console.log(JSON.stringify(report,null,2));fs.writeFileSync('docs/p0-finalization/track-estimates.json',JSON.stringify({method:'Arc length / 47m/s. Geometry estimate only; not a human timing certification.',circuits:report},null,2)+'\n');

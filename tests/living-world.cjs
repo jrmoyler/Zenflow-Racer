@@ -25,6 +25,14 @@ for(const id of ['cherry','stormforge','canopy']){
  const before=rig.hinge.rotation.z,time=s.time;run('updateLivingWorld(0);updateLivingWorld(NaN)');assert.equal(s.time,time);assert.equal(rig.hinge.rotation.z,before);
  run('world.updateMatrixWorld(true)');run('world').traverse(m=>{assert.ok(m.matrixWorld.elements.every(Number.isFinite));if(m.geometry)assert.ok(m.geometry.attributes.position.array.every(Number.isFinite));});
  assert.ok(Math.abs(run('SOLAR_DIRECTION.length()')-1)<1e-6);
+ // Atmosphere: GPU particles follow simulation time on every circuit.
+ {
+  const fx=s.fx;assert.ok(fx&&fx.root.parent===run('world'),id+' atmosphere lives under world (disposed on switch)');
+  assert.ok(run('world').getObjectByName('waterfall-spray')?.isPoints,id+' waterfall spray');
+  const t0=fx.time.value;run('updateLivingWorld(.05)');assert.ok(fx.time.value>t0,'particles advance on game time');const t1=fx.time.value;run('updateLivingWorld(0)');assert.equal(fx.time.value,t1,'pause holds particles');
+  if(id==='cherry')assert.ok(run('world').getObjectByName('cherry-petal-drift')?.isPoints,'cherry blossom gusts');
+  if(id==='canopy'){const g=fx.gulls.mesh,before=Array.from(g.instanceMatrix.array);run('for(let i=0;i<30;i++)updateLivingWorld(1/60)');assert.notDeepEqual(Array.from(g.instanceMatrix.array),before,'gulls soar');assert.ok(g.instanceMatrix.array.every(Number.isFinite));}
+ }
  console.log('PASS',id,s.rigs.length,'anchored rigs;',s.leaves.length,'shared foliage geometries');
 }
 c.matchMedia=()=>({matches:true});run("selectMap('cherry')");assert.equal(run('LIVING_WORLD.reduced'),true);run('LIVING_WORLD.timeline.cancel()');

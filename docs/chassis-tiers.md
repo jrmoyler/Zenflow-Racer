@@ -54,9 +54,13 @@ wheel's centre, radius, width and triangle count.
 
 ## Known limits
 
-- **The pilot is part of the sculpted body.** Tier II and III pilots move with the sprung body
-  (roll, pitch, heave, spin-out), but their arms and heads do not animate separately. The factory
-  karts still have the fully articulated pilot.
+- **The pilot is part of the sculpted body, so it is soft-skinned.** `tierPilotSkin` in
+  `kart-assets.js` splits the fused pilot out with smooth weights around measured helmet positions
+  (`KART_TIER_PILOT`), so tier II and III pilots steer, lean, turn their heads and react like the
+  factory pilot. `scaleTierPilotRig` in `vehicles.js` damps the motion (torso 0.7, head 0.75,
+  arms 0.32, wheel 0.6) to what the fused suit can stretch to; grip positions are estimated from
+  seated proportions, and the victory/spin-out arm gestures stay smaller than tier I because the
+  hands remain bound to the wheel.
 - **Nine Nightfall chassis have static wheels.** Collective, Eon, Juris, Cognara, Civic, Obsidian,
   Nomad, Signal and Vector have tyres fused to enclosing fenders, so splitting the tyre would drag
   bodywork around with it. Their wheels steer and fold with the pivot but do not spin. All 20 Apex
