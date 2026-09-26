@@ -33,7 +33,7 @@ function disposeKart(root){
   const sharedGeometry=new Set(Object.values(KART_GEO));
   const sharedTextures=new Set(Object.values(TEX));
   const geometries=new Set(),materials=new Set(),textures=new Set();
-  root.traverse(obj=>{if(obj.geometry&&!obj.geometry.userData?.blenderShared&&!sharedGeometry.has(obj.geometry))geometries.add(obj.geometry);
+  root.traverse(obj=>{if(obj.isSkinnedMesh&&obj.skeleton)obj.skeleton.dispose();if(obj.geometry&&!obj.geometry.userData?.blenderShared&&!sharedGeometry.has(obj.geometry))geometries.add(obj.geometry);
     if(obj.material)(Array.isArray(obj.material)?obj.material:[obj.material]).forEach(m=>materials.add(m));});
   // Fitted chassis templates share their textured material across every instance.
   materials.forEach(m=>{if(m.userData?.tierShared)return;Object.values(m).forEach(v=>{if(v?.isTexture&&!sharedTextures.has(v)&&!(typeof KART_TIER_ASSETS!=='undefined'&&KART_TIER_ASSETS.textures.has(v)))textures.add(v);});m.dispose();});
@@ -786,7 +786,17 @@ function animateKart(r,dt,ag=0){
   applyKartClips(ud,state,dt);
   animateRacingEquipment(ud,a.t,boosting?1:0);
   if(typeof animateKartBuildVisuals==='function')animateKartBuildVisuals(r.mesh,a.t,{speed:r.speed});
+  scaleTierPilotRig(ud);
   if(typeof constrainKartHands==='function')constrainKartHands(r.mesh,state);
+}
+// Fitted Tier II/III pilots are skinned out of one sculpted scan: the same choreography plays
+// through gains that keep suit, seat and rim within what the fused surface can stretch to.
+function scaleTierPilotRig(ud){
+  const g=ud.rigGain;if(!g)return;
+  ud.pilot.rotation.set(ud.pilot.rotation.x*g.torso,ud.pilot.rotation.y*g.torso,ud.pilot.rotation.z*g.torso);ud.pilot.position.y=1+(ud.pilot.position.y-1)*g.torso;
+  if(ud.head)ud.head.rotation.set(ud.head.rotation.x*g.head,ud.head.rotation.y*g.head,ud.head.rotation.z*g.head);
+  if(ud.arms)for(const arm of ud.arms)arm.rotation.set(arm.rotation.x*g.arm,arm.rotation.y*g.arm,arm.rotation.z*g.arm);
+  const sw=ud.steeringWheel;if(sw){const rest=ud.pilotJoints?ud.pilotJoints.tilt:sw.rotation.x;sw.rotation.set(rest+(sw.rotation.x-rest)*g.wheel,sw.rotation.y*g.wheel,sw.rotation.z*g.wheel);}
 }
 // Turntable presentation: heave, settling suspension, breathing pilot who follows the showroom camera.
 function animateShowroomKart(kart,time,dt,yaw){
@@ -812,6 +822,7 @@ function animateShowroomKart(kart,time,dt,yaw){
   applyKartClips(ud,'idle',dt);
   animateRacingEquipment(ud,time,0);
   if(typeof animateKartBuildVisuals==='function')animateKartBuildVisuals(kart,time,{speed:0});
+  scaleTierPilotRig(ud);
   if(typeof constrainKartHands==='function')constrainKartHands(kart,'idle');
 }
 

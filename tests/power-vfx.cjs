@@ -17,6 +17,9 @@ assert.equal(scene.children.length,baseline,'repeated casts reuse pooled objects
 assert.equal(scene.children.filter(o=>o.isPointLight).length,lights,'lights are never added mid-race (no shader recompiles)');
 assert.ok(scene.children.some(o=>o.isPointLight&&o.intensity>0),'casts light the scene');
 assert.ok(context.game.trauma>0,'the player feels their own cast');
+for(let i=0;i<12;i++){fx.blast({u:.1,lat:0},'#ffe4a3',7);fx.telegraph({u:.1,lat:0},'#baff36',5.5,.4);fx.update(1/60);}
+assert.equal(scene.children.length,baseline,'area blasts and telegraphs reuse pooled objects');
+assert.ok(scene.children.some(o=>o.name==='power-vfx-decal'&&o.visible&&Math.abs(o.scale.x-5.5)<1e-6),'telegraph decal spans the true hazard footprint');
 for(let i=0;i<240;i++)fx.update(1/60);
 assert.ok(scene.children.filter(o=>o.isPointLight).every(o=>o.intensity===0),'lights return to dark');
 assert.ok(scene.children.filter(o=>o.isSprite).every(o=>!o.visible),'flares retire');

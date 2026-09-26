@@ -50,6 +50,10 @@ The upstream `src/abilities`, `src/materials`, and relevant `src/assets` files w
 
 Nexus, Loom and Gaia bind to actual ability-zone coordinates and lifetime: a consumed decoy disappears, and snares/roots are rendered at the dropped zone rather than at the owner's cast position. Civic never draws to a finished racer. Predictive Line follows curved/banked track coordinates rather than projecting a straight strip into scenery.
 
+## Readability and stone
+
+Every zone keeps its horizontal footprint equal to the gameplay radius and gains vertical scale (raised so its floor stays on the road), a thick glowing edge ring, and a 4-8m primary silhouette; projectiles scale to their hit radius. Delayed zones telegraph their exact footprint (`telegraph()` in `power-vfx.js`) and area detonations reach their true radius with a light column (`blast()`). All Earth stone (Earth, Monolith, Earth Spire, Ward and the gate arches) shares one procedural rock: a subdivided, bevelled block cut by fracture planes, strata-banded and noise-weathered, with baked contact darkening and cavity shading, textured from the game's cliff maps. Rocks erupt with overshoot and settle, shed landing chips and a dust ring, and sink at expiry; reduced motion keeps the rise only. Mobile uses lower-detail rocks.
+
 ## Contact, pause and cleanup
 
 `spawnAddonEffect(id,u,lat,owner,{duration,phase,radius,entity,follow})` tracks the exact projectile or zone record used by collision. Zone footprints scale to the gameplay radius. Pyre's visible annulus has an exact 3.5m inner / 7m outer radius. Summoned missiles and terminal formations use distinct geometries. Burst phases route to contact animation.

@@ -10,6 +10,8 @@
  * carry the dark circuits, while the colour halo and ground decals are drawn with normal
  * blending in saturated colour so the same cast still reads on Cherry Blossom's pale road.
  *
+ *  blast(at,color,r)   area detonation sized to the gameplay radius; telegraph(at,color,r,t) arm pulses.
+ *
  * Budgets are fixed at init: one Points, one LineSegments, one sprite pool, a decal pool and a
  * light pool that never changes size (adding lights mid-race would recompile every shader).
  * Everything is presentation only and a no-op in stub/test contexts.
@@ -24,14 +26,17 @@ const powerVFX=(()=>{
   const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.16,'rgba(255,255,255,.9)');gr.addColorStop(.42,'rgba(255,255,255,.32)');gr.addColorStop(1,'rgba(255,255,255,0)');
   g.fillStyle=gr;g.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);
  }
- // Ground decal: kind 0 = expanding shock ring, 1 = scorch that cools from its accent to soot.
+ // Ground decal: kind 0 = expanding shock ring, 1 = scorch that cools from its accent to soot,
+ // 2 = telegraph: a solid footprint rim with pulses converging on the centre until the hazard arms.
  const DECAL_VERT=`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
- const DECAL_FRAG=`uniform vec3 color;uniform float t;uniform float kind;uniform float alpha;uniform float seed;varying vec2 vP;
+ const DECAL_FRAG=`uniform vec3 color;uniform float t;uniform float kind;uniform float alpha;uniform float seed;uniform float beats;varying vec2 vP;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7))+seed)*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
 void main(){float r=length(vP),ang=atan(vP.y,vP.x);float wob=n(vec2(ang*3.,t*4.))*.08;
  if(kind<.5){float front=t,band=smoothstep(.16,0.,abs(r-front-wob))*(1.-t);float inner=smoothstep(front,front*.4,r)*(1.-t)*.35;float a=(band+inner)*alpha;if(r>1.)discard;
   vec3 c=mix(color,vec3(1.),band*.55);gl_FragColor=vec4(c,a);}
+ else if(kind>1.5){if(r>1.02)discard;float ph=fract(t*beats),front=1.-ph,band=smoothstep(.08,0.,abs(r-front-wob*.5))*(.3+.7*ph);float rim=smoothstep(.045,0.,abs(r-.965));float fill=smoothstep(1.,.2,r)*.1;
+  gl_FragColor=vec4(mix(color,vec3(1.),band*.45),(band+rim*.9+fill)*alpha*(1.-t*t*t));}
  else{float edge=smoothstep(1.,.55,r+n(vP*5.)*.25);float soot=edge*(.55+.45*n(vP*9.));float glow=smoothstep(.5,0.,abs(r-.62+n(vP*7.)*.12))*(1.-t);
   vec3 c=mix(color*.22,color*1.2,glow);gl_FragColor=vec4(c,(soot*.6+glow*.8)*alpha*(1.-t*t));}}`;
  function init(){
@@ -59,7 +64,7 @@ void main(){float r=length(vP),ang=atan(vP.y,vP.x);float wob=n(vec2(ang*3.,t*4.)
    const s=new THREE.Sprite(m);s.visible=false;s.renderOrder=additive?1203:1202;s.name='power-vfx-flare';S.sprites.push({s,additive,life:0,max:1,from:1,to:1,alpha:1,follow:null});}
   // Ground decals.
   const plane=new THREE.PlaneGeometry(2,2);S.decals=[];
-  for(let i=0;i<decalCap;i++){const m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,uniforms:{color:{value:new THREE.Color()},t:{value:0},kind:{value:0},alpha:{value:1},seed:{value:i*7.3}},vertexShader:DECAL_VERT,fragmentShader:DECAL_FRAG});
+  for(let i=0;i<decalCap;i++){const m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,uniforms:{color:{value:new THREE.Color()},t:{value:0},kind:{value:0},alpha:{value:1},seed:{value:i*7.3},beats:{value:1}},vertexShader:DECAL_VERT,fragmentShader:DECAL_FRAG});
    const g=new THREE.Group(),mesh=new THREE.Mesh(plane,m);mesh.rotation.x=-Math.PI/2;g.add(mesh);g.visible=false;g.renderOrder=1150;mesh.renderOrder=1150;g.name='power-vfx-decal';S.decals.push({g,mesh,life:0,max:1,radius:1,grow:0,u:0,lat:0});}
   // Fixed light pool, parked dark until needed.
   S.lights=[];for(let i=0;i<lightCap;i++){const l=new THREE.PointLight(0xffffff,0,16,2);l.name='power-vfx-light';l.userData.dynamic=true;S.lights.push({l,life:0,max:1,peak:0,key:null,follow:null});}
@@ -78,7 +83,7 @@ void main(){float r=length(vP),ang=atan(vP.y,vP.x);float wob=n(vec2(ang*3.,t*4.)
  function decal(u,lat,color,kind,radius,life,grow=0){
   let best=null;for(const x of S.decals)if(!best||x.life<best.life)best=x;if(!best||typeof orientOnTrack!=='function')return;
   best.u=u;best.lat=lat;best.life=best.max=life;best.radius=radius;best.grow=grow;best.kind=kind;
-  const m=best.mesh.material.uniforms;m.color.value.copy(color);m.kind.value=kind;m.t.value=0;m.alpha.value=kind?.85:1;
+  const m=best.mesh.material.uniforms;m.color.value.copy(color);m.kind.value=kind;m.t.value=0;m.alpha.value=kind===1?.85:1;m.beats.value=Math.max(1,Math.round(life*2.4));
   orientOnTrack(best.g,u,lat,.06,0);best.g.scale.setScalar(kind?radius:.01);best.g.visible=true;
  }
  function light(pos,color,peak,life,range=16,key=null,follow=null){
@@ -118,8 +123,21 @@ void main(){float r=length(vP),ang=atan(vP.y,vP.x);float wob=n(vec2(ang*3.,t*4.)
   light(p,col,6*strength,.35,14);
  }
  // Small, cheap confirmation for sustained fields landing on a rival (no light, no decal).
- function touch(target,color){if(!S||!target)return;const col=toColor(color),p=racerPos(target,.9,new THREE.Vector3());sprite(p,whiteHot(col,.6),true,.5,2.2,.2,.8);
-  for(let i=0;i<(S.lo?3:8);i++){const a=Math.random()*Math.PI*2;streak(p.x,p.y,p.z,Math.cos(a)*7,2+Math.random()*4,Math.sin(a)*7,whiteHot(col,.5),.18);}}
+ function touch(target,color){if(!S||!target)return;const col=toColor(color),p=racerPos(target,.9,new THREE.Vector3());sprite(p,whiteHot(col,.6),true,.7,3.2,.22,.85);sprite(p,col,false,1,3,.26,.45);
+  for(let i=0;i<(S.lo?4:10);i++){const a=Math.random()*Math.PI*2;streak(p.x,p.y,p.z,Math.cos(a)*8,2+Math.random()*5,Math.sin(a)*8,whiteHot(col,.5),.22);}}
+ // Area detonation: the shock front, scorch and spark fan reach the true gameplay radius, and a
+ // tall flare column marks the strike from the back of the pack.
+ function blast(target,color,radius=5){
+  if(!S||!target)return;attach();const col=toColor(color),u=target.u||0,lat=target.lat||0,p=racerPos(target,.6,new THREE.Vector3()),k=Math.max(1,radius/4);
+  sprite(p,whiteHot(col,.85),true,1.2*k,radius*1.25,.24,1);sprite(p,col,false,radius*.5,radius*1.35,.4,.6);
+  const top=p.clone();if(typeof trackUp==='function'){trackUp(u,S.w);top.addScaledVector(S.w,radius*.6);}else top.y+=radius*.6;sprite(top,whiteHot(col,.5),true,.8*k,radius*.9,.3,.8);
+  decal(u,lat,whiteHot(col,.25),0,radius*1.05,.6);decal(u,lat,col,1,radius*.72,3.2);
+  const n=Math.round((S.lo?16:46)*Math.min(1.6,k));for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(10+Math.random()*12)*k,up=4+Math.random()*10;streak(p.x,p.y,p.z,Math.cos(a)*s,up,Math.sin(a)*s,whiteHot(col,.2+Math.random()*.6),.3+Math.random()*.25);}
+  const e=S.lo?6:18;for(let i=0;i<e;i++){const a=Math.random()*Math.PI*2,r=Math.random()*radius*.7,s=1+Math.random()*2;mote(p.x+Math.cos(a)*r,p.y,p.z+Math.sin(a)*r,Math.cos(a)*s,2.5+Math.random()*3,Math.sin(a)*s,col,1+Math.random()*.8,.4+Math.random()*.4,1.6,-2.2);}
+  light(p,col,8*Math.min(1.5,k),.5,radius*3.2);
+ }
+ // Telegraph a hazard's footprint for the arm window so it can be read, and dodged, before it bites.
+ function telegraph(target,color,radius=3,life=.5){if(!S||!target||typeof target.u!=='number')return;attach();decal(target.u,target.lat||0,toColor(color),2,radius,Math.max(.3,life));}
  function sustain(key,follow,color,intensity=3,range=14){if(!S)return;const p=follow(new THREE.Vector3());if(!p)return;
   const slot=S.lights.find(x=>x.key===key);if(slot){slot.life=Math.max(slot.life,.25);slot.follow=follow;return;}
   // Sustains never evict a fresh cast or impact pulse: they only take a dark or dimmer slot.
@@ -149,6 +167,6 @@ void main(){float r=length(vP),ang=atan(vP.y,vP.x);float wob=n(vec2(ang*3.,t*4.)
    const f=Math.max(0,x.life/x.max);x.l.intensity=x.key?x.peak*(.85+.15*Math.sin(S.t*23+x.peak)):x.peak*f*f;}
  }
  function clear(){if(!S)return;S.events.length=0;S.sustains.clear();for(const x of S.sprites){x.life=0;x.s.visible=false;}for(const x of S.decals){x.life=0;x.g.visible=false;}for(const x of S.lights){x.life=0;x.l.intensity=0;x.key=null;x.follow=null;}S.motes.life.fill(0);S.streaks.life.fill(0);}
- return {init,update,clear,cast,impact,touch,sustain,ready:()=>!!S,get state(){return S;}};
+ return {init,update,clear,cast,impact,touch,blast,telegraph,sustain,ready:()=>!!S,get state(){return S;}};
 })();
 if(typeof module!=='undefined')module.exports=powerVFX;

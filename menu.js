@@ -77,17 +77,17 @@
    document.getElementById('map-prompt').textContent='Select a circuit to continue.';
    showStep('character');
  };
- document.getElementById('title-start').onclick=()=>{audioInit();SFX.ui();transitionScene('CHOOSE YOUR RACER',()=>{dismiss();window.resetRaceSetup();});};
+ document.getElementById('title-start').onclick=()=>{audioInit();SFX.ui();transitionScene('CHOOSE YOUR RACER',()=>{dismiss();window.resetRaceSetup();},{cinematic:'roster'});};
  document.getElementById('confirm-racer').onclick=()=>{
    if(!selected||raceSetup.step!=='character')return;
-   audioInit();SFX.ui();transitionScene('CHOOSE YOUR CIRCUIT',()=>{raceSetup.racerConfirmed=true;showStep('map');});
+   audioInit();SFX.ui();transitionScene('CHOOSE YOUR CIRCUIT',()=>{raceSetup.racerConfirmed=true;showStep('map');},{cinematic:'hero'});
  };
- document.getElementById('back-racer').onclick=()=>transitionScene('CHOOSE YOUR RACER',window.resetRaceSetup);
+ document.getElementById('back-racer').onclick=()=>transitionScene('CHOOSE YOUR RACER',window.resetRaceSetup,{cinematic:'roster'});
  const settings=document.getElementById('settings-panel');
- const openSettings=()=>{audioInit();transitionScene('RACE SETTINGS',()=>{title.inert=true;roster.inert=true;settings.classList.remove('hidden');document.getElementById('autothrottle').focus();});};
+ const openSettings=()=>{audioInit();transitionScene('RACE SETTINGS',()=>{title.inert=true;roster.inert=true;settings.classList.remove('hidden');document.getElementById('autothrottle').focus();},{cinematic:document.body.classList.contains('title-open')?'title':'roster',focusOnEnd:null});};
  document.getElementById('title-settings').onclick=openSettings;
  document.getElementById('menu-settings').onclick=openSettings;
- document.getElementById('settings-close').onclick=()=>transitionScene(document.body.classList.contains('title-open')?'ZENFLOW RACER':'CHARACTER SELECT',()=>{settings.classList.add('hidden');title.inert=false;roster.inert=document.body.classList.contains('title-open');document.getElementById(roster.inert?'title-settings':'menu-settings').focus();});
+ document.getElementById('settings-close').onclick=()=>transitionScene(document.body.classList.contains('title-open')?'ZENFLOW RACER':'CHARACTER SELECT',()=>{settings.classList.add('hidden');title.inert=false;roster.inert=document.body.classList.contains('title-open');document.getElementById(roster.inert?'title-settings':'menu-settings').focus();},{cinematic:document.body.classList.contains('title-open')?'title':'roster',focusOnEnd:null});
  settings.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.getElementById('settings-close').click();}});
  // The first-run coach is one-and-done, so Race settings keeps a way back to it.
  const tutorialButton=document.getElementById('replay-tutorial'),tutorialState=document.getElementById('tutorial-state');
@@ -96,7 +96,7 @@
  document.getElementById('title-settings').addEventListener('click',syncTutorial);
  document.getElementById('menu-settings').addEventListener('click',syncTutorial);
  syncTutorial();
- document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');raceSetup.step='title';raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false;roster.inert=true;document.getElementById('title-start').focus();});
+ document.getElementById('title-return').onclick=()=>transitionScene('ZENFLOW RACER',()=>{title.classList.remove('hidden');document.body.classList.add('title-open');raceSetup.step='title';raceSetup.racerConfirmed=false;raceSetup.mapConfirmed=false;roster.inert=true;document.getElementById('title-start').focus();},{cinematic:'title'});
  const descriptions={cherry:'Floating pagodas, lantern avenues and a pale moon over cascading sky-islands.',stormforge:'Dive the ribbed forge portal — turbines, lightning and amber foundry glow.',canopy:'Race the living canopy: botanical gardens, spore-light and a rolling turquoise sea.'};
  const mapName=button=>MAPS.find(map=>map.id===button.dataset.map)?.name||button.textContent.trim();
  const syncMap=(id)=>{
@@ -108,7 +108,7 @@
  };
  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',()=>{
    if(typeof chooseMap!=='function'||raceSetup.step!=='map'||!raceSetup.racerConfirmed)return;
-   transitionScene(mapName(button).toUpperCase(),()=>{if(chooseMap(button.dataset.map)!==false){if(selectMap(button.dataset.map))miniBounds=null;raceSetup.mapConfirmed=true;syncMap(button.dataset.map);document.getElementById('go').disabled=false;document.getElementById('map-prompt').textContent=selected.name+' · '+mapName(button)+' · Ready';document.getElementById('go').focus({preventScroll:true});}});
+   transitionScene(mapName(button).toUpperCase(),()=>{if(chooseMap(button.dataset.map)!==false){if(selectMap(button.dataset.map))miniBounds=null;raceSetup.mapConfirmed=true;syncMap(button.dataset.map);document.getElementById('go').disabled=false;document.getElementById('map-prompt').textContent=selected.name+' · '+mapName(button)+' · Ready';document.getElementById('go').focus({preventScroll:true});}},{cinematic:'circuit',sub:descriptions[button.dataset.map]});
  }));
  window.addEventListener('mapselect',event=>syncMap(event.detail.id));
  syncMap(typeof chosenMapId==='string'?chosenMapId:'cherry');

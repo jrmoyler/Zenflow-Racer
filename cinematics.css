@@ -1,0 +1,81 @@
+/* Cutscene chrome over the live 3D scene: anamorphic letterbox, title cards, lower thirds,
+   the ZenFlow lockup and the final-lap sting. Type is the shipped Rajdhani / Orbitron. */
+.cinematic{--bar:max(7vh,min(13vh,calc((100vh - 100vw / 2.39) / 2)));--bar:max(7svh,min(13svh,calc((100svh - 100vw / 2.39) / 2)));--cine-ink:#07090d;position:fixed;inset:0;z-index:8500;pointer-events:auto;cursor:pointer;color:var(--paper,#f4f1e8);overflow:hidden;-webkit-tap-highlight-color:transparent}
+.cinematic[hidden],.cinematic.held{display:none}
+/* Click-through the moment a film ends (and the one frame before it starts): the fade-out never eats a tap. */
+.cinematic:not(.on){pointer-events:none}
+.cinematic::before{content:'';position:absolute;left:0;right:0;bottom:var(--bar);height:48vh;background:linear-gradient(to top,rgba(7,9,13,.62),rgba(7,9,13,.22) 45%,transparent);opacity:0;transition:opacity .7s ease;pointer-events:none}
+.cinematic.on::before{opacity:1}
+.cine-bar{position:absolute;left:0;right:0;height:var(--bar);background:var(--cine-ink);transform:scaleY(0);transition:transform .7s cubic-bezier(.2,.75,.1,1)}
+.cine-top{top:0;transform-origin:top}
+.cine-bottom{bottom:0;transform-origin:bottom;display:flex;align-items:center;justify-content:flex-end;padding:0 max(16px,4vw) env(safe-area-inset-bottom)}
+/* Skip sits on its own, centred on the bar's top edge region, clear of the home indicator and never clipped by a thin bar. */
+.cinematic .cine-skip{position:absolute;right:max(16px,4vw,env(safe-area-inset-right));bottom:calc(max(var(--bar),44px) / 2 + env(safe-area-inset-bottom));transform:translateY(50%)}
+.cinematic.on .cine-bar{transform:none}
+.cine-fade{position:absolute;inset:0;background:var(--cine-ink);pointer-events:none;opacity:0}
+.cine-progress{position:absolute;left:0;right:0;top:0;height:2px;background:rgba(244,241,232,.08)}
+.cine-progress i{display:block;height:100%;background:var(--coral,#ef765e);transform-origin:left;transform:scaleX(0)}
+.cine-skip{position:relative;min-height:44px;min-width:44px;display:inline-flex;align-items:center;gap:12px;padding:0 16px;margin:0;border:1px solid rgba(244,241,232,.34);border-radius:2px;background:transparent;color:var(--paper,#f4f1e8);font:700 13px/1 var(--body,'Rajdhani',sans-serif);letter-spacing:.24em;cursor:pointer;opacity:0;transition:opacity .4s .6s,background .15s,color .15s}
+.cinematic.on .cine-skip{opacity:.86}
+.cine-skip kbd{font:500 10px/1 var(--body,'Rajdhani',sans-serif);letter-spacing:.16em;color:#9aa3ae;background:none;border:0;padding:0}
+.cine-skip:hover,.cine-skip:focus-visible{background:var(--paper,#f4f1e8);color:var(--ink,#19202b);opacity:1}
+.cine-skip:hover kbd,.cine-skip:focus-visible kbd{color:#535267}
+.cine-skip:focus-visible{outline:3px solid var(--cyan,#8fd5dc);outline-offset:3px}
+@media (pointer:coarse){.cine-skip kbd{display:none}}
+/* Title card: eyebrow, drawn rule, wiped headline, subtitle. */
+.cine-card{position:absolute;left:max(16px,6vw);right:max(16px,6vw);bottom:calc(var(--bar) + 5vh);display:grid;justify-items:start;gap:12px;pointer-events:none}
+.cine-card[data-align=center]{justify-items:center;text-align:center}
+.cine-eyebrow{font:700 12px/1 var(--body,'Rajdhani',sans-serif);letter-spacing:.34em;color:var(--lavender,#c9bce9);opacity:0}
+.cine-rule{display:block;width:72px;height:2px;background:var(--coral,#ef765e);transform:scaleX(0);transform-origin:left}
+.cine-title{max-width:14ch;font:700 clamp(40px,7.4vw,112px)/.86 var(--display,'Rajdhani',sans-serif);letter-spacing:-.035em;text-transform:uppercase;color:var(--paper,#f4f1e8);clip-path:inset(0 100% 0 0)}
+.cine-sub{max-width:56ch;font:500 clamp(14px,1.35vw,19px)/1.35 var(--body,'Rajdhani',sans-serif);letter-spacing:.07em;color:#d8dce2;opacity:0}
+.cine-card.on .cine-eyebrow{animation:cine-rise .6s .05s both cubic-bezier(.2,.75,.1,1)}
+.cine-card.on .cine-rule{animation:cine-draw .8s .15s both cubic-bezier(.2,.75,.1,1)}
+.cine-card.on .cine-title{animation:cine-wipe 1s .22s both cubic-bezier(.65,0,.12,1)}
+.cine-card.on .cine-sub{animation:cine-rise .7s .6s both cubic-bezier(.2,.75,.1,1)}
+/* Lower third: grid slot or honour in Orbitron, name and credentials in Rajdhani. */
+.cine-lower{--acc:#ef765e;position:absolute;left:max(16px,6vw);bottom:calc(var(--bar) + 4.5vh);display:grid;grid-template-columns:auto 1fr;column-gap:18px;row-gap:6px;align-items:end;pointer-events:none;opacity:0;max-width:88vw}
+.cine-lower-tag{grid-row:span 2;align-self:stretch;display:flex;align-items:center;padding-right:18px;border-right:2px solid var(--acc);font:800 clamp(34px,4.8vw,70px)/.82 'Orbitron',var(--display,'Rajdhani',sans-serif);letter-spacing:-.02em;color:var(--acc)}
+.cine-lower[data-long=true] .cine-lower-tag{font:700 clamp(12px,1.3vw,16px)/1.2 var(--body,'Rajdhani',sans-serif);letter-spacing:.28em;max-width:10ch}
+.cine-lower-name{font:700 clamp(24px,2.8vw,42px)/.95 var(--display,'Rajdhani',sans-serif);letter-spacing:-.01em;text-transform:uppercase;color:var(--paper,#f4f1e8)}
+.cine-lower-meta{font:500 clamp(11px,1vw,14px)/1.3 var(--body,'Rajdhani',sans-serif);letter-spacing:.2em;text-transform:uppercase;color:#cfd4db}
+.cine-lower.on{animation:cine-slide .6s both cubic-bezier(.2,.75,.1,1)}
+/* ZENFLOW RACER lockup: tracking-in wordmark with a single light glint. */
+.cine-lockup{position:absolute;inset:var(--bar) 0;display:grid;place-content:center;justify-items:center;gap:16px;pointer-events:none;opacity:0;transition:opacity .6s ease}
+.cine-lockup::before{content:'';position:absolute;inset:18% 8%;background:radial-gradient(closest-side,rgba(7,9,13,.5),transparent);z-index:-1}
+.cine-lockup.on{opacity:1}
+.cine-lockup-eyebrow{font:700 12px/1 var(--body,'Rajdhani',sans-serif);letter-spacing:.5em;margin-right:-.5em;color:var(--lavender,#c9bce9)}
+.cine-lockup-word{font:800 clamp(52px,11vw,170px)/.84 'Orbitron',var(--display,'Rajdhani',sans-serif);letter-spacing:.06em;margin-right:-.06em;background:linear-gradient(100deg,#f4f1e8 0 40%,#ffffff 47%,#ffd6cb 50%,#f4f1e8 57%) 100% 0/260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#f4f1e8}
+.cine-lockup-racer{font:700 clamp(18px,2.5vw,36px)/1 var(--display,'Rajdhani',sans-serif);font-style:italic;letter-spacing:.9em;margin-right:-.9em;color:var(--coral,#ef765e)}
+.cine-lockup-rule{display:block;width:min(440px,62vw);height:1px;background:linear-gradient(90deg,transparent,rgba(244,241,232,.9),transparent);transform:scaleX(0)}
+.cine-lockup.on .cine-lockup-word{animation:cine-track 1.7s both cubic-bezier(.16,.8,.1,1),cine-glint 2.2s .7s both ease-in-out}
+.cine-lockup.on .cine-lockup-racer{animation:cine-rise .9s .55s both cubic-bezier(.2,.75,.1,1)}
+.cine-lockup.on .cine-lockup-rule{animation:cine-draw 1.3s .35s both cubic-bezier(.2,.75,.1,1)}
+.cine-lockup.on .cine-lockup-eyebrow{animation:cine-rise .8s .9s both}
+/* Menus, HUD and dialogs step aside while a cutscene plays, then fade back in. */
+body.cinematic-playing :is(#title-screen,#roster,#hud,#touch,#results,#coach,#settings-panel,.title-status){opacity:0!important;pointer-events:none!important}
+body.cine-reveal :is(#title-screen,#roster,#hud,#results,#settings-panel){transition:opacity .5s ease}
+/* Final-lap sting: letterbox bars flick in around the live race and carry the label. */
+/* Below #hud (10) and #touch (12): the lap counter and pedals stay readable through the flourish. */
+.cine-sting{position:fixed;inset:0;z-index:9;pointer-events:none}
+.cine-sting-bar{position:absolute;left:0;right:0;height:max(28px,5.5vh);display:flex;align-items:center;justify-content:center;background:rgba(7,9,13,.86);transform:scaleY(0)}
+.cine-sting-bar{box-sizing:border-box}
+.cine-sting-top{top:0;height:calc(max(28px,5.5vh) + var(--sa-t,0px));padding-top:var(--sa-t,0px);transform-origin:top}.cine-sting-bottom{bottom:0;height:calc(max(28px,5.5vh) + var(--sa-b,0px));padding-bottom:var(--sa-b,0px);transform-origin:bottom}
+.cine-sting-title{font:800 clamp(12px,1.5vw,18px)/1 'Orbitron',var(--display,'Rajdhani',sans-serif);letter-spacing:.5em;margin-right:-.5em;color:var(--paper,#f4f1e8)}
+.cine-sting-sub{font:700 clamp(11px,1.1vw,14px)/1 var(--body,'Rajdhani',sans-serif);letter-spacing:.32em;color:var(--coral,#ef765e)}
+.cine-sting.on .cine-sting-bar{animation:cine-band 2.2s both cubic-bezier(.2,.75,.1,1)}
+@keyframes cine-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes cine-slide{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes cine-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes cine-wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes cine-track{from{opacity:0;letter-spacing:.42em;filter:blur(8px)}to{opacity:1;letter-spacing:.06em;filter:none}}
+@keyframes cine-glint{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes cine-band{0%{transform:scaleY(0)}14%,82%{transform:scaleY(1)}100%{transform:scaleY(0)}}
+@media (orientation:portrait){.cinematic{--bar:max(6vh,min(9vh,calc((100vh - 100vw * 1.25) / 2)))}.cine-card,.cine-lower{bottom:calc(var(--bar) + 3vh)}.cine-title{max-width:none}}
+/* Reduced motion: cross-fades only. Bars, cards and lockup appear without travel. */
+@media (prefers-reduced-motion:reduce){
+ .cine-bar,.cinematic.reduced .cine-bar{transition:opacity .35s;transform:none;opacity:0}.cinematic.on .cine-bar{opacity:1}
+ .cine-card.on *,.cine-lower.on,.cine-lockup.on *,.cine-sting.on .cine-sting-bar{animation:cine-fade .35s both!important}
+ .cine-title{clip-path:none}.cine-rule,.cine-lockup-rule{transform:none}.cine-sting.on .cine-sting-bar{transform:none}
+}
+@keyframes cine-fade{from{opacity:0}to{opacity:1}}

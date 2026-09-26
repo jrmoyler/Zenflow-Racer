@@ -4,6 +4,7 @@ for(const file of ['audience-data.js','audience.js'])run(fs.readFileSync(file,'u
 run('resetAudience();for(let i=0;i<24;i++)addAudienceSeat(new THREE.Matrix4(),i*1.1,1,0,1,0xcf6451,i);buildAudience()');
 const state=run('AUDIENCE'),data=run('AUDIENCE_DATA');assert.equal(state.batches.length,12);assert.equal(state.seats.length,24);assert.deepEqual(Object.keys(data.clips),['wave','clap','watch']);assert.match(data.source,/Blender 4.5/);
 for(const part of data.parts){assert.ok(part.positions.every(Number.isFinite));assert.equal(part.positions.length,part.normals.length);assert.equal(part.uv.length,part.positions.length/3*2);}
+const statures=new Set(state.seats.map(seat=>new THREE.Vector3().setFromMatrixScale(seat.matrix).y.toFixed(3)));assert.ok(statures.size>=4,'spectators vary in stature');assert.ok(state.seats.every(seat=>seat.tempo>=.88&&seat.tempo<=1.14),'bounded per-seat tempo');
 const matrices=()=>state.batches.map(m=>Array.from(m.instanceMatrix.array));const before=matrices();run('updateAudience(.1)');assert.notDeepEqual(matrices(),before,'cheering actually moves joint matrices');
 const moving=matrices();run('updateAudience(0)');assert.deepEqual(matrices(),moving,'pause freezes all joints');run('updateAudience(NaN)');assert.deepEqual(matrices(),moving);
 c.matchMedia=()=>({matches:true});run('updateAudience(.1)');assert.deepEqual(matrices(),moving,'reduced motion freezes audience');

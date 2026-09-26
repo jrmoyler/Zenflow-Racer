@@ -13,14 +13,32 @@ function islandCapGeometry(r,seed){
   }
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(idx);g.computeVertexNormals();return g;
 }
+// Analytic height of the cap surface at island-local (x,z); matches islandCapGeometry.
+function islandCapHeight(r,seed,x,z){
+  const a=Math.atan2(z/.83,x),t=Math.min(1,Math.hypot(x,z/.83)/islandRimRadius(r,a,seed));
+  return Math.sin(Math.max(0,(t-.8)/.2)*Math.PI)*.35*Math.sin(a*11+seed);
+}
+// The pond outflow is draped on the cap (the undulating shoulder used to pierce a flat
+// stream plane near the lip) and descends to meet the waterfall crest at +.08.
+function islandStreamGeometry(island,seed){
+  const r=island.r,rows=MOBILEFX?10:16,cols=6,width=r*.29,z0=r*.4,z1=r*.8,p=[],uv=[],idx=[];
+  for(let j=0;j<=rows;j++)for(let k=0;k<=cols;k++){
+    const t=j/rows,x=(k/cols-.5)*width*(.8+.2*t),z=z0+(z1-z0)*t;
+    // Hug the terrain 5 cm up, sit under the pond rim at the source and finish on the crest.
+    let y=islandCapHeight(r,seed,x,z)+.05;if(j===0)y=Math.min(y,.04);if(j===rows)y=Math.max(y,.08);
+    p.push(x,y,z);uv.push(k/cols,t);
+    if(j<rows&&k<cols){const n=j*(cols+1)+k,m=n+cols+1;idx.push(n,m,n+1,n+1,m,m+1);}
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g;
+}
 function buildNaturalStonework(){
   const root=new THREE.Group();root.name='blender-natural-stonework';world.add(root);
   const rnd=mulberry(1871),matrix=new THREE.Matrix4(),q=new THREE.Quaternion(),p=new THREE.Vector3(),scale=new THREE.Vector3();
-  const industrial=activeMap.id==='stormforge';
+  const industrial=activeMap.id==='stormforge',cherry=activeMap.id==='cherry';
   for(let variant=0;variant<NATURAL_STONE_DATA.length;variant++){
     const data=NATURAL_STONE_DATA[variant],g=new THREE.BufferGeometry();
     g.setAttribute('position',new THREE.Float32BufferAttribute(data.positions,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(data.normals,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(data.uv,2));
-    const mat=new THREE.MeshStandardMaterial({color:industrial?0x737b80:variant===1?0x737d70:0xc6bfaa,map:TEX.cliffColor||null,bumpMap:TEX.cliffHeight||null,bumpScale:.065,roughness:.9,metalness:0});
+    const mat=new THREE.MeshStandardMaterial({color:industrial?0x737b80:variant===1?0x737d70:cherry?(variant===0?0x7a7080:0x6e6676):0xc6bfaa,map:TEX.cliffColor||null,bumpMap:TEX.cliffHeight||null,bumpScale:.065,roughness:.9,metalness:0});
     const count=(MOBILEFX?2:4),islands=world.userData.islands||[],mesh=new THREE.InstancedMesh(g,mat,islands.length*count);
     let i=0;for(const island of islands)for(let k=0;k<count;k++){
       const a=(k/count+variant/12)*Math.PI*2+.2,rad=island.r*(.80+variant*.012);

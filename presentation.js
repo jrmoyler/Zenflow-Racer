@@ -11,8 +11,11 @@ function animateCurtain(curtain,enter,done){
     curtain.animate([{transform:enter?'translateX(100%)':'translateX(0)'},{transform:enter?'translateX(0)':'translateX(-100%)'}],{duration:enter?180:240,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished.then(done,done);
   }else done();
 }
-function transitionScene(label,commit){
+// options.cinematic names an in-engine cutscene (cinematics.js) that starts once the rebuilt
+// scene is ready, so the wipe reveals a live camera move instead of a static frame.
+function transitionScene(label,commit,options){
   if(sceneCut.busy)return false;
+  if(typeof stopCinematic==='function')stopCinematic();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let curtain=document.getElementById('scene-cut');
   if(!curtain){curtain=document.createElement('div');curtain.id='scene-cut';curtain.setAttribute('role','status');curtain.setAttribute('aria-live','polite');document.body.append(curtain);}
@@ -27,6 +30,7 @@ function transitionScene(label,commit){
     finally{sceneCut.committing=false;}
     // Leave two paints after expensive scene construction before uncovering it.
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(options?.cinematic&&typeof playCinematic==='function'){try{playCinematic(options.cinematic,Object.assign({label},options));}catch(error){console.error('Scene cutscene failed',error);}}
       if(reduced){finish();return;}
       animateCurtain(curtain,false,finish);
     }));

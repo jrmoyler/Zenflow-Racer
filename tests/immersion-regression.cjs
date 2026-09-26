@@ -87,6 +87,6 @@ for(const id of ['cherry','stormforge','canopy']){
   run(`selectMap('${id}')`);
   const mobileVenue=run('world').getObjectByName('race-venue');
   assert.ok(mobileVenue.userData.spectators>=250&&mobileVenue.userData.spectators<450,'mobile density retains lively crowd at reduced instance count');
-  assert.equal(mobileVenue.userData.instanceBatches,10,'mobile venue batch budget');
+  assert.ok(mobileVenue.userData.instanceBatches<=11,'mobile venue batch budget (foliage crowns add one instanced draw on garden/festival courts)');
 }
 console.log('PASS mobile venue density and batch budget');
