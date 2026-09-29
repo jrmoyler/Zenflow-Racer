@@ -9,6 +9,7 @@
   // Each row owns its state chips; keeping the references here avoids a second
   // DOM query per row on every equip and keeps the row a single button.
   const rowParts=new WeakMap();
+  const cooldownText=a=>Number(addonCooldownSeconds(a,saved.addonUpgradeLevels?.[a.id]).toFixed(2))+'s COOLDOWN';
   const glyph=addon=>typeof addonIconSVG==='function'?addonIconSVG(addon):'';
   // Keep equipment within reach before AND after circuit selection. Moving the
   // existing native button preserves keyboard semantics and its stable ID.
@@ -25,7 +26,7 @@
     const a=equipped();status.textContent=a?a.name+' equipped · Press F or tap ADD-ON in your race.':'Add-on slot cleared.';
     list.querySelectorAll('button').forEach(b=>{const active=b.dataset.addon===(a?.id||'');b.setAttribute('aria-pressed',String(active));
       const parts=rowParts.get(b);if(!parts)return;
-      parts.cd.textContent=b.dataset.addon?addonDefinition(b.dataset.addon).cooldown+'s COOLDOWN':'NO ADD-ON';
+      parts.cd.textContent=b.dataset.addon?cooldownText(addonDefinition(b.dataset.addon)):'NO ADD-ON';
       parts.action.textContent=active?'EQUIPPED ✓':b.dataset.addon?(typeof Economy!=='undefined'&&!saved.ownedAddons.includes(b.dataset.addon)?'LOCKED · GARAGE':'EQUIP'):'CLEAR SLOT';});
     SFX.ui();
   }
@@ -45,7 +46,7 @@
       const type=document.createElement('span');type.className='addon-type';type.textContent=a.type||'SLOT';
       head.append(name,type);
       const desc=document.createElement('span');desc.className='addon-desc';desc.textContent=a.description||a.desc||'';
-      const cd=document.createElement('span');cd.className='addon-cooldown';cd.textContent=a.cooldown?a.cooldown+'s COOLDOWN':'NO ADD-ON';
+      const cd=document.createElement('span');cd.className='addon-cooldown';cd.textContent=a.cooldown?cooldownText(a):'NO ADD-ON';
       copy.append(head,desc,cd);
       // The row is one button, so the call to action is a chip inside it rather
       // than a nested control that would break keyboard and pointer semantics.
@@ -83,6 +84,7 @@ function updateAddonHUD(r){
   const icon=document.getElementById('addonIcon');
   if(icon&&icon.dataset.addon!==a.id){icon.dataset.addon=a.id;if(typeof addonIconSVG==='function')icon.innerHTML=addonIconSVG(a);}
   button.style.setProperty('--addon-color','#'+a.color.toString(16).padStart(6,'0'));
+  const cooldown=addonCooldownSeconds(a,r.addonLevel);
   const ready=!(r.addonCooldown>0),blocked=game.state!=='race'||r.finished||r.spin>0||r.vault>0;
   button.dataset.ready=String(ready);button.disabled=!ready||blocked;
   const state=r.finished?'FINISHED':r.vault>0?'LOCKED':r.spin>0?'RECOVERING':ready?'READY':Math.ceil(r.addonCooldown)+'s';
@@ -90,7 +92,7 @@ function updateAddonHUD(r){
   const binding=game.gamepadConnected?'RB / R1':'F';
   button.setAttribute('aria-label',a.name+' · '+state+' · '+binding+' to activate');
   const hint=document.getElementById('addonBinding');if(hint)hint.textContent=binding;
-  button.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/a.cooldown)*100)+'%');
+  button.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/cooldown)*100)+'%');
   if(touch)touch.setAttribute('aria-label',a.name+' · '+state);
-  if(touch){touch.disabled=button.disabled;const glyph=typeof addonIconSVG==='function'?addonIconSVG(a):'';if(touch.dataset.addon!==a.id+':'+state){touch.dataset.addon=a.id+':'+state;touch.innerHTML='<span class="touch-addon-glyph" aria-hidden="true">'+glyph+'</span><span>ADD-ON</span><small>'+state+'</small>';}touch.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/a.cooldown)*100)+'%');touch.classList.toggle('ready',ready&&!blocked);}
+  if(touch){touch.disabled=button.disabled;const glyph=typeof addonIconSVG==='function'?addonIconSVG(a):'';if(touch.dataset.addon!==a.id+':'+state){touch.dataset.addon=a.id+':'+state;touch.innerHTML='<span class="touch-addon-glyph" aria-hidden="true">'+glyph+'</span><span>ADD-ON</span><small>'+state+'</small>';}touch.style.setProperty('--addon-charge',String(Math.max(0,1-(r.addonCooldown||0)/cooldown)*100)+'%');touch.classList.toggle('ready',ready&&!blocked);}
 }

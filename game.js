@@ -6,7 +6,8 @@ if(typeof saved!=='object'||Array.isArray(saved))saved={};
 if(typeof Economy!=='undefined')saved=Economy.migrate(saved,ADDONS.map(a=>a.id));
 game.autoThrottle=saved.autoThrottle===true;
 let chosenMapId=typeof MAPS!=='undefined'&&MAPS.some(m=>m.id===saved.map)?saved.map:'cherry';
-function raceRecordKey(division,difficulty,mapId=chosenMapId){return mapId+(typeof extendedCircuitControls==='function'?'-p0-':'-')+division+'-'+difficulty;}
+function circuitRevision(mapId=chosenMapId){return typeof extendedCircuitControls==='function'?(CIRCUIT_EXTENSIONS[mapId]?.revision||'p0'):'original';}
+function raceRecordKey(division,difficulty,mapId=chosenMapId){const revision=circuitRevision(mapId);return mapId+(revision==='original'?'-':'-'+revision+'-')+division+'-'+difficulty;}
 function chooseMap(id){
   if(typeof MAPS==='undefined'||!MAPS.some(m=>m.id===id)||!['boot','roster','title','results'].includes(game.state))return false;
   chosenMapId=id;saved.map=id;persist();updateBestTime();
@@ -667,7 +668,7 @@ function updateHUD(dt){
 // ---------- Race flow ----------
 function onPlayerFinish(){
   if(typeof clearAddons==='function')clearAddons();if(typeof clearAbilities==='function')clearAbilities();
-  if(typeof raceTelemetry!=='undefined'){raceTelemetry.event('lap-timing',{circuitRevision:'p0',map:chosenMapId,playerLapSeconds:game.player.lapTimes.slice(),aiLaps:game.racers.filter(r=>!r.isPlayer).map(r=>({division:r.div.id,lapSeconds:r.lapTimes.slice()})),tokensCollected:game.player.totalTokensCollected,serviceLineMetres:game.player.serviceLineMetres});raceTelemetry.finish(game.player.finishTime);}
+  if(typeof raceTelemetry!=='undefined'){raceTelemetry.event('lap-timing',{circuitRevision:circuitRevision(),map:chosenMapId,playerLapSeconds:game.player.lapTimes.slice(),aiLaps:game.racers.filter(r=>!r.isPlayer).map(r=>({division:r.div.id,lapSeconds:r.lapTimes.slice()})),tokensCollected:game.player.totalTokensCollected,serviceLineMetres:game.player.serviceLineMetres});raceTelemetry.finish(game.player.finishTime);}
   updateRanks(true);const p=game.player,key=raceRecordKey(p.div.id,game.diff);const old=saved[key];
   game.newBest=!p.dnf&&(!Number.isFinite(old)||p.finishTime<old);game.pbDelta=Number.isFinite(old)?p.finishTime-old:null;
   if(game.newBest){saved[key]=p.finishTime;persist();}

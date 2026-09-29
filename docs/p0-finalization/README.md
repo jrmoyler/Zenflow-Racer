@@ -2,6 +2,8 @@
 
 Baseline: main at `5a09544` (merged PR #23). P1 was not started.
 
+**Historical evidence below; current follow-up: [September P0/P1 review](../p0-p1-followup.md).** The user reports the physical Samsung Galaxy A15 validation passed. That report does not include a tested SHA or measured FPS, and is not a new device run by this session.
+
 **This branch is not a complete P0 certification.** The playable progression loop is implemented; human lap timing, final WebGL visual approval and physical-device certification remain open. Do not label the game finished on the basis of these diagnostics.
 
 ## Implemented
@@ -47,9 +49,11 @@ The flat completion payment and the graded damage-control steps are the P1.2 pac
 
 | Circuit | Original mean AI lap | Extended mean AI lap | Increase |
 |---|---:|---:|---:|
-| Cherry | 31.67 s | 48.76 s | 17.09 s |
-| Stormforge | 33.45 s | 50.36 s | 16.91 s |
-| Canopy | 31.36 s | 49.02 s | 17.66 s |
+| Cherry | 32.73 s | 48.84 s | 16.11 s |
+| Stormforge | 33.54 s | 50.41 s | 16.87 s |
+| Canopy | 31.14 s | 46.66 s | 15.52 s |
+
+Re-measured 2026-09-29 against the shipping physics. Canopy’s wider east sweep restores the simulated extension from +14.45 s to +15.52 s; its token arc moves onto the clear exit, and its `p0-pacing2` record namespace preserves older records without comparing unlike layouts. The timing runner now rejects any circuit outside the 15–20 second simulated extension range.
 
 Raw splits: `ai-timing.json`. Geometry and sampled nonadjacent road clearance: `track-estimates.json`. Human timing and fastest-legal-lap fields are deliberately not fabricated.
 

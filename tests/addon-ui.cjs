@@ -94,3 +94,16 @@ console.log('PASS malformed saved state: invalid JSON, primitives, arrays, unkno
  f.run("game.state='paused'");f.el('addonHUD').fire('click',{detail:0});assert.equal(casts,1,'paused race cannot cast');
  console.log('PASS native keyboard/assistive activation and duplicate-pointer prevention');
 }
+
+{
+ const f=fixture();f.run("saved.addonUpgradeLevels={fire:3}");f.open();
+ const row=f.rows().find(n=>n.dataset.addon==='fire');
+ const find=(node,cls)=>node.className===cls?node:node.children.reduce((hit,child)=>hit||find(child,cls),null);
+ assert.equal(find(row,'addon-cooldown').textContent,'17.28s COOLDOWN','catalog shows purchased tuning');
+ f.equip('fire');assert.equal(find(row,'addon-cooldown').textContent,'17.28s COOLDOWN','equip preserves tuned display');
+ f.context.r={addonId:'fire',addonLevel:3,addonCooldown:17.28,spin:0,vault:0,finished:false};
+ f.run("game.state='race';updateAddonHUD(r)");
+ assert.equal(f.el('addonHUD').style['--addon-charge'],'0%');assert.equal(f.el('tA').style['--addon-charge'],'0%');
+ f.context.r.addonCooldown=8.64;f.run('updateAddonHUD(r)');assert.equal(f.el('addonHUD').style['--addon-charge'],'50%');
+ console.log('PASS purchased cooldown tuning stays consistent across catalog, equip and both HUDs');
+}

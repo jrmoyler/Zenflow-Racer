@@ -28,11 +28,11 @@
     {
       "map": "canopy",
       "beforeMetres": 1189.852680442345,
-      "afterMetres": 1821.9300769584538,
-      "addedMetres": 632.0773965161088,
+      "afterMetres": 1873.8679474487044,
+      "addedMetres": 684.0152670063594,
       "referenceSpeed": 47,
-      "geometricSeconds": 13.448455245023592,
-      "minCenterClearance": 32.01531180877156,
+      "geometricSeconds": 14.553516319284244,
+      "minCenterClearance": 32.8075484395811,
       "humanLapSeconds": null,
       "aiLapSeconds": null,
       "certified": false

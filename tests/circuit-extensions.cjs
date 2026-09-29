@@ -3,6 +3,12 @@ const c={THREE};vm.createContext(c);const run=s=>vm.runInContext(s,c);
 run(fs.readFileSync('circuit-extensions.js','utf8'));run(fs.readFileSync('maps.js','utf8'));
 const w=fs.readFileSync('world.js','utf8');run(w.slice(w.indexOf('const CTRL='),w.indexOf('const TRACK_W')));
 const curve=points=>{const c=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)),true,'centripetal',.5);c.arcLengthDivisions=4000;return c;};
+// Revised layouts keep old PBs archived under their existing keys.
+const gameSource=fs.readFileSync('game.js','utf8');
+run(gameSource.slice(gameSource.indexOf('function circuitRevision('),gameSource.indexOf('function chooseMap(')));
+assert.equal(run("raceRecordKey('zenflow',1,'cherry')"),'cherry-p0-zenflow-1');
+assert.equal(run("raceRecordKey('zenflow',1,'stormforge')"),'stormforge-p0-zenflow-1');
+assert.equal(run("raceRecordKey('zenflow',1,'canopy')"),'canopy-p0-pacing2-zenflow-1');
 const report=[];
 for(const map of run('MAPS')){
  const base=map.control||run('CHERRY_CONTROL'),after=run(`extendedCircuitControls('${map.id}',${JSON.stringify(base)})`),a=curve(base),b=curve(after);

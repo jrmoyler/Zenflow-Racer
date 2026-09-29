@@ -33,6 +33,8 @@ for(const id of ['cherry','stormforge','canopy']){
   assert.equal(run(`circuitLandmarkCrossed(${marks[0].u+1e-4},${marks[0].u+2e-4})`),null,id+': no cue while inside a section');
   assert.equal(run(`circuitLandmarkCrossed(${marks[1].u-1e-3},${marks[1].u+1e-3})`).name,marks[1].name,id+': entering a moment names it');
   assert.equal(run(`circuitLandmarkCrossed(${1-1e-4},${marks[0].u+1e-4})`).name,marks[0].name,id+': the lap wrap still reports the first moment');
+  assert.equal(run(`circuitLandmarkCrossed(${marks[1].u+1e-3},${marks[1].u-1e-3})`),null,id+': reversing across a moment does not announce a false lap');
+  assert.equal(run('circuitLandmarkCrossed(.0001,.9999)'),null,id+': reverse start crossing is silent');
   assert.equal(new Set(marks.map(m=>m.name)).size,3,id+': three distinct named moments');
   const venue=world.getObjectByName('race-venue');
   assert.ok(venue,id+': authored race venue');

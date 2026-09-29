@@ -56,6 +56,11 @@ const ADDONS=Object.freeze([
 const addonEntities=[];
 const ADDON_ENTITY_LIMIT=72;
 function addonDefinition(id){return ADDONS.find(a=>a.id===id)||null;}
+// One tuning rule feeds simulation, garage and both HUDs. Clamp corrupt levels.
+function addonCooldownSeconds(addon,level=1){
+ const tuned=Number.isFinite(level)?Math.max(1,Math.min(3,Math.floor(level))):1;
+ return addon.cooldown*(1-(tuned-1)*.02);
+}
 function initAddons(r,id=''){
  r.addonId=addonDefinition(id)?id:'';r.addonCooldown=0;r.addonActive=0;r.addonPulse=0;r.addonAI=2+(typeof rng==='function'?rng():.5)*5;
 }
@@ -107,7 +112,7 @@ function addonBlast(e,radius=e.radius){for(const r of game.racers)if(r!==e.owner
 function useAddon(r){
  const a=addonDefinition(r.addonId);
  if(!a||game.state!=='race'||r.finished||r.vault>0||r.spin>0||r.addonCooldown>0)return false;
- r.addonCooldown=a.cooldown*(1-(Math.min(3,r.addonLevel||1)-1)*.02);r.addonsUsed=(r.addonsUsed||0)+1;
+ r.addonCooldown=addonCooldownSeconds(a,r.addonLevel);r.addonsUsed=(r.addonsUsed||0)+1;
  if(r.isPlayer&&typeof setToast==='function'){setToast(a.name.toUpperCase(),'teal');if(typeof SFX!=='undefined')SFX.ui();}
  if(typeof powerVFX!=='undefined'&&typeof ADDON_FX_COLORS!=='undefined')powerVFX.cast(r,ADDON_FX_COLORS[a.id]||'#ffffff',{scale:1.05});
  switch(a.id){
