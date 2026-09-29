@@ -121,10 +121,10 @@
   {
    "map": "canopy",
    "difficulty": 0,
-   "meanLapSeconds": 48.149,
-   "bestLapSeconds": 47.909,
-   "lapSpreadSeconds": 0.713,
-   "metresLostAfterSpin": 97.81,
+   "meanLapSeconds": 49.206,
+   "bestLapSeconds": 48.955,
+   "lapSpreadSeconds": 0.726,
+   "metresLostAfterSpin": 93.14,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -135,10 +135,10 @@
   {
    "map": "canopy",
    "difficulty": 1,
-   "meanLapSeconds": 45.607,
-   "bestLapSeconds": 45.353,
-   "lapSpreadSeconds": 0.756,
-   "metresLostAfterSpin": 78.38,
+   "meanLapSeconds": 46.688,
+   "bestLapSeconds": 46.433,
+   "lapSpreadSeconds": 0.758,
+   "metresLostAfterSpin": 74.2,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,
@@ -149,10 +149,10 @@
   {
    "map": "canopy",
    "difficulty": 2,
-   "meanLapSeconds": 44.261,
-   "bestLapSeconds": 44.005,
-   "lapSpreadSeconds": 0.762,
-   "metresLostAfterSpin": 58.1,
+   "meanLapSeconds": 45.35,
+   "bestLapSeconds": 45.094,
+   "lapSpreadSeconds": 0.767,
+   "metresLostAfterSpin": 58.76,
    "stats": {
     "maxSpeedBase": 45.8,
     "accel": 21.4,

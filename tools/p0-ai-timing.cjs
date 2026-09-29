@@ -18,6 +18,7 @@ for(const map of run('MAPS'))for(const extended of [false,true]){
  run(\"globalThis.r=new Racer(ROSTER[0],false,0);r.specialAI=Infinity;game.racers=[r];game.player=r;game.diff=1;game.state='race';game.raceTime=0;r.u=0;r.distance=0;for(let tick=0;tick<120*400&&!r.finished;tick++){game.raceTime+=1/120;stepAI(r,1/120);stepRacer(r,1/120);}\");
  const times=run('r.lapTimes');assert.equal(times.length,3,map.id+' three completed laps');result.push({map:map.id,extended,lapSeconds:Array.from(times),meanLapSeconds:times.reduce((a,b)=>a+b,0)/3});
 }
+for(let i=0;i<result.length;i+=2){const delta=result[i+1].meanLapSeconds-result[i].meanLapSeconds;assert.ok(delta>=15&&delta<=20,result[i].map+' simulated extension must add 15–20 seconds, got '+delta.toFixed(2));}
 require('node:fs').writeFileSync(path.join(__dirname,'../docs/p0-finalization/ai-timing.json'),JSON.stringify({method:'Deterministic ZenFlow / Standard / solo / no items / authored banking and anti-gravity; actual stepAI and stepRacer, 120Hz. Not physical-device or human evidence.',runs:result},null,2)+'\\n');console.log(JSON.stringify(result,null,2));
 `;
 const m=new Module(file,module);m.filename=file;m.paths=Module._nodeModulePaths(path.dirname(file));m._compile(fixture+tail,file);

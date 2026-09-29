@@ -106,6 +106,16 @@ console.log('PASS chassis tier economy: purchase order, milestone reasons, equip
   assert.ok(restTop.distanceTo(new THREE.Vector3().fromBufferAttribute(g.attributes.position,top))<1e-4,key+' bind pose is the scan');
   c.r={mesh:kart,speed:18,steer:1,drifting:true,driftDir:1,spin:0,wheelspin:0,boost:0,brake:false,finished:false,rank:3,hitCd:0,hop:0,wheelRot:0,visualYaw:0,theta:0,lat:0,u:.1,throttle:1,shield:0,distance:.1};
   run('for(let i=0;i<40;i++)animateKart(r,1/60,0)');
+  // Fitted tyres roll according to their authored axle radius, not the factory tyre size.
+  for(const w of ud.wheels){
+   const radius=template.getObjectByName(w.pivot.name)?.userData.zf_radius||.61;
+   assert.ok(Math.abs(w.spin.rotation.x-c.r.wheelRot*.61/radius)<1e-8,key+' '+w.pivot.name+' rolls without radius-dependent sliding');
+  }
+  // A power pulse retains the shield envelope needed to cover a longer upgraded chassis.
+  c.r.shield=1;run('animateKart(r,1/60,0)');
+  const shieldPulse=1+Math.sin(ud.anim.t*9)*.04;
+  assert.ok(Math.abs(ud.shield.scale.x-ud.shield.userData.restScale.x*shieldPulse)<1e-8,key+' shield keeps the fitted envelope');
+  c.r.shield=0;
   assert.ok(Math.abs(ud.steeringWheel.rotation.z)>.3,key+' steering wheel turns');assert.ok(Math.abs(ud.head.rotation.y)>.2,key+' head looks into the corner');assert.ok(Math.abs(ud.pilot.rotation.y)>.1,key+' torso leans into the drift');
   kart.position.set(0,0,0);kart.rotation.set(0,0,0);ud.body.position.set(0,0,0);ud.body.rotation.set(0,0,0);ud.body.scale.set(1,1,1);kart.updateMatrixWorld(true);mesh.skeleton.update();
   const turnedTop=skinned(mesh,top);assert.ok(turnedTop.distanceTo(restTop)>.03,`${key} helmet moves (${turnedTop.distanceTo(restTop).toFixed(3)} m)`);

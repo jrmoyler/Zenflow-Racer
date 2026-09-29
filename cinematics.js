@@ -262,7 +262,7 @@ gl_FragColor=acc/ws;}`
   }
   seq.total=seq.shots.reduce((t,s)=>t+s.dur,0);seq.t=0;seq.index=-1;seq.reduced=reduced;seq.returnFocus=document.activeElement;if(opts.focusOnEnd!==undefined)seq.focusOnEnd=opts.focusOnEnd;
   state.active=seq;state.held=false;state.pad=padButtons();
-  const o=overlay();o.root.hidden=false;o.root.style.pointerEvents='';o.root.dataset.scene=seq.name;
+  const o=overlay();o.root.hidden=false;o.root.inert=false;o.root.style.pointerEvents='';o.root.dataset.scene=seq.name;
   // The curtain already announced a transition label; the card stays silent so it is not read twice.
   o.card.setAttribute('aria-live',opts.label?'off':'polite');
   // Menus and HUD leave the tab order and the accessibility tree while the film owns the screen.
@@ -340,7 +340,7 @@ gl_FragColor=acc/ws;}`
   if(lens)lens.enabled=false;
   try{seq.onEnd?.(skipped);}catch(error){console.error(error);}
   for(const [n,was] of seq.inert||[])n.inert=was;
-  const o=overlay();o.root.style.pointerEvents='none';o.root.classList.remove('on','held');o.lockup.classList.remove('on');o.card.classList.remove('on');o.lower.classList.remove('on');o.fade.style.opacity='0';
+  const o=overlay();o.root.inert=true;o.root.style.pointerEvents='none';o.root.classList.remove('on','held');o.lockup.classList.remove('on');o.card.classList.remove('on');o.lower.classList.remove('on');o.fade.style.opacity='0';
   document.body.classList.remove('cinematic-playing');document.body.classList.add('cine-reveal');
   clearTimeout(finish.timer);finish.timer=setTimeout(()=>{if(!state.active){o.root.hidden=true;document.body.classList.remove('cine-reveal');}},520);
   // Focus lands on the scene's control, or back where the commit left it when that control is unavailable.
@@ -352,10 +352,12 @@ gl_FragColor=acc/ws;}`
  }
  function skip(){if(!state.active)return false;finish(true);return true;}
  function stop(){if(state.active)finish(true);}
- // Any fresh key skips; Tab still moves focus to the Skip button. Held/repeated keys never skip.
+ // Keep Tab inside the modal while it owns the screen; held/repeated keys never skip.
  const PASS=new Set(['Tab','Shift','Control','Alt','Meta','CapsLock']);
  document.addEventListener('keydown',e=>{
-  if(!state.active||state.held||e.repeat||PASS.has(e.key))return;
+  if(!state.active||state.held)return;
+  if(e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();overlay().skip.focus({preventScroll:true});return;}
+  if(e.repeat||PASS.has(e.key))return;
   e.preventDefault();e.stopImmediatePropagation();skip();
  },true);
 

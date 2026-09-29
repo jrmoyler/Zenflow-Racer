@@ -205,12 +205,12 @@ function createTierKart(div,tier){
   // The reference light ring is painted into the tyre texture; this node only keeps the glow contract.
   const ring=new THREE.Mesh(new THREE.TorusGeometry(Math.max(.2,(source?.userData.zf_radius||.45)*.82),.012,4,32),glowMaterial());
   ring.name='wheel-light-ring';ring.rotation.y=Math.PI/2;ring.visible=false;pivot.add(ring);
-  wheels.push({pivot,spin,glow:ring,side:i%2?1:-1,rest,static:!source});
+  wheels.push({pivot,spin,glow:ring,side:i%2?1:-1,rest,radius:source?.userData.zf_radius||.61,static:!source});
  });
  const exhaust=[-.42,.42].map(x=>{const e=new THREE.Mesh(new THREE.CircleGeometry(.09,12),glowMaterial());e.name=x<0?'exhaust-l':'exhaust-r';e.position.set(x,.55,halfL-.05);e.visible=false;body.add(e);return e;});
  const under=new THREE.Mesh(new THREE.TorusGeometry(1,.035,8,48),glowMaterial());under.name='underbody-flow-ring';under.rotation.x=Math.PI/2;under.scale.set(halfW*.66,halfL*.72,1);under.position.y=.19;under.material.emissiveIntensity=0;root.add(under);
  const shield=new THREE.Mesh(new THREE.SphereGeometry(2.15,24,16),new THREE.MeshPhysicalMaterial({color:0x00d9b5,emissive:0x00d9b5,emissiveIntensity:.35,transparent:true,opacity:.16,roughness:.15,side:THREE.DoubleSide}));
- shield.name='aegis-shield';shield.position.y=.9;shield.visible=false;shield.scale.setScalar(Math.max(1,halfL/2.1));root.add(shield);
+ shield.name='aegis-shield';shield.position.y=.9;shield.visible=false;shield.scale.setScalar(Math.max(1,halfL/2.1));shield.userData.restScale=shield.scale.clone();root.add(shield);
  root.userData={wheels,body,pilot,head,arms,steeringWheel,exhaust,under,shield,halo,star,glow:under.material,chassis:div.id,tier,asset:'fitted-glb',clipState:null,clipNodes:null,anim:null,cockpitFinished:true,fittedPilot:chassis.isSkinnedMesh?'skinned':true,pilotJoints:joints,rigGain:chassis.isSkinnedMesh?KART_TIER_RIG_GAIN:null};
  Object.defineProperty(root.userData,'toJSON',{value:()=>({chassis:div.id,tier,asset:'fitted-glb'}),enumerable:false});
  if(typeof TEX!=='undefined'&&TEX.contactShadow){

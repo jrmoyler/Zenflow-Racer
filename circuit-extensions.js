@@ -6,7 +6,7 @@ const CIRCUIT_EXTENSIONS={
   route:{id:'temple-inside-line',name:'Temple Inside Line',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}},
  stormforge:{names:['Turbine Chicane','Foundry Drop','Reactor Exit'],points:[[265,10,20],[325,22,-30],[295,29,-100],[365,34,-175],[325,20,-265],[260,10,-245],[220,7,-180]],
   route:{id:'turbine-service-apex',name:'Turbine Service Apex',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6}},
- canopy:{names:['Cliffside Sweep','Canopy Descent','Sea Bridge'],points:[[265,18,15],[335,36,-55],[395,42,-200],[335,30,-280],[250,16,-275],[210,12,-220]],
+ canopy:{revision:'p0-pacing2',names:['Cliffside Sweep','Canopy Descent','Sea Bridge'],points:[[265,18,15],[355,36,-55],[430,42,-200],[355,30,-280],[250,16,-275],[210,12,-220]],
   route:{id:'root-cut-line',name:'Root Cut Line',cue:'GOLD INSIDE LINE · SHORTER RADIUS, LESS ROOM',from:4,to:6},
   // The detour arrives heading north, so rejoining old control 3 folded a 4 m hairpin; it rejoins control 4.
   drop:1}
@@ -322,7 +322,10 @@ function buildServiceLane(){
 // arc length, so a crossing is a plain interval test and never re-fires mid-section.
 function circuitLandmarkCrossed(lastU,u){
  const marks=world.userData.extensionLandmarks;if(!marks||!Number.isFinite(lastU)||!Number.isFinite(u))return null;
- // A lap wrap is the only backwards step worth following; everything else is noise.
+ // Unwrap the short per-frame movement first. Braking into reverse must not
+ // look like a full forward lap and announce an unrelated landmark.
+ const delta=((u-lastU+.5)%1+1)%1-.5;
+ if(delta<=0)return null;
  const wrapped=u<lastU;
  for(const mark of marks){
   const crossed=wrapped?(lastU<mark.u||u>=mark.u):(lastU<mark.u&&u>=mark.u);

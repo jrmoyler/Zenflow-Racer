@@ -16,8 +16,9 @@
   const buildRacerId=racerId,focusKey=restoreFocus||document.activeElement?.dataset?.garageKey;
   select.value=buildRacerId;
   const racer=ROSTER.find(r=>r.id===buildRacerId),build=saved.builds[buildRacerId]||[],addon=ADDONS.find(a=>a.id===saved.addons[buildRacerId]);
+  const fittedTier=(saved.chassis?.[buildRacerId]||'factory')!=='factory';
   const tierName=(KART_TIERS.find(t=>t.id===(saved.chassis?.[buildRacerId]||'factory'))||KART_TIERS[0]).name;
-  dialog.querySelector('#garage-build-summary').textContent=racer.name+' · '+tierName+' chassis · '+(build.length?build.map(id=>Economy.BUILDS[id].name).join(' / '):'Factory setup')+' · '+(saved.appearance[buildRacerId]==='satin'?'Satin paint':'Factory livery')+' · '+(addon?addon.name:'No add-on equipped');
+  dialog.querySelector('#garage-build-summary').textContent=racer.name+' · '+tierName+' chassis · '+(build.length?build.map(id=>Economy.BUILDS[id].name).join(' / '):'Factory setup')+' · '+(fittedTier?'Reference finish retained':saved.appearance[buildRacerId]==='satin'?'Satin paint':'Factory livery')+' · '+(addon?addon.name:'No add-on equipped');
   if(dialog.open)preview?.update(racer,saved);
   dialog.querySelector('#garage-wallet').textContent=saved.wallet+' Zen Credits';list.replaceChildren();
   dialog.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===category)));
@@ -36,7 +37,8 @@
    button.onclick=async()=>{
     if(busy)return;busy=true;status.textContent=name+' · saving…';render();
     try{
-     await economyTransaction(callback);
+     let declined=false;await economyTransaction(s=>{const next=callback(s);declined=!!cost&&next===s;return next;});
+     if(declined)throw new Error('Purchase not completed. Your balance or ownership changed; review the refreshed Garage.');
      // Confirm what changed and what it left behind: a purchase is worth a receipt.
      status.textContent=cost?`${name} · bought for ${cost} · ${saved.wallet} Zen Credits left`:`${name} · ${action==='EQUIP'?'equipped':'saved'}`;
      SFX.ui();window.dispatchEvent(new Event('garagechange'));
@@ -62,9 +64,10 @@
    button.onclick=async()=>{
     if(busy)return;busy=true;status.textContent=tier.name+' · saving…';render();
     try{
-     await economyTransaction(s=>owned?Economy.equipChassis(s,buildRacerId,tier.id):Economy.purchase(s,'chassis',{racer:buildRacerId,tier:tier.id},ids));
+     if(tier.id!=='factory'&&typeof loadKartTier==='function'){status.textContent=tier.name+' · loading chassis…';if(!await loadKartTier(buildRacerId,tier.id))throw new Error('Chassis could not load. No credits spent or equipment changed; try again.');}
+     let declined=false;await economyTransaction(s=>{const next=owned?Economy.equipChassis(s,buildRacerId,tier.id):Economy.purchase(s,'chassis',{racer:buildRacerId,tier:tier.id},ids);declined=!owned&&next===s;return next;});
+     if(declined)throw new Error('Purchase not completed. Your balance or ownership changed; review the refreshed Garage.');
      status.textContent=owned?`${tier.name} equipped on ${racer.name}`:`${tier.name} · bought for ${rule.price} · ${saved.wallet} Zen Credits left`;
-     if(tier.id!=='factory'&&typeof loadKartTier==='function'){status.textContent+=' · loading chassis…';await loadKartTier(buildRacerId,tier.id);status.textContent=status.textContent.replace(' · loading chassis…','');}
      SFX.ui();window.dispatchEvent(new Event('garagechange'));
     }catch(error){status.textContent=error.message;}
     finally{busy=false;render('chassis:'+tier.id);}
@@ -75,16 +78,16 @@
   }
   if(category==='Add-Ons'||category==='Owned / Locked')for(const a of ADDONS){
    const owned=saved.ownedAddons.includes(a.id),level=saved.addonUpgradeLevels[a.id]||0,equipped=saved.addons[buildRacerId]===a.id;
-   card(a.name,a.type,a.description+` · ${a.cooldown*(1-Math.max(0,level-1)*.02)}s cooldown.`,owned?(equipped?'Equipped':'Owned'):'Locked',level,owned?0:Economy.addonPrice(a.id,ids),owned?(equipped?'EQUIPPED':'EQUIP'):'BUY',equipped?null:s=>owned?{...s,addons:{...s.addons,[buildRacerId]:s.ownedAddons.includes(a.id)?a.id:null}}:Economy.purchase(s,'addon',a.id,ids));
+   card(a.name,a.type,a.description+` · ${Number(addonCooldownSeconds(a,level).toFixed(2))}s cooldown.`,owned?(equipped?'Equipped':'Owned'):'Locked',level,owned?0:Economy.addonPrice(a.id,ids),owned?(equipped?'EQUIPPED':'EQUIP'):'BUY',equipped?null:s=>owned?{...s,addons:{...s.addons,[buildRacerId]:s.ownedAddons.includes(a.id)?a.id:null}}:Economy.purchase(s,'addon',a.id,ids));
    if(owned)card(a.name+' tuning','Add-on upgrade',level===1?'Next: cooldown −2% from base. Requires ownership.':level===2?'Next: cooldown −4% from base. Requires level 2.':'Maximum: cooldown −4%. Damage, radius and duration unchanged.','Owned',level,level<3?level*180:0,level<3?'UPGRADE':'MAX LEVEL',level<3?s=>Economy.purchase(s,'level',a.id,ids):null);
   }
   if(category==='Kart Upgrades'||category==='Owned / Locked')for(const [id,b] of Object.entries(Economy.BUILDS)){
    const owned=saved.kartUpgrades[id],equipped=(saved.builds[buildRacerId]||[]).includes(id);
-   card(b.name,id,b.effect+' · Factory setup is always available.',equipped?'Equipped':owned?'Owned':'Locked',owned?1:0,owned?0:b.price,owned?(equipped?'RESTORE FACTORY':'EQUIP'):'BUY',s=>{if(!owned)return Economy.purchase(s,'kart',id,ids);const build=s.builds[buildRacerId]||[];return {...s,builds:{...s.builds,[buildRacerId]:build.includes(id)?build.filter(x=>x!==id):s.kartUpgrades[id]?[...build,id]:build}};});
+   card(b.name,id,b.effect+' · Handling applies to every chassis. Visible hardware applies to Factory chassis only; fitted tiers retain their reference body.',equipped?'Equipped':owned?'Owned':'Locked',owned?1:0,owned?0:b.price,owned?(equipped?'RESTORE FACTORY':'EQUIP'):'BUY',s=>{if(!owned)return Economy.purchase(s,'kart',id,ids);const build=s.builds[buildRacerId]||[];return {...s,builds:{...s.builds,[buildRacerId]:build.includes(id)?build.filter(x=>x!==id):s.kartUpgrades[id]?[...build,id]:build}};});
   }
   if(category==='Appearance'||category==='Owned / Locked')for(const id of ['factory','satin']){
    const owned=saved.cosmetics.includes(id),equipped=(saved.appearance[buildRacerId]||'factory')===id;
-   card(id==='factory'?'Factory livery':'Satin paint','Appearance','Material finish only. Original division colors preserved.',equipped?'Equipped':owned?'Owned':'Locked',owned?1:0,owned?0:200,owned?(equipped?'EQUIPPED':'EQUIP'):'BUY',equipped?null:s=>owned?{...s,appearance:{...s.appearance,[buildRacerId]:id}}:Economy.purchase(s,'cosmetic',id,ids));
+   card(id==='factory'?'Factory livery':'Satin paint','Appearance','Factory chassis only. Original division colors preserved. Fitted tiers retain their reference finish; saved paint applies when you return to Factory.',equipped?'Equipped':owned?'Owned':'Locked',owned?1:0,owned?0:200,owned?(equipped?'EQUIPPED':'EQUIP'):'BUY',equipped?null:s=>owned?{...s,appearance:{...s.appearance,[buildRacerId]:id}}:Economy.purchase(s,'cosmetic',id,ids));
   }
   if(focusKey&&dialog.open){const target=[...list.querySelectorAll('button')].find(b=>b.dataset.garageKey===focusKey&&!b.disabled);(target||dialog.querySelector('#garage-close')).focus({preventScroll:true});}
  }

@@ -81,10 +81,13 @@ const near=(a,b,eps=1e-6)=>a.distanceTo(b)<eps;
 {
  const t=world();t.grid();const doc=t.w.document,key=(k,o={})=>{const e=new t.w.KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true,...o});doc.dispatchEvent(e);return e;};
  t.run("playCinematic('grid')");t.run('tickCinematic(.05)');
- key('w',{repeat:true});key('Tab');assert.equal(t.run('cinematicActive()'),true);
+ key('w',{repeat:true});
+ for(const shiftKey of [false,true]){const tab=key('Tab',{shiftKey});assert.equal(tab.defaultPrevented,true,'Tab stays inside the cutscene modal');assert.equal(doc.activeElement,doc.querySelector('.cine-skip'));}
+ assert.equal(t.run('cinematicActive()'),true);
  const e=key('w');assert.equal(e.defaultPrevented,true);assert.equal(t.run('cinematicActive()'),false);
+ assert.equal(doc.getElementById('cinematic').inert,true,'fading cutscene cannot take focus back from gameplay');
  const hand=t.run('cinematics.countdownPose({pos:new THREE.Vector3(),look:new THREE.Vector3(),up:new THREE.Vector3(),fov:0})');assert.ok(near(t.ctx.camera.position,hand.pos),'skip lands on the hand-off frame');
- t.run("playCinematic('grid')");doc.getElementById('cinematic').dispatchEvent(new t.w.MouseEvent('click',{bubbles:true}));assert.equal(t.run('cinematicActive()'),false,'tap skips');
+ t.run("playCinematic('grid')");assert.equal(doc.getElementById('cinematic').inert,false,'reused modal is interactive again');doc.getElementById('cinematic').dispatchEvent(new t.w.MouseEvent('click',{bubbles:true}));assert.equal(t.run('cinematicActive()'),false,'tap skips');
  t.run("playCinematic('grid')");t.ctx.navigator.getGamepads=()=>[{index:0,buttons:[{pressed:true}]}];t.run('tickCinematic(.05)');assert.equal(t.run('cinematicActive()'),false,'fresh pad press skips');
  t.ctx.navigator.getGamepads=()=>[];
  t.run("playCinematic('grid')");t.run("tickCinematic(.05);game.state='paused'");const before=t.run('cinematics.active.t');

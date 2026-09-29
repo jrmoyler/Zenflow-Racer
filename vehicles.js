@@ -756,14 +756,14 @@ function animateKart(r,dt,ag=0){
   // --- wheels: spin, steer, anti-grav fold, glow
   a.overspin=wheelspin?a.overspin+dt*38:a.overspin*Math.exp(-dt*4);
   for(let i=0;i<4;i++){const w=ud.wheels[i];if(!w)continue;
-    w.spin.rotation.x=r.wheelRot+(i>=2?a.overspin:0);w.pivot.rotation.y=i<2?Math.atan2(2.53*r.steer,6.65-w.side*r.steer*1.23):0;
+    w.spin.rotation.x=r.wheelRot*(.61/(w.radius||.61))+(i>=2?a.overspin:0);w.pivot.rotation.y=i<2?Math.atan2(2.53*r.steer,6.65-w.side*r.steer*1.23):0;
     a.fold[i]=ease(a.fold[i],w.side*ag*Math.PI/2,dt,5);w.pivot.rotation.z=a.fold[i];
     w.glow.material.emissiveIntensity=.65+ag*1.0;w.glow.material.opacity=1;}
   ud.under.material.emissiveIntensity=ag*2.4;
   // --- exhausts, halo/star, shield
   const pulse=boosting?1+.12*Math.sin(a.t*38)+.08:1;
   for(let i=0;i<ud.exhaust.length;i++){const e=ud.exhaust[i];e.material.emissiveIntensity=boosting?2.4:r.throttle?1.1:.4;e.scale.set(pulse,pulse,1);}
-  ud.halo.rotation.y+=dt*2.5;ud.star.rotation.y+=dt*1.5;ud.shield.visible=r.shield>0;if(r.shield>0){const s=1+Math.sin(a.t*9)*.04;ud.shield.scale.set(s,s,s);ud.shield.rotation.y+=dt;}
+  ud.halo.rotation.y+=dt*2.5;ud.star.rotation.y+=dt*1.5;ud.shield.visible=r.shield>0;if(r.shield>0){const s=1+Math.sin(a.t*9)*.04;const rest=ud.shield.userData.restScale;if(rest)ud.shield.scale.copy(rest).multiplyScalar(s);else ud.shield.scale.set(s,s,s);ud.shield.rotation.y+=dt;}
   // --- steering wheel and arms
   a.wheel=ease(a.wheel,spinning?Math.sin(a.t*21)*.6:-r.steer*1.1,dt,12);
   const sw=ud.steeringWheel;if(sw){sw.rotation.z=a.wheel;}
